@@ -95,7 +95,7 @@ export default function LandingPage() {
 
         {/* ── HERO – CENTERED LAYOUT ─────────────────────────────────── */}
         <MotionRevealSection className="relative">
-          <div className="mx-auto flex max-w-4xl flex-col items-center justify-center text-center px-4 pb-16 pt-6 lg:px-0">
+          <div className="mx-auto flex max-w-6xl flex-col items-center justify-center text-center px-4 pb-16 pt-6 lg:px-0">
             
             {/* Pill Badge */}
             <div className="inline-flex items-center gap-2 rounded-full border border-[#0992C2]/20 bg-white/80 px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.25em] text-neutral-500 shadow-sm shadow-[#0992C2]/20 backdrop-blur">
@@ -490,7 +490,7 @@ export default function LandingPage() {
           id="how-it-works"
           className="scroll-mt-24 py-20"
         >
-          <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-0">
+          <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-0">
             <div className="mb-12 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
               <div className="space-y-3">
                 <h2 className="text-h2 text-neutral-900">
@@ -557,7 +557,7 @@ export default function LandingPage() {
 
         {/* ── TRUST SIGNALS – LIGHT BAND ───────────────────────────────── */}
         <MotionRevealSection className="py-14">
-          <div className="mx-auto max-w-5xl px-4 text-center sm:px-6 lg:px-0">
+          <div className="mx-auto max-w-6xl px-4 text-center sm:px-6 lg:px-0">
             <p className="text-micro mb-6 text-neutral-500">
               TRUSTED BY TEAMS WHO CARE ABOUT THE EXPERIENCE
             </p>
@@ -584,7 +584,7 @@ export default function LandingPage() {
         <MotionRevealSection className="py-16">
           {!user && (
             <section className="relative">
-              <div className="mx-auto max-w-3xl px-4 text-center sm:px-6 lg:px-0">
+              <div className="mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-0">
                 <div className="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-[#0992C2] via-[#0AC4E0] to-[#F6E7BC] px-6 py-10 shadow-[0_28px_90px_rgba(9,146,194,0.3)]">
                   <div className="pointer-events-none absolute -left-10 top-0 h-32 w-32 rounded-full bg-white/50 blur-2xl" />
                   <div className="pointer-events-none absolute -right-16 bottom-0 h-40 w-40 rounded-full bg-white/40 blur-3xl" />
@@ -618,7 +618,7 @@ export default function LandingPage() {
 
           {user && (
             <section className="relative">
-              <div className="mx-auto max-w-3xl px-4 text-center sm:px-6 lg:px-0">
+              <div className="mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-0">
                 <div className="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-[#0AC4E0]/10 via-white to-[#F6E7BC]/40 px-6 py-10 shadow-[0_22px_70px_rgba(11,45,114,0.12)] ring-1 ring-[#0992C2]/20">
                   <div className="pointer-events-none absolute -left-10 top-0 h-32 w-32 rounded-full bg-[#0AC4E0]/40 blur-2xl" />
                   <div className="pointer-events-none absolute -right-16 bottom-0 h-40 w-40 rounded-full bg-[#F6E7BC]/60 blur-3xl" />

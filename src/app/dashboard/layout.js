@@ -65,25 +65,25 @@ const NAV_BY_ROLE = {
 };
 
 const ROLE_PULSE  = {
-  admin: 'bg-[#84B179]',
-  landlord: 'bg-[#84B179]',
-  property_manager: 'bg-[#84B179]',
-  tenant: 'bg-[#84B179]',
-  law_reviewer: 'bg-[#84B179]',
+  admin: 'bg-[#0992C2]',
+  landlord: 'bg-[#0992C2]',
+  property_manager: 'bg-[#0992C2]',
+  tenant: 'bg-[#0992C2]',
+  law_reviewer: 'bg-[#0992C2]',
 };
 const ROLE_BADGE  = {
-  admin: 'bg-[#C7EABB] text-[#234224] border-[#A2CB8B]',
-  landlord: 'bg-[#C7EABB] text-[#234224] border-[#A2CB8B]',
-  property_manager: 'bg-[#C7EABB] text-[#234224] border-[#A2CB8B]',
-  tenant: 'bg-[#C7EABB] text-[#234224] border-[#A2CB8B]',
-  law_reviewer: 'bg-[#C7EABB] text-[#234224] border-[#A2CB8B]',
+  admin: 'bg-[#0AC4E0]/10 text-[#0B2D72] border-[#0992C2]/40',
+  landlord: 'bg-[#0AC4E0]/10 text-[#0B2D72] border-[#0992C2]/40',
+  property_manager: 'bg-[#0AC4E0]/10 text-[#0B2D72] border-[#0992C2]/40',
+  tenant: 'bg-[#0AC4E0]/10 text-[#0B2D72] border-[#0992C2]/40',
+  law_reviewer: 'bg-[#0AC4E0]/10 text-[#0B2D72] border-[#0992C2]/40',
 };
 const ROLE_COLORS = {
-  landlord: { bg: 'bg-[#F2F7E5]', text: 'text-[#234224]' },
-  tenant: { bg: 'bg-[#F2F7E5]', text: 'text-[#234224]' },
-  property_manager: { bg: 'bg-[#F2F7E5]', text: 'text-[#234224]' },
-  admin: { bg: 'bg-[#F2F7E5]', text: 'text-[#234224]' },
-  law_reviewer: { bg: 'bg-[#F2F7E5]', text: 'text-[#234224]' },
+  landlord: { bg: 'bg-[#E6F4F8]', text: 'text-[#0B2D72]' },
+  tenant: { bg: 'bg-[#E6F4F8]', text: 'text-[#0B2D72]' },
+  property_manager: { bg: 'bg-[#E6F4F8]', text: 'text-[#0B2D72]' },
+  admin: { bg: 'bg-[#E6F4F8]', text: 'text-[#0B2D72]' },
+  law_reviewer: { bg: 'bg-[#E6F4F8]', text: 'text-[#0B2D72]' },
 };
 
 function NotificationToast({ notification, onDismiss }) {
@@ -177,14 +177,14 @@ export default function DashboardLayout({ children }) {
 
   if (!user) {
     return (
-      <div className="flex h-screen items-center justify-center bg-[#E8F5BD]">
+      <div className="flex h-screen items-center justify-center bg-[#F8FBFC]">
         <motion.div
           initial={{ opacity: 0, y: 10, scale: 0.96 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={{ duration: 0.4, ease: [0.22, 1.25, 0.36, 1] }}
-          className="rf-card flex items-center gap-3 px-5 py-4 bg-white/90 border border-[#E0EDC5]"
+          className="rf-card flex items-center gap-3 px-5 py-4 bg-white/90 border border-[#0992C2]/15"
         >
-          <Loader2 className="h-6 w-6 animate-spin text-[#84B179]" />
+          <Loader2 className="h-6 w-6 animate-spin text-[#0992C2]" />
           <p className="text-sm font-semibold text-neutral-800">
             Loading your dashboard…
           </p>
@@ -199,7 +199,7 @@ export default function DashboardLayout({ children }) {
   const badgeColor = ROLE_BADGE[role]  || 'bg-gray-100 text-gray-600 border-gray-200';
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#E8F5BD]">
+    <div className="min-h-screen flex flex-col bg-[#F8FBFC]">
       <Navbar />
       <NotificationToast notification={notification} onDismiss={() => setNotification(null)} />
 
@@ -210,10 +210,10 @@ export default function DashboardLayout({ children }) {
             initial={{ x: -40, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
             transition={{ duration: 0.5, ease: [0.21, 0.8, 0.3, 1] }}
-            className="hidden w-64 shrink-0 flex-col rounded-3xl bg-white/85 p-4 shadow-[0_22px_70px_rgba(148,163,120,0.55)] ring-1 ring-[#E0EDC5] lg:flex"
+            className="hidden w-64 shrink-0 flex-col rounded-3xl bg-white/85 p-4 shadow-[0_22px_70px_rgba(11,45,114,0.35)] ring-1 ring-[#0992C2]/15 lg:flex"
           >
             <div className="mb-4 flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-[#A2CB8B] to-[#84B179] text-white font-semibold">
+              <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-[#0992C2] to-[#0B2D72] text-white font-semibold">
                 {user.name?.charAt(0)?.toUpperCase() || '?'}
               </div>
               <div className="min-w-0">

@@ -620,7 +620,7 @@ export default function ListingDetailPage() {
       <Navbar />
       <Suspense fallback={
         <div className="flex-grow pt-20 flex justify-center items-center">
-          <Loader2 className="animate-spin h-8 w-8" style={{ color:'#84B179' }}/>
+          <Loader2 className="animate-spin h-8 w-8" style={{ color:'#0992C2' }}/>
         </div>
       }>
         <ListingDetailContent />

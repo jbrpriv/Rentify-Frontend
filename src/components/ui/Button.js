@@ -7,11 +7,11 @@ const base =
 
 const variants = {
   primary:
-    'rf-btn-primary focus-visible:ring-[#84B179]',
+    'rf-btn-primary focus-visible:ring-[#0B2D72]',
   secondary:
-    'rf-btn-secondary focus-visible:ring-[#A2CB8B]',
+    'rf-btn-secondary focus-visible:ring-[#0992C2]',
   ghost:
-    'rf-btn-ghost focus-visible:ring-[#C7EABB]',
+    'rf-btn-ghost focus-visible:ring-[#0AC4E0]',
   danger:
     'rf-btn-danger focus-visible:ring-red-500',
 };

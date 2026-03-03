@@ -138,7 +138,7 @@ function BrowseContent() {
       <Navbar />
 
       {/* Filter bar */}
-      <div className="sticky top-16 z-40 border-b border-[#0992C2]/15 bg-white/90 backdrop-blur">
+      <div className="sticky top-24 z-40 border-b border-[#0992C2]/15 bg-white/90 backdrop-blur">
         <div className="mx-auto flex max-w-[1600px] flex-wrap items-center gap-3 px-4 py-3 sm:px-6">
           <form
             onSubmit={e => { e.preventDefault(); setCity(searchInput.trim()); }}

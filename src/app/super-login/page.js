@@ -9,14 +9,14 @@ const ROLE_CONFIG = {
   admin: {
     label: 'System Administrator',
     icon: ShieldCheck,
-    color: 'from-[#84B179] to-[#4C7A4C]',
+    color: 'from-[#0B2D72] via-[#0992C2] to-[#0AC4E0]',
     badge: 'ADMIN PORTAL',
     description: 'Full platform management & oversight',
   },
   law_reviewer: {
     label: 'Law Reviewer',
     icon: Scale,
-    color: 'from-[#84B179] to-[#4C7A4C]',
+    color: 'from-[#0B2D72] via-[#0992C2] to-[#0AC4E0]',
     badge: 'LEGAL PORTAL',
     description: 'Clause review, template management & legal oversight',
   },
@@ -188,52 +188,52 @@ export default function SuperLoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#E8F5BD] flex items-stretch">
+    <div className="min-h-screen bg-[#F8FBFC] flex items-stretch">
       {/* Left secure panel */}
-      <div className="hidden lg:flex w-1/2 flex-col justify-between bg-gradient-to-br from-[#84B179] via-[#A2CB8B] to-[#C7EABB] px-10 py-10 text-white relative overflow-hidden">
-        <div className="pointer-events-none absolute -right-20 top-10 h-64 w-64 rounded-full bg-white/20 blur-3xl" />
-        <div className="pointer-events-none absolute -left-16 bottom-[-40px] h-56 w-56 rounded-full bg-[#E8F5BD]/70 blur-3xl" />
+      <div className="hidden lg:flex w-1/2 flex-col justify-between bg-gradient-to-br from-[#0B2D72] via-[#0992C2] to-[#0AC4E0] px-10 py-10 text-white relative overflow-hidden">
+        <div className="pointer-events-none absolute -right-20 top-10 h-64 w-64 rounded-full bg-white/18 blur-3xl" />
+        <div className="pointer-events-none absolute -left-16 bottom-[-40px] h-56 w-56 rounded-full bg-[#0AC4E0]/40 blur-3xl" />
 
         <div>
           <div className="inline-flex items-center gap-2 rounded-full bg-white/15 px-4 py-1.5 text-xs font-semibold tracking-[0.2em] uppercase">
-            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-200" />
+            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-cyan-200" />
             Zero-trust staff access
           </div>
           <h1 className="mt-6 text-4xl font-black tracking-tight">
             RentifyPro
           </h1>
-          <p className="mt-2 text-sm text-emerald-50/90">
+          <p className="mt-2 text-sm text-cyan-50/90">
             Internal control center for agreements, risk and oversight.
           </p>
         </div>
 
         <div className="space-y-4">
           <div className="rounded-2xl bg-white/10 p-4 backdrop-blur-sm">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-50/80">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-cyan-50/80">
               Security snapshot
             </p>
             <div className="mt-3 grid grid-cols-3 gap-3 text-sm">
               <div>
                 <p className="text-lg font-extrabold leading-none">99.9%</p>
-                <p className="mt-1 text-[11px] text-emerald-50/80">
+                <p className="mt-1 text-[11px] text-cyan-50/80">
                   Uptime
                 </p>
               </div>
               <div>
                 <p className="text-lg font-extrabold leading-none">256-bit</p>
-                <p className="mt-1 text-[11px] text-emerald-50/80">
+                <p className="mt-1 text-[11px] text-cyan-50/80">
                   Encryption
                 </p>
               </div>
               <div>
                 <p className="text-lg font-extrabold leading-none">24/7</p>
-                <p className="mt-1 text-[11px] text-emerald-50/80">
+                <p className="mt-1 text-[11px] text-cyan-50/80">
                   Monitoring
                 </p>
               </div>
             </div>
           </div>
-          <p className="text-[11px] text-emerald-50/80">
+          <p className="text-[11px] text-cyan-50/80">
             Access is logged and audited. Use only if you are an authorized admin or legal reviewer.
           </p>
         </div>
@@ -245,11 +245,11 @@ export default function SuperLoginPage() {
 
           {/* Header */}
           <div className="mb-8 text-center lg:text-left">
-            <div className="inline-flex items-center gap-2 rounded-full bg-white/60 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-[#234224] shadow-sm shadow-[#C7EABB]/60">
-              <div className="h-1.5 w-1.5 animate-pulse rounded-full bg-[#84B179]" />
+            <div className="inline-flex items-center gap-2 rounded-full bg-white/70 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-[#0B2D72] shadow-sm shadow-[#0992C2]/40">
+              <div className="h-1.5 w-1.5 animate-pulse rounded-full bg-[#0AC4E0]" />
               Restricted Staff Access
             </div>
-            <h2 className="mt-5 text-3xl font-black tracking-tight text-[#1F2933]">
+            <h2 className="mt-5 text-3xl font-black tracking-tight text-[#0B2D72]">
               Staff sign-in
             </h2>
             <p className="mt-1 text-sm text-[#4B5563]">
@@ -268,8 +268,8 @@ export default function SuperLoginPage() {
                     onClick={() => handleRoleSelect(role)}
                     className={`flex-1 rounded-2xl border px-4 py-3 text-sm font-bold transition-all flex items-center justify-center gap-2 ${
                       selectedRole === role
-                        ? 'border-[#84B179] bg-white text-[#234224] shadow-sm shadow-[#C7EABB]'
-                        : 'border-transparent bg-white/60 text-[#64748B] hover:border-[#E0EDC5] hover:text-[#1F2933]'
+                        ? 'border-[#0992C2] bg-white text-[#0B2D72] shadow-sm shadow-[#0992C2]/25'
+                        : 'border-transparent bg-white/70 text-[#64748B] hover:border-[#99E0F2] hover:text-[#0B2D72]'
                     }`}
                   >
                     <RIcon className="h-4 w-4" />
@@ -280,7 +280,7 @@ export default function SuperLoginPage() {
             </div>
           )}
 
-          <div className="rounded-3xl bg-white/90 p-7 shadow-[0_22px_70px_rgba(148,163,120,0.55)] ring-1 ring-[#E0EDC5]">
+          <div className="rounded-3xl bg-white/90 p-7 shadow-[0_22px_70px_rgba(9,146,194,0.45)] ring-1 ring-[#0992C2]/18">
 
             {/* Alerts */}
             {error && (
@@ -309,14 +309,14 @@ export default function SuperLoginPage() {
                   </div>
                 </div>
 
-                <div className="mb-6 flex gap-1 rounded-xl bg-[#F2F7E5] p-1">
+                <div className="mb-6 flex gap-1 rounded-xl bg-[#F0F8FA] p-1">
                   {['login', 'register'].map((m) => (
                     <button
                       key={m}
                       onClick={() => { setMode(m); clearAlerts(); }}
                       className={`flex flex-1 items-center justify-center gap-2 rounded-lg py-2 text-sm font-bold transition-all ${
                         mode === m
-                          ? 'bg-white text-[#234224] shadow-sm shadow-[#C7EABB]'
+                          ? 'bg-white text-[#0B2D72] shadow-sm shadow-[#0992C2]/25'
                           : 'text-[#6B7280] hover:text-[#111827]'
                       }`}
                     >
@@ -339,9 +339,9 @@ export default function SuperLoginPage() {
                         value={formData.name}
                         onChange={e => setFormData(f => ({ ...f, name: e.target.value }))}
                         placeholder=" "
-                        className="peer w-full rounded-xl border border-[#DCEAC4] bg-white/60 px-3.5 pt-5 pb-2.5 text-sm text-[#111827] placeholder-transparent outline-none transition-colors focus:border-[#84B179]"
+                        className="peer w-full rounded-xl border border-[#D1E7F0] bg-white/70 px-3.5 pt-5 pb-2.5 text-sm text-[#111827] placeholder-transparent outline-none transition-colors focus:border-[#0992C2]"
                       />
-                      <label className="pointer-events-none absolute left-3.5 top-2.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#9CA3AF] transition-all peer-placeholder-shown:top-3.5 peer-placeholder-shown:text-xs peer-placeholder-shown:text-[#9CA3AF] peer-focus:top-2 peer-focus:text-[10px] peer-focus:text-[#84B179]">
+                      <label className="pointer-events-none absolute left-3.5 top-2.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#9CA3AF] transition-all peer-placeholder-shown:top-3.5 peer-placeholder-shown:text-xs peer-placeholder-shown:text-[#9CA3AF] peer-focus:top-2 peer-focus:text-[10px] peer-focus:text-[#0992C2]">
                         Full name
                       </label>
                     </div>
@@ -355,9 +355,9 @@ export default function SuperLoginPage() {
                       value={formData.email}
                       onChange={e => setFormData(f => ({ ...f, email: e.target.value }))}
                       placeholder=" "
-                      className="peer w-full rounded-xl border border-[#DCEAC4] bg-white/60 pl-9 pr-3.5 pt-5 pb-2.5 text-sm text-[#111827] placeholder-transparent outline-none transition-colors focus:border-[#84B179]"
+                      className="peer w-full rounded-xl border border-[#D1E7F0] bg-white/70 pl-9 pr-3.5 pt-5 pb-2.5 text-sm text-[#111827] placeholder-transparent outline-none transition-colors focus:border-[#0992C2]"
                     />
-                    <label className="pointer-events-none absolute left-9 top-2.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#9CA3AF] transition-all peer-placeholder-shown:top-3.5 peer-placeholder-shown:text-xs peer-placeholder-shown:text-[#9CA3AF] peer-focus:top-2 peer-focus:text-[10px] peer-focus:text-[#84B179]">
+                    <label className="pointer-events-none absolute left-9 top-2.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#9CA3AF] transition-all peer-placeholder-shown:top-3.5 peer-placeholder-shown:text-xs peer-placeholder-shown:text-[#9CA3AF] peer-focus:top-2 peer-focus:text-[10px] peer-focus:text-[#0992C2]">
                       Email address
                     </label>
                   </div>
@@ -370,9 +370,9 @@ export default function SuperLoginPage() {
                         value={formData.phoneNumber}
                         onChange={e => setFormData(f => ({ ...f, phoneNumber: e.target.value }))}
                         placeholder=" "
-                        className="peer w-full rounded-xl border border-[#DCEAC4] bg-white/60 px-3.5 pt-5 pb-2.5 text-sm text-[#111827] placeholder-transparent outline-none transition-colors focus:border-[#84B179]"
+                        className="peer w-full rounded-xl border border-[#D1E7F0] bg-white/70 px-3.5 pt-5 pb-2.5 text-sm text-[#111827] placeholder-transparent outline-none transition-colors focus:border-[#0992C2]"
                       />
-                      <label className="pointer-events-none absolute left-3.5 top-2.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#9CA3AF] transition-all peer-placeholder-shown:top-3.5 peer-placeholder-shown:text-xs peer-placeholder-shown:text-[#9CA3AF] peer-focus:top-2 peer-focus:text-[10px] peer-focus:text-[#84B179]">
+                      <label className="pointer-events-none absolute left-3.5 top-2.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#9CA3AF] transition-all peer-placeholder-shown:top-3.5 peer-placeholder-shown:text-xs peer-placeholder-shown:text-[#9CA3AF] peer-focus:top-2 peer-focus:text-[10px] peer-focus:text-[#0992C2]">
                         Phone number
                       </label>
                     </div>
@@ -386,9 +386,9 @@ export default function SuperLoginPage() {
                       value={formData.password}
                       onChange={e => setFormData(f => ({ ...f, password: e.target.value }))}
                       placeholder=" "
-                      className="peer w-full rounded-xl border border-[#DCEAC4] bg-white/60 pl-9 pr-9 pt-5 pb-2.5 text-sm text-[#111827] placeholder-transparent outline-none transition-colors focus:border-[#84B179]"
+                      className="peer w-full rounded-xl border border-[#D1E7F0] bg-white/70 pl-9 pr-9 pt-5 pb-2.5 text-sm text-[#111827] placeholder-transparent outline-none transition-colors focus:border-[#0992C2]"
                     />
-                    <label className="pointer-events-none absolute left-9 top-2.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#9CA3AF] transition-all peer-placeholder-shown:top-3.5 peer-placeholder-shown:text-xs peer-placeholder-shown:text-[#9CA3AF] peer-focus:top-2 peer-focus:text-[10px] peer-focus:text-[#84B179]">
+                    <label className="pointer-events-none absolute left-9 top-2.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#9CA3AF] transition-all peer-placeholder-shown:top-3.5 peer-placeholder-shown:text-xs peer-placeholder-shown:text-[#9CA3AF] peer-focus:top-2 peer-focus:text-[10px] peer-focus:text-[#0992C2]">
                       Password
                     </label>
                     <button
@@ -403,7 +403,7 @@ export default function SuperLoginPage() {
                   <button
                     type="submit"
                     disabled={loading}
-                    className={`mt-2 flex w-full transform items-center justify-center gap-2 rounded-xl bg-gradient-to-r ${cfg.color} py-3.5 text-sm font-black text-white shadow-md shadow-[#84B179]/50 transition-transform transition-colors hover:scale-[1.02] hover:shadow-lg hover:shadow-[#84B179]/60 active:scale-[0.97] disabled:opacity-60`}
+                    className={`mt-2 flex w-full transform items-center justify-center gap-2 rounded-xl bg-gradient-to-r ${cfg.color} py-3.5 text-sm font-black text-white shadow-md shadow-[#0992C2]/40 transition-transform transition-colors hover:scale-[1.02] hover:shadow-lg hover:shadow-[#0B2D72]/60 active:scale-[0.97] disabled:opacity-60`}
                   >
                     {loading ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
@@ -438,9 +438,9 @@ export default function SuperLoginPage() {
                   <input type="text" inputMode="numeric" pattern="[0-9]*" maxLength={6} required
                     value={emailCode} onChange={e => setEmailCode(e.target.value.replace(/\D/g, ''))}
                     placeholder="000000"
-                    className="w-full text-center text-3xl font-black tracking-[0.5em] bg-[#F2F7E5] border border-[#DCEAC4] text-[#111827] rounded-2xl py-4 focus:outline-none focus:border-[#84B179]" />
+                    className="w-full text-center text-3xl font-black tracking-[0.5em] bg-[#F8FBFC] border border-[#D1E7F0] text-[#111827] rounded-2xl py-4 focus:outline-none focus:border-[#0992C2]" />
                   <button type="submit" disabled={loading || emailCode.length < 6}
-                    className="w-full flex items-center justify-center gap-2 bg-[#84B179] text-white rounded-xl py-3.5 font-black text-sm hover:bg-[#4C7A4C] disabled:opacity-50 transition">
+                    className="w-full flex items-center justify-center gap-2 bg-[#0992C2] text-white rounded-xl py-3.5 font-black text-sm hover:bg-[#0B2D72] disabled:opacity-50 transition">
                     {loading ? <Loader2 className="animate-spin w-4 h-4" /> : <><CheckCircle className="w-4 h-4" /> Verify Email</>}
                   </button>
                 </form>
@@ -467,9 +467,9 @@ export default function SuperLoginPage() {
                   <input type="text" inputMode="numeric" pattern="[0-9]*" maxLength={6} required
                     value={phoneOTP} onChange={e => setPhoneOTP(e.target.value.replace(/\D/g, ''))}
                     placeholder="000000"
-                    className="w-full text-center text-3xl font-black tracking-[0.5em] bg-[#F2F7E5] border border-[#DCEAC4] text-[#111827] rounded-2xl py-4 focus:outline-none focus:border-[#84B179]" />
+                    className="w-full text-center text-3xl font-black tracking-[0.5em] bg-[#F8FBFC] border border-[#D1E7F0] text-[#111827] rounded-2xl py-4 focus:outline-none focus:border-[#0992C2]" />
                   <button type="submit" disabled={loading || phoneOTP.length < 6}
-                    className="w-full flex items-center justify-center gap-2 bg-[#84B179] text-white rounded-xl py-3.5 font-black text-sm hover:bg-[#4C7A4C] disabled:opacity-50 transition">
+                    className="w-full flex items-center justify-center gap-2 bg-[#0992C2] text-white rounded-xl py-3.5 font-black text-sm hover:bg-[#0B2D72] disabled:opacity-50 transition">
                     {loading ? <Loader2 className="animate-spin w-4 h-4" /> : <><CheckCircle className="w-4 h-4" /> Verify & Sign In</>}
                   </button>
                 </form>
@@ -493,9 +493,9 @@ export default function SuperLoginPage() {
                 <input type="text" inputMode="numeric" pattern="[0-9]*" maxLength={6} required
                   value={totp} onChange={e => setTotp(e.target.value.replace(/\D/g, ''))}
                   placeholder="000000"
-                  className="w-full text-center text-3xl font-black tracking-[0.5em] bg-[#F2F7E5] border border-[#DCEAC4] text-[#111827] rounded-2xl py-4 focus:outline-none focus:border-[#84B179]" />
+                    className="w-full text-center text-3xl font-black tracking-[0.5em] bg-[#F8FBFC] border border-[#D1E7F0] text-[#111827] rounded-2xl py-4 focus:outline-none focus:border-[#0992C2]" />
                 <button type="submit" disabled={totpLoading || totp.length < 6}
-                  className="w-full flex items-center justify-center gap-2 bg-[#84B179] text-white rounded-xl py-3.5 font-black text-sm hover:bg-[#4C7A4C] disabled:opacity-50 transition">
+                    className="w-full flex items-center justify-center gap-2 bg-[#0992C2] text-white rounded-xl py-3.5 font-black text-sm hover:bg-[#0B2D72] disabled:opacity-50 transition">
                   {totpLoading ? <Loader2 className="animate-spin w-4 h-4" /> : 'Verify & Sign In'}
                 </button>
                 <button type="button" onClick={() => { setStep('main'); setTotp(''); clearAlerts(); }}
