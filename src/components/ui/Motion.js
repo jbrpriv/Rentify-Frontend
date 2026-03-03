@@ -43,3 +43,25 @@ export const MotionListStagger = ({ items, renderItem, baseDelay = 0.04 }) => (
   </>
 );
 
+export const MotionRevealSection = ({
+  children,
+  delay = 0,
+  y = 24,
+  ...rest
+}) => (
+  <motion.section
+    initial={{ opacity: 0, y }}
+    whileInView={{ opacity: 1, y: 0 }}
+    viewport={{ once: true, amount: 0.2 }}
+    transition={{
+      duration: 0.55,
+      ease: [0.21, 0.8, 0.3, 1],
+      delay,
+    }}
+    {...rest}
+  >
+    {children}
+  </motion.section>
+);
+
+

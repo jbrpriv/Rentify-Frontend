@@ -8,16 +8,12 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        rentifyBlue: '#2563eb',
+        /* Rentify green palette */
         brand: {
-          primary: '#2563eb',
-          primarySoft: '#dbeafe',
-          primaryStrong: '#1d4ed8',
-        },
-        semantic: {
-          success: '#16a34a',
-          warning: '#f59e0b',
-          danger: '#ef4444',
+          primary: '#A2CB8B',      // muted green
+          primaryStrong: '#84B179', // deep green / hover
+          primarySoft: '#C7EABB',   // soft mint / secondary
+          accent: '#E8F5BD',        // pale yellow‑green
         },
       },
       borderRadius: {

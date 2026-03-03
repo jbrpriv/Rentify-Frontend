@@ -8,20 +8,11 @@ import Footer from '@/components/Footer';
 import {
   MapPin, Bed, Bath, SquareCode, ShieldCheck, ArrowLeft,
   Loader2, FileText, ChevronLeft, ChevronRight,
-  CheckCircle, Eye, Clock, Heart, PawPrint, Home,
+  CheckCircle, Eye, Clock, Heart, PawPrint,
   Tag, ArrowRight, TrendingDown, TrendingUp, X,
 } from 'lucide-react';
+import { MotionFadeIn } from '@/components/ui/Motion';
 
-/* ─── Tour date helpers ───────────────────────────────────────────── */
-function getTourDates(n = 10) {
-  const days   = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  const today  = new Date();
-  return Array.from({ length: n }, (_, i) => {
-    const d = new Date(today); d.setDate(today.getDate() + i);
-    return { day: days[d.getDay()], num: d.getDate(), month: months[d.getMonth()] };
-  });
-}
 const fmt = (n) => `Rs. ${Number(n || 0).toLocaleString()}`;
 
 /* ─── Diff badge ──────────────────────────────────────────────────── */
@@ -314,12 +305,7 @@ function ListingDetailContent() {
   const [lightboxOpen,     setLightboxOpen]     = useState(false);
   const [lightboxStart,    setLightboxStart]    = useState(0);
   const [saved,            setSaved]            = useState(false);
-  const [selectedTourDate, setSelectedTourDate] = useState(0);
-  const [tourOffset,       setTourOffset]       = useState(0);
   const [hasExistingOffer, setHasExistingOffer] = useState(false);
-
-  const tourDates    = getTourDates(10);
-  const visibleDates = tourDates.slice(tourOffset, tourOffset + 4);
 
   useEffect(() => {
     const stored = localStorage.getItem('userInfo');
@@ -402,7 +388,8 @@ function ListingDetailContent() {
         <Lightbox images={images} startIndex={lightboxStart} onClose={() => setLightboxOpen(false)}/>
       )}
 
-      <main className="flex-grow pt-16 bg-gray-50">
+      <MotionFadeIn y={16} delay={0.05}>
+        <main className="flex-grow pt-16 bg-[#F7FAF0]">
 
         {/* ── HERO ─────────────────────────────────────────── */}
         <div className="hero-wrapper" style={{ minHeight: heroImg ? 480 : 340 }}>
@@ -616,52 +603,24 @@ function ListingDetailContent() {
                   </div>
                 ) : null}
 
-                {/* Tour date */}
-                <div style={{ borderTop:'1px solid #F1F5F9', padding:'18px 20px' }}>
-                  <p style={{ textAlign:'center', fontWeight:700, color:'#0F172A', fontSize:'0.88rem', marginBottom:12, fontFamily:"'Outfit',sans-serif", display:'flex', alignItems:'center', justifyContent:'center', gap:6 }}>
-                    <Home size={14} style={{ color:'#7C3AED' }}/> Schedule a Tour
-                  </p>
-                  <div style={{ display:'flex', alignItems:'center', gap:5 }}>
-                    <button onClick={() => setTourOffset(o => Math.max(0, o-1))} disabled={tourOffset === 0}
-                      style={{ background:'none', border:'1.5px solid #E2E8F0', borderRadius:8, width:28, height:28, display:'flex', alignItems:'center', justifyContent:'center', cursor: tourOffset === 0 ? 'default' : 'pointer', color:'#64748B', flexShrink:0, opacity: tourOffset === 0 ? 0.4 : 1 }}>
-                      <ChevronLeft size={14}/>
-                    </button>
-                    <div style={{ display:'flex', gap:4, flex:1 }}>
-                      {visibleDates.map((d, i) => (
-                        <button key={i} onClick={() => setSelectedTourDate(tourOffset + i)}
-                          className={`tour-date-btn ${selectedTourDate === tourOffset + i ? 'sel' : ''}`}>
-                          <p style={{ fontSize:'0.6rem', color:'#94A3B8', fontWeight:700, textTransform:'uppercase', letterSpacing:'0.04em' }}>{d.day}</p>
-                          <p style={{ fontFamily:"'Outfit',sans-serif", fontWeight:800, fontSize:'1.05rem', color: selectedTourDate === tourOffset + i ? '#7C3AED' : '#0F172A', lineHeight:1.1 }}>{d.num}</p>
-                          <p style={{ fontSize:'0.6rem', color:'#94A3B8', fontWeight:600 }}>{d.month}</p>
-                        </button>
-                      ))}
-                    </div>
-                    <button onClick={() => setTourOffset(o => Math.min(tourDates.length - 4, o+1))} disabled={tourOffset >= tourDates.length - 4}
-                      style={{ background:'none', border:'1.5px solid #E2E8F0', borderRadius:8, width:28, height:28, display:'flex', alignItems:'center', justifyContent:'center', cursor: tourOffset >= tourDates.length - 4 ? 'default' : 'pointer', color:'#64748B', flexShrink:0, opacity: tourOffset >= tourDates.length - 4 ? 0.4 : 1 }}>
-                      <ChevronRight size={14}/>
-                    </button>
-                  </div>
-                  <button style={{ width:'100%', marginTop:12, padding:'10px', background:'linear-gradient(135deg,#1D4ED8,#3B82F6)', color:'white', fontWeight:700, fontSize:'0.85rem', border:'none', borderRadius:11, cursor:'pointer', fontFamily:"'Outfit',sans-serif" }}>
-                    Book Tour
-                  </button>
-                </div>
               </div>
             </div>
 
           </div>
         </div>
-      </main>
+        </main>
+      </MotionFadeIn>
     </>
   );
 }
 
 export default function ListingDetailPage() {
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50">
+    <div className="min-h-screen flex flex-col bg-[#F7FAF0]">
       <Navbar />
       <Suspense fallback={
         <div className="flex-grow pt-20 flex justify-center items-center">
-          <Loader2 className="animate-spin h-8 w-8" style={{ color:'#7C3AED' }}/>
+          <Loader2 className="animate-spin h-8 w-8" style={{ color:'#84B179' }}/>
         </div>
       }>
         <ListingDetailContent />

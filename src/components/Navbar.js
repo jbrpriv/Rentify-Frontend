@@ -13,7 +13,7 @@ export default function Navbar() {
   useEffect(() => {
     const stored = localStorage.getItem('userInfo');
     if (stored) setUser(JSON.parse(stored));
-  }, [pathname]); // Refresh user state on page change
+  }, [pathname]);
 
   const handleLogout = () => {
     localStorage.removeItem('userInfo');
@@ -25,27 +25,27 @@ export default function Navbar() {
   const isDashboard = pathname?.startsWith('/dashboard');
 
   const linkBase =
-    'relative text-xs font-semibold tracking-[0.16em] uppercase rf-link';
+    'rf-link text-[0.68rem] font-semibold tracking-[0.18em] uppercase text-neutral-600';
 
   const desktopLinks = (
-    <div className="hidden md:flex items-center gap-6">
+    <div className="hidden items-center gap-6 md:flex">
       <Link
         href="/browse"
         className={`${linkBase} ${
-          pathname === '/browse' ? 'text-slate-50' : 'text-slate-300'
+          pathname === '/browse' ? 'text-neutral-900' : 'text-neutral-600'
         }`}
       >
         Browse
       </Link>
       <Link
         href="/#features"
-        className={`${linkBase} text-slate-300`}
+        className={linkBase}
       >
         Features
       </Link>
       <Link
         href="/#how-it-works"
-        className={`${linkBase} text-slate-300`}
+        className={linkBase}
       >
         How it works
       </Link>
@@ -53,7 +53,7 @@ export default function Navbar() {
         <Link
           href="/dashboard"
           className={`${linkBase} flex items-center gap-1 ${
-            isDashboard ? 'text-sky-300' : 'text-slate-300'
+            isDashboard ? 'text-emerald-800' : 'text-neutral-600'
           }`}
         >
           <LayoutDashboard className="h-3.5 w-3.5" />
@@ -64,63 +64,68 @@ export default function Navbar() {
   );
 
   return (
-    <nav className="fixed inset-x-0 top-0 z-50 border-b border-slate-800/70 bg-slate-950/70 backdrop-blur-xl">
-      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        {/* Logo + primary links */}
-        <div className="flex items-center gap-8">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-tr from-sky-500 to-indigo-500 shadow-xl">
-              <Building2 className="h-4 w-4 text-white" />
-            </div>
-            <div className="flex flex-col">
-              <span className="bg-gradient-to-r from-slate-50 via-sky-100 to-slate-300 bg-clip-text text-sm font-semibold uppercase tracking-[0.22em] text-transparent">
-                Rentify
-              </span>
-              <span className="text-[15px] font-semibold text-slate-100">
-                Pro
-              </span>
-            </div>
-          </Link>
-          {desktopLinks}
-        </div>
-
-        {/* Right side actions */}
-        <div className="flex items-center gap-3">
-          {user ? (
-            <>
-              <div className="hidden sm:flex flex-col items-end">
-                <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500">
-                  Signed in as
-                </p>
-                <p className="text-xs font-semibold text-slate-50">
-                  {user.name}
-                </p>
+    <div className="pointer-events-none fixed inset-x-0 top-0 z-50 flex justify-center px-3 pt-4 sm:px-4 md:px-6">
+      <nav className="pointer-events-auto max-w-6xl flex-1 rounded-full bg-white/80 px-4 py-2.5 shadow-[0_18px_60px_rgba(148,163,120,0.45)] ring-1 ring-[#E0EDC5] backdrop-blur-xl">
+        <div className="flex items-center justify-between gap-4">
+          {/* Logo + primary links */}
+          <div className="flex items-center gap-6">
+            <Link
+              href="/"
+              className="group flex items-center gap-2 rounded-full bg-gradient-to-r from-[#E8F5BD] via-[#FFFFFF] to-[#C7EABB] px-1.5 py-1 pr-3 shadow-sm transition-transform duration-200 ease-[cubic-bezier(0.22,1.25,0.36,1)] hover:-translate-y-0.5"
+            >
+              <div className="flex h-8 w-8 items-center justify-center rounded-2xl bg-gradient-to-tr from-[#A2CB8B] to-[#84B179] shadow-md shadow-[#A2CB8B]/40">
+                <Building2 className="h-4 w-4 text-white" />
               </div>
-              <button
-                onClick={handleLogout}
-                className="rf-btn rf-btn-danger text-[11px] px-3 py-2"
-              >
-                Logout
-              </button>
-            </>
-          ) : (
-            <>
-              <Link
-                href="/login"
-                className="rf-btn rf-btn-ghost hidden text-[11px] sm:inline-flex"
-              >
-                Sign in
-              </Link>
-              <Link
-                href="/register"
-                className="rf-btn rf-btn-primary text-[11px] px-4 py-2"
-              >
-                Get started
-              </Link>
-            </>
-          )}
+              <div className="flex flex-col">
+                <span className="bg-gradient-to-r from-neutral-800 via-emerald-900 to-lime-800 bg-clip-text text-[0.68rem] font-semibold uppercase tracking-[0.3em] text-transparent">
+                  Rentify
+                </span>
+                <span className="text-[0.9rem] font-semibold text-neutral-900">
+                  Pro
+                </span>
+              </div>
+            </Link>
+            {desktopLinks}
+          </div>
+
+          {/* Right side actions */}
+          <div className="flex items-center gap-3">
+            {user ? (
+              <>
+                <div className="hidden flex-col items-end sm:flex">
+                  <p className="text-[0.6rem] font-semibold uppercase tracking-[0.22em] text-neutral-400">
+                    Signed in as
+                  </p>
+                  <p className="text-xs font-semibold text-neutral-900">
+                    {user.name}
+                  </p>
+                </div>
+                <button
+                  onClick={handleLogout}
+                  className="rf-btn rf-btn-danger text-[0.7rem] px-3 py-2"
+                >
+                  Logout
+                </button>
+              </>
+            ) : (
+              <>
+                <Link
+                  href="/login"
+                  className="rf-btn rf-btn-ghost hidden text-[0.7rem] sm:inline-flex"
+                >
+                  Sign in
+                </Link>
+                <Link
+                  href="/register"
+                  className="rf-btn rf-btn-primary text-[0.7rem] px-4 py-2"
+                >
+                  Get started
+                </Link>
+              </>
+            )}
+          </div>
         </div>
-      </div>
-    </nav>
+      </nav>
+    </div>
   );
 }

@@ -64,9 +64,27 @@ const NAV_BY_ROLE = {
   ],
 };
 
-const ROLE_PULSE  = { admin:'bg-rose-500', landlord:'bg-violet-500', property_manager:'bg-amber-500', tenant:'bg-emerald-500', law_reviewer:'bg-purple-500' };
-const ROLE_BADGE  = { admin:'bg-rose-50 text-rose-700 border-rose-200', landlord:'bg-violet-50 text-violet-700 border-violet-200', property_manager:'bg-amber-50 text-amber-700 border-amber-200', tenant:'bg-emerald-50 text-emerald-700 border-emerald-200', law_reviewer:'bg-purple-50 text-purple-700 border-purple-200' };
-const ROLE_COLORS = { landlord:{bg:'bg-violet-100',text:'text-violet-700'}, tenant:{bg:'bg-emerald-100',text:'text-emerald-700'}, property_manager:{bg:'bg-amber-100',text:'text-amber-700'}, admin:{bg:'bg-rose-100',text:'text-rose-700'}, law_reviewer:{bg:'bg-purple-100',text:'text-purple-700'} };
+const ROLE_PULSE  = {
+  admin: 'bg-[#84B179]',
+  landlord: 'bg-[#84B179]',
+  property_manager: 'bg-[#84B179]',
+  tenant: 'bg-[#84B179]',
+  law_reviewer: 'bg-[#84B179]',
+};
+const ROLE_BADGE  = {
+  admin: 'bg-[#C7EABB] text-[#234224] border-[#A2CB8B]',
+  landlord: 'bg-[#C7EABB] text-[#234224] border-[#A2CB8B]',
+  property_manager: 'bg-[#C7EABB] text-[#234224] border-[#A2CB8B]',
+  tenant: 'bg-[#C7EABB] text-[#234224] border-[#A2CB8B]',
+  law_reviewer: 'bg-[#C7EABB] text-[#234224] border-[#A2CB8B]',
+};
+const ROLE_COLORS = {
+  landlord: { bg: 'bg-[#F2F7E5]', text: 'text-[#234224]' },
+  tenant: { bg: 'bg-[#F2F7E5]', text: 'text-[#234224]' },
+  property_manager: { bg: 'bg-[#F2F7E5]', text: 'text-[#234224]' },
+  admin: { bg: 'bg-[#F2F7E5]', text: 'text-[#234224]' },
+  law_reviewer: { bg: 'bg-[#F2F7E5]', text: 'text-[#234224]' },
+};
 
 function NotificationToast({ notification, onDismiss }) {
   const [show, setShow] = useState(false);
@@ -159,15 +177,15 @@ export default function DashboardLayout({ children }) {
 
   if (!user) {
     return (
-      <div className="flex h-screen items-center justify-center bg-slate-950">
+      <div className="flex h-screen items-center justify-center bg-[#E8F5BD]">
         <motion.div
           initial={{ opacity: 0, y: 10, scale: 0.96 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={{ duration: 0.4, ease: [0.22, 1.25, 0.36, 1] }}
-          className="rf-card flex items-center gap-3 px-5 py-4 bg-slate-900/80"
+          className="rf-card flex items-center gap-3 px-5 py-4 bg-white/90 border border-[#E0EDC5]"
         >
-          <Loader2 className="h-6 w-6 animate-spin text-violet-400" />
-          <p className="text-sm font-semibold text-slate-100">
+          <Loader2 className="h-6 w-6 animate-spin text-[#84B179]" />
+          <p className="text-sm font-semibold text-neutral-800">
             Loading your dashboard…
           </p>
         </motion.div>
@@ -181,63 +199,103 @@ export default function DashboardLayout({ children }) {
   const badgeColor = ROLE_BADGE[role]  || 'bg-gray-100 text-gray-600 border-gray-200';
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-[#E8F5BD]">
       <Navbar />
       <NotificationToast notification={notification} onDismiss={() => setNotification(null)} />
 
-      {/* Sub-nav bar */}
-      <motion.div
-        className="mt-16 sticky top-16 z-40 w-full border-b border-slate-800/70 bg-slate-950/85 backdrop-blur-xl"
-        initial={{ opacity: 0, y: -8 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.35, ease: [0.21, 0.6, 0.35, 1] }}
-      >
-        <div className="w-full px-4 sm:px-8 lg:px-12">
-          <div className="flex items-center justify-between h-14">
-            <div className="flex space-x-0.5 overflow-x-auto no-scrollbar h-full items-center">
-              {currentNav.map((item) => {
-                const Icon     = item.icon;
-                const isActive = pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href));
-                const count    = item.badgeKey ? (badgeCounts[item.badgeKey] || 0) : 0;
+      <div className="flex-1 pt-24 pb-10">
+        <div className="mx-auto flex max-w-[1600px] gap-6 px-4 sm:px-8 lg:px-12">
+          {/* Sidebar */}
+          <motion.aside
+            initial={{ x: -40, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            transition={{ duration: 0.5, ease: [0.21, 0.8, 0.3, 1] }}
+            className="hidden w-64 shrink-0 flex-col rounded-3xl bg-white/85 p-4 shadow-[0_22px_70px_rgba(148,163,120,0.55)] ring-1 ring-[#E0EDC5] lg:flex"
+          >
+            <div className="mb-4 flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-[#A2CB8B] to-[#84B179] text-white font-semibold">
+                {user.name?.charAt(0)?.toUpperCase() || '?'}
+              </div>
+              <div className="min-w-0">
+                <p className="truncate text-sm font-semibold text-neutral-900">
+                  {user.name}
+                </p>
+                <div className="mt-1 flex items-center gap-2">
+                  <span className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.15em] ${badgeColor}`}>
+                    <span className={`h-1.5 w-1.5 rounded-full animate-pulse ${pulseColor}`} />
+                    {role.replace('_', ' ')}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div className="mb-2 h-px rounded-full bg-[#E0EDC5]" />
+
+            <nav className="flex flex-1 flex-col gap-1 pt-1">
+              {currentNav.map((item, index) => {
+                const Icon = item.icon;
+                const isActive =
+                  pathname === item.href ||
+                  (item.href !== '/dashboard' && pathname.startsWith(item.href));
+                const count = item.badgeKey ? (badgeCounts[item.badgeKey] || 0) : 0;
                 return (
-                  <motion.a
+                  <motion.button
                     key={item.name}
-                    href={item.href}
-                    className={`relative flex items-center h-full px-3.5 text-[11px] font-bold tracking-wide border-b-2 transition-all whitespace-nowrap gap-1.5 ${
-                      isActive ? 'border-violet-600 text-violet-700' : 'border-transparent text-gray-400 hover:text-gray-700 hover:border-gray-200'
+                    onClick={() => router.push(item.href)}
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{
+                      duration: 0.35,
+                      delay: 0.04 * index,
+                      ease: [0.21, 0.6, 0.35, 1],
+                    }}
+                    className={`group mb-0.5 flex w-full items-center justify-between rounded-2xl px-3 py-2.5 text-[0.78rem] font-semibold transition-all ${
+                      isActive
+                        ? 'bg-[#E8F5BD] text-neutral-900 shadow-sm shadow-[#C7EABB]'
+                        : 'text-neutral-500 hover:bg-[#F2F7E5] hover:text-neutral-900'
                     }`}
-                    whileHover={{ y: -1 }}
-                    transition={{ duration: 0.15 }}
                   >
-                    <Icon className={`h-3.5 w-3.5 ${isActive ? 'text-violet-600' : 'text-gray-400'}`} />
-                    {item.name}
+                    <span className="flex items-center gap-2">
+                      <span
+                        className={`flex h-7 w-7 items-center justify-center rounded-2xl border ${
+                          isActive
+                            ? 'border-[#A2CB8B] bg-white'
+                            : 'border-transparent bg-white/70 group-hover:border-[#E0EDC5]'
+                        }`}
+                      >
+                        <Icon
+                          className={`h-3.5 w-3.5 ${
+                            isActive ? 'text-[#84B179]' : 'text-neutral-500'
+                          }`}
+                        />
+                      </span>
+                      {item.name}
+                    </span>
                     {count > 0 && (
-                      <span className="inline-flex items-center justify-center min-w-[16px] h-4 px-1 rounded-full bg-violet-600 text-white text-[9px] font-black leading-none">
+                      <span className="inline-flex min-w-[18px] items-center justify-center rounded-full bg-[#84B179] px-1 text-[10px] font-bold text-white">
                         {count > 9 ? '9+' : count}
                       </span>
                     )}
-                  </motion.a>
+                  </motion.button>
                 );
               })}
-            </div>
-            <div className="hidden sm:flex items-center gap-2 ml-4 shrink-0">
-              <div className={`w-2 h-2 rounded-full animate-pulse ${pulseColor}`} />
-              <span className={`text-[10px] font-bold uppercase px-2.5 py-0.5 rounded-full tracking-widest border ${badgeColor}`}>
-                {role.replace('_', ' ')}
-              </span>
-            </div>
-          </div>
-        </div>
-      </motion.div>
+            </nav>
+          </motion.aside>
 
-      <motion.main
-        className="flex-grow py-8 px-4 sm:px-8 lg:px-12 w-full max-w-[1600px] mx-auto"
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, ease: [0.21, 0.6, 0.35, 1] }}
-      >
-        {children}
-      </motion.main>
+          {/* Main content */}
+          <motion.main
+            className="flex-1"
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.45, ease: [0.21, 0.6, 0.35, 1] }}
+          >
+            <div className="rounded-[2rem] bg-white/80 p-4 shadow-[0_24px_80px_rgba(148,163,120,0.45)] ring-1 ring-[#E0EDC5] sm:p-6 lg:p-8">
+              {children}
+            </div>
+          </motion.main>
+        </div>
+      </div>
+
       <Footer />
     </div>
   );

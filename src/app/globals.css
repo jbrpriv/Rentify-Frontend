@@ -1,38 +1,39 @@
 @import "tailwindcss";
 
 /* ──────────────────────────────────────────────────────────────
-   DESIGN TOKENS – GLOBAL THEME
-   Centralized color, typography, radius, shadow & motion system
+   DESIGN TOKENS – RENTIFY GREEN THEME
+   Uses ONLY the requested palette:
+   #A2CB8B, #84B179, #C7EABB, #E8F5BD
    ──────────────────────────────────────────────────────────── */
 
 :root {
-  /* Brand */
-  --rf-color-primary: #2563eb;
-  --rf-color-primary-soft: #dbeafe;
-  --rf-color-primary-strong: #1d4ed8;
+  /* Brand greens */
+  --rf-color-primary: #A2CB8B; /* muted green */
+  --rf-color-primary-strong: #84B179; /* deep green / hover */
+  --rf-color-primary-soft: #C7EABB; /* soft mint / secondary */
 
-  /* Accent / secondary */
-  --rf-color-accent: #0f172a;
-  --rf-color-accent-soft: #e5e7eb;
+  /* Supporting tones from palette */
+  --rf-color-soft: #C7EABB;
+  --rf-color-soft-alt: #E8F5BD;
 
-  /* Neutrals */
-  --rf-color-bg: #020617;
-  --rf-color-bg-elevated: #020617;
-  --rf-color-surface: #0b1120;
-  --rf-color-surface-soft: #020617;
-  --rf-color-border-subtle: rgba(148, 163, 184, 0.18);
-  --rf-color-border-strong: rgba(148, 163, 184, 0.32);
-  --rf-color-text-main: #f9fafb;
-  --rf-color-text-soft: #e5e7eb;
-  --rf-color-text-muted: #9ca3af;
+  /* Neutrals tuned for light, premium look */
+  --rf-color-bg: #F7FAF0;
+  --rf-color-bg-elevated: #FDFEF8;
+  --rf-color-surface: #FFFFFF;
+  --rf-color-surface-soft: #F9FBEF;
+  --rf-color-border-subtle: rgba(148, 163, 120, 0.22);
+  --rf-color-border-strong: rgba(120, 140, 90, 0.5);
+  --rf-color-text-main: #1F2933;
+  --rf-color-text-soft: #4B5563;
+  --rf-color-text-muted: #6B7280;
 
-  /* Semantic */
-  --rf-color-success: #16a34a;
-  --rf-color-success-soft: #dcfce7;
-  --rf-color-warning: #f59e0b;
-  --rf-color-warning-soft: #fef3c7;
-  --rf-color-danger: #ef4444;
-  --rf-color-danger-soft: #fee2e2;
+  /* Semantic (kept but softly shifted toward green) */
+  --rf-color-success: #84B179;
+  --rf-color-success-soft: #E8F5BD;
+  --rf-color-warning: #EAB308;
+  --rf-color-warning-soft: #FEF9C3;
+  --rf-color-danger: #DC2626;
+  --rf-color-danger-soft: #FEE2E2;
 
   /* Typography scale */
   --rf-font-sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
@@ -56,14 +57,14 @@
   --rf-radius-xl: 1.25rem;
   --rf-radius-2xl: 1.5rem;
 
-  /* Shadows */
-  --rf-shadow-soft: 0 18px 40px rgba(15, 23, 42, 0.25);
-  --rf-shadow-elevated: 0 24px 70px rgba(15, 23, 42, 0.42);
+  /* Shadows tuned for soft, airy UI */
+  --rf-shadow-soft: 0 18px 40px rgba(148, 163, 120, 0.18);
+  --rf-shadow-elevated: 0 28px 80px rgba(120, 130, 80, 0.26);
 
   /* Motion */
   --rf-duration-fast: 140ms;
-  --rf-duration-normal: 220ms;
-  --rf-duration-slow: 320ms;
+  --rf-duration-normal: 230ms;
+  --rf-duration-slow: 360ms;
   --rf-ease-standard: cubic-bezier(0.21, 0.6, 0.35, 1);
   --rf-ease-bouncy: cubic-bezier(0.22, 1.25, 0.36, 1);
 }
@@ -71,7 +72,9 @@
 @layer base {
   body {
     color: var(--rf-color-text-main);
-    background: radial-gradient(circle at top left, #020617 0, #020617 26%, #020617 60%, #020617 100%);
+    background:
+      radial-gradient(circle at top left, #E8F5BD 0, #F7FAF0 32%, #FFFFFF 70%),
+      radial-gradient(circle at bottom right, #C7EABB 0, #FFFFFF 55%);
     font-family: var(--font-geist-sans, var(--rf-font-sans));
     -webkit-font-smoothing: antialiased;
   }
@@ -79,15 +82,14 @@
   .rf-shell {
     min-height: 100vh;
     background:
-      radial-gradient(circle at top, rgba(37, 99, 235, 0.13), transparent 55%),
-      radial-gradient(circle at 80% 10%, rgba(14, 165, 233, 0.12), transparent 60%),
-      radial-gradient(circle at 0% 80%, rgba(16, 185, 129, 0.08), transparent 60%);
+      radial-gradient(circle at 0% -10%, rgba(162, 203, 139, 0.65), transparent 55%),
+      radial-gradient(circle at 90% 0%, rgba(231, 245, 189, 0.9), transparent 62%),
+      radial-gradient(circle at 0% 80%, rgba(199, 234, 187, 0.75), transparent 60%);
   }
 }
 
 /* ──────────────────────────────────────────────────────────────
    TYPOGRAPHY UTILITIES
-   Use alongside Tailwind (text-display, text-h1, etc.)
    ──────────────────────────────────────────────────────────── */
 
 @layer utilities {
@@ -146,22 +148,22 @@
 @layer utilities {
   .rf-card {
     border-radius: var(--rf-radius-2xl);
-    background: radial-gradient(circle at top left, #020617, #020617);
+    background: radial-gradient(circle at top left, #FFFFFF, #F9FBEF);
     box-shadow: var(--rf-shadow-soft);
-    border: 1px solid rgba(148, 163, 184, 0.18);
+    border: 1px solid var(--rf-color-border-subtle);
   }
 
   .rf-card-soft {
     border-radius: var(--rf-radius-xl);
-    background: rgba(15, 23, 42, 0.86);
-    box-shadow: 0 22px 60px rgba(15, 23, 42, 0.38);
-    border: 1px solid rgba(148, 163, 184, 0.16);
+    background: rgba(255, 255, 255, 0.9);
+    box-shadow: 0 22px 60px rgba(148, 163, 120, 0.24);
+    border: 1px solid rgba(148, 163, 120, 0.28);
   }
 
   .rf-surface {
     border-radius: var(--rf-radius-lg);
-    background: rgba(15, 23, 42, 0.9);
-    border: 1px solid rgba(148, 163, 184, 0.18);
+    background: rgba(255, 255, 255, 0.92);
+    border: 1px solid var(--rf-color-border-subtle);
   }
 
   .rf-border-subtle {
@@ -174,15 +176,7 @@
 }
 
 /* ──────────────────────────────────────────────────────────────
-   BUTTON SYSTEM
-   Tailwind-friendly, variant-based button primitives.
-
-   Tailwind v4 rule: @apply only works with built-in Tailwind
-   utilities — never with custom CSS classes, even your own.
-   Solution: rf-btn is a standalone class; variants are always
-   used alongside it (e.g. "rf-btn rf-btn-primary") so they
-   don't need to @apply it — each variant inlines the shared
-   base styles directly.
+   BUTTON SYSTEM – GREEN VARIANTS
    ──────────────────────────────────────────────────────────── */
 
 @layer utilities {
@@ -194,8 +188,8 @@
     gap: 0.5rem;
     font-size: 0.875rem;
     font-weight: 600;
-    border-radius: 0.75rem;
-    padding: 0.625rem 1rem;
+    border-radius: 999px;
+    padding: 0.625rem 1.15rem;
     transform-origin: center;
     transition:
       transform var(--rf-duration-fast) var(--rf-ease-bouncy),
@@ -203,8 +197,6 @@
       background-color var(--rf-duration-normal) var(--rf-ease-standard),
       color var(--rf-duration-normal) var(--rf-ease-standard);
   }
-
-  /* ── Variants (each carries the full base so @apply is not needed) ── */
 
   .rf-btn-primary {
     display: inline-flex;
@@ -213,8 +205,8 @@
     gap: 0.5rem;
     font-size: 0.875rem;
     font-weight: 600;
-    border-radius: 0.75rem;
-    padding: 0.625rem 1rem;
+    border-radius: 999px;
+    padding: 0.625rem 1.15rem;
     transform-origin: center;
     transition:
       transform var(--rf-duration-fast) var(--rf-ease-bouncy),
@@ -222,16 +214,16 @@
       background-color var(--rf-duration-normal) var(--rf-ease-standard),
       color var(--rf-duration-normal) var(--rf-ease-standard);
     background: linear-gradient(135deg, var(--rf-color-primary-strong), var(--rf-color-primary));
-    color: white;
-    box-shadow: 0 18px 40px rgba(37, 99, 235, 0.4);
+    color: #1A2A1A;
+    box-shadow: 0 18px 40px rgba(132, 177, 121, 0.45);
   }
   .rf-btn-primary:hover {
-    transform: translateY(-1px) scale(1.02);
-    box-shadow: 0 24px 60px rgba(37, 99, 235, 0.55);
+    transform: translateY(-1px) scale(1.03);
+    box-shadow: 0 22px 60px rgba(132, 177, 121, 0.6);
   }
   .rf-btn-primary:active {
     transform: translateY(0) scale(0.97);
-    box-shadow: 0 10px 30px rgba(37, 99, 235, 0.45);
+    box-shadow: 0 12px 32px rgba(132, 177, 121, 0.5);
   }
 
   .rf-btn-secondary {
@@ -241,8 +233,8 @@
     gap: 0.5rem;
     font-size: 0.875rem;
     font-weight: 600;
-    border-radius: 0.75rem;
-    padding: 0.625rem 1rem;
+    border-radius: 999px;
+    padding: 0.625rem 1.15rem;
     transform-origin: center;
     transition:
       transform var(--rf-duration-fast) var(--rf-ease-bouncy),
@@ -250,13 +242,13 @@
       background-color var(--rf-duration-normal) var(--rf-ease-standard),
       color var(--rf-duration-normal) var(--rf-ease-standard);
     border: 1px solid var(--rf-color-border-subtle);
-    background: rgba(15, 23, 42, 0.7);
+    background: rgba(248, 250, 244, 0.95);
     color: var(--rf-color-text-soft);
   }
   .rf-btn-secondary:hover {
-    background: rgba(15, 23, 42, 0.95);
-    border-color: rgba(148, 163, 184, 0.45);
-    transform: translateY(-0.5px);
+    background: #F1F7E4;
+    border-color: var(--rf-color-border-strong);
+    transform: translateY(-0.5px) scale(1.01);
   }
 
   .rf-btn-ghost {
@@ -266,8 +258,8 @@
     gap: 0.5rem;
     font-size: 0.875rem;
     font-weight: 600;
-    border-radius: 0.75rem;
-    padding: 0.625rem 1rem;
+    border-radius: 999px;
+    padding: 0.625rem 1.15rem;
     transform-origin: center;
     transition:
       transform var(--rf-duration-fast) var(--rf-ease-bouncy),
@@ -278,7 +270,8 @@
     color: var(--rf-color-text-soft);
   }
   .rf-btn-ghost:hover {
-    background: rgba(15, 23, 42, 0.65);
+    background: rgba(226, 240, 206, 0.8);
+    color: #1F2933;
   }
 
   .rf-btn-danger {
@@ -288,27 +281,26 @@
     gap: 0.5rem;
     font-size: 0.875rem;
     font-weight: 600;
-    border-radius: 0.75rem;
-    padding: 0.625rem 1rem;
+    border-radius: 999px;
+    padding: 0.625rem 1.15rem;
     transform-origin: center;
     transition:
       transform var(--rf-duration-fast) var(--rf-ease-bouncy),
       box-shadow var(--rf-duration-normal) var(--rf-ease-standard),
       background-color var(--rf-duration-normal) var(--rf-ease-standard),
       color var(--rf-duration-normal) var(--rf-ease-standard);
-    background: linear-gradient(135deg, #dc2626, #ef4444);
+    background: linear-gradient(135deg, #DC2626, #EF4444);
     color: white;
     box-shadow: 0 18px 40px rgba(248, 113, 113, 0.35);
   }
   .rf-btn-danger:hover {
-    transform: translateY(-1px) scale(1.02);
+    transform: translateY(-1px) scale(1.03);
     box-shadow: 0 24px 60px rgba(239, 68, 68, 0.5);
   }
 }
 
 /* ──────────────────────────────────────────────────────────────
-   MICRO-INTERACTIONS
-   Reusable motion primitives for cards, sections, links
+   MICRO-INTERACTIONS & SCROLL ANIMATION PRIMITIVES
    ──────────────────────────────────────────────────────────── */
 
 @layer utilities {
@@ -316,17 +308,21 @@
     transition:
       transform var(--rf-duration-normal) var(--rf-ease-bouncy),
       box-shadow var(--rf-duration-normal) var(--rf-ease-standard),
-      border-color var(--rf-duration-normal) var(--rf-ease-standard);
+      border-color var(--rf-duration-normal) var(--rf-ease-standard),
+      background-color var(--rf-duration-normal) var(--rf-ease-standard);
   }
   .rf-hover-card:hover {
-    transform: translateY(-4px) translateZ(0);
+    transform: translateY(-6px) translateZ(0) scale(1.01);
     box-shadow: var(--rf-shadow-elevated);
-    border-color: rgba(129, 140, 248, 0.7);
+    border-color: rgba(132, 177, 121, 0.9);
+    background-color: rgba(248, 252, 238, 0.96);
   }
 
   .rf-link {
     position: relative;
-    transition: color var(--rf-duration-normal) var(--rf-ease-standard);
+    transition:
+      color var(--rf-duration-normal) var(--rf-ease-standard),
+      transform var(--rf-duration-fast) var(--rf-ease-bouncy);
   }
   .rf-link::after {
     content: "";
@@ -336,25 +332,38 @@
     width: 0;
     height: 1.5px;
     border-radius: 999px;
-    background: linear-gradient(90deg, var(--rf-color-primary), #38bdf8);
+    background: linear-gradient(90deg, #A2CB8B, #C7EABB);
     transition: width var(--rf-duration-normal) var(--rf-ease-standard);
+  }
+  .rf-link:hover {
+    transform: translateY(-1px);
   }
   .rf-link:hover::after {
     width: 100%;
   }
 
+  /* Scroll-triggered fade/slide utilities (paired with IntersectionObserver or framer-motion) */
   .rf-fade-in-up {
-    animation: rf-fade-in-up 420ms var(--rf-ease-standard) both;
+    opacity: 0;
+    transform: translateY(16px);
+    animation: rf-fade-in-up 520ms var(--rf-ease-standard) forwards;
   }
   .rf-fade-in-delayed {
-    animation: rf-fade-in-up 520ms var(--rf-ease-standard) 60ms both;
+    opacity: 0;
+    transform: translateY(18px);
+    animation: rf-fade-in-up 620ms var(--rf-ease-standard) 80ms forwards;
+  }
+  .rf-fade-in-stagger {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: rf-fade-in-up 640ms var(--rf-ease-standard) 120ms forwards;
   }
 }
 
 @keyframes rf-fade-in-up {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(20px);
   }
   to {
     opacity: 1;

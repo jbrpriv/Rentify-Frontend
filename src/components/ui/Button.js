@@ -3,15 +3,15 @@
 import clsx from 'clsx';
 
 const base =
-  'inline-flex items-center justify-center gap-2 text-sm font-semibold rounded-xl px-4 py-2.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 disabled:opacity-60 disabled:cursor-not-allowed transition-transform duration-150 ease-[cubic-bezier(0.22,1.25,0.36,1)]';
+  'inline-flex items-center justify-center gap-2 text-sm font-semibold rounded-full px-4 py-2.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent disabled:opacity-60 disabled:cursor-not-allowed transition-transform duration-150 ease-[cubic-bezier(0.22,1.25,0.36,1)] hover:scale-[1.02] active:scale-[0.97]';
 
 const variants = {
   primary:
-    'rf-btn-primary focus-visible:ring-blue-600',
+    'rf-btn-primary focus-visible:ring-[#84B179]',
   secondary:
-    'rf-btn-secondary focus-visible:ring-slate-500',
+    'rf-btn-secondary focus-visible:ring-[#A2CB8B]',
   ghost:
-    'rf-btn-ghost hover:bg-slate-800/80 focus-visible:ring-slate-600',
+    'rf-btn-ghost focus-visible:ring-[#C7EABB]',
   danger:
     'rf-btn-danger focus-visible:ring-red-500',
 };

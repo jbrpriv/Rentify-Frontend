@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import { MotionRevealSection } from '@/components/ui/Motion';
 
 // ── CLOUDINARY IMAGE ──────────────────────────────────────────────────────────
 // Upload your cityscape to Cloudinary, paste the URL below
@@ -88,465 +89,650 @@ export default function LandingPage() {
   const features = roleTab === 'tenant' ? TENANT_FEATURES : LANDLORD_FEATURES;
 
   return (
-    <div className="min-h-screen flex flex-col bg-white">
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800&display=swap');
-
-        *, body { font-family: 'Plus Jakarta Sans', sans-serif; }
-
-        .hero-bg {
-          background: linear-gradient(160deg, #1e40af 0%, #2563eb 35%, #3b82f6 65%, #60a5fa 100%);
-          position: relative;
-          overflow: hidden;
-          min-height: 540px;
-        }
-        .hero-bg::before {
-          content: '';
-          position: absolute; inset: 0;
-          background:
-            radial-gradient(ellipse at 15% 40%, rgba(255,255,255,0.08) 0%, transparent 55%),
-            radial-gradient(ellipse at 85% 20%, rgba(30,64,175,0.5) 0%, transparent 50%);
-        }
-        .hero-bg::after {
-          content: '';
-          position: absolute; inset: 0;
-          background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.025'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-        }
-
-        .hero-content { position: relative; z-index: 10; }
-
-        .search-card {
-          background: white;
-          border-radius: 0 20px 20px 20px;
-          box-shadow: 0 24px 64px rgba(30, 64, 175, 0.3);
-        }
-
-        .search-tab-active {
-          background: white; color: #2563eb;
-          border-radius: 12px 12px 0 0;
-          font-weight: 700;
-        }
-        .search-tab-inactive {
-          color: rgba(255,255,255,0.75);
-          border-radius: 12px 12px 0 0;
-          transition: color 0.2s;
-        }
-        .search-tab-inactive:hover { color: white; }
-
-        .city-card {
-          border-radius: 18px; overflow: hidden;
-          position: relative; cursor: pointer;
-          box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-          transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s;
-        }
-        .city-card:hover {
-          transform: translateY(-8px) scale(1.02);
-          box-shadow: 0 20px 48px rgba(0,0,0,0.18);
-        }
-        .city-card img {
-          width: 100%; height: 210px; object-fit: cover;
-          transition: transform 0.5s ease;
-        }
-        .city-card:hover img { transform: scale(1.08); }
-        .city-overlay {
-          position: absolute; bottom: 0; left: 0; right: 0;
-          background: linear-gradient(to top, rgba(15,23,42,0.78) 0%, transparent 100%);
-          padding: 24px 16px 16px;
-          color: white;
-        }
-
-        .role-toggle-wrap {
-          background: #F1F5F9;
-          border-radius: 16px;
-          position: relative;
-          padding: 5px;
-          display: inline-flex;
-        }
-        .role-indicator {
-          position: absolute;
-          top: 5px; bottom: 5px;
-          background: white;
-          border-radius: 12px;
-          box-shadow: 0 2px 12px rgba(37,99,235,0.15);
-          transition: left 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), width 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
-          z-index: 0;
-        }
-        .role-btn {
-          position: relative; z-index: 1;
-          padding: 12px 36px;
-          border-radius: 12px;
-          font-weight: 700; font-size: 0.9rem;
-          transition: color 0.3s;
-          cursor: pointer;
-          background: none; border: none;
-          white-space: nowrap;
-        }
-        .role-btn-active  { color: #2563EB; }
-        .role-btn-inactive { color: #64748B; }
-
-        .feature-card {
-          background: white;
-          border: 1px solid #E2E8F0;
-          border-radius: 20px;
-          padding: 28px;
-          transition: transform 0.25s, box-shadow 0.25s, border-color 0.25s;
-        }
-        .feature-card:hover {
-          transform: translateY(-4px);
-          box-shadow: 0 16px 40px rgba(37,99,235,0.1);
-          border-color: #BFDBFE;
-        }
-
-        .features-grid-enter { animation: fadeSlideUp 0.45s cubic-bezier(0.34,1.1,0.64,1) both; }
-        @keyframes fadeSlideUp {
-          from { opacity: 0; transform: translateY(24px); }
-          to   { opacity: 1; transform: translateY(0); }
-        }
-
-        .stat-item {
-          text-align: center;
-          padding: 28px 20px;
-        }
-
-        .cta-section {
-          background: linear-gradient(135deg, #1E3A8A 0%, #2563EB 50%, #3B82F6 100%);
-          position: relative; overflow: hidden;
-        }
-        .cta-section::before {
-          content: '';
-          position: absolute; inset: 0;
-          background: radial-gradient(ellipse at 80% 50%, rgba(96,165,250,0.25) 0%, transparent 60%);
-        }
-
-        .seagull { position: absolute; opacity: 0.5; }
-
-        .how-step-num {
-          font-family: 'Outfit', sans-serif;
-          font-size: 3.5rem;
-          font-weight: 800;
-          line-height: 1;
-          background: linear-gradient(135deg, #93C5FD, #2563EB);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          background-clip: text;
-        }
-      `}</style>
-
+    <div className="flex min-h-screen flex-col bg-transparent">
       <Navbar />
 
-      <main className="flex-grow pt-16">
+      <main className="flex-grow pt-24">
 
-        {/* ── HERO ──────────────────────────────────────────────────────── */}
-        <section className="hero-bg pb-0 pt-16">
-          {/* Seagulls */}
-          <svg className="seagull" style={{top:'20%',left:'14%',width:38}} viewBox="0 0 60 20"><path d="M0 10 Q15 0 30 10 Q45 0 60 10" stroke="white" strokeWidth="2.5" fill="none"/></svg>
-          <svg className="seagull" style={{top:'32%',left:'10%',width:24}} viewBox="0 0 60 20"><path d="M0 10 Q15 0 30 10 Q45 0 60 10" stroke="white" strokeWidth="2.5" fill="none"/></svg>
-          <svg className="seagull" style={{top:'15%',right:'15%',width:32}} viewBox="0 0 60 20"><path d="M0 10 Q15 0 30 10 Q45 0 60 10" stroke="white" strokeWidth="2.5" fill="none"/></svg>
-          <svg className="seagull" style={{top:'40%',right:'10%',width:20}} viewBox="0 0 60 20"><path d="M0 10 Q15 0 30 10 Q45 0 60 10" stroke="white" strokeWidth="2.5" fill="none"/></svg>
-
-          <div className="hero-content max-w-4xl mx-auto px-4 text-center">
-            <p className="text-blue-200 text-xs font-bold uppercase tracking-[0.25em] mb-4">60+ Countries · 2M+ Listings</p>
-            <h1 style={{
-              fontFamily: "'Outfit', sans-serif",
-              fontSize: 'clamp(2.4rem, 5.5vw, 4rem)',
-              fontWeight: 800,
-              color: 'white',
-              lineHeight: 1.08,
-              marginBottom: '2.2rem',
-              textShadow: '0 2px 24px rgba(30,58,138,0.4)',
-              letterSpacing: '-0.02em'
-            }}>
-              Renting Done Right.<br/>Finally.
-            </h1>
-
-            {/* Search tabs + box */}
-            <div className="max-w-2xl mx-auto">
-              <div className="flex gap-0 justify-start">
-                {['Rent','Buy'].map(t => (
-                  <button key={t} onClick={() => setTab(t.toLowerCase())}
-                    className={`px-7 py-2.5 text-sm font-bold transition-all ${tab === t.toLowerCase() ? 'search-tab-active' : 'search-tab-inactive'}`}>
-                    {t}
-                  </button>
-                ))}
+        {/* ── HERO – GREEN BENTO LAYOUT ─────────────────────────────────── */}
+        <MotionRevealSection
+          className="relative"
+        >
+          <div className="mx-auto flex max-w-6xl flex-col gap-10 px-4 pb-10 md:flex-row md:items-stretch md:gap-8 lg:px-0">
+            {/* Left column – copy + search */}
+            <div className="flex flex-1 flex-col gap-6">
+              <div className="inline-flex w-fit items-center gap-2 rounded-full border border-[#E0EDC5] bg-white/80 px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.25em] text-neutral-500 shadow-sm shadow-[#C7EABB]/40 backdrop-blur">
+                <span className="h-1.5 w-1.5 rounded-full bg-[#84B179]" />
+                60+ countries · 2M+ listings
               </div>
-              <form onSubmit={handleSearch} className="search-card flex items-center gap-3 p-2 pl-5">
-                <Search className="text-blue-400 flex-shrink-0" size={19} />
-                <input
-                  value={query}
-                  onChange={e => setQuery(e.target.value)}
-                  placeholder="Type a city, address, or ZIP code"
-                  className="flex-1 py-3 text-gray-700 bg-transparent outline-none text-base placeholder-gray-400"
-                />
-                <button type="submit"
-                  className="px-7 py-3 rounded-xl text-white text-sm font-bold flex-shrink-0 transition-all hover:brightness-110 active:scale-95"
-                  style={{background: 'linear-gradient(135deg, #1D4ED8, #3B82F6)'}}>
-                  Search
-                </button>
-              </form>
-            </div>
 
-            <div className="mt-5 flex items-center justify-center gap-5 flex-wrap">
-              {['Verified Listings','Digital Leases','Secure Payments','AI Matching'].map(t => (
-                <span key={t} className="text-white/80 text-xs flex items-center gap-1.5 font-semibold">
-                  <CheckCircle2 size={13} className="text-blue-200"/>  {t}
-                </span>
-              ))}
-            </div>
-          </div>
+              <div className="space-y-4">
+                <h1 className="text-hero text-neutral-900">
+                  Renting, reimagined in
+                  <span className="bg-gradient-to-r from-[#84B179] via-[#A2CB8B] to-[#C7EABB] bg-clip-text text-transparent">
+                    {' '}
+                    one calm workspace.
+                  </span>
+                </h1>
+                <p className="max-w-xl text-body text-neutral-600">
+                  RentifyPro replaces scattered calls, PDFs, and spreadsheets with a single
+                  premium hub for tenants and landlords — from discovery to signed keys.
+                </p>
+              </div>
 
-          {/* Cityscape */}
-          <div style={{marginTop:'2.5rem', position:'relative', height:220}}>
-            {HERO_CITYSCAPE_URL ? (
-              <img src={HERO_CITYSCAPE_URL} alt="City skyline"
-                style={{position:'absolute',bottom:0,left:'50%',transform:'translateX(-50%)',width:'100%',maxWidth:900,opacity:0.85,mixBlendMode:'luminosity',zIndex:1}}/>
-            ) : (
-              <svg style={{position:'absolute',bottom:0,left:0,right:0,width:'100%'}} viewBox="0 0 1440 220" preserveAspectRatio="xMidYMax meet" xmlns="http://www.w3.org/2000/svg">
-                <defs>
-                  <linearGradient id="b1" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="rgba(147,197,253,0.5)"/>
-                    <stop offset="100%" stopColor="rgba(59,130,246,0.2)"/>
-                  </linearGradient>
-                  <linearGradient id="b2" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="rgba(191,219,254,0.4)"/>
-                    <stop offset="100%" stopColor="rgba(37,99,235,0.2)"/>
-                  </linearGradient>
-                </defs>
-                <rect x="0" y="195" width="1440" height="25" fill="rgba(30,64,175,0.25)" rx="0"/>
-                {/* Buildings */}
-                <rect x="60"  y="120" width="48" height="100" fill="url(#b1)" rx="2"/>
-                <rect x="118" y="80"  width="40" height="140" fill="url(#b2)" rx="2"/>
-                <rect x="168" y="100" width="60" height="120" fill="url(#b1)" rx="2"/>
-                <rect x="238" y="60"  width="36" height="160" fill="url(#b2)" rx="2"/>
-                <rect x="284" y="95"  width="65" height="125" fill="url(#b1)" rx="2"/>
-                <rect x="360" y="130" width="45" height="90"  fill="url(#b2)" rx="2"/>
-                <rect x="415" y="65"  width="38" height="155" fill="url(#b1)" rx="2"/>
-                <rect x="463" y="90"  width="72" height="130" fill="url(#b2)" rx="2"/>
-                {/* Central tower */}
-                <rect x="555" y="18"  width="55" height="202" fill="url(#b1)" rx="3"/>
-                <rect x="568" y="4"   width="28" height="18"  fill="rgba(147,197,253,0.5)" rx="2"/>
-                <rect x="545" y="105" width="75" height="7"   fill="rgba(191,219,254,0.5)" rx="3"/>
-                <line x1="545" y1="105" x2="490" y2="175" stroke="rgba(191,219,254,0.35)" strokeWidth="3"/>
-                <line x1="620" y1="105" x2="675" y2="175" stroke="rgba(191,219,254,0.35)" strokeWidth="3"/>
-                {/* Right side */}
-                <rect x="645" y="95"  width="52" height="125" fill="url(#b2)" rx="2"/>
-                <rect x="707" y="70"  width="42" height="150" fill="url(#b1)" rx="2"/>
-                <rect x="759" y="105" width="65" height="115" fill="url(#b2)" rx="2"/>
-                <rect x="834" y="55"  width="38" height="165" fill="url(#b1)" rx="2"/>
-                <rect x="882" y="88"  width="58" height="132" fill="url(#b2)" rx="2"/>
-                <rect x="950" y="115" width="48" height="105" fill="url(#b1)" rx="2"/>
-                <rect x="1008" y="72" width="43" height="148" fill="url(#b2)" rx="2"/>
-                <rect x="1061" y="98" width="62" height="122" fill="url(#b1)" rx="2"/>
-                <rect x="1133" y="85" width="38" height="135" fill="url(#b2)" rx="2"/>
-                <rect x="1181" y="118" width="52" height="102" fill="url(#b1)" rx="2"/>
-                <rect x="1243" y="92" width="58" height="128" fill="url(#b2)" rx="2"/>
-                <rect x="1311" y="110" width="70" height="110" fill="url(#b1)" rx="2"/>
-                {/* Window dots */}
-                {[130,145,160,175,190].map(y =>
-                  [128,138,250,260,430,470,570,585,720,730,848,858,1018,1028,1145,1155,1256,1266].map(x => (
-                    <rect key={`${x}-${y}`} x={x} y={y} width="5" height="3" fill="rgba(255,255,255,0.3)" rx="1"/>
-                  ))
-                )}
-                <rect x="0" y="218" width="1440" height="2" fill="rgba(59,130,246,0.3)"/>
-              </svg>
-            )}
-          </div>
-        </section>
+              {/* Search bento card */}
+              <div className="mt-2 grid gap-3 md:grid-cols-[minmax(0,1.5fr),minmax(0,1fr)]">
+                <div className="rf-card-soft relative overflow-hidden">
+                  <div className="pointer-events-none absolute -left-6 -top-10 h-28 w-28 rounded-full bg-[#E8F5BD] blur-2xl" />
+                  <div className="pointer-events-none absolute -right-10 bottom-0 h-28 w-28 rounded-full bg-[#C7EABB] blur-2xl" />
+                  <div className="relative space-y-3">
+                    <div className="inline-flex items-center gap-1 rounded-full bg-white/70 px-2 py-1 text-[0.65rem] font-medium text-neutral-500 ring-1 ring-[#E0EDC5]">
+                      <CheckCircle2 className="h-3 w-3 text-[#84B179]" />
+                      <span>Verified listings & digital leases</span>
+                    </div>
 
-        {/* ── STATS STRIP ───────────────────────────────────────────────── */}
-        <section style={{background:'#1E3A8A'}}>
-          <div className="max-w-5xl mx-auto px-4">
-            <div className="grid grid-cols-2 md:grid-cols-4 divide-x divide-blue-700/40">
-              {STATS.map(s => (
-                <div key={s.label} className="stat-item">
-                  <p style={{fontFamily:"'Outfit',sans-serif", fontWeight:800, fontSize:'2rem', color:'white', lineHeight:1}}>{s.value}</p>
-                  <p className="text-blue-300 text-xs font-semibold uppercase tracking-widest mt-1">{s.label}</p>
+                    <div className="flex items-center gap-1 rounded-full bg-[#F2F7E5] p-1 text-[0.7rem] font-semibold text-neutral-600">
+                      {['Rent', 'Buy'].map((t) => (
+                        <button
+                          key={t}
+                          type="button"
+                          onClick={() => setTab(t.toLowerCase())}
+                          className={`flex-1 rounded-full px-3 py-1.5 transition-all ${
+                            tab === t.toLowerCase()
+                              ? 'bg-white text-neutral-900 shadow-sm shadow-[#C7EABB]/60'
+                              : 'text-neutral-500 hover:text-neutral-800'
+                          }`}
+                        >
+                          {t}
+                        </button>
+                      ))}
+                    </div>
+
+                    <form
+                      onSubmit={handleSearch}
+                      className="flex items-center gap-2 rounded-2xl border border-[#E0EDC5] bg-white/90 px-3 py-2.5 shadow-sm shadow-[#E1F0C9]/50 backdrop-blur"
+                    >
+                      <Search className="h-4 w-4 text-[#84B179]" />
+                      <input
+                        value={query}
+                        onChange={(e) => setQuery(e.target.value)}
+                        placeholder="Search by city, address, or ZIP"
+                        className="flex-1 bg-transparent text-sm text-neutral-800 placeholder:text-neutral-400 focus:outline-none"
+                      />
+                      <button
+                        type="submit"
+                        className="rf-btn rf-btn-primary hidden text-[0.7rem] md:inline-flex"
+                      >
+                        Search
+                      </button>
+                    </form>
+
+                    <div className="flex flex-wrap gap-3 text-[0.7rem] text-neutral-500">
+                      {['Verified landlords', 'Secure payments', 'AI match suggestions'].map(
+                        (item) => (
+                          <span
+                            key={item}
+                            className="inline-flex items-center gap-1 rounded-full bg-[#F5FAE9] px-2 py-1"
+                          >
+                            <CheckCircle2 className="h-3 w-3 text-[#84B179]" />
+                            {item}
+                          </span>
+                        ),
+                      )}
+                    </div>
+                  </div>
                 </div>
-              ))}
+
+                {/* Compact stat stack */}
+                <div className="flex flex-col gap-3">
+                  <div className="rf-card h-full min-h-[120px] rounded-2xl border border-[#E0EDC5] bg-gradient-to-br from-[#F9FCEB] via-white to-[#E8F5BD] p-4">
+                    <div className="flex items-center justify-between gap-3">
+                      <div>
+                        <p className="text-[0.7rem] font-semibold uppercase tracking-[0.22em] text-neutral-500">
+                          Live activity
+                        </p>
+                        <p className="mt-1 text-sm font-semibold text-neutral-900">
+                          Applications processed in the last 24h
+                        </p>
+                      </div>
+                      <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white/70 shadow-sm shadow-[#C7EABB]/60">
+                        <Home className="h-5 w-5 text-[#84B179]" />
+                      </div>
+                    </div>
+                    <div className="mt-4 flex items-end justify-between">
+                      <p className="text-2xl font-semibold text-neutral-900">8,412</p>
+                      <span className="inline-flex items-center gap-1 rounded-full bg-white/80 px-2 py-1 text-[0.65rem] font-medium text-[#1F7A3A]">
+                        <TrendingUp className="h-3 w-3" />
+                        +18% this week
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Right column – overlapping cards bento */}
+            <div className="relative mt-4 flex flex-1 items-stretch md:mt-0">
+              <div className="pointer-events-none absolute -right-10 top-0 h-40 w-40 rounded-full bg-[#C7EABB] opacity-70 blur-3xl" />
+              <div className="pointer-events-none absolute -left-10 bottom-0 h-32 w-32 rounded-full bg-[#E8F5BD] opacity-80 blur-3xl" />
+
+              <div className="relative mx-auto grid w-full max-w-md grid-cols-2 gap-4">
+                {/* Main vertical card */}
+                <div className="col-span-1 row-span-2 space-y-3 rounded-3xl bg-white/90 p-4 shadow-[0_24px_65px_rgba(148,163,120,0.55)] ring-1 ring-[#E0EDC5] backdrop-blur">
+                  <div className="flex items-center justify-between">
+                    <span className="rounded-full bg-[#F2F7E5] px-2 py-1 text-[0.7rem] font-medium text-neutral-600">
+                      Tenant view
+                    </span>
+                    <span className="text-[0.65rem] font-medium text-neutral-400">
+                      Digital lease · 12 mo
+                    </span>
+                  </div>
+                  <div className="mt-1 space-y-1.5">
+                    <p className="text-sm font-semibold text-neutral-900">
+                      2-bed in Uptown Green District
+                    </p>
+                    <p className="text-[0.7rem] text-neutral-500">
+                      ₹45,000 / month · Fully managed
+                    </p>
+                  </div>
+                  <div className="mt-3 flex items-center gap-2 text-[0.7rem] text-neutral-500">
+                    <span className="inline-flex items-center gap-1 rounded-full bg-[#F5FAE9] px-2 py-1">
+                      <Bed size={11} /> 2
+                    </span>
+                    <span className="inline-flex items-center gap-1 rounded-full bg-[#F5FAE9] px-2 py-1">
+                      <Bath size={11} /> 2
+                    </span>
+                    <span className="inline-flex items-center gap-1 rounded-full bg-[#F5FAE9] px-2 py-1">
+                      <Square size={11} /> 920 sq ft
+                    </span>
+                  </div>
+                  <div className="mt-4 flex items-center justify-between">
+                    <div className="space-y-1">
+                      <p className="text-[0.7rem] font-semibold uppercase tracking-[0.18em] text-neutral-400">
+                        Status
+                      </p>
+                      <p className="inline-flex items-center gap-1 rounded-full bg-[#E3F4D2] px-2 py-1 text-[0.7rem] font-semibold text-[#1F7A3A]">
+                        <ShieldCheck size={11} />
+                        Verified listing
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      className="rf-btn rf-btn-primary text-[0.7rem]"
+                      onClick={() => router.push('/browse')}
+                    >
+                      Explore listings
+                    </button>
+                  </div>
+                </div>
+
+                {/* Small landlord tile */}
+                <div className="rf-card-soft relative mt-6 flex flex-col justify-between rounded-3xl border border-[#E0EDC5] bg-white/80 p-3 shadow-md shadow-[#C7EABB]/40">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="rounded-full bg-[#F5FAE9] px-2 py-1 text-[0.65rem] font-semibold text-neutral-600">
+                      Landlord inbox
+                    </span>
+                    <Bell className="h-3.5 w-3.5 text-[#84B179]" />
+                  </div>
+                  <div className="mt-2 space-y-1">
+                    <p className="text-[0.8rem] font-semibold text-neutral-900">
+                      5 new applications
+                    </p>
+                    <p className="text-[0.7rem] text-neutral-500">
+                      Screening queued · Auto reminders on
+                    </p>
+                  </div>
+                </div>
+
+                {/* Stats tile */}
+                <div className="rf-card-soft relative -mt-4 flex flex-col justify-between rounded-3xl border border-[#E0EDC5] bg-gradient-to-br from-[#F9FCEB] via-white to-[#E8F5BD] p-3 shadow-md shadow-[#C7EABB]/50">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-[0.7rem] font-semibold text-neutral-600">
+                      Satisfaction
+                    </span>
+                    <Star className="h-3.5 w-3.5 fill-[#FACC15] text-[#EAB308]" />
+                  </div>
+                  <div className="mt-3 flex items-end justify-between">
+                    <p className="text-xl font-semibold text-neutral-900">4.7</p>
+                    <span className="text-[0.65rem] text-neutral-500">Avg rating</span>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
-        </section>
+        </MotionRevealSection>
 
-        {/* ── CITIES ────────────────────────────────────────────────────── */}
-        <section className="py-20 bg-white">
-          <div className="max-w-6xl mx-auto px-4 sm:px-6">
-            <div className="text-center mb-12">
-              <div className="inline-flex items-center gap-2 bg-blue-50 text-blue-600 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest mb-4">
-                <Globe size={13}/> Global Coverage
+        {/* ── STATS STRIP – ASYMMETRIC BENTO ───────────────────────────── */}
+        <MotionRevealSection delay={0.05}>
+          <div className="mx-auto max-w-6xl px-4 lg:px-0">
+            <div className="grid gap-4 md:grid-cols-[minmax(0,1.4fr),minmax(0,1fr)]">
+              <div className="rf-card flex items-center justify-between rounded-3xl bg-gradient-to-r from-[#F2F7E5] via-[#FFFFFF] to-[#E8F5BD] px-6 py-5">
+                <div>
+                  <p className="text-[0.7rem] font-semibold uppercase tracking-[0.26em] text-neutral-500">
+                    Trusted around the world
+                  </p>
+                  <p className="mt-2 text-base font-semibold text-neutral-900">
+                    Built for modern operators who want renting to feel like a premium product.
+                  </p>
+                </div>
+                <div className="hidden flex-col gap-1 text-right text-[0.75rem] text-neutral-500 sm:flex">
+                  {STATS.map((s) => (
+                    <div key={s.label} className="flex items-baseline justify-end gap-1">
+                      <span className="text-base font-semibold text-neutral-900">
+                        {s.value}
+                      </span>
+                      <span>{s.label}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
-              <h2 style={{fontFamily:"'Outfit',sans-serif", fontWeight:800, fontSize:'clamp(1.8rem,3vw,2.5rem)', letterSpacing:'-0.02em'}} className="text-gray-900 mb-3">
-                Rent Around the World
-              </h2>
-              <p className="text-gray-500 text-base max-w-md mx-auto leading-relaxed">
-                Explore millions of listings across 60+ countries. From studio apartments to luxury homes — find your next place in minutes.
-              </p>
+
+              <div className="rf-card-soft rounded-3xl bg-white/90 p-5">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-[#F2F7E5]">
+                    <Globe className="h-4 w-4 text-[#84B179]" />
+                  </div>
+                  <div className="space-y-0.5">
+                    <p className="text-[0.8rem] font-semibold text-neutral-900">
+                      Global-ready from day one
+                    </p>
+                    <p className="text-[0.7rem] text-neutral-500">
+                      Localized for major hubs with consistent, compliant workflows.
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-              {CITIES.map((city) => (
-                <Link key={city.name} href={`/browse?city=${city.name}`} className="city-card block">
-                  <img src={city.img} alt={city.name} loading="lazy"/>
-                  <div className="city-overlay">
-                    <div className="flex items-end justify-between">
-                      <div>
-                        <p style={{fontFamily:"'Outfit',sans-serif", fontWeight:700, fontSize:'1.1rem'}}>{city.name}</p>
-                        <p className="text-white/65 text-xs mt-0.5 flex items-center gap-1"><MapPin size={10}/>{city.count}</p>
+          </div>
+        </MotionRevealSection>
+
+        {/* ── CITIES – FLOATING GRID ───────────────────────────────────── */}
+        <MotionRevealSection className="py-20">
+          <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-0">
+            <div className="mb-10 flex flex-col items-start justify-between gap-6 md:flex-row md:items-end">
+              <div className="space-y-3">
+                <div className="inline-flex items-center gap-2 rounded-full bg-[#F2F7E5] px-4 py-1.5 text-[0.7rem] font-semibold uppercase tracking-[0.2em] text-neutral-600">
+                  <Globe size={13} />
+                  Global coverage
+                </div>
+                <div>
+                  <h2 className="text-h2 text-neutral-900">
+                    A calm layer over
+                    <br />
+                    chaotic rental markets.
+                  </h2>
+                  <p className="mt-2 max-w-md text-body text-neutral-600">
+                    Explore curated rental markets around the world. Tap into trusted inventory
+                    without losing the local nuance that matters.
+                  </p>
+                </div>
+              </div>
+
+              <div className="rounded-3xl border border-[#E0EDC5] bg-white/80 px-4 py-3 text-[0.8rem] text-neutral-600 shadow-sm">
+                <p className="font-semibold text-neutral-800">
+                  24 new markets added in the last year
+                </p>
+                <p className="text-[0.7rem] text-neutral-500">
+                  Your workflows stay identical while we handle the complexity.
+                </p>
+              </div>
+            </div>
+
+            <div className="grid gap-5 md:grid-cols-3">
+              {CITIES.map((city, idx) => (
+                <Link
+                  key={city.name}
+                  href={`/browse?city=${city.name}`}
+                  className={`group relative block overflow-hidden rounded-3xl border border-[#E0EDC5] bg-white/90 shadow-sm shadow-[#DCEAC4]/40 transition-transform duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] hover:-translate-y-2 hover:shadow-[0_24px_70px_rgba(148,163,120,0.55)] ${
+                    idx === 1 ? 'md:-mt-6' : idx === 2 ? 'md:mt-6' : ''
+                  }`}
+                >
+                  <div className="relative h-52 overflow-hidden">
+                    <img
+                      src={city.img}
+                      alt={city.name}
+                      loading="lazy"
+                      className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+                    />
+                    <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent" />
+                    <div className="absolute inset-x-0 bottom-0 p-3.5">
+                      <div className="flex items-end justify-between gap-2">
+                        <div>
+                          <p className="text-sm font-semibold text-white">
+                            {city.name}
+                          </p>
+                          <p className="mt-0.5 flex items-center gap-1 text-[0.7rem] font-medium text-white/80">
+                            <MapPin size={11} />
+                            {city.count}
+                          </p>
+                        </div>
+                        <span className="rounded-full bg-white/15 px-2 py-0.5 text-[0.65rem] font-semibold text-white backdrop-blur-sm ring-1 ring-white/30">
+                          {city.country}
+                        </span>
                       </div>
-                      <span className="bg-white/15 backdrop-blur-sm text-white text-[10px] font-bold px-2 py-0.5 rounded-full border border-white/20">{city.country}</span>
                     </div>
                   </div>
                 </Link>
               ))}
             </div>
-            <div className="text-center mt-10">
-              <Link href="/browse"
-                className="inline-flex items-center gap-2 px-7 py-3 rounded-2xl text-sm font-bold text-blue-700 border-2 border-blue-200 hover:bg-blue-50 transition-all">
-                View All Cities <ArrowRight size={15}/>
+
+            <div className="mt-10 flex justify-center">
+              <Link
+                href="/browse"
+                className="rf-btn rf-btn-secondary text-[0.75rem]"
+              >
+                View all markets
+                <ArrowRight size={15} />
               </Link>
             </div>
           </div>
-        </section>
+        </MotionRevealSection>
 
-        {/* ── TENANT / LANDLORD FEATURES ────────────────────────────────── */}
-        <section id="features" className="py-20 scroll-mt-16" style={{background:'#F8FAFF'}}>
-          <div className="max-w-6xl mx-auto px-4 sm:px-6">
-            <div className="text-center mb-10">
-              <h2 style={{fontFamily:"'Outfit',sans-serif", fontWeight:800, fontSize:'clamp(1.8rem,3vw,2.5rem)', letterSpacing:'-0.02em'}} className="text-gray-900 mb-3">
-                Built for Every Role
-              </h2>
-              <p className="text-gray-500 text-base max-w-sm mx-auto mb-8">
-                Whether you're searching for a home or managing properties — we've got you covered.
-              </p>
+        {/* ── TENANT / LANDLORD FEATURES – COLOR-SWITCHING TABS ────────── */}
+        <MotionRevealSection
+          id="features"
+          className="scroll-mt-20 py-20"
+        >
+          <div
+            className={`mx-auto max-w-6xl px-4 sm:px-6 lg:px-0`}
+          >
+            <div
+              className={`relative overflow-hidden rounded-[2rem] border bg-gradient-to-br p-6 shadow-[0_28px_90px_rgba(148,163,120,0.5)] transition-colors duration-500 ${
+                roleTab === 'tenant'
+                  ? 'from-[#F5FAE9] via-white to-[#E8F5BD] border-[#E0EDC5]'
+                  : 'from-[#DCEAC4] via-[#F5FAE9] to-[#C7EABB] border-[#C0DBA5]'
+              }`}
+            >
+              <div className="pointer-events-none absolute -left-24 top-0 h-56 w-56 rounded-full bg-[#E8F5BD] opacity-70 blur-3xl" />
+              <div className="pointer-events-none absolute -right-24 bottom-0 h-64 w-64 rounded-full bg-[#C7EABB] opacity-80 blur-3xl" />
 
-              {/* Role toggle */}
-              <div className="flex justify-center">
-                <div className="role-toggle-wrap">
-                  <div className="role-indicator" style={indicatorStyle}/>
-                  <button ref={tenantBtnRef}
-                    onClick={() => setRoleTab('tenant')}
-                    className={`role-btn ${roleTab === 'tenant' ? 'role-btn-active' : 'role-btn-inactive'}`}>
-                    🏠 Tenant
-                  </button>
-                  <button ref={landlordBtnRef}
-                    onClick={() => setRoleTab('landlord')}
-                    className={`role-btn ${roleTab === 'landlord' ? 'role-btn-active' : 'role-btn-inactive'}`}>
-                    🏢 Landlord
-                  </button>
+              <div className="relative flex flex-col gap-8 lg:flex-row">
+                <div className="flex-1 space-y-5">
+                  <div className="inline-flex items-center gap-2 rounded-full bg-white/70 px-3 py-1 text-[0.7rem] font-semibold uppercase tracking-[0.22em] text-neutral-600 ring-1 ring-[#E0EDC5]">
+                    <LayoutDashboard className="h-3.5 w-3.5 text-[#84B179]" />
+                    Role-specific workspaces
+                  </div>
+                  <div className="space-y-3">
+                    <h2 className="text-h2 text-neutral-900">
+                      Built for
+                      <span className="font-extrabold">
+                        {' '}
+                        {roleTab === 'tenant' ? 'tenants who expect calm.' : 'landlords who expect control.'}
+                      </span>
+                    </h2>
+                    <p className="max-w-md text-body text-neutral-600">
+                      Switch views to see how RentifyPro adapts instantly to tenants or landlords
+                      — from application flows to analytics.
+                    </p>
+                  </div>
+
+                  {/* Role toggle */}
+                  <div className="inline-flex rounded-full border border-[#E0EDC5] bg-white/80 p-1 shadow-sm shadow-[#DCEAC4]/50">
+                    <div
+                      className="relative flex gap-1 overflow-hidden rounded-full"
+                    >
+                      <div
+                        className="absolute inset-y-1 rounded-full bg-[#F2F7E5] transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
+                        style={{
+                          left: indicatorStyle.left,
+                          width: indicatorStyle.width,
+                        }}
+                      />
+                      <button
+                        ref={tenantBtnRef}
+                        type="button"
+                        onClick={() => setRoleTab('tenant')}
+                        className={`relative z-10 flex items-center gap-1 rounded-full px-4 py-2 text-[0.75rem] font-semibold transition-colors ${
+                          roleTab === 'tenant'
+                            ? 'text-neutral-900'
+                            : 'text-neutral-500 hover:text-neutral-700'
+                        }`}
+                      >
+                        🏠 Tenant
+                      </button>
+                      <button
+                        ref={landlordBtnRef}
+                        type="button"
+                        onClick={() => setRoleTab('landlord')}
+                        className={`relative z-10 flex items-center gap-1 rounded-full px-4 py-2 text-[0.75rem] font-semibold transition-colors ${
+                          roleTab === 'landlord'
+                            ? 'text-neutral-900'
+                            : 'text-neutral-500 hover:text-neutral-700'
+                        }`}
+                      >
+                        🏢 Landlord
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Auth-aware CTA specific to this section */}
+                  <div className="mt-6 flex flex-wrap gap-3">
+                    {!user ? (
+                      <Link
+                        href="/register"
+                        className="rf-btn rf-btn-primary text-[0.8rem]"
+                      >
+                        Get started free
+                        <ArrowRight size={15} />
+                      </Link>
+                    ) : (
+                      <Link
+                        href="/dashboard"
+                        className="rf-btn rf-btn-secondary text-[0.8rem]"
+                      >
+                        Go to dashboard
+                        <LayoutDashboard size={15} />
+                      </Link>
+                    )}
+                    <Link
+                      href="/browse"
+                      className="rf-btn rf-btn-ghost text-[0.8rem]"
+                    >
+                      Preview listings
+                    </Link>
+                  </div>
+                </div>
+
+                {/* Features grid – re-render with color theme */}
+                <div className="relative flex-1">
+                  <div
+                    key={roleTab}
+                    className="grid grid-cols-1 gap-4 sm:grid-cols-2"
+                  >
+                    {features.map((f, i) => {
+                      const Icon = f.icon;
+                      return (
+                        <div
+                          key={f.title}
+                          style={{ animationDelay: `${i * 70}ms` }}
+                          className="rf-hover-card rf-fade-in-stagger rounded-2xl border border-[#E0EDC5] bg-white/80 p-4 text-sm shadow-sm shadow-[#DCEAC4]/40"
+                        >
+                          <div
+                            className={`mb-3 flex h-10 w-10 items-center justify-center rounded-2xl ${
+                              roleTab === 'tenant'
+                                ? 'bg-[#EAF5D6]'
+                                : 'bg-[#D8ECC3]'
+                            }`}
+                          >
+                            <Icon
+                              size={18}
+                              className="text-[#84B179]"
+                            />
+                          </div>
+                          <h3 className="mb-1 text-[0.9rem] font-semibold text-neutral-900">
+                            {f.title}
+                          </h3>
+                          <p className="text-[0.75rem] leading-relaxed text-neutral-600">
+                            {f.desc}
+                          </p>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
               </div>
             </div>
-
-            {/* Features grid — re-renders with animation on tab switch */}
-            <div key={roleTab} className="features-grid-enter grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-              {features.map((f, i) => {
-                const Icon = f.icon;
-                return (
-                  <div key={i} className="feature-card" style={{animationDelay: `${i * 55}ms`}}>
-                    <div style={{width:48,height:48,borderRadius:14,background:f.bg,display:'flex',alignItems:'center',justifyContent:'center',marginBottom:16}}>
-                      <Icon size={22} style={{color:f.color}}/>
-                    </div>
-                    <h3 style={{fontFamily:"'Outfit',sans-serif", fontWeight:700, fontSize:'1rem', color:'#0F172A', marginBottom:8}}>{f.title}</h3>
-                    <p style={{color:'#64748B', fontSize:'0.875rem', lineHeight:1.65}}>{f.desc}</p>
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* CTA under features */}
-            <div className="text-center mt-10">
-              <Link href="/register"
-                className="inline-flex items-center gap-2 px-8 py-3.5 rounded-2xl text-white text-sm font-bold shadow-lg shadow-blue-200 transition-all hover:brightness-110 active:scale-95"
-                style={{background:'linear-gradient(135deg,#1D4ED8,#3B82F6)'}}>
-                Get Started Free <ArrowRight size={15}/>
-              </Link>
-            </div>
           </div>
-        </section>
+        </MotionRevealSection>
 
-        {/* ── HOW IT WORKS ──────────────────────────────────────────────── */}
-        <section id="how-it-works" className="py-20 bg-white scroll-mt-16">
-          <div className="max-w-5xl mx-auto px-4 sm:px-6">
-            <div className="text-center mb-14">
-              <h2 style={{fontFamily:"'Outfit',sans-serif", fontWeight:800, fontSize:'clamp(1.8rem,3vw,2.5rem)', letterSpacing:'-0.02em'}} className="text-gray-900 mb-3">
-                From Search to Keys — In Minutes
-              </h2>
-              <p className="text-gray-500 max-w-sm mx-auto text-base">The entire rental lifecycle, digitized end to end.</p>
+        {/* ── HOW IT WORKS – STEPPED RAIL ──────────────────────────────── */}
+        <MotionRevealSection
+          id="how-it-works"
+          className="scroll-mt-24 py-20"
+        >
+          <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-0">
+            <div className="mb-12 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+              <div className="space-y-3">
+                <h2 className="text-h2 text-neutral-900">
+                  From search to signed keys
+                  <br />
+                  in three calm steps.
+                </h2>
+                <p className="max-w-md text-body text-neutral-600">
+                  Every workflow is opinionated enough to be fast, but flexible enough to mirror
+                  how your team already works.
+                </p>
+              </div>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+            <div className="grid gap-8 md:grid-cols-3">
               {[
-                { n:'01', title:'Search & Discover',   desc:'Browse verified listings globally. Filter by city, price, type, and amenities. AI matches you with the best options.', icon: Search },
-                { n:'02', title:'Apply & Sign',         desc:'Submit applications in one click. Landlords review, accept, and send digital agreements — no paper, no delays.', icon: FileText },
-                { n:'03', title:'Pay & Move In',        desc:'Security deposit and rent collected securely. Automated monthly schedules, receipts, and real-time tracking.', icon: Key },
-              ].map((step) => {
+                {
+                  n: '01',
+                  title: 'Search & discover',
+                  desc: 'Verified listings, AI-powered recommendations, and filters that actually map to how you search.',
+                  icon: Search,
+                },
+                {
+                  n: '02',
+                  title: 'Apply & sign',
+                  desc: 'Tenant applications, screening, and digital agreements live in a single trackable thread.',
+                  icon: FileText,
+                },
+                {
+                  n: '03',
+                  title: 'Pay & stay synced',
+                  desc: 'Rent schedules, receipts, and maintenance all tied back to the same live agreement.',
+                  icon: Key,
+                },
+              ].map((step, idx) => {
                 const Icon = step.icon;
                 return (
-                  <div key={step.n} className="text-center">
-                    <div className="how-step-num mb-2">{step.n}</div>
-                    <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                      <Icon size={20} className="text-blue-600"/>
+                  <div
+                    key={step.n}
+                    className="relative space-y-3 rounded-3xl border border-[#E0EDC5] bg-white/80 p-5 shadow-sm shadow-[#DCEAC4]/40"
+                  >
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="text-[0.8rem] font-semibold text-neutral-500">
+                        Step {step.n}
+                      </span>
+                      <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-[#F2F7E5]">
+                        <Icon className="h-4 w-4 text-[#84B179]" />
+                      </div>
                     </div>
-                    <h3 style={{fontFamily:"'Outfit',sans-serif", fontWeight:700}} className="text-gray-900 text-lg mb-2">{step.title}</h3>
-                    <p className="text-gray-500 text-sm leading-relaxed max-w-xs mx-auto">{step.desc}</p>
+                    <h3 className="text-[1rem] font-semibold text-neutral-900">
+                      {step.title}
+                    </h3>
+                    <p className="text-[0.8rem] leading-relaxed text-neutral-600">
+                      {step.desc}
+                    </p>
+                    {idx < 2 && (
+                      <div className="pointer-events-none absolute -right-2 top-1/2 hidden h-px w-5 bg-gradient-to-r from-[#C7EABB] to-transparent md:block" />
+                    )}
                   </div>
                 );
               })}
             </div>
           </div>
-        </section>
+        </MotionRevealSection>
 
-        {/* ── TRUST SIGNALS ─────────────────────────────────────────────── */}
-        <section style={{background:'#F1F5FF'}} className="py-14">
-          <div className="max-w-5xl mx-auto px-4 text-center">
-            <p className="text-gray-400 text-xs font-bold uppercase tracking-widest mb-8">Trusted Worldwide</p>
-            <div className="flex flex-wrap justify-center gap-8 items-center">
+        {/* ── TRUST SIGNALS – LIGHT BAND ───────────────────────────────── */}
+        <MotionRevealSection className="py-14">
+          <div className="mx-auto max-w-5xl px-4 text-center sm:px-6 lg:px-0">
+            <p className="text-micro mb-6 text-neutral-500">
+              TRUSTED BY TEAMS WHO CARE ABOUT THE EXPERIENCE
+            </p>
+            <div className="flex flex-wrap items-center justify-center gap-8 text-[0.8rem] font-medium text-neutral-600">
               {[
-                { icon: ShieldCheck, text: 'Verified Listings & Landlords' },
-                { icon: Star,        text: '4.7★ Average Rating' },
-                { icon: Globe,       text: '60+ Countries Covered' },
-                { icon: UserCheck,   text: 'Tenant Screening Built-in' },
+                { icon: ShieldCheck, text: 'Verified listings & landlords' },
+                { icon: Star, text: '4.7★ average satisfaction' },
+                { icon: Globe, text: '60+ countries supported' },
+                { icon: UserCheck, text: 'In-line tenant screening' },
               ].map(({ icon: Icon, text }) => (
-                <div key={text} className="flex items-center gap-2 text-gray-600 text-sm font-semibold">
-                  <Icon size={18} className="text-blue-500"/> {text}
+                <div
+                  key={text}
+                  className="inline-flex items-center gap-2 rounded-full bg-white/70 px-4 py-2 shadow-sm shadow-[#DCEAC4]/40"
+                >
+                  <Icon size={16} className="text-[#84B179]" />
+                  <span>{text}</span>
                 </div>
               ))}
             </div>
           </div>
-        </section>
+        </MotionRevealSection>
 
-        {/* ── CTA ───────────────────────────────────────────────────────── */}
-        {!user && (
-          <section className="cta-section py-20">
-            <div className="max-w-3xl mx-auto px-4 text-center" style={{position:'relative',zIndex:1}}>
-              <h2 style={{fontFamily:"'Outfit',sans-serif", fontWeight:800, fontSize:'clamp(1.8rem,3vw,2.2rem)', color:'white', marginBottom:'1rem', letterSpacing:'-0.02em'}}>
-                Ready to simplify your rental?
-              </h2>
-              <p className="text-white/75 mb-8 text-base">Join 500,000+ landlords and tenants already on RentifyPro.</p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Link href="/register"
-                  className="px-9 py-4 bg-white text-blue-700 font-bold rounded-2xl shadow-2xl hover:bg-blue-50 transition-all text-sm">
-                  Get Started Free
-                </Link>
-                <Link href="/browse"
-                  className="px-9 py-4 border-2 border-white/30 text-white font-bold rounded-2xl hover:bg-white/10 transition-all text-sm">
-                  Browse Listings
-                </Link>
+        {/* ── CTA – LOGGED OUT / IN VARIANTS ───────────────────────────── */}
+        <MotionRevealSection className="py-16">
+          {!user && (
+            <section className="relative">
+              <div className="mx-auto max-w-3xl px-4 text-center sm:px-6 lg:px-0">
+                <div className="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-[#A2CB8B] via-[#C7EABB] to-[#E8F5BD] px-6 py-10 shadow-[0_28px_90px_rgba(148,163,120,0.7)]">
+                  <div className="pointer-events-none absolute -left-10 top-0 h-32 w-32 rounded-full bg-white/50 blur-2xl" />
+                  <div className="pointer-events-none absolute -right-16 bottom-0 h-40 w-40 rounded-full bg-white/40 blur-3xl" />
+                  <div className="relative space-y-5">
+                    <h2 className="text-h2 text-neutral-900">
+                      Ready to make renting feel premium?
+                    </h2>
+                    <p className="mx-auto max-w-md text-body text-neutral-700">
+                      Join thousands of tenants and landlords who already manage their entire
+                      rental lifecycle inside RentifyPro.
+                    </p>
+                    <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
+                      <Link
+                        href="/register"
+                        className="rf-btn rf-btn-primary w-full justify-center text-[0.8rem] sm:w-auto"
+                      >
+                        Get started free
+                      </Link>
+                      <Link
+                        href="/browse"
+                        className="rf-btn rf-btn-secondary w-full justify-center text-[0.8rem] sm:w-auto"
+                      >
+                        Browse listings
+                      </Link>
+                    </div>
+                  </div>
+                </div>
               </div>
-            </div>
-          </section>
-        )}
+            </section>
+          )}
 
-        {user && (
-          <section className="cta-section py-16">
-            <div className="max-w-2xl mx-auto px-4 text-center" style={{position:'relative',zIndex:1}}>
-              <h2 style={{fontFamily:"'Outfit',sans-serif", fontWeight:800, color:'white', marginBottom:'0.75rem', fontSize:'1.8rem', letterSpacing:'-0.02em'}}>
-                Welcome back, {user.name?.split(' ')[0]}!
-              </h2>
-              <p className="text-white/70 mb-6 text-sm">Head to your dashboard to manage your properties and leases.</p>
-              <Link href="/dashboard"
-                className="inline-flex items-center gap-2 px-8 py-3.5 bg-white text-blue-700 font-bold rounded-2xl shadow-xl hover:bg-blue-50 transition-all text-sm">
-                <LayoutDashboard size={15}/> Go to Dashboard
-              </Link>
-            </div>
-          </section>
-        )}
+          {user && (
+            <section className="relative">
+              <div className="mx-auto max-w-3xl px-4 text-center sm:px-6 lg:px-0">
+                <div className="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-[#F5FAE9] via-white to-[#E8F5BD] px-6 py-10 shadow-[0_22px_70px_rgba(148,163,120,0.5)] ring-1 ring-[#E0EDC5]">
+                  <div className="pointer-events-none absolute -left-10 top-0 h-32 w-32 rounded-full bg-[#C7EABB]/60 blur-2xl" />
+                  <div className="pointer-events-none absolute -right-16 bottom-0 h-40 w-40 rounded-full bg-[#E8F5BD]/70 blur-3xl" />
+                  <div className="relative space-y-4">
+                    <h2 className="text-h2 text-neutral-900">
+                      Welcome back, {user.name?.split(' ')[0]}.
+                    </h2>
+                    <p className="mx-auto max-w-md text-body text-neutral-600">
+                      Continue where you left off — your applications, leases, and payments are
+                      already synced.
+                    </p>
+                    <Link
+                      href="/dashboard"
+                      className="rf-btn rf-btn-primary inline-flex items-center justify-center text-[0.8rem]"
+                    >
+                      <LayoutDashboard size={16} />
+                      Go to dashboard
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            </section>
+          )}
+        </MotionRevealSection>
       </main>
 
       <Footer />

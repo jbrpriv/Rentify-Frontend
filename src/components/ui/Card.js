@@ -6,7 +6,7 @@ export default function Card({ className, children, ...props }) {
   return (
     <div
       className={clsx(
-        'rf-card rf-hover-card bg-slate-900/80 border border-slate-700/60 text-slate-50',
+        'rf-card rf-hover-card border border-[#E0EDC5] text-neutral-900',
         className
       )}
       {...props}
