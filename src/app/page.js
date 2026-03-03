@@ -95,7 +95,7 @@ export default function LandingPage() {
 
         {/* ── HERO – CENTERED LAYOUT ─────────────────────────────────── */}
         <MotionRevealSection className="relative">
-          <div className="mx-auto flex max-w-6xl flex-col items-center justify-center text-center px-4 pb-16 pt-6 lg:px-0">
+          <div className="mx-auto flex max-w-7xl flex-col items-center justify-center text-center px-4 pb-20 pt-8 lg:px-0">
             
             {/* Pill Badge */}
             <div className="inline-flex items-center gap-2 rounded-full border border-[#0992C2]/20 bg-white/80 px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.25em] text-neutral-500 shadow-sm shadow-[#0992C2]/20 backdrop-blur">
@@ -104,7 +104,7 @@ export default function LandingPage() {
             </div>
 
             {/* Headings */}
-            <div className="mt-8 space-y-4">
+            <div className="mt-10 space-y-5">
               <h1 className="text-hero text-neutral-900">
                 Renting, reimagined in
                 <br className="hidden md:block" />
@@ -112,27 +112,27 @@ export default function LandingPage() {
                   {' '}one calm workspace.
                 </span>
               </h1>
-              <p className="mx-auto max-w-2xl text-body text-neutral-600">
+              <p className="mx-auto max-w-3xl text-[1.02rem] leading-relaxed text-neutral-600">
                 RentifyPro replaces scattered calls, PDFs, and spreadsheets with a single
                 premium hub for tenants and landlords — from discovery to signed keys.
               </p>
             </div>
 
             {/* Centered Search & Stats Grid */}
-            <div className="mt-10 grid w-full max-w-3xl gap-4 md:grid-cols-[minmax(0,1.5fr),minmax(0,1fr)] text-left">
+            <div className="mt-12 grid w-full max-w-5xl gap-5 md:grid-cols-[minmax(0,1.6fr),minmax(0,1fr)] text-left">
               
               {/* Search Card */}
               <div className="rf-card-soft relative overflow-hidden">
-                <div className="pointer-events-none absolute -left-6 -top-10 h-28 w-28 rounded-full bg-[#F6E7BC] blur-2xl" />
-                <div className="pointer-events-none absolute -right-10 bottom-0 h-28 w-28 rounded-full bg-[#0AC4E0]/40 blur-2xl" />
+                <div className="pointer-events-none absolute -left-10 -top-16 h-32 w-32 rounded-full bg-[#F6E7BC] blur-3xl" />
+                <div className="pointer-events-none absolute -right-16 bottom-0 h-36 w-36 rounded-full bg-[#0AC4E0]/40 blur-3xl" />
                 
-                <div className="relative space-y-3 p-4 md:p-5">
-                  <div className="inline-flex items-center gap-1 rounded-full bg-white/70 px-2 py-1 text-[0.65rem] font-medium text-neutral-500 ring-1 ring-[#0992C2]/20">
-                    <CheckCircle2 className="h-3 w-3 text-[#0992C2]" />
+                <div className="relative space-y-4 p-5 md:p-6">
+                  <div className="inline-flex items-center gap-1.5 rounded-full bg-white/80 px-3 py-1.5 text-[0.72rem] font-semibold uppercase tracking-[0.22em] text-neutral-500 ring-1 ring-[#0992C2]/25">
+                    <CheckCircle2 className="h-3.5 w-3.5 text-[#0992C2]" />
                     <span>Verified listings & digital leases</span>
                   </div>
 
-                  <div className="flex items-center gap-1 rounded-full bg-[#0992C2]/10 p-1 text-[0.7rem] font-semibold text-neutral-600">
+                  <div className="flex items-center gap-1.5 rounded-full bg-[#0992C2]/10 p-1.5 text-[0.78rem] font-semibold text-neutral-700">
                     {['Rent', 'Buy'].map((t) => (
                       <button
                         key={t}
@@ -140,7 +140,7 @@ export default function LandingPage() {
                         onClick={() => setTab(t.toLowerCase())}
                         className={`flex-1 rounded-full px-3 py-1.5 transition-all ${
                           tab === t.toLowerCase()
-                            ? 'bg-white text-neutral-900 shadow-sm shadow-[#0992C2]/20'
+                            ? 'bg-white text-neutral-900 shadow-sm shadow-[#0992C2]/25'
                             : 'text-neutral-500 hover:text-neutral-800'
                         }`}
                       >
@@ -151,24 +151,24 @@ export default function LandingPage() {
 
                   <form
                     onSubmit={handleSearch}
-                    className="flex items-center gap-2 rounded-2xl border border-[#0992C2]/20 bg-white/90 px-3 py-2.5 shadow-sm shadow-[#0AC4E0]/30 backdrop-blur"
+                    className="flex items-center gap-3 rounded-2xl border border-[#0992C2]/20 bg-white/95 px-4 py-3 shadow-sm shadow-[#0AC4E0]/40 backdrop-blur"
                   >
-                    <Search className="h-4 w-4 text-[#0992C2]" />
+                    <Search className="h-5 w-5 text-[#0992C2]" />
                     <input
                       value={query}
                       onChange={(e) => setQuery(e.target.value)}
                       placeholder="Search by city, address, or ZIP"
-                      className="flex-1 bg-transparent text-sm text-neutral-800 placeholder:text-neutral-400 focus:outline-none"
+                      className="flex-1 bg-transparent text-[0.9rem] text-neutral-800 placeholder:text-neutral-400 focus:outline-none"
                     />
                     <button
                       type="submit"
-                      className="rf-btn rf-btn-primary hidden text-[0.7rem] md:inline-flex"
+                      className="rf-btn rf-btn-primary hidden text-[0.78rem] md:inline-flex"
                     >
                       Search
                     </button>
                   </form>
 
-                  <div className="flex flex-wrap gap-2 text-[0.7rem] text-neutral-500">
+                  <div className="flex flex-wrap gap-2 text-[0.78rem] text-neutral-500">
                     {['Verified landlords', 'Secure payments', 'AI match suggestions'].map(
                       (item) => (
                         <span
@@ -185,13 +185,13 @@ export default function LandingPage() {
               </div>
 
               {/* Live Activity Stat */}
-              <div className="rf-card flex flex-col justify-between min-h-[120px] rounded-2xl border border-[#0992C2]/20 bg-gradient-to-br from-[#F6E7BC]/40 via-white to-[#0AC4E0]/10 p-4 md:p-5">
+              <div className="rf-card flex flex-col justify-between min-h-[150px] rounded-3xl border border-[#0992C2]/25 bg-gradient-to-br from-[#F6E7BC]/45 via-white to-[#0AC4E0]/15 p-5 md:p-6">
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <p className="text-[0.7rem] font-semibold uppercase tracking-[0.22em] text-neutral-500">
+                    <p className="text-[0.78rem] font-semibold uppercase tracking-[0.24em] text-neutral-500">
                       Live activity
                     </p>
-                    <p className="mt-1 text-sm font-semibold text-neutral-900 leading-tight">
+                    <p className="mt-1 text-[0.98rem] font-semibold text-neutral-900 leading-tight">
                       Applications processed in the last 24h
                     </p>
                   </div>
@@ -199,10 +199,10 @@ export default function LandingPage() {
                     <Home className="h-5 w-5 text-[#0992C2]" />
                   </div>
                 </div>
-                <div className="mt-4 flex items-end justify-between">
-                  <p className="text-3xl font-bold text-neutral-900 tracking-tight">8,412</p>
-                  <span className="inline-flex items-center gap-1 rounded-full bg-white/80 px-2 py-1 text-[0.65rem] font-medium text-[#0B2D72]">
-                    <TrendingUp className="h-3 w-3" />
+                <div className="mt-5 flex items-end justify-between">
+                  <p className="text-4xl font-extrabold text-neutral-900 tracking-tight">8,412</p>
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-white/90 px-3 py-1.5 text-[0.72rem] font-semibold text-[#0B2D72]">
+                    <TrendingUp className="h-3.5 w-3.5" />
                     +18% this week
                   </span>
                 </div>

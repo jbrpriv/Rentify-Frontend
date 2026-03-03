@@ -202,38 +202,38 @@ export default function SuperLoginPage() {
           <h1 className="mt-6 text-4xl font-black tracking-tight">
             RentifyPro
           </h1>
-          <p className="mt-2 text-sm text-cyan-50/90">
+          <p className="mt-2 text-sm text-cyan-50">
             Internal control center for agreements, risk and oversight.
           </p>
         </div>
 
         <div className="space-y-4">
           <div className="rounded-2xl bg-white/10 p-4 backdrop-blur-sm">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-cyan-50/80">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-cyan-100">
               Security snapshot
             </p>
             <div className="mt-3 grid grid-cols-3 gap-3 text-sm">
               <div>
                 <p className="text-lg font-extrabold leading-none">99.9%</p>
-                <p className="mt-1 text-[11px] text-cyan-50/80">
+                <p className="mt-1 text-[11px] text-cyan-100/90">
                   Uptime
                 </p>
               </div>
               <div>
                 <p className="text-lg font-extrabold leading-none">256-bit</p>
-                <p className="mt-1 text-[11px] text-cyan-50/80">
+                <p className="mt-1 text-[11px] text-cyan-100/90">
                   Encryption
                 </p>
               </div>
               <div>
                 <p className="text-lg font-extrabold leading-none">24/7</p>
-                <p className="mt-1 text-[11px] text-cyan-50/80">
+                <p className="mt-1 text-[11px] text-cyan-100/90">
                   Monitoring
                 </p>
               </div>
             </div>
           </div>
-          <p className="text-[11px] text-cyan-50/80">
+          <p className="text-[11px] text-cyan-100/90">
             Access is logged and audited. Use only if you are an authorized admin or legal reviewer.
           </p>
         </div>

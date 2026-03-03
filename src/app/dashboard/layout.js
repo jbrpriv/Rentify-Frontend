@@ -249,30 +249,30 @@ export default function DashboardLayout({ children }) {
                       delay: 0.04 * index,
                       ease: [0.21, 0.6, 0.35, 1],
                     }}
-                    className={`group mb-0.5 flex w-full items-center justify-between rounded-2xl px-3 py-2.5 text-[0.78rem] font-semibold transition-all ${
+                    className={`group mb-0.5 flex w-full items-center justify-between rounded-2xl px-3 py-2.5 text-[0.8rem] font-semibold transition-all ${
                       isActive
-                        ? 'bg-[#E8F5BD] text-neutral-900 shadow-sm shadow-[#C7EABB]'
-                        : 'text-neutral-500 hover:bg-[#F2F7E5] hover:text-neutral-900'
+                        ? 'bg-[#E6F4F8] text-neutral-900 shadow-sm shadow-[#0992C2]/25'
+                        : 'text-neutral-500 hover:bg-[#F0F8FA] hover:text-neutral-900'
                     }`}
                   >
                     <span className="flex items-center gap-2">
                       <span
-                        className={`flex h-7 w-7 items-center justify-center rounded-2xl border ${
+                        className={`flex h-8 w-8 items-center justify-center rounded-2xl border ${
                           isActive
-                            ? 'border-[#A2CB8B] bg-white'
-                            : 'border-transparent bg-white/70 group-hover:border-[#E0EDC5]'
+                            ? 'border-[#0992C2] bg-white'
+                            : 'border-transparent bg-white/70 group-hover:border-[#99E0F2]'
                         }`}
                       >
                         <Icon
                           className={`h-3.5 w-3.5 ${
-                            isActive ? 'text-[#84B179]' : 'text-neutral-500'
+                            isActive ? 'text-[#0992C2]' : 'text-neutral-500'
                           }`}
                         />
                       </span>
                       {item.name}
                     </span>
                     {count > 0 && (
-                      <span className="inline-flex min-w-[18px] items-center justify-center rounded-full bg-[#84B179] px-1 text-[10px] font-bold text-white">
+                      <span className="inline-flex min-w-[18px] items-center justify-center rounded-full bg-[#0992C2] px-1 text-[10px] font-bold text-white">
                         {count > 9 ? '9+' : count}
                       </span>
                     )}
