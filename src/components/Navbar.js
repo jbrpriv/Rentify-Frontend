@@ -69,7 +69,7 @@ export default function Navbar() {
         {/* Logo + primary links */}
         <div className="flex items-center gap-8">
           <Link href="/" className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-tr from-sky-500 to-indigo-500 shadow-soft">
+            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-tr from-sky-500 to-indigo-500 shadow-xl">
               <Building2 className="h-4 w-4 text-white" />
             </div>
             <div className="flex flex-col">
