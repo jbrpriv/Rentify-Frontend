@@ -36,7 +36,7 @@ const NAV_BY_ROLE = {
     { name: 'Profile',     href: '/dashboard/profile',     icon: User },
   ],
   admin: [
-    { name: 'Overview',    href: '/dashboard',                  icon: LayoutDashboard },
+    { name: 'Overview',    href: '/dashboard',                 icon: LayoutDashboard },
     { name: 'Stats',       href: '/dashboard/admin',            icon: BarChart2 },
     { name: 'Users',       href: '/dashboard/admin/users',      icon: Users },
     { name: 'Agreements',  href: '/dashboard/admin/agreements', icon: FileText },
@@ -210,7 +210,8 @@ export default function DashboardLayout({ children }) {
             initial={{ x: -40, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
             transition={{ duration: 0.5, ease: [0.21, 0.8, 0.3, 1] }}
-            className="hidden w-64 shrink-0 flex-col rounded-3xl bg-white/85 p-4 shadow-[0_22px_70px_rgba(11,45,114,0.35)] ring-1 ring-[#0992C2]/15 lg:flex"
+            // Added: sticky, top-28, self-start, max-h, and overflow-y-auto
+            className="sticky top-28 self-start max-h-[calc(100vh-8rem)] overflow-y-auto hidden w-64 shrink-0 flex-col rounded-3xl bg-white/85 p-4 shadow-[0_22px_70px_rgba(11,45,114,0.35)] ring-1 ring-[#0992C2]/15 lg:flex custom-scrollbar"
           >
             <div className="mb-4 flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-[#0992C2] to-[#0B2D72] text-white font-semibold">

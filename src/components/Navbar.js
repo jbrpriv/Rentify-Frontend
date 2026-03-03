@@ -39,7 +39,8 @@ export default function Navbar() {
         ? 'bg-transparent'
         : 'bg-white/95 backdrop-blur-xl shadow-sm border-b border-black/5'
     }`}>
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-3.5">
+      {/* Changed: removed max-w-7xl and mx-auto, added w-full and responsive padding */}
+      <div className="flex w-full items-center justify-between px-6 py-3.5 md:px-12 lg:px-16">
 
         {/* Logo + Nav Links */}
         <div className="flex items-center gap-8">
