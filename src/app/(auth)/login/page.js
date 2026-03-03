@@ -128,7 +128,8 @@ export default function LoginPage() {
   return (
     <div className="flex min-h-screen flex-col bg-transparent">
       <div className="flex flex-1 items-center justify-center px-4 py-16 sm:px-8">
-        <div className="mx-auto grid w-full max-w-6xl items-center gap-10 md:grid-cols-[minmax(0,1.1fr),minmax(0,1.1fr)]">
+        {/* FIX: Changed md:grid-cols-[minmax(...)] to md:grid-cols-2 */}
+        <div className="mx-auto grid w-full max-w-6xl items-center gap-10 md:grid-cols-2 lg:gap-16">
 
           {/* Left: brand story */}
           <div className="hidden md:block">
@@ -169,7 +170,7 @@ export default function LoginPage() {
           </div>
 
           {/* Right: glass login card */}
-          <div className="rf-glass-dark rf-fade-in-up w-full max-w-md justify-self-start px-8 py-9">
+          <div className="rf-glass-dark rf-fade-in-up w-full max-w-md md:justify-self-end px-8 py-9">
             <div className="mb-8 text-center md:text-left">
               <p className="text-micro text-slate-400">Welcome back</p>
               <h2 className="text-h2 mt-1 bg-gradient-to-r from-slate-50 via-sky-100 to-slate-200 bg-clip-text text-transparent">
@@ -323,161 +324,161 @@ export default function LoginPage() {
 
             {/* 2FA */}
             {needs2FA && (
-          <form onSubmit={handle2FASubmit} className="space-y-6">
-            <div className="text-center">
-              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-600/20">
-                <ShieldCheck className="h-7 w-7 text-indigo-300" />
-              </div>
-              <h3 className="text-h3 text-slate-50">Two-Factor Auth</h3>
-              <p className="mt-1 text-xs text-slate-400">
-                Enter the 6‑digit code from your authenticator app.
-              </p>
-            </div>
-            <input
-              type="text"
-              inputMode="numeric"
-              pattern="[0-9]*"
-              maxLength={6}
-              required
-              value={totp}
-              onChange={(e) => setTotp(e.target.value.replace(/\D/g, ''))}
-              placeholder="000000"
-              className="w-full rounded-2xl border border-slate-700 bg-slate-900/80 py-4 text-center text-3xl font-black tracking-[0.5em] text-slate-50 shadow-sm outline-none ring-1 ring-slate-800 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/70"
-            />
-            <Button
-              type="submit"
-              variant="primary"
-              disabled={totpLoading || totp.length < 6}
-              className="w-full justify-center rounded-2xl py-3.5"
-            >
-              {totpLoading ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  Verifying…
-                </>
-              ) : (
-                'Verify & Sign in'
-              )}
-            </Button>
-            <button
-              type="button"
-              onClick={() => {
-                setNeeds2FA(false);
-                setError('');
-              }}
-              className="w-full text-xs text-slate-500 hover:text-slate-300"
-            >
-              ← Back to login
-            </button>
-          </form>
+              <form onSubmit={handle2FASubmit} className="space-y-6">
+                <div className="text-center">
+                  <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-600/20">
+                    <ShieldCheck className="h-7 w-7 text-indigo-300" />
+                  </div>
+                  <h3 className="text-h3 text-slate-50">Two-Factor Auth</h3>
+                  <p className="mt-1 text-xs text-slate-400">
+                    Enter the 6‑digit code from your authenticator app.
+                  </p>
+                </div>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  maxLength={6}
+                  required
+                  value={totp}
+                  onChange={(e) => setTotp(e.target.value.replace(/\D/g, ''))}
+                  placeholder="000000"
+                  className="w-full rounded-2xl border border-slate-700 bg-slate-900/80 py-4 text-center text-3xl font-black tracking-[0.5em] text-slate-50 shadow-sm outline-none ring-1 ring-slate-800 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/70"
+                />
+                <Button
+                  type="submit"
+                  variant="primary"
+                  disabled={totpLoading || totp.length < 6}
+                  className="w-full justify-center rounded-2xl py-3.5"
+                >
+                  {totpLoading ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Verifying…
+                    </>
+                  ) : (
+                    'Verify & Sign in'
+                  )}
+                </Button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setNeeds2FA(false);
+                    setError('');
+                  }}
+                  className="w-full text-xs text-slate-500 hover:text-slate-300"
+                >
+                  ← Back to login
+                </button>
+              </form>
             )}
 
             {/* Email Verification Prompt */}
             {needsEmailVerify && (
-          <div className="space-y-5">
-            <div className="text-center">
-              <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-600/20">
-                <Mail className="h-7 w-7 text-indigo-200" />
+              <div className="space-y-5">
+                <div className="text-center">
+                  <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-600/20">
+                    <Mail className="h-7 w-7 text-indigo-200" />
+                  </div>
+                  <h3 className="text-h3 text-slate-50">Verify your email</h3>
+                  <p className="mt-1 text-xs text-slate-400">
+                    Your email address is not yet verified. Paste the verification
+                    token from your inbox.
+                  </p>
+                </div>
+                <form onSubmit={handleVerifyEmail} className="space-y-4">
+                  <TextField
+                    type="text"
+                    required
+                    value={emailToken}
+                    onChange={(e) => setEmailToken(e.target.value.trim())}
+                    placeholder="Paste verification token"
+                  />
+                  <Button
+                    type="submit"
+                    variant="primary"
+                    disabled={loading || !emailToken}
+                    className="w-full justify-center rounded-2xl py-3.5"
+                  >
+                    {loading ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <>
+                        <CheckCircle className="h-4 w-4" />
+                        Verify email
+                      </>
+                    )}
+                  </Button>
+                </form>
+                <button
+                  onClick={handleResendEmailVerification}
+                  disabled={sending}
+                  className="w-full text-xs text-slate-500 hover:text-sky-300"
+                >
+                  {sending ? 'Sending…' : 'Resend verification email'}
+                </button>
+                <button
+                  onClick={() => {
+                    setNeedsEmailVerify(false);
+                    setError('');
+                  }}
+                  className="w-full text-xs text-slate-500 hover:text-slate-300"
+                >
+                  ← Back to login
+                </button>
               </div>
-              <h3 className="text-h3 text-slate-50">Verify your email</h3>
-              <p className="mt-1 text-xs text-slate-400">
-                Your email address is not yet verified. Paste the verification
-                token from your inbox.
-              </p>
-            </div>
-            <form onSubmit={handleVerifyEmail} className="space-y-4">
-              <TextField
-                type="text"
-                required
-                value={emailToken}
-                onChange={(e) => setEmailToken(e.target.value.trim())}
-                placeholder="Paste verification token"
-              />
-              <Button
-                type="submit"
-                variant="primary"
-                disabled={loading || !emailToken}
-                className="w-full justify-center rounded-2xl py-3.5"
-              >
-                {loading ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <>
-                    <CheckCircle className="h-4 w-4" />
-                    Verify email
-                  </>
-                )}
-              </Button>
-            </form>
-            <button
-              onClick={handleResendEmailVerification}
-              disabled={sending}
-              className="w-full text-xs text-slate-500 hover:text-sky-300"
-            >
-              {sending ? 'Sending…' : 'Resend verification email'}
-            </button>
-            <button
-              onClick={() => {
-                setNeedsEmailVerify(false);
-                setError('');
-              }}
-              className="w-full text-xs text-slate-500 hover:text-slate-300"
-            >
-              ← Back to login
-            </button>
-          </div>
             )}
 
             {/* Phone Verification Prompt */}
             {needsPhoneVerify && (
-          <div className="space-y-5">
-            <div className="text-center">
-              <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-600/20">
-                <Phone className="h-7 w-7 text-emerald-200" />
+              <div className="space-y-5">
+                <div className="text-center">
+                  <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-600/20">
+                    <Phone className="h-7 w-7 text-emerald-200" />
+                  </div>
+                  <h3 className="text-h3 text-slate-50">Verify phone number</h3>
+                  <p className="mt-1 text-xs text-slate-400">
+                    We&apos;ve sent a 6‑digit verification code to your phone.
+                  </p>
+                </div>
+                <form onSubmit={handleVerifyPhone} className="space-y-4">
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    maxLength={6}
+                    required
+                    value={phoneOTP}
+                    onChange={(e) =>
+                      setPhoneOTP(e.target.value.replace(/\D/g, ''))
+                    }
+                    placeholder="000000"
+                    className="w-full rounded-2xl border border-emerald-700 bg-slate-900/80 py-4 text-center text-3xl font-black tracking-[0.5em] text-emerald-100 shadow-sm outline-none ring-1 ring-emerald-800 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/70"
+                  />
+                  <Button
+                    type="submit"
+                    variant="primary"
+                    disabled={loading || phoneOTP.length < 6}
+                    className="w-full justify-center rounded-2xl bg-emerald-600 py-3.5 hover:bg-emerald-500"
+                  >
+                    {loading ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <>
+                        <CheckCircle className="h-4 w-4" />
+                        Verify &amp; sign in
+                      </>
+                    )}
+                  </Button>
+                </form>
+                <button
+                  onClick={handleResendOTP}
+                  disabled={sending}
+                  className="w-full text-xs text-slate-500 hover:text-sky-300"
+                >
+                  {sending ? 'Sending…' : 'Resend OTP'}
+                </button>
               </div>
-              <h3 className="text-h3 text-slate-50">Verify phone number</h3>
-              <p className="mt-1 text-xs text-slate-400">
-                We&apos;ve sent a 6‑digit verification code to your phone.
-              </p>
-            </div>
-            <form onSubmit={handleVerifyPhone} className="space-y-4">
-              <input
-                type="text"
-                inputMode="numeric"
-                pattern="[0-9]*"
-                maxLength={6}
-                required
-                value={phoneOTP}
-                onChange={(e) =>
-                  setPhoneOTP(e.target.value.replace(/\D/g, ''))
-                }
-                placeholder="000000"
-                className="w-full rounded-2xl border border-emerald-700 bg-slate-900/80 py-4 text-center text-3xl font-black tracking-[0.5em] text-emerald-100 shadow-sm outline-none ring-1 ring-emerald-800 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/70"
-              />
-              <Button
-                type="submit"
-                variant="primary"
-                disabled={loading || phoneOTP.length < 6}
-                className="w-full justify-center rounded-2xl bg-emerald-600 py-3.5 hover:bg-emerald-500"
-              >
-                {loading ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <>
-                    <CheckCircle className="h-4 w-4" />
-                    Verify &amp; sign in
-                  </>
-                )}
-              </Button>
-            </form>
-            <button
-              onClick={handleResendOTP}
-              disabled={sending}
-              className="w-full text-xs text-slate-500 hover:text-sky-300"
-            >
-              {sending ? 'Sending…' : 'Resend OTP'}
-            </button>
-          </div>
             )}
           </div>
         </div>
