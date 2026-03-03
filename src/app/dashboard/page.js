@@ -1,0 +1,365 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import Link from 'next/link';
+import api from '@/utils/api';
+import {
+  Building2, FileText, CreditCard, Wrench, Tag, Scale,
+  TrendingUp, CheckCircle, Clock, AlertCircle, ArrowRight,
+  Plus, Bell, Users, Key,
+} from 'lucide-react';
+import {
+  BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
+  PieChart, Pie, Cell,
+} from 'recharts';
+
+/* ─── Colour tokens ──────────────────────────────────────────────────────── */
+const ROLE_THEME = {
+  landlord:        { accent:'#4F46E5', light:'#EDE9FE', text:'#4338CA', dot:'#6D28D9' },
+  tenant:          { accent:'#059669', light:'#D1FAE5', text:'#065F46', dot:'#10B981' },
+  property_manager:{ accent:'#D97706', light:'#FEF3C7', text:'#92400E', dot:'#F59E0B' },
+  admin:           { accent:'#DC2626', light:'#FEE2E2', text:'#991B1B', dot:'#EF4444' },
+  law_reviewer:    { accent:'#7C3AED', light:'#EDE9FE', text:'#5B21B6', dot:'#8B5CF6' },
+};
+const CHART_COLORS = ['#4F46E5','#10B981','#F59E0B','#EF4444','#3B82F6'];
+
+/* ─── Stat card ──────────────────────────────────────────────────────────── */
+function StatCard({ label, value, icon: Icon, theme, sub }) {
+  return (
+    <div style={{ background:'white', borderRadius:18, padding:'22px 24px', border:'1px solid #E8EAF0', position:'relative', overflow:'hidden' }}>
+      <div style={{ position:'absolute', top:-16, right:-16, width:80, height:80, borderRadius:'50%', background:theme.light, opacity:.6 }}/>
+      <div style={{ display:'flex', alignItems:'flex-start', justifyContent:'space-between', position:'relative' }}>
+        <div>
+          <p style={{ fontSize:'0.7rem', fontWeight:700, color:'#94A3B8', textTransform:'uppercase', letterSpacing:'0.1em', marginBottom:8 }}>{label}</p>
+          <p style={{ fontFamily:"'Outfit',sans-serif", fontSize:'2.2rem', fontWeight:800, color:'#0F172A', letterSpacing:'-0.03em', lineHeight:1 }}>{value}</p>
+          {sub && <p style={{ fontSize:'0.72rem', color:'#94A3B8', marginTop:4 }}>{sub}</p>}
+        </div>
+        <div style={{ width:44, height:44, borderRadius:14, background:theme.light, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+          <Icon size={20} style={{ color: theme.accent }}/>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ─── Quick action pill ──────────────────────────────────────────────────── */
+function ActionPill({ href, icon: Icon, label, theme }) {
+  return (
+    <Link href={href} style={{
+      display:'inline-flex', alignItems:'center', gap:8, padding:'10px 18px',
+      background:theme.light, color:theme.accent, borderRadius:40,
+      fontSize:'0.82rem', fontWeight:700, textDecoration:'none',
+      border:`1.5px solid ${theme.accent}22`, transition:'all .15s',
+    }}>
+      <Icon size={15}/>{label}
+    </Link>
+  );
+}
+
+/* ─── Alert banner ───────────────────────────────────────────────────────── */
+function AlertBanner({ tasks, role, theme }) {
+  if (tasks.length === 0) return null;
+  return (
+    <div style={{ background:`${theme.accent}10`, borderLeft:`5px solid ${theme.accent}`, borderRadius:'0 14px 14px 0', padding:'16px 22px', display:'flex', alignItems:'center', justifyContent:'space-between', gap:12 }}>
+      <div style={{ display:'flex', alignItems:'center', gap:12 }}>
+        <div style={{ background:theme.light, borderRadius:10, padding:8 }}>
+          <Bell size={18} style={{ color:theme.accent }}/>
+        </div>
+        <div>
+          <p style={{ fontWeight:700, fontSize:'0.9rem', color:'#0F172A', marginBottom:2 }}>
+            {tasks.length} task{tasks.length>1?'s':''} need your attention
+          </p>
+          <p style={{ fontSize:'0.78rem', color:'#64748B' }}>{tasks.join(' · ')}</p>
+        </div>
+      </div>
+      <Link href={role === 'landlord' ? '/dashboard/offers' : '/dashboard/agreements'}
+        style={{ padding:'8px 16px', background:theme.accent, color:'white', borderRadius:10, fontSize:'0.78rem', fontWeight:700, textDecoration:'none', whiteSpace:'nowrap' }}>
+        Review
+      </Link>
+    </div>
+  );
+}
+
+/* ─── Lease row ──────────────────────────────────────────────────────────── */
+function LeaseRow({ lease, role }) {
+  return (
+    <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'14px 18px', borderBottom:'1px solid #F1F5F9', gap:12 }}>
+      <div style={{ display:'flex', alignItems:'center', gap:12 }}>
+        <div style={{ width:36, height:36, borderRadius:10, background:'#EDE9FE', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+          <Building2 size={16} color="#7C3AED"/>
+        </div>
+        <div>
+          <p style={{ fontWeight:600, fontSize:'0.88rem', color:'#0F172A' }}>{lease.property?.title || 'Property'}</p>
+          {role !== 'tenant' && lease.tenant && (
+            <p style={{ fontSize:'0.72rem', color:'#94A3B8' }}>{lease.tenant?.name}</p>
+          )}
+        </div>
+      </div>
+      <div style={{ textAlign:'right' }}>
+        <p style={{ fontFamily:"'Outfit',sans-serif", fontWeight:700, fontSize:'0.95rem', color:'#0F172A' }}>Rs. {(lease.financials?.rentAmount||0).toLocaleString()}</p>
+        <span style={{ fontSize:'0.68rem', fontWeight:700, color:'#059669', background:'#D1FAE5', padding:'2px 8px', borderRadius:20 }}>Active</span>
+      </div>
+    </div>
+  );
+}
+
+/* ─── Main ───────────────────────────────────────────────────────────────── */
+export default function DashboardHome() {
+  const [user, setUser]                 = useState(null);
+  const [agreements, setAgreements]     = useState([]);
+  const [properties, setProperties]     = useState([]);
+  const [payments,   setPayments]       = useState([]);
+  const [offers,     setOffers]         = useState([]);
+  const [pendingDisputes,  setPD]       = useState(0);
+  const [pendingMaint,     setPM]       = useState(0);
+  const [loading, setLoading]           = useState(true);
+
+  useEffect(() => {
+    const stored = localStorage.getItem('userInfo');
+    if (!stored) return;
+    const u = JSON.parse(stored);
+    setUser(u);
+
+    (async () => {
+      try {
+        const [agResp, offerResp] = await Promise.all([
+          api.get('/agreements').catch(() => ({ data: [] })),
+          api.get('/offers').catch(() => ({ data: { offers: [] } })),
+        ]);
+        setAgreements(agResp.data || []);
+        setOffers((offerResp.data?.offers || []));
+
+        if (['landlord','property_manager','admin'].includes(u.role)) {
+          const propResp = await api.get('/properties').catch(() => ({ data: [] }));
+          setProperties(Array.isArray(propResp.data) ? propResp.data : []);
+        }
+
+        const payResp  = await api.get('/payments').catch(() => ({ data: [] }));
+        setPayments(payResp.data || []);
+
+        const [dispResp, maintResp] = await Promise.all([
+          api.get('/disputes').catch(() => ({ data: { disputes: [] } })),
+          api.get('/maintenance').catch(() => ({ data: [] })),
+        ]);
+        setPD((dispResp.data?.disputes || []).filter(d => ['open','under_review'].includes(d.status)).length);
+        setPM((Array.isArray(maintResp.data) ? maintResp.data : []).filter(m => ['pending','in_progress'].includes(m.status)).length);
+      } catch (e) { console.error(e); }
+      finally { setLoading(false); }
+    })();
+  }, []);
+
+  if (!user || loading) return null;
+
+  const theme = ROLE_THEME[user.role] || ROLE_THEME.tenant;
+  const activeLeases = agreements.filter(a => a.status === 'active');
+  const pendingOffers = offers.filter(o => ['pending','countered'].includes(o.status));
+  const totalRevenue  = activeLeases.reduce((s, a) => s + (a.financials?.rentAmount||0), 0);
+
+  /* Alert tasks */
+  const tasks = [];
+  if (user.role === 'landlord') {
+    if (pendingOffers.length)  tasks.push(`${pendingOffers.length} offer(s) to review`);
+    if (pendingDisputes > 0)   tasks.push(`${pendingDisputes} open dispute(s)`);
+    if (pendingMaint > 0)      tasks.push(`${pendingMaint} maintenance request(s)`);
+  } else if (user.role === 'tenant') {
+    const awaitSign = agreements.filter(a => a.status === 'sent' && !a.signatures?.tenant?.signed);
+    if (awaitSign.length)    tasks.push(`${awaitSign.length} agreement(s) to sign`);
+    if (pendingOffers.length)tasks.push(`${pendingOffers.length} offer in negotiation`);
+  } else {
+    if (pendingDisputes > 0) tasks.push(`${pendingDisputes} dispute(s)`);
+    if (pendingMaint > 0)    tasks.push(`${pendingMaint} maintenance(s)`);
+  }
+
+  /* Chart data */
+  const monthlyData  = buildMonthly(payments);
+  const statusData   = buildStatus(agreements);
+  const propStatData = buildPropStatus(properties);
+
+  const qkActions = {
+    landlord: [
+      { href:'/dashboard/properties/new', icon:Plus,      label:'Add Property' },
+      { href:'/dashboard/offers',         icon:Tag,       label:'View Offers' },
+      { href:'/dashboard/agreements',     icon:FileText,  label:'Agreements' },
+      { href:'/dashboard/maintenance',    icon:Wrench,    label:'Maintenance' },
+    ],
+    tenant: [
+      { href:'/dashboard/my-lease',    icon:Key,       label:'My Lease' },
+      { href:'/dashboard/offers',      icon:Tag,       label:'Make an Offer' },
+      { href:'/dashboard/payments',    icon:CreditCard,label:'Payments' },
+      { href:'/dashboard/maintenance', icon:Wrench,    label:'Maintenance' },
+    ],
+    property_manager: [
+      { href:'/dashboard/pm/properties', icon:Building2, label:'Properties' },
+      { href:'/dashboard/pm/tenants',    icon:Users,     label:'Tenants' },
+      { href:'/dashboard/pm/maintenance',icon:Wrench,    label:'Maintenance' },
+    ],
+  }[user.role] || [];
+
+  return (
+    <>
+      <style>{`@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@700;800;900&display=swap');`}</style>
+
+      <div style={{ display:'flex', flexDirection:'column', gap:28, maxWidth:1200, margin:'0 auto' }}>
+
+        {/* ── Header ── */}
+        <div style={{ display:'flex', alignItems:'flex-end', justifyContent:'space-between', flexWrap:'wrap', gap:12 }}>
+          <div>
+            <h1 style={{ fontFamily:"'Outfit',sans-serif", fontWeight:900, fontSize:'2.4rem', color:'#0F172A', letterSpacing:'-0.04em', lineHeight:1, marginBottom:6 }}>
+              Hi, {user.name?.split(' ')[0]} 👋
+            </h1>
+            <p style={{ fontSize:'0.8rem', fontWeight:600, color:'#94A3B8', textTransform:'uppercase', letterSpacing:'0.12em' }}>
+              {user.role === 'landlord' ? 'Landlord Dashboard'
+               : user.role === 'tenant' ? 'Tenant Portal'
+               : user.role === 'property_manager' ? 'Property Manager Portal'
+               : user.role === 'admin' ? 'Admin Dashboard'
+               : 'Dashboard'}
+            </p>
+          </div>
+          <div style={{ display:'flex', alignItems:'center', gap:8, padding:'8px 16px', background:'white', borderRadius:40, border:'1px solid #E8EAF0' }}>
+            <span style={{ width:8, height:8, borderRadius:'50%', background:theme.dot, animation:'pulse 2s infinite' }}/>
+            <span style={{ fontSize:'0.75rem', fontWeight:700, color:theme.text, textTransform:'uppercase', letterSpacing:'0.08em' }}>
+              {user.role?.replace('_',' ')}
+            </span>
+          </div>
+        </div>
+
+        {/* ── Alert ── */}
+        <AlertBanner tasks={tasks} role={user.role} theme={theme}/>
+
+        {/* ── Stats ── */}
+        <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(180px,1fr))', gap:16 }}>
+          {user.role === 'landlord' && (
+            <>
+              <StatCard label="Monthly Income"   value={`Rs. ${totalRevenue.toLocaleString()}`} icon={TrendingUp} theme={theme} sub={`${activeLeases.length} active lease(s)`}/>
+              <StatCard label="Properties"       value={properties.length}  icon={Building2} theme={ROLE_THEME.property_manager}/>
+              <StatCard label="Active Offers"    value={pendingOffers.length} icon={Tag}     theme={ROLE_THEME.tenant}/>
+              <StatCard label="Maintenance"      value={pendingMaint}       icon={Wrench}    theme={ROLE_THEME.admin} sub="pending"/>
+            </>
+          )}
+          {user.role === 'tenant' && (
+            <>
+              <StatCard label="Active Leases"  value={activeLeases.length} icon={Key}       theme={theme}/>
+              <StatCard label="My Offers"      value={offers.length}       icon={Tag}       theme={ROLE_THEME.property_manager}/>
+              <StatCard label="Payments Made"  value={payments.filter(p=>p.status==='paid').length} icon={CreditCard} theme={ROLE_THEME.admin}/>
+              <StatCard label="Open Disputes"  value={pendingDisputes}     icon={Scale}     theme={ROLE_THEME.landlord}/>
+            </>
+          )}
+          {user.role === 'property_manager' && (
+            <>
+              <StatCard label="Properties"     value={properties.length}   icon={Building2} theme={theme}/>
+              <StatCard label="Active Tenants" value={activeLeases.length} icon={Users}     theme={ROLE_THEME.tenant}/>
+              <StatCard label="Maintenance"    value={pendingMaint}        icon={Wrench}    theme={ROLE_THEME.admin} sub="pending"/>
+              <StatCard label="Open Disputes"  value={pendingDisputes}     icon={Scale}     theme={ROLE_THEME.landlord}/>
+            </>
+          )}
+          {(user.role === 'admin' || user.role === 'law_reviewer') && (
+            <>
+              <StatCard label="Agreements"    value={agreements.length}   icon={FileText}  theme={theme}/>
+              <StatCard label="Active Leases" value={activeLeases.length} icon={CheckCircle} theme={ROLE_THEME.tenant}/>
+              <StatCard label="Open Disputes" value={pendingDisputes}     icon={Scale}     theme={ROLE_THEME.admin}/>
+              <StatCard label="Maintenance"   value={pendingMaint}        icon={Wrench}    theme={ROLE_THEME.property_manager}/>
+            </>
+          )}
+        </div>
+
+        {/* ── Quick Actions ── */}
+        {qkActions.length > 0 && (
+          <div style={{ display:'flex', flexWrap:'wrap', gap:10, alignItems:'center' }}>
+            <span style={{ fontSize:'0.7rem', fontWeight:700, color:'#CBD5E1', textTransform:'uppercase', letterSpacing:'0.1em', marginRight:4 }}>Quick</span>
+            {qkActions.map(a => <ActionPill key={a.href} href={a.href} icon={a.icon} label={a.label} theme={theme}/>)}
+          </div>
+        )}
+
+        {/* ── Charts ── */}
+        <div style={{ display:'grid', gridTemplateColumns:'2fr 1fr', gap:20 }}>
+          {/* Bar chart */}
+          <div style={{ background:'white', borderRadius:20, border:'1px solid #E8EAF0', padding:'24px' }}>
+            <p style={{ fontSize:'0.75rem', fontWeight:700, color:'#94A3B8', textTransform:'uppercase', letterSpacing:'0.1em', marginBottom:16 }}>Monthly Payments (last 6 months)</p>
+            {monthlyData.length > 0 ? (
+              <ResponsiveContainer width="100%" height={200}>
+                <BarChart data={monthlyData} margin={{ top:0, right:0, left:-24, bottom:0 }}>
+                  <XAxis dataKey="month" tick={{ fontSize:10, fontWeight:600 }}/>
+                  <YAxis tick={{ fontSize:10 }}/>
+                  <Tooltip formatter={v => [`Rs. ${v.toLocaleString()}`, 'Amount']}/>
+                  <Bar dataKey="amount" fill={theme.accent} radius={[6,6,0,0]}/>
+                </BarChart>
+              </ResponsiveContainer>
+            ) : <div style={{ height:200, display:'flex', alignItems:'center', justifyContent:'center', color:'#CBD5E1', fontSize:'0.85rem', fontWeight:600 }}>No payment data yet</div>}
+          </div>
+
+          {/* Pie chart */}
+          <div style={{ background:'white', borderRadius:20, border:'1px solid #E8EAF0', padding:'24px' }}>
+            <p style={{ fontSize:'0.75rem', fontWeight:700, color:'#94A3B8', textTransform:'uppercase', letterSpacing:'0.1em', marginBottom:16 }}>Agreement Status</p>
+            {statusData.length > 0 ? (
+              <ResponsiveContainer width="100%" height={200}>
+                <PieChart>
+                  <Pie data={statusData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={72} labelLine={false}
+                    label={({ name, value }) => `${name}: ${value}`}>
+                    {statusData.map((_, i) => <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]}/>)}
+                  </Pie>
+                  <Tooltip/>
+                </PieChart>
+              </ResponsiveContainer>
+            ) : <div style={{ height:200, display:'flex', alignItems:'center', justifyContent:'center', color:'#CBD5E1', fontSize:'0.85rem', fontWeight:600 }}>No agreements yet</div>}
+          </div>
+        </div>
+
+        {/* ── Property status (landlord / PM) ── */}
+        {propStatData.length > 0 && (
+          <div style={{ background:'white', borderRadius:20, border:'1px solid #E8EAF0', padding:'24px' }}>
+            <p style={{ fontSize:'0.75rem', fontWeight:700, color:'#94A3B8', textTransform:'uppercase', letterSpacing:'0.1em', marginBottom:16 }}>Portfolio Status</p>
+            <div style={{ display:'flex', gap:12 }}>
+              {propStatData.map((d, i) => (
+                <div key={d.name} style={{ flex:1, borderRadius:14, padding:'18px', textAlign:'center', background:`${CHART_COLORS[i]}12`, border:`1.5px solid ${CHART_COLORS[i]}30` }}>
+                  <p style={{ fontFamily:"'Outfit',sans-serif", fontSize:'2.2rem', fontWeight:800, color:CHART_COLORS[i], lineHeight:1 }}>{d.value}</p>
+                  <p style={{ fontSize:'0.7rem', fontWeight:700, color:'#94A3B8', textTransform:'uppercase', letterSpacing:'0.08em', marginTop:4 }}>{d.name}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* ── Active Occupancy ── */}
+        <div style={{ background:'white', borderRadius:20, border:'1px solid #E8EAF0', overflow:'hidden' }}>
+          <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'20px 24px', borderBottom:'1px solid #F1F5F9' }}>
+            <p style={{ fontFamily:"'Outfit',sans-serif", fontWeight:800, fontSize:'1.15rem', color:'#0F172A' }}>Active Occupancy</p>
+            {user.role === 'landlord' && (
+              <Link href="/dashboard/properties/new" style={{ display:'flex', alignItems:'center', gap:6, padding:'7px 14px', background:theme.light, color:theme.accent, borderRadius:10, fontSize:'0.78rem', fontWeight:700, textDecoration:'none' }}>
+                <Plus size={13}/> Add Property
+              </Link>
+            )}
+          </div>
+          {activeLeases.length > 0 ? (
+            activeLeases.map(l => <LeaseRow key={l._id} lease={l} role={user.role}/>)
+          ) : (
+            <div style={{ textAlign:'center', padding:'48px 20px', color:'#CBD5E1' }}>
+              <Building2 size={36} style={{ margin:'0 auto 10px' }}/>
+              <p style={{ fontWeight:600, fontSize:'0.85rem' }}>No active leases found.</p>
+            </div>
+          )}
+        </div>
+
+      </div>
+    </>
+  );
+}
+
+function buildMonthly(payments) {
+  const map = {};
+  payments.filter(p => p.status === 'paid').forEach(p => {
+    const d   = new Date(p.paidAt || p.createdAt);
+    const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+    map[key]  = (map[key] || 0) + (p.amount || 0);
+  });
+  return Object.entries(map).sort().slice(-6).map(([month, amount]) => ({ month, amount }));
+}
+function buildStatus(agreements) {
+  const map = {};
+  agreements.forEach(a => { map[a.status] = (map[a.status] || 0) + 1; });
+  return Object.entries(map).map(([name, value]) => ({ name, value }));
+}
+function buildPropStatus(properties) {
+  const map = {};
+  properties.forEach(p => { map[p.status] = (map[p.status] || 0) + 1; });
+  return Object.entries(map).map(([name, value]) => ({ name, value }));
+}
