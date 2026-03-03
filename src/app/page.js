@@ -473,34 +473,30 @@ export default function LandingPage() {
 
         {/* ── CTA ───────────────────────────────────────────────────── */}
         <MotionRevealSection className="py-16 bg-white">
-          {!user && (
-            <div className="mx-auto max-w-4xl px-4 text-center">
-              <div className="relative overflow-hidden rounded-[2rem] px-6 py-12 shadow-[0_28px_90px_rgba(9,146,194,0.3)]"
-                style={{ background: 'linear-gradient(135deg, #F6C87A 0%, #0AC4E0 45%, #0992C2 70%, #0B2D72 100%)' }}
-              >
-                <div className="pointer-events-none absolute -left-10 top-0 h-32 w-32 rounded-full bg-white/40 blur-2xl" />
-                <div className="pointer-events-none absolute -right-16 bottom-0 h-40 w-40 rounded-full bg-white/30 blur-3xl" />
-                <div className="relative space-y-5">
-                  <h2 className="text-h2 text-white">Ready to make renting feel premium?</h2>
-                  <p className="mx-auto max-w-md text-body text-white/85">
-                    Join thousands of tenants and landlords who already manage their entire rental lifecycle inside RentifyPro.
-                  </p>
-                  <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
-                    <Link href="/register"
-                      className="w-full sm:w-auto rounded-full bg-white px-6 py-2.5 text-[0.85rem] font-bold text-[#0992C2] shadow-md transition-all hover:scale-105 hover:shadow-lg inline-flex items-center justify-center gap-2"
-                    >
-                      Get started free
-                    </Link>
-                    <Link href="/browse"
-                      className="w-full sm:w-auto rounded-full border border-white/60 px-6 py-2.5 text-[0.85rem] font-semibold text-white transition-all hover:bg-white/10 inline-flex items-center justify-center"
-                    >
-                      Browse listings
-                    </Link>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
+        {!user && (
+  <section
+    className="relative overflow-hidden px-6 py-24 text-center"
+    style={{ background: 'linear-gradient(135deg, #F6C87A 0%, #0AC4E0 45%, #0992C2 70%, #0B2D72 100%)' }}
+  >
+    <div className="pointer-events-none absolute -left-16 top-0 h-64 w-64 rounded-full bg-white/25 blur-3xl" />
+    <div className="pointer-events-none absolute -right-20 bottom-0 h-72 w-72 rounded-full bg-white/20 blur-3xl" />
+    <div className="relative mx-auto max-w-2xl space-y-5">
+      <h2 className="text-h2 text-white">Ready to make renting feel premium?</h2>
+      <p className="mx-auto max-w-md text-body text-white/85">
+        Join thousands of tenants and landlords who already manage their entire rental lifecycle inside RentifyPro.
+      </p>
+      <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
+        <Link href="/register" className="w-full sm:w-auto inline-flex items-center justify-center rounded-full bg-white px-7 py-2.5 text-[0.85rem] font-bold text-[#0992C2] shadow-md transition-all hover:scale-105 hover:shadow-lg">
+          Get started free
+        </Link>
+        <Link href="/browse" className="w-full sm:w-auto inline-flex items-center justify-center rounded-full border border-white/60 px-7 py-2.5 text-[0.85rem] font-semibold text-white transition-all hover:bg-white/10">
+          Browse listings
+        </Link>
+      </div>
+    </div>
+  </section>
+)}
+
 
           {user && (
             <div className="mx-auto max-w-4xl px-4 text-center">
