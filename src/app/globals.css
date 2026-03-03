@@ -69,10 +69,6 @@
 }
 
 @layer base {
-  * {
-    @apply border-border;
-  }
-
   body {
     color: var(--rf-color-text-main);
     background: radial-gradient(circle at top left, #020617 0, #020617 26%, #020617 60%, #020617 100%);
