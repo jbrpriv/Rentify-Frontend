@@ -211,8 +211,8 @@ export default function LandingPage() {
                       type="button"
                       onClick={() => setTab(t.toLowerCase())}
                       className={`px-8 py-2.5 text-[0.85rem] font-semibold transition-all ${tab === t.toLowerCase()
-                          ? 'bg-white text-[#0992C2]'
-                          : 'bg-white/15 text-white hover:bg-white/25'
+                        ? 'bg-white text-[#0992C2]'
+                        : 'bg-white/15 text-white hover:bg-white/25'
                         }`}
                     >
                       {t}
@@ -318,8 +318,8 @@ export default function LandingPage() {
         >
           <div
             className={`relative overflow-hidden transition-colors duration-500 px-6 py-16 md:px-16 lg:px-24 ${roleTab === 'tenant'
-                ? 'bg-[#F8843F]'
-                : 'bg-[#0B2D72]'
+              ? 'bg-[#F8843F]'
+              : 'bg-[#0B2D72]'
               }`}
           >
             {/* Decorative blobs */}
@@ -332,8 +332,8 @@ export default function LandingPage() {
               {/* Left: info + toggle */}
               <div className="flex-shrink-0 lg:w-72 xl:w-80 space-y-6">
                 <div className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-[0.7rem] font-semibold uppercase tracking-[0.22em] ${roleTab === 'tenant'
-                    ? 'bg-white/20 text-white ring-1 ring-white/30'
-                    : 'bg-white/10 text-white/80 ring-1 ring-white/20'
+                  ? 'bg-white/20 text-white ring-1 ring-white/30'
+                  : 'bg-white/10 text-white/80 ring-1 ring-white/20'
                   }`}>
                   <LayoutDashboard className="h-3.5 w-3.5" />
                   Role-specific workspaces
@@ -386,8 +386,8 @@ export default function LandingPage() {
                     <Link
                       href="/register"
                       className={`rf-btn text-[0.8rem] font-bold ${roleTab === 'tenant'
-                          ? 'bg-white text-[#F8843F] hover:bg-white/90 shadow-lg shadow-black/10'
-                          : 'bg-white text-[#0B2D72] hover:bg-white/90 shadow-lg shadow-black/20'
+                        ? 'bg-white text-[#F8843F] hover:bg-white/90 shadow-lg shadow-black/10'
+                        : 'bg-white text-[#0B2D72] hover:bg-white/90 shadow-lg shadow-black/20'
                         }`}
                     >
                       Get started free
@@ -425,8 +425,8 @@ export default function LandingPage() {
                         key={f.title}
                         style={{ animationDelay: `${i * 70}ms` }}
                         className={`rf-fade-in-stagger rounded-2xl p-4 transition-transform duration-200 hover:-translate-y-1 ${isTenant
-                            ? 'bg-white/20 ring-1 ring-white/25 hover:bg-white/25'
-                            : 'bg-white/10 ring-1 ring-white/15 hover:bg-white/15'
+                          ? 'bg-white/20 ring-1 ring-white/25 hover:bg-white/25'
+                          : 'bg-white/10 ring-1 ring-white/15 hover:bg-white/15'
                           }`}
                       >
                         <div className={`mb-3 flex h-10 w-10 items-center justify-center rounded-2xl ${isTenant ? 'bg-white/30' : 'bg-[#0AC4E0]/30'
@@ -531,23 +531,32 @@ export default function LandingPage() {
 
 
           {user && (
-            <section className="relative overflow-hidden px-6 py-24 text-center bg-gradient-to-br from-[#0AC4E0]/10 via-[#F8FBFC] to-[#F6E7BC]/30 border-t border-[#0992C2]/10">
-              {/* Full-width decorative blobs */}
-              <div className="pointer-events-none absolute -left-16 top-0 h-80 w-80 rounded-full bg-[#0AC4E0]/20 blur-3xl" />
-              <div className="pointer-events-none absolute -right-20 bottom-0 h-96 w-96 rounded-full bg-[#F6E7BC]/40 blur-3xl" />
+            <section
+              className="relative overflow-hidden px-6 py-24 text-center"
+              style={{
+                background: 'linear-gradient(135deg, #F8FBFC 0%, #0AC4E0 35%, #0992C2 65%, #0B2D72 100%)',
+              }}
+            >
+              {/* Radial overlays for depth, removed the plain blurry circles */}
+              <div
+                className="pointer-events-none absolute inset-0"
+                style={{
+                  background: 'radial-gradient(circle at 15% 25%, rgba(255,255,255,0.45) 0%, transparent 45%), radial-gradient(circle at 85% 75%, rgba(246,231,188,0.2) 0%, transparent 40%)',
+                }}
+              />
 
-              <div className="relative mx-auto max-w-2xl space-y-5">
-                <h2 className="text-h2 text-neutral-900">
+              <div className="relative mx-auto max-w-2xl space-y-6">
+                <h2 className="text-h2 text-white">
                   Welcome back, {user.name?.split(' ')[0]}.
                 </h2>
-                <p className="mx-auto max-w-md text-[1.05rem] leading-relaxed text-neutral-600">
+                <p className="mx-auto max-w-md text-[1.05rem] leading-relaxed text-white/85">
                   Continue where you left off — your applications, leases, and payments are already synced.
                 </p>
 
                 <div className="mt-8 flex justify-center">
                   <Link
                     href="/dashboard"
-                    className="rf-btn rf-btn-primary inline-flex items-center justify-center gap-2 px-8 py-3 text-[0.85rem]"
+                    className="inline-flex items-center justify-center gap-2 rounded-full bg-white px-8 py-3.5 text-[0.85rem] font-bold text-[#0992C2] shadow-md shadow-black/10 transition-all hover:scale-105 hover:shadow-lg hover:shadow-black/15"
                   >
                     <LayoutDashboard size={18} />
                     Go to dashboard
