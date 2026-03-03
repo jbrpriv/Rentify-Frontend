@@ -14,26 +14,28 @@ import {
   PieChart, Pie, Cell,
 } from 'recharts';
 
-/* ─── Colour tokens ──────────────────────────────────────────────────────── */
+/* ─── Colour tokens (Updated to New Palette) ─────────────────────────────── */
 const ROLE_THEME = {
-  landlord:        { accent:'#4F46E5', light:'#EDE9FE', text:'#4338CA', dot:'#6D28D9' },
-  tenant:          { accent:'#059669', light:'#D1FAE5', text:'#065F46', dot:'#10B981' },
-  property_manager:{ accent:'#D97706', light:'#FEF3C7', text:'#92400E', dot:'#F59E0B' },
-  admin:           { accent:'#DC2626', light:'#FEE2E2', text:'#991B1B', dot:'#EF4444' },
-  law_reviewer:    { accent:'#7C3AED', light:'#EDE9FE', text:'#5B21B6', dot:'#8B5CF6' },
+  landlord:        { accent:'#0B2D72', light:'#E6EAF2', text:'#0B2D72', dot:'#0B2D72' }, // Deep Blue
+  tenant:          { accent:'#0992C2', light:'#E6F4F8', text:'#0992C2', dot:'#0992C2' }, // Mid Blue
+  property_manager:{ accent:'#0AC4E0', light:'#E6FAFD', text:'#078A9E', dot:'#0AC4E0' }, // Cyan
+  admin:           { accent:'#DC2626', light:'#FEE2E2', text:'#991B1B', dot:'#EF4444' }, // Kept semantic red for admin alerts
+  law_reviewer:    { accent:'#1F2933', light:'#F3F4F6', text:'#1F2933', dot:'#4B5563' }, // Neutral Slate
 };
-const CHART_COLORS = ['#4F46E5','#10B981','#F59E0B','#EF4444','#3B82F6'];
+
+// Deep Blue, Mid Blue, Cyan, Cream, Slate
+const CHART_COLORS = ['#0B2D72','#0992C2','#0AC4E0','#F6E7BC','#1F2933'];
 
 /* ─── Stat card ──────────────────────────────────────────────────────────── */
 function StatCard({ label, value, icon: Icon, theme, sub }) {
   return (
-    <div style={{ background:'white', borderRadius:18, padding:'22px 24px', border:'1px solid #E8EAF0', position:'relative', overflow:'hidden' }}>
+    <div style={{ background:'white', borderRadius:18, padding:'22px 24px', border:'1px solid rgba(11, 45, 114, 0.12)', position:'relative', overflow:'hidden' }}>
       <div style={{ position:'absolute', top:-16, right:-16, width:80, height:80, borderRadius:'50%', background:theme.light, opacity:.6 }}/>
       <div style={{ display:'flex', alignItems:'flex-start', justifyContent:'space-between', position:'relative' }}>
         <div>
-          <p style={{ fontSize:'0.7rem', fontWeight:700, color:'#94A3B8', textTransform:'uppercase', letterSpacing:'0.1em', marginBottom:8 }}>{label}</p>
-          <p style={{ fontFamily:"'Outfit',sans-serif", fontSize:'2.2rem', fontWeight:800, color:'#0F172A', letterSpacing:'-0.03em', lineHeight:1 }}>{value}</p>
-          {sub && <p style={{ fontSize:'0.72rem', color:'#94A3B8', marginTop:4 }}>{sub}</p>}
+          <p style={{ fontSize:'0.7rem', fontWeight:700, color:'#6B7280', textTransform:'uppercase', letterSpacing:'0.1em', marginBottom:8 }}>{label}</p>
+          <p style={{ fontFamily:"'Outfit',sans-serif", fontSize:'2.2rem', fontWeight:800, color:'#1F2933', letterSpacing:'-0.03em', lineHeight:1 }}>{value}</p>
+          {sub && <p style={{ fontSize:'0.72rem', color:'#6B7280', marginTop:4 }}>{sub}</p>}
         </div>
         <div style={{ width:44, height:44, borderRadius:14, background:theme.light, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
           <Icon size={20} style={{ color: theme.accent }}/>
@@ -67,10 +69,10 @@ function AlertBanner({ tasks, role, theme }) {
           <Bell size={18} style={{ color:theme.accent }}/>
         </div>
         <div>
-          <p style={{ fontWeight:700, fontSize:'0.9rem', color:'#0F172A', marginBottom:2 }}>
+          <p style={{ fontWeight:700, fontSize:'0.9rem', color:'#1F2933', marginBottom:2 }}>
             {tasks.length} task{tasks.length>1?'s':''} need your attention
           </p>
-          <p style={{ fontSize:'0.78rem', color:'#64748B' }}>{tasks.join(' · ')}</p>
+          <p style={{ fontSize:'0.78rem', color:'#4B5563' }}>{tasks.join(' · ')}</p>
         </div>
       </div>
       <Link href={role === 'landlord' ? '/dashboard/offers' : '/dashboard/agreements'}
@@ -84,21 +86,21 @@ function AlertBanner({ tasks, role, theme }) {
 /* ─── Lease row ──────────────────────────────────────────────────────────── */
 function LeaseRow({ lease, role }) {
   return (
-    <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'14px 18px', borderBottom:'1px solid #F1F5F9', gap:12 }}>
+    <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'14px 18px', borderBottom:'1px solid rgba(11, 45, 114, 0.08)', gap:12 }}>
       <div style={{ display:'flex', alignItems:'center', gap:12 }}>
-        <div style={{ width:36, height:36, borderRadius:10, background:'#EDE9FE', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
-          <Building2 size={16} color="#7C3AED"/>
+        <div style={{ width:36, height:36, borderRadius:10, background:'#E6FAFD', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+          <Building2 size={16} color="#0AC4E0"/>
         </div>
         <div>
-          <p style={{ fontWeight:600, fontSize:'0.88rem', color:'#0F172A' }}>{lease.property?.title || 'Property'}</p>
+          <p style={{ fontWeight:600, fontSize:'0.88rem', color:'#1F2933' }}>{lease.property?.title || 'Property'}</p>
           {role !== 'tenant' && lease.tenant && (
-            <p style={{ fontSize:'0.72rem', color:'#94A3B8' }}>{lease.tenant?.name}</p>
+            <p style={{ fontSize:'0.72rem', color:'#6B7280' }}>{lease.tenant?.name}</p>
           )}
         </div>
       </div>
       <div style={{ textAlign:'right' }}>
-        <p style={{ fontFamily:"'Outfit',sans-serif", fontWeight:700, fontSize:'0.95rem', color:'#0F172A' }}>Rs. {(lease.financials?.rentAmount||0).toLocaleString()}</p>
-        <span style={{ fontSize:'0.68rem', fontWeight:700, color:'#059669', background:'#D1FAE5', padding:'2px 8px', borderRadius:20 }}>Active</span>
+        <p style={{ fontFamily:"'Outfit',sans-serif", fontWeight:700, fontSize:'0.95rem', color:'#1F2933' }}>Rs. {(lease.financials?.rentAmount||0).toLocaleString()}</p>
+        <span style={{ fontSize:'0.68rem', fontWeight:700, color:'#0992C2', background:'#E6F4F8', padding:'2px 8px', borderRadius:20 }}>Active</span>
       </div>
     </div>
   );
@@ -215,10 +217,10 @@ export default function DashboardHome() {
           transition={{ duration: 0.35, delay: 0.05, ease: [0.21, 0.6, 0.35, 1] }}
         >
           <div>
-            <h1 style={{ fontFamily:"'Outfit',sans-serif", fontWeight:900, fontSize:'2.4rem', color:'#0F172A', letterSpacing:'-0.04em', lineHeight:1, marginBottom:6 }}>
+            <h1 style={{ fontFamily:"'Outfit',sans-serif", fontWeight:900, fontSize:'2.4rem', color:'#1F2933', letterSpacing:'-0.04em', lineHeight:1, marginBottom:6 }}>
               Hi, {user.name?.split(' ')[0]} 👋
             </h1>
-            <p style={{ fontSize:'0.8rem', fontWeight:600, color:'#94A3B8', textTransform:'uppercase', letterSpacing:'0.12em' }}>
+            <p style={{ fontSize:'0.8rem', fontWeight:600, color:'#6B7280', textTransform:'uppercase', letterSpacing:'0.12em' }}>
               {user.role === 'landlord' ? 'Landlord Dashboard'
                : user.role === 'tenant' ? 'Tenant Portal'
                : user.role === 'property_manager' ? 'Property Manager Portal'
@@ -226,7 +228,7 @@ export default function DashboardHome() {
                : 'Dashboard'}
             </p>
           </div>
-          <div style={{ display:'flex', alignItems:'center', gap:8, padding:'8px 16px', background:'white', borderRadius:40, border:'1px solid #E8EAF0' }}>
+          <div style={{ display:'flex', alignItems:'center', gap:8, padding:'8px 16px', background:'white', borderRadius:40, border:'1px solid rgba(11, 45, 114, 0.12)' }}>
             <span style={{ width:8, height:8, borderRadius:'50%', background:theme.dot, animation:'pulse 2s infinite' }}/>
             <span style={{ fontSize:'0.75rem', fontWeight:700, color:theme.text, textTransform:'uppercase', letterSpacing:'0.08em' }}>
               {user.role?.replace('_',' ')}
@@ -292,7 +294,7 @@ export default function DashboardHome() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3, delay: 0.16, ease: [0.21, 0.6, 0.35, 1] }}
           >
-            <span style={{ fontSize:'0.7rem', fontWeight:700, color:'#CBD5E1', textTransform:'uppercase', letterSpacing:'0.1em', marginRight:4 }}>Quick</span>
+            <span style={{ fontSize:'0.7rem', fontWeight:700, color:'#9CA3AF', textTransform:'uppercase', letterSpacing:'0.1em', marginRight:4 }}>Quick</span>
             {qkActions.map(a => <ActionPill key={a.href} href={a.href} icon={a.icon} label={a.label} theme={theme}/>)}
           </motion.div>
         )}
@@ -305,8 +307,8 @@ export default function DashboardHome() {
           transition={{ duration: 0.4, delay: 0.18, ease: [0.21, 0.6, 0.35, 1] }}
         >
           {/* Bar chart */}
-          <div style={{ background:'white', borderRadius:20, border:'1px solid #E8EAF0', padding:'24px' }}>
-            <p style={{ fontSize:'0.75rem', fontWeight:700, color:'#94A3B8', textTransform:'uppercase', letterSpacing:'0.1em', marginBottom:16 }}>Monthly Payments (last 6 months)</p>
+          <div style={{ background:'white', borderRadius:20, border:'1px solid rgba(11, 45, 114, 0.12)', padding:'24px' }}>
+            <p style={{ fontSize:'0.75rem', fontWeight:700, color:'#6B7280', textTransform:'uppercase', letterSpacing:'0.1em', marginBottom:16 }}>Monthly Payments (last 6 months)</p>
             {monthlyData.length > 0 ? (
               <ResponsiveContainer width="100%" height={200}>
                 <BarChart data={monthlyData} margin={{ top:0, right:0, left:-24, bottom:0 }}>
@@ -316,12 +318,12 @@ export default function DashboardHome() {
                   <Bar dataKey="amount" fill={theme.accent} radius={[6,6,0,0]}/>
                 </BarChart>
               </ResponsiveContainer>
-            ) : <div style={{ height:200, display:'flex', alignItems:'center', justifyContent:'center', color:'#CBD5E1', fontSize:'0.85rem', fontWeight:600 }}>No payment data yet</div>}
+            ) : <div style={{ height:200, display:'flex', alignItems:'center', justifyContent:'center', color:'#9CA3AF', fontSize:'0.85rem', fontWeight:600 }}>No payment data yet</div>}
           </div>
 
           {/* Pie chart */}
-          <div style={{ background:'white', borderRadius:20, border:'1px solid #E8EAF0', padding:'24px' }}>
-            <p style={{ fontSize:'0.75rem', fontWeight:700, color:'#94A3B8', textTransform:'uppercase', letterSpacing:'0.1em', marginBottom:16 }}>Agreement Status</p>
+          <div style={{ background:'white', borderRadius:20, border:'1px solid rgba(11, 45, 114, 0.12)', padding:'24px' }}>
+            <p style={{ fontSize:'0.75rem', fontWeight:700, color:'#6B7280', textTransform:'uppercase', letterSpacing:'0.1em', marginBottom:16 }}>Agreement Status</p>
             {statusData.length > 0 ? (
               <ResponsiveContainer width="100%" height={200}>
                 <PieChart>
@@ -332,24 +334,24 @@ export default function DashboardHome() {
                   <Tooltip/>
                 </PieChart>
               </ResponsiveContainer>
-            ) : <div style={{ height:200, display:'flex', alignItems:'center', justifyContent:'center', color:'#CBD5E1', fontSize:'0.85rem', fontWeight:600 }}>No agreements yet</div>}
+            ) : <div style={{ height:200, display:'flex', alignItems:'center', justifyContent:'center', color:'#9CA3AF', fontSize:'0.85rem', fontWeight:600 }}>No agreements yet</div>}
           </div>
         </motion.div>
 
         {/* ── Property status (landlord / PM) ── */}
         {propStatData.length > 0 && (
           <motion.div
-            style={{ background:'white', borderRadius:20, border:'1px solid #E8EAF0', padding:'24px' }}
+            style={{ background:'white', borderRadius:20, border:'1px solid rgba(11, 45, 114, 0.12)', padding:'24px' }}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.38, delay: 0.22, ease: [0.21, 0.6, 0.35, 1] }}
           >
-            <p style={{ fontSize:'0.75rem', fontWeight:700, color:'#94A3B8', textTransform:'uppercase', letterSpacing:'0.1em', marginBottom:16 }}>Portfolio Status</p>
+            <p style={{ fontSize:'0.75rem', fontWeight:700, color:'#6B7280', textTransform:'uppercase', letterSpacing:'0.1em', marginBottom:16 }}>Portfolio Status</p>
             <div style={{ display:'flex', gap:12 }}>
               {propStatData.map((d, i) => (
                 <div key={d.name} style={{ flex:1, borderRadius:14, padding:'18px', textAlign:'center', background:`${CHART_COLORS[i]}12`, border:`1.5px solid ${CHART_COLORS[i]}30` }}>
                   <p style={{ fontFamily:"'Outfit',sans-serif", fontSize:'2.2rem', fontWeight:800, color:CHART_COLORS[i], lineHeight:1 }}>{d.value}</p>
-                  <p style={{ fontSize:'0.7rem', fontWeight:700, color:'#94A3B8', textTransform:'uppercase', letterSpacing:'0.08em', marginTop:4 }}>{d.name}</p>
+                  <p style={{ fontSize:'0.7rem', fontWeight:700, color:'#6B7280', textTransform:'uppercase', letterSpacing:'0.08em', marginTop:4 }}>{d.name}</p>
                 </div>
               ))}
             </div>
@@ -358,13 +360,13 @@ export default function DashboardHome() {
 
         {/* ── Active Occupancy ── */}
         <motion.div
-          style={{ background:'white', borderRadius:20, border:'1px solid #E8EAF0', overflow:'hidden' }}
+          style={{ background:'white', borderRadius:20, border:'1px solid rgba(11, 45, 114, 0.12)', overflow:'hidden' }}
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.25, ease: [0.21, 0.6, 0.35, 1] }}
         >
-          <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'20px 24px', borderBottom:'1px solid #F1F5F9' }}>
-            <p style={{ fontFamily:"'Outfit',sans-serif", fontWeight:800, fontSize:'1.15rem', color:'#0F172A' }}>Active Occupancy</p>
+          <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'20px 24px', borderBottom:'1px solid rgba(11, 45, 114, 0.08)' }}>
+            <p style={{ fontFamily:"'Outfit',sans-serif", fontWeight:800, fontSize:'1.15rem', color:'#1F2933' }}>Active Occupancy</p>
             {user.role === 'landlord' && (
               <Link href="/dashboard/properties/new" style={{ display:'flex', alignItems:'center', gap:6, padding:'7px 14px', background:theme.light, color:theme.accent, borderRadius:10, fontSize:'0.78rem', fontWeight:700, textDecoration:'none' }}>
                 <Plus size={13}/> Add Property
@@ -374,7 +376,7 @@ export default function DashboardHome() {
           {activeLeases.length > 0 ? (
             activeLeases.map(l => <LeaseRow key={l._id} lease={l} role={user.role}/>)
           ) : (
-            <div style={{ textAlign:'center', padding:'48px 20px', color:'#CBD5E1' }}>
+            <div style={{ textAlign:'center', padding:'48px 20px', color:'#9CA3AF' }}>
               <Building2 size={36} style={{ margin:'0 auto 10px' }}/>
               <p style={{ fontWeight:600, fontSize:'0.85rem' }}>No active leases found.</p>
             </div>

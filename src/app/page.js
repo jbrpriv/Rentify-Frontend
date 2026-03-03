@@ -98,8 +98,8 @@ export default function LandingPage() {
           <div className="mx-auto flex max-w-4xl flex-col items-center justify-center text-center px-4 pb-16 pt-6 lg:px-0">
             
             {/* Pill Badge */}
-            <div className="inline-flex items-center gap-2 rounded-full border border-[#E0EDC5] bg-white/80 px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.25em] text-neutral-500 shadow-sm shadow-[#C7EABB]/40 backdrop-blur">
-              <span className="h-1.5 w-1.5 rounded-full bg-[#84B179]" />
+            <div className="inline-flex items-center gap-2 rounded-full border border-[#0992C2]/20 bg-white/80 px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.25em] text-neutral-500 shadow-sm shadow-[#0992C2]/20 backdrop-blur">
+              <span className="h-1.5 w-1.5 rounded-full bg-[#0992C2]" />
               60+ countries · 2M+ listings
             </div>
 
@@ -108,7 +108,7 @@ export default function LandingPage() {
               <h1 className="text-hero text-neutral-900">
                 Renting, reimagined in
                 <br className="hidden md:block" />
-                <span className="bg-gradient-to-r from-[#84B179] via-[#A2CB8B] to-[#C7EABB] bg-clip-text text-transparent">
+                <span className="bg-gradient-to-r from-[#0B2D72] via-[#0992C2] to-[#0AC4E0] bg-clip-text text-transparent">
                   {' '}one calm workspace.
                 </span>
               </h1>
@@ -123,16 +123,16 @@ export default function LandingPage() {
               
               {/* Search Card */}
               <div className="rf-card-soft relative overflow-hidden">
-                <div className="pointer-events-none absolute -left-6 -top-10 h-28 w-28 rounded-full bg-[#E8F5BD] blur-2xl" />
-                <div className="pointer-events-none absolute -right-10 bottom-0 h-28 w-28 rounded-full bg-[#C7EABB] blur-2xl" />
+                <div className="pointer-events-none absolute -left-6 -top-10 h-28 w-28 rounded-full bg-[#F6E7BC] blur-2xl" />
+                <div className="pointer-events-none absolute -right-10 bottom-0 h-28 w-28 rounded-full bg-[#0AC4E0]/40 blur-2xl" />
                 
                 <div className="relative space-y-3 p-4 md:p-5">
-                  <div className="inline-flex items-center gap-1 rounded-full bg-white/70 px-2 py-1 text-[0.65rem] font-medium text-neutral-500 ring-1 ring-[#E0EDC5]">
-                    <CheckCircle2 className="h-3 w-3 text-[#84B179]" />
+                  <div className="inline-flex items-center gap-1 rounded-full bg-white/70 px-2 py-1 text-[0.65rem] font-medium text-neutral-500 ring-1 ring-[#0992C2]/20">
+                    <CheckCircle2 className="h-3 w-3 text-[#0992C2]" />
                     <span>Verified listings & digital leases</span>
                   </div>
 
-                  <div className="flex items-center gap-1 rounded-full bg-[#F2F7E5] p-1 text-[0.7rem] font-semibold text-neutral-600">
+                  <div className="flex items-center gap-1 rounded-full bg-[#0992C2]/10 p-1 text-[0.7rem] font-semibold text-neutral-600">
                     {['Rent', 'Buy'].map((t) => (
                       <button
                         key={t}
@@ -140,7 +140,7 @@ export default function LandingPage() {
                         onClick={() => setTab(t.toLowerCase())}
                         className={`flex-1 rounded-full px-3 py-1.5 transition-all ${
                           tab === t.toLowerCase()
-                            ? 'bg-white text-neutral-900 shadow-sm shadow-[#C7EABB]/60'
+                            ? 'bg-white text-neutral-900 shadow-sm shadow-[#0992C2]/20'
                             : 'text-neutral-500 hover:text-neutral-800'
                         }`}
                       >
@@ -151,9 +151,9 @@ export default function LandingPage() {
 
                   <form
                     onSubmit={handleSearch}
-                    className="flex items-center gap-2 rounded-2xl border border-[#E0EDC5] bg-white/90 px-3 py-2.5 shadow-sm shadow-[#E1F0C9]/50 backdrop-blur"
+                    className="flex items-center gap-2 rounded-2xl border border-[#0992C2]/20 bg-white/90 px-3 py-2.5 shadow-sm shadow-[#0AC4E0]/30 backdrop-blur"
                   >
-                    <Search className="h-4 w-4 text-[#84B179]" />
+                    <Search className="h-4 w-4 text-[#0992C2]" />
                     <input
                       value={query}
                       onChange={(e) => setQuery(e.target.value)}
@@ -173,9 +173,9 @@ export default function LandingPage() {
                       (item) => (
                         <span
                           key={item}
-                          className="inline-flex items-center gap-1 rounded-full bg-[#F5FAE9] px-2 py-1"
+                          className="inline-flex items-center gap-1 rounded-full bg-[#0AC4E0]/10 px-2 py-1"
                         >
-                          <CheckCircle2 className="h-3 w-3 text-[#84B179]" />
+                          <CheckCircle2 className="h-3 w-3 text-[#0992C2]" />
                           {item}
                         </span>
                       ),
@@ -185,7 +185,7 @@ export default function LandingPage() {
               </div>
 
               {/* Live Activity Stat */}
-              <div className="rf-card flex flex-col justify-between min-h-[120px] rounded-2xl border border-[#E0EDC5] bg-gradient-to-br from-[#F9FCEB] via-white to-[#E8F5BD] p-4 md:p-5">
+              <div className="rf-card flex flex-col justify-between min-h-[120px] rounded-2xl border border-[#0992C2]/20 bg-gradient-to-br from-[#F6E7BC]/40 via-white to-[#0AC4E0]/10 p-4 md:p-5">
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <p className="text-[0.7rem] font-semibold uppercase tracking-[0.22em] text-neutral-500">
@@ -195,13 +195,13 @@ export default function LandingPage() {
                       Applications processed in the last 24h
                     </p>
                   </div>
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-white/70 shadow-sm shadow-[#C7EABB]/60">
-                    <Home className="h-5 w-5 text-[#84B179]" />
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-white/70 shadow-sm shadow-[#0992C2]/20">
+                    <Home className="h-5 w-5 text-[#0992C2]" />
                   </div>
                 </div>
                 <div className="mt-4 flex items-end justify-between">
                   <p className="text-3xl font-bold text-neutral-900 tracking-tight">8,412</p>
-                  <span className="inline-flex items-center gap-1 rounded-full bg-white/80 px-2 py-1 text-[0.65rem] font-medium text-[#1F7A3A]">
+                  <span className="inline-flex items-center gap-1 rounded-full bg-white/80 px-2 py-1 text-[0.65rem] font-medium text-[#0B2D72]">
                     <TrendingUp className="h-3 w-3" />
                     +18% this week
                   </span>
@@ -216,7 +216,7 @@ export default function LandingPage() {
         <MotionRevealSection delay={0.05}>
           <div className="mx-auto max-w-6xl px-4 lg:px-0">
             <div className="grid gap-4 md:grid-cols-[minmax(0,1.4fr),minmax(0,1fr)]">
-              <div className="rf-card flex items-center justify-between rounded-3xl bg-gradient-to-r from-[#F2F7E5] via-[#FFFFFF] to-[#E8F5BD] px-6 py-5">
+              <div className="rf-card flex items-center justify-between rounded-3xl bg-gradient-to-r from-[#0AC4E0]/10 via-[#FFFFFF] to-[#F6E7BC]/40 px-6 py-5">
                 <div>
                   <p className="text-[0.7rem] font-semibold uppercase tracking-[0.26em] text-neutral-500">
                     Trusted around the world
@@ -239,8 +239,8 @@ export default function LandingPage() {
 
               <div className="rf-card-soft rounded-3xl bg-white/90 p-5">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-[#F2F7E5]">
-                    <Globe className="h-4 w-4 text-[#84B179]" />
+                  <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-[#0992C2]/10">
+                    <Globe className="h-4 w-4 text-[#0992C2]" />
                   </div>
                   <div className="space-y-0.5">
                     <p className="text-[0.8rem] font-semibold text-neutral-900">
@@ -261,7 +261,7 @@ export default function LandingPage() {
           <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-0">
             <div className="mb-10 flex flex-col items-start justify-between gap-6 md:flex-row md:items-end">
               <div className="space-y-3">
-                <div className="inline-flex items-center gap-2 rounded-full bg-[#F2F7E5] px-4 py-1.5 text-[0.7rem] font-semibold uppercase tracking-[0.2em] text-neutral-600">
+                <div className="inline-flex items-center gap-2 rounded-full bg-[#0992C2]/10 px-4 py-1.5 text-[0.7rem] font-semibold uppercase tracking-[0.2em] text-neutral-600">
                   <Globe size={13} />
                   Global coverage
                 </div>
@@ -278,7 +278,7 @@ export default function LandingPage() {
                 </div>
               </div>
 
-              <div className="rounded-3xl border border-[#E0EDC5] bg-white/80 px-4 py-3 text-[0.8rem] text-neutral-600 shadow-sm">
+              <div className="rounded-3xl border border-[#0992C2]/20 bg-white/80 px-4 py-3 text-[0.8rem] text-neutral-600 shadow-sm">
                 <p className="font-semibold text-neutral-800">
                   24 new markets added in the last year
                 </p>
@@ -293,7 +293,7 @@ export default function LandingPage() {
                 <Link
                   key={city.name}
                   href={`/browse?city=${city.name}`}
-                  className={`group relative block overflow-hidden rounded-3xl border border-[#E0EDC5] bg-white/90 shadow-sm shadow-[#DCEAC4]/40 transition-transform duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] hover:-translate-y-2 hover:shadow-[0_24px_70px_rgba(148,163,120,0.55)] ${
+                  className={`group relative block overflow-hidden rounded-3xl border border-[#0992C2]/20 bg-white/90 shadow-sm shadow-[#0992C2]/15 transition-transform duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] hover:-translate-y-2 hover:shadow-[0_24px_70px_rgba(11,45,114,0.15)] ${
                     idx === 1 ? 'md:-mt-6' : idx === 2 ? 'md:mt-6' : ''
                   }`}
                 >
@@ -347,19 +347,19 @@ export default function LandingPage() {
             className={`mx-auto max-w-6xl px-4 sm:px-6 lg:px-0`}
           >
             <div
-              className={`relative overflow-hidden rounded-[2rem] border bg-gradient-to-br p-6 shadow-[0_28px_90px_rgba(148,163,120,0.5)] transition-colors duration-500 ${
+              className={`relative overflow-hidden rounded-[2rem] border bg-gradient-to-br p-6 shadow-[0_28px_90px_rgba(11,45,114,0.12)] transition-colors duration-500 ${
                 roleTab === 'tenant'
-                  ? 'from-[#F5FAE9] via-white to-[#E8F5BD] border-[#E0EDC5]'
-                  : 'from-[#DCEAC4] via-[#F5FAE9] to-[#C7EABB] border-[#C0DBA5]'
+                  ? 'from-[#0AC4E0]/10 via-white to-[#F6E7BC]/40 border-[#0992C2]/20'
+                  : 'from-[#0992C2]/10 via-[#0AC4E0]/10 to-[#0AC4E0]/20 border-[#0992C2]/30'
               }`}
             >
-              <div className="pointer-events-none absolute -left-24 top-0 h-56 w-56 rounded-full bg-[#E8F5BD] opacity-70 blur-3xl" />
-              <div className="pointer-events-none absolute -right-24 bottom-0 h-64 w-64 rounded-full bg-[#C7EABB] opacity-80 blur-3xl" />
+              <div className="pointer-events-none absolute -left-24 top-0 h-56 w-56 rounded-full bg-[#F6E7BC]/80 opacity-70 blur-3xl" />
+              <div className="pointer-events-none absolute -right-24 bottom-0 h-64 w-64 rounded-full bg-[#0AC4E0]/50 opacity-80 blur-3xl" />
 
               <div className="relative flex flex-col gap-8 lg:flex-row">
                 <div className="flex-1 space-y-5">
-                  <div className="inline-flex items-center gap-2 rounded-full bg-white/70 px-3 py-1 text-[0.7rem] font-semibold uppercase tracking-[0.22em] text-neutral-600 ring-1 ring-[#E0EDC5]">
-                    <LayoutDashboard className="h-3.5 w-3.5 text-[#84B179]" />
+                  <div className="inline-flex items-center gap-2 rounded-full bg-white/70 px-3 py-1 text-[0.7rem] font-semibold uppercase tracking-[0.22em] text-neutral-600 ring-1 ring-[#0992C2]/20">
+                    <LayoutDashboard className="h-3.5 w-3.5 text-[#0992C2]" />
                     Role-specific workspaces
                   </div>
                   <div className="space-y-3">
@@ -377,12 +377,12 @@ export default function LandingPage() {
                   </div>
 
                   {/* Role toggle */}
-                  <div className="inline-flex rounded-full border border-[#E0EDC5] bg-white/80 p-1 shadow-sm shadow-[#DCEAC4]/50">
+                  <div className="inline-flex rounded-full border border-[#0992C2]/20 bg-white/80 p-1 shadow-sm shadow-[#0992C2]/15">
                     <div
                       className="relative flex gap-1 overflow-hidden rounded-full"
                     >
                       <div
-                        className="absolute inset-y-1 rounded-full bg-[#F2F7E5] transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
+                        className="absolute inset-y-1 rounded-full bg-[#0AC4E0]/20 transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
                         style={{
                           left: indicatorStyle.left,
                           width: indicatorStyle.width,
@@ -455,18 +455,18 @@ export default function LandingPage() {
                         <div
                           key={f.title}
                           style={{ animationDelay: `${i * 70}ms` }}
-                          className="rf-hover-card rf-fade-in-stagger rounded-2xl border border-[#E0EDC5] bg-white/80 p-4 text-sm shadow-sm shadow-[#DCEAC4]/40"
+                          className="rf-hover-card rf-fade-in-stagger rounded-2xl border border-[#0992C2]/20 bg-white/80 p-4 text-sm shadow-sm shadow-[#0992C2]/10"
                         >
                           <div
                             className={`mb-3 flex h-10 w-10 items-center justify-center rounded-2xl ${
                               roleTab === 'tenant'
-                                ? 'bg-[#EAF5D6]'
-                                : 'bg-[#D8ECC3]'
+                                ? 'bg-[#0AC4E0]/20'
+                                : 'bg-[#0992C2]/20'
                             }`}
                           >
                             <Icon
                               size={18}
-                              className="text-[#84B179]"
+                              className="text-[#0992C2]"
                             />
                           </div>
                           <h3 className="mb-1 text-[0.9rem] font-semibold text-neutral-900">
@@ -529,14 +529,14 @@ export default function LandingPage() {
                 return (
                   <div
                     key={step.n}
-                    className="relative space-y-3 rounded-3xl border border-[#E0EDC5] bg-white/80 p-5 shadow-sm shadow-[#DCEAC4]/40"
+                    className="relative space-y-3 rounded-3xl border border-[#0992C2]/20 bg-white/80 p-5 shadow-sm shadow-[#0992C2]/15"
                   >
                     <div className="flex items-center justify-between gap-3">
                       <span className="text-[0.8rem] font-semibold text-neutral-500">
                         Step {step.n}
                       </span>
-                      <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-[#F2F7E5]">
-                        <Icon className="h-4 w-4 text-[#84B179]" />
+                      <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-[#0AC4E0]/15">
+                        <Icon className="h-4 w-4 text-[#0992C2]" />
                       </div>
                     </div>
                     <h3 className="text-[1rem] font-semibold text-neutral-900">
@@ -546,7 +546,7 @@ export default function LandingPage() {
                       {step.desc}
                     </p>
                     {idx < 2 && (
-                      <div className="pointer-events-none absolute -right-2 top-1/2 hidden h-px w-5 bg-gradient-to-r from-[#C7EABB] to-transparent md:block" />
+                      <div className="pointer-events-none absolute -right-2 top-1/2 hidden h-px w-5 bg-gradient-to-r from-[#0AC4E0]/50 to-transparent md:block" />
                     )}
                   </div>
                 );
@@ -570,9 +570,9 @@ export default function LandingPage() {
               ].map(({ icon: Icon, text }) => (
                 <div
                   key={text}
-                  className="inline-flex items-center gap-2 rounded-full bg-white/70 px-4 py-2 shadow-sm shadow-[#DCEAC4]/40"
+                  className="inline-flex items-center gap-2 rounded-full bg-white/70 px-4 py-2 shadow-sm shadow-[#0992C2]/15"
                 >
-                  <Icon size={16} className="text-[#84B179]" />
+                  <Icon size={16} className="text-[#0992C2]" />
                   <span>{text}</span>
                 </div>
               ))}
@@ -585,7 +585,7 @@ export default function LandingPage() {
           {!user && (
             <section className="relative">
               <div className="mx-auto max-w-3xl px-4 text-center sm:px-6 lg:px-0">
-                <div className="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-[#A2CB8B] via-[#C7EABB] to-[#E8F5BD] px-6 py-10 shadow-[0_28px_90px_rgba(148,163,120,0.7)]">
+                <div className="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-[#0992C2] via-[#0AC4E0] to-[#F6E7BC] px-6 py-10 shadow-[0_28px_90px_rgba(9,146,194,0.3)]">
                   <div className="pointer-events-none absolute -left-10 top-0 h-32 w-32 rounded-full bg-white/50 blur-2xl" />
                   <div className="pointer-events-none absolute -right-16 bottom-0 h-40 w-40 rounded-full bg-white/40 blur-3xl" />
                   <div className="relative space-y-5">
@@ -619,9 +619,9 @@ export default function LandingPage() {
           {user && (
             <section className="relative">
               <div className="mx-auto max-w-3xl px-4 text-center sm:px-6 lg:px-0">
-                <div className="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-[#F5FAE9] via-white to-[#E8F5BD] px-6 py-10 shadow-[0_22px_70px_rgba(148,163,120,0.5)] ring-1 ring-[#E0EDC5]">
-                  <div className="pointer-events-none absolute -left-10 top-0 h-32 w-32 rounded-full bg-[#C7EABB]/60 blur-2xl" />
-                  <div className="pointer-events-none absolute -right-16 bottom-0 h-40 w-40 rounded-full bg-[#E8F5BD]/70 blur-3xl" />
+                <div className="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-[#0AC4E0]/10 via-white to-[#F6E7BC]/40 px-6 py-10 shadow-[0_22px_70px_rgba(11,45,114,0.12)] ring-1 ring-[#0992C2]/20">
+                  <div className="pointer-events-none absolute -left-10 top-0 h-32 w-32 rounded-full bg-[#0AC4E0]/40 blur-2xl" />
+                  <div className="pointer-events-none absolute -right-16 bottom-0 h-40 w-40 rounded-full bg-[#F6E7BC]/60 blur-3xl" />
                   <div className="relative space-y-4">
                     <h2 className="text-h2 text-neutral-900">
                       Welcome back, {user.name?.split(' ')[0]}.

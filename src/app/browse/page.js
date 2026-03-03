@@ -30,11 +30,11 @@ function PhotoCarousel({ images, title }) {
   const next = (e) => { e.preventDefault(); setIdx(i => (i + 1) % images.length); };
 
   return (
-    <div className="relative h-52 select-none overflow-hidden rounded-3xl bg-[#F2F7E5]">
+    <div className="relative h-52 select-none overflow-hidden rounded-3xl bg-[#0AC4E0]/10">
       {src
         ? <img src={src} alt={title} className="h-full w-full object-cover transition-opacity duration-300" loading="lazy"/>
-        : <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-[#E8F5BD] to-[#C7EABB]">
-            <Building2 className="h-14 w-14 text-white/60"/>
+        : <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-[#F6E7BC]/80 to-[#0AC4E0]/30">
+            <Building2 className="h-14 w-14 text-white/80"/>
           </div>
       }
       <button onClick={e => e.preventDefault()}
@@ -47,12 +47,12 @@ function PhotoCarousel({ images, title }) {
           <button onClick={prev}
             className="arrow-btn absolute left-2 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full bg-white/85 opacity-0 shadow-sm backdrop-blur-sm transition-all hover:bg-white"
           >
-            <ChevronLeft size={14} className="text-neutral-700"/>
+            <ChevronLeft size={14} className="text-[#0B2D72]"/>
           </button>
           <button onClick={next}
             className="arrow-btn absolute right-2 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full bg-white/85 opacity-0 shadow-sm backdrop-blur-sm transition-all hover:bg-white"
           >
-            <ChevronRight size={14} className="text-neutral-700"/>
+            <ChevronRight size={14} className="text-[#0B2D72]"/>
           </button>
           <div className="absolute bottom-2 left-1/2 flex -translate-x-1/2 gap-1">
             {images.slice(0, 5).map((_, i) => (
@@ -78,15 +78,15 @@ function Dropdown({ label, options, value, onChange, wide }) {
     <div ref={ref} className="relative">
       <button onClick={() => setOpen(o => !o)}
         className={`flex items-center gap-2 px-4 py-2 rounded-xl border text-sm font-semibold transition-all whitespace-nowrap
-          ${open ? 'border-violet-500 bg-violet-50 text-violet-700' : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300 hover:bg-gray-50'}`}>
+          ${open ? 'border-[#0992C2] bg-[#0992C2]/10 text-[#0B2D72]' : 'border-gray-200 bg-white text-gray-700 hover:border-[#0992C2]/30 hover:bg-[#F0F8FA]'}`}>
         {label} <ChevronDown size={13} className={`transition-transform ${open ? 'rotate-180' : ''}`}/>
       </button>
       {open && (
         <div className={`absolute top-full left-0 mt-2 bg-white border border-gray-200 rounded-2xl shadow-xl z-50 overflow-hidden ${wide ? 'w-52' : 'w-44'}`}>
           {options.map(opt => (
             <button key={opt.value ?? opt} onClick={() => { onChange(opt.value ?? opt); setOpen(false); }}
-              className={`w-full text-left px-4 py-2.5 text-sm hover:bg-violet-50 hover:text-violet-700 transition-colors font-medium
-                ${(opt.value ?? opt) === value ? 'bg-violet-50 text-violet-700' : 'text-gray-700'}`}>
+              className={`w-full text-left px-4 py-2.5 text-sm hover:bg-[#0992C2]/10 hover:text-[#0B2D72] transition-colors font-medium
+                ${(opt.value ?? opt) === value ? 'bg-[#0992C2]/10 text-[#0B2D72]' : 'text-gray-700'}`}>
               {opt.label ?? opt}
             </button>
           ))}
@@ -134,17 +134,17 @@ function BrowseContent() {
   useEffect(() => { fetchListings(); }, [fetchListings]);
 
   return (
-    <div className="flex min-h-screen flex-col bg-[#F7FAF0]">
+    <div className="flex min-h-screen flex-col bg-[#F8FBFC]">
       <Navbar />
 
       {/* Filter bar */}
-      <div className="sticky top-16 z-40 border-b border-[#E0EDC5] bg-white/90 backdrop-blur">
+      <div className="sticky top-16 z-40 border-b border-[#0992C2]/15 bg-white/90 backdrop-blur">
         <div className="mx-auto flex max-w-[1600px] flex-wrap items-center gap-3 px-4 py-3 sm:px-6">
           <form
             onSubmit={e => { e.preventDefault(); setCity(searchInput.trim()); }}
-            className="flex max-w-xs flex-1 items-center gap-2 rounded-2xl border border-transparent bg-[#F2F7E5] px-3 py-2.5 transition-colors focus-within:border-[#A2CB8B] focus-within:bg-white"
+            className="flex max-w-xs flex-1 items-center gap-2 rounded-2xl border border-transparent bg-[#0AC4E0]/10 px-3 py-2.5 transition-colors focus-within:border-[#0992C2] focus-within:bg-white"
           >
-            <Search size={15} className="flex-shrink-0 text-[#84B179]"/>
+            <Search size={15} className="flex-shrink-0 text-[#0992C2]"/>
             <input value={searchInput} onChange={e => setSearchInput(e.target.value)}
               placeholder="City or address…"
               className="min-w-0 flex-1 bg-transparent py-0 text-sm text-neutral-700 outline-none placeholder:text-neutral-400"/>
@@ -152,7 +152,7 @@ function BrowseContent() {
           <Dropdown label={priceKey === 'Any Price' ? 'Price' : priceKey} value={priceKey} onChange={setPriceKey} wide options={PRICE_RANGES.map(r=>({label:r.label,value:r.label}))}/>
           <Dropdown label={type ? type[0].toUpperCase()+type.slice(1) : 'Type'} value={type} onChange={setType} options={[{label:'All Types',value:''},...TYPES.map(t=>({label:t[0].toUpperCase()+t.slice(1),value:t}))]}/>
           <Dropdown label={beds ? `${beds} Beds` : 'Beds'} value={beds} onChange={setBeds} options={[{label:'Any Beds',value:''},...BEDS.map(b=>({label:`${b} bed${b==='1'?'':'s'}`,value:b}))]}/>
-          <button className="flex items-center gap-2 rounded-2xl border border-[#E0EDC5] bg-white px-4 py-2 text-sm font-semibold text-neutral-700 transition-all hover:border-[#C0DBA5] hover:bg-[#F5FAE9]">
+          <button className="flex items-center gap-2 rounded-2xl border border-[#0992C2]/20 bg-white px-4 py-2 text-sm font-semibold text-neutral-700 transition-all hover:border-[#0992C2]/40 hover:bg-[#F0F8FA]">
             <SlidersHorizontal size={14}/> Filters
           </button>
           <div className="ml-auto flex items-center gap-4 flex-shrink-0">
@@ -174,12 +174,12 @@ function BrowseContent() {
             <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
               {[...Array(10)].map((_,i) => (
                 <div key={i} className="overflow-hidden rounded-3xl bg-white shadow-sm">
-                  <div className="h-52 animate-pulse bg-[#EFF3E0]"/>
+                  <div className="h-52 animate-pulse bg-[#0AC4E0]/10"/>
                   <div className="space-y-2.5 p-4">
-                    <div className="h-5 w-1/2 rounded-lg bg-[#E4ECD0]"/>
-                    <div className="h-3.5 w-3/4 rounded bg-[#E9F1D7]"/>
-                    <div className="h-3.5 w-2/3 rounded bg-[#E9F1D7]"/>
-                    <div className="mt-3 h-8 rounded-xl bg-[#E4ECD0]"/>
+                    <div className="h-5 w-1/2 rounded-lg bg-[#0992C2]/15"/>
+                    <div className="h-3.5 w-3/4 rounded bg-[#0992C2]/10"/>
+                    <div className="h-3.5 w-2/3 rounded bg-[#0992C2]/10"/>
+                    <div className="mt-3 h-8 rounded-xl bg-[#0AC4E0]/15"/>
                   </div>
                 </div>
               ))}
@@ -188,13 +188,13 @@ function BrowseContent() {
 
           {!loading && listings.length === 0 && (
             <div className="py-28 text-center">
-              <div className="mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-full bg-[#F2F7E5]">
-                <Home className="h-10 w-10 text-[#C7EABB]"/>
+              <div className="mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-full bg-[#0AC4E0]/10">
+                <Home className="h-10 w-10 text-[#0992C2]"/>
               </div>
               <h3 className="mb-2 text-xl font-semibold text-neutral-800">No listings found</h3>
               <p className="text-sm text-neutral-500">Try adjusting your filters or search a different city</p>
               <button onClick={() => { setCity(''); setSearchInput(''); setType(''); setPriceKey('Any Price'); setBeds(''); }}
-                className="mt-6 rounded-full bg-[#84B179] px-6 py-2.5 text-sm font-bold text-white transition-all hover:bg-[#6A965F]">
+                className="mt-6 rounded-full bg-[#0992C2] px-6 py-2.5 text-sm font-bold text-white transition-all hover:bg-[#0B2D72]">
                 Clear Filters
               </button>
             </div>
@@ -206,7 +206,7 @@ function BrowseContent() {
                 <Link
                   key={listing._id}
                   href={`/browse/${listing._id}`}
-                  className="group block overflow-hidden rounded-3xl border border-[#E0EDC5] bg-white/95 shadow-[0_8px_26px_rgba(148,163,120,0.28)] transition-transform duration-300 ease-[cubic-bezier(0.34,1.2,0.64,1)] hover:-translate-y-2 hover:shadow-[0_22px_70px_rgba(148,163,120,0.4)]"
+                  className="group block overflow-hidden rounded-3xl border border-[#0992C2]/20 bg-white/95 shadow-[0_8px_26px_rgba(11,45,114,0.12)] transition-transform duration-300 ease-[cubic-bezier(0.34,1.2,0.64,1)] hover:-translate-y-2 hover:shadow-[0_22px_70px_rgba(11,45,114,0.25)]"
                 >
                   <PhotoCarousel images={listing.images} title={listing.title}/>
                   <div className="p-3.5">
@@ -216,7 +216,7 @@ function BrowseContent() {
                       </span>
                       <button
                         onClick={e => e.preventDefault()}
-                        className="flex h-7 w-7 items-center justify-center rounded-full border border-[#E0EDC5] text-neutral-400 transition-colors hover:border-red-300 hover:text-red-500"
+                        className="flex h-7 w-7 items-center justify-center rounded-full border border-[#0992C2]/20 text-neutral-400 transition-colors hover:border-red-300 hover:text-red-500"
                       >
                         <Heart size={13}/>
                       </button>
@@ -226,7 +226,7 @@ function BrowseContent() {
                       {listing.specs?.bathrooms != null && <span className="flex items-center gap-1"><Bath size={11} className="text-neutral-400"/> {listing.specs.bathrooms}</span>}
                       {listing.specs?.sizeSqFt && <span className="flex items-center gap-1"><Square size={11} className="text-neutral-400"/> {listing.specs.sizeSqFt} sq ft</span>}
                       {!listing.specs?.bedrooms && !listing.specs?.bathrooms && !listing.specs?.sizeSqFt && (
-                        <span className="capitalize text-[#84B179]">{listing.type}</span>
+                        <span className="capitalize text-[#0992C2]">{listing.type}</span>
                       )}
                     </div>
                     <p className="mb-3 flex items-start gap-1 text-[11px] font-medium leading-snug text-neutral-400">
@@ -235,7 +235,7 @@ function BrowseContent() {
                     </p>
                     <button
                       onClick={e => e.preventDefault()}
-                      className="flex w-full items-center justify-center gap-2 rounded-full border border-[#A2CB8B] bg-white px-4 py-2 text-[0.8rem] font-semibold text-[#1F7A3A] transition-all hover:bg-[#A2CB8B] hover:text-white"
+                      className="flex w-full items-center justify-center gap-2 rounded-full border border-[#0992C2]/30 bg-white px-4 py-2 text-[0.8rem] font-semibold text-[#0992C2] transition-all hover:bg-[#0992C2] hover:text-white"
                     >
                       <Tag size={13}/>
                       View
@@ -245,17 +245,17 @@ function BrowseContent() {
               ))}
 
               {listings.length >= 4 && (
-                <div className="flex min-h-[300px] flex-col items-center justify-center rounded-3xl bg-gradient-to-br from-[#A2CB8B] via-[#C7EABB] to-[#E8F5BD] p-6 text-center text-neutral-900 shadow-[0_22px_70px_rgba(148,163,120,0.6)]">
-                  <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-white/20">
+                <div className="flex min-h-[300px] flex-col items-center justify-center rounded-3xl bg-gradient-to-br from-[#0992C2] via-[#0AC4E0] to-[#F6E7BC] p-6 text-center text-white shadow-[0_22px_70px_rgba(11,45,114,0.3)]">
+                  <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-white/20 backdrop-blur-sm">
                     <Star size={20} className="text-white"/>
                   </div>
-                  <h3 className="mb-2 text-lg font-semibold text-neutral-900">Discover more</h3>
-                  <p className="mb-5 text-xs leading-relaxed text-neutral-800">
+                  <h3 className="mb-2 text-lg font-semibold text-white">Discover more</h3>
+                  <p className="mb-5 text-xs leading-relaxed text-white/90">
                     Quality properties — curated, verified, and always in sync with your filters.
                   </p>
                   <Link
                     href="/register"
-                    className="rounded-full bg-white px-5 py-2.5 text-xs font-bold text-[#1F7A3A] transition-all hover:bg-[#F5FAE9]"
+                    className="rounded-full bg-white px-5 py-2.5 text-xs font-bold text-[#0B2D72] transition-all hover:bg-[#F6E7BC]"
                   >
                     Save this search
                   </Link>
@@ -273,10 +273,10 @@ function BrowseContent() {
 export default function BrowsePage() {
   return (
     <Suspense fallback={
-      <div className="flex min-h-screen flex-col bg-[#F7FAF0]">
+      <div className="flex min-h-screen flex-col bg-[#F8FBFC]">
         <Navbar />
         <div className="flex flex-grow items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-[#84B179]" />
+          <Loader2 className="h-8 w-8 animate-spin text-[#0992C2]" />
         </div>
         <Footer />
       </div>

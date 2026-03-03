@@ -17,11 +17,11 @@ export default function Footer() {
   }, [pathname]);
 
   return (
-    <footer className="mt-auto border-t border-[#E0EDC5] bg-gradient-to-t from-[#F0F6DE] via-[#F9FCEB] to-transparent">
+    <footer className="mt-auto border-t border-[#0992C2]/20 bg-gradient-to-t from-[#0AC4E0]/10 via-[#F6E7BC]/20 to-transparent">
       <div className="mx-auto flex w-full max-w-6xl flex-col items-center justify-between gap-6 px-4 py-8 sm:flex-row sm:px-6 lg:px-8">
         {/* Logo */}
         <div className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-tr from-[#A2CB8B] to-[#84B179] shadow-md shadow-[#A2CB8B]/40">
+          <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-tr from-[#0992C2] to-[#0B2D72] shadow-md shadow-[#0992C2]/30">
             <Building2 className="h-4 w-4 text-white" />
           </div>
           <div className="flex flex-col">
