@@ -15,37 +15,37 @@ import Footer from '@/components/Footer';
 import { MotionRevealSection } from '@/components/ui/Motion';
 
 const CITIES = [
-  { name: 'New York',    country: 'USA',    count: '12,400+ listings', img: 'https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?w=700&q=80' },
-  { name: 'London',      country: 'UK',     count: '9,800+ listings',  img: 'https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?w=700&q=80' },
-  { name: 'Los Angeles', country: 'USA',    count: '7,200+ listings',  img: 'https://images.unsplash.com/photo-1534430480872-3498386e7856?w=700&q=80' },
-  { name: 'Manchester',  country: 'UK',     count: '4,100+ listings',  img: 'https://images.unsplash.com/photo-1570168007204-dfb528c6958f?w=700&q=80' },
-  { name: 'Dubai',       country: 'UAE',    count: '6,600+ listings',  img: 'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=700&q=80' },
-  { name: 'Toronto',     country: 'Canada', count: '5,300+ listings',  img: 'https://images.unsplash.com/photo-1517090504586-fde19ea6066f?w=700&q=80' },
+  { name: 'New York', country: 'USA', count: '12,400+ listings', img: 'https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?w=700&q=80' },
+  { name: 'London', country: 'UK', count: '9,800+ listings', img: 'https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?w=700&q=80' },
+  { name: 'Los Angeles', country: 'USA', count: '7,200+ listings', img: 'https://images.unsplash.com/photo-1534430480872-3498386e7856?w=700&q=80' },
+  { name: 'Manchester', country: 'UK', count: '4,100+ listings', img: 'https://images.unsplash.com/photo-1570168007204-dfb528c6958f?w=700&q=80' },
+  { name: 'Dubai', country: 'UAE', count: '6,600+ listings', img: 'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=700&q=80' },
+  { name: 'Toronto', country: 'Canada', count: '5,300+ listings', img: 'https://images.unsplash.com/photo-1517090504586-fde19ea6066f?w=700&q=80' },
 ];
 
 const TENANT_FEATURES = [
-  { icon: Search,        color: '#0992C2', title: 'Smart Search & Discovery',  desc: 'Browse verified listings by city, budget, and amenities. AI matching recommends properties based on your profile.' },
-  { icon: ClipboardList, color: '#0284C7', title: 'One-Click Applications',    desc: 'Apply with a single click. Track all your applications in real time — status, landlord responses, and offer rounds.' },
-  { icon: FileText,      color: '#0891B2', title: 'Digital Lease Signing',     desc: 'Sign legally binding agreements from any device. No printing, no fax — your signed lease is instantly downloadable.' },
-  { icon: CreditCard,    color: '#0992C2', title: 'Rent Payments',             desc: 'Pay rent securely via card or bank transfer. Automated reminders, downloadable receipts, and full payment history.' },
-  { icon: Wrench,        color: '#0284C7', title: 'Maintenance Requests',      desc: 'Submit issues with photos and urgency levels. Track repair status end-to-end — no more chasing landlords.' },
-  { icon: MessageSquare, color: '#0891B2', title: 'Direct Messaging',          desc: 'All tenant-landlord communication in one place. Full audit trail, document sharing, and read receipts.' },
+  { icon: Search, color: '#0992C2', title: 'Smart Search & Discovery', desc: 'Browse verified listings by city, budget, and amenities. AI matching recommends properties based on your profile.' },
+  { icon: ClipboardList, color: '#0284C7', title: 'One-Click Applications', desc: 'Apply with a single click. Track all your applications in real time — status, landlord responses, and offer rounds.' },
+  { icon: FileText, color: '#0891B2', title: 'Digital Lease Signing', desc: 'Sign legally binding agreements from any device. No printing, no fax — your signed lease is instantly downloadable.' },
+  { icon: CreditCard, color: '#0992C2', title: 'Rent Payments', desc: 'Pay rent securely via card or bank transfer. Automated reminders, downloadable receipts, and full payment history.' },
+  { icon: Wrench, color: '#0284C7', title: 'Maintenance Requests', desc: 'Submit issues with photos and urgency levels. Track repair status end-to-end — no more chasing landlords.' },
+  { icon: MessageSquare, color: '#0891B2', title: 'Direct Messaging', desc: 'All tenant-landlord communication in one place. Full audit trail, document sharing, and read receipts.' },
 ];
 
 const LANDLORD_FEATURES = [
-  { icon: Building2,  color: '#1D4ED8', title: 'Verified Property Listings', desc: 'Publish listings with photos, amenities, and lease terms. Verified badge builds trust with quality tenants.' },
-  { icon: UserCheck,  color: '#0369A1', title: 'Tenant Screening',           desc: 'One-click screening requests. Get credit reports, criminal background, employment verification — all in-platform.' },
-  { icon: Users,      color: '#0E7490', title: 'Application Management',     desc: 'Centralized inbox for all applicants. Review profiles, message candidates, and accept or decline with one click.' },
-  { icon: TrendingUp, color: '#1D4ED8', title: 'Rent Collection',            desc: 'Automated rent schedules, overdue flagging, and a full collection dashboard. Late fees applied automatically.' },
-  { icon: BarChart2,  color: '#0369A1', title: 'Portfolio Analytics',        desc: 'Track occupancy rates, payment status, maintenance costs, and lease expiries across all your properties.' },
-  { icon: ShieldCheck,color: '#0E7490', title: 'Dispute Resolution',         desc: 'Built-in dispute system with a transparent audit log. Admin mediation keeps every interaction documented.' },
+  { icon: Building2, color: '#1D4ED8', title: 'Verified Property Listings', desc: 'Publish listings with photos, amenities, and lease terms. Verified badge builds trust with quality tenants.' },
+  { icon: UserCheck, color: '#0369A1', title: 'Tenant Screening', desc: 'One-click screening requests. Get credit reports, criminal background, employment verification — all in-platform.' },
+  { icon: Users, color: '#0E7490', title: 'Application Management', desc: 'Centralized inbox for all applicants. Review profiles, message candidates, and accept or decline with one click.' },
+  { icon: TrendingUp, color: '#1D4ED8', title: 'Rent Collection', desc: 'Automated rent schedules, overdue flagging, and a full collection dashboard. Late fees applied automatically.' },
+  { icon: BarChart2, color: '#0369A1', title: 'Portfolio Analytics', desc: 'Track occupancy rates, payment status, maintenance costs, and lease expiries across all your properties.' },
+  { icon: ShieldCheck, color: '#0E7490', title: 'Dispute Resolution', desc: 'Built-in dispute system with a transparent audit log. Admin mediation keeps every interaction documented.' },
 ];
 
 const STATS = [
-  { value: '60+',   label: 'Countries' },
-  { value: '2M+',   label: 'Listings' },
+  { value: '60+', label: 'Countries' },
+  { value: '2M+', label: 'Listings' },
   { value: '500K+', label: 'Landlords' },
-  { value: '4.7★',  label: 'Avg Rating' },
+  { value: '4.7★', label: 'Avg Rating' },
 ];
 
 // SVG Cityscape illustration using the brand palette
@@ -63,75 +63,75 @@ function CityscapeSVG() {
       <rect x="0" y="280" width="1200" height="60" fill="rgba(10,196,224,0.15)" />
 
       {/* Far-background buildings */}
-      <rect x="50"  y="180" width="40"  height="120" fill="rgba(11,45,114,0.25)" rx="3"/>
-      <rect x="100" y="160" width="30"  height="140" fill="rgba(11,45,114,0.2)"  rx="3"/>
-      <rect x="140" y="190" width="50"  height="110" fill="rgba(11,45,114,0.22)" rx="3"/>
+      <rect x="50" y="180" width="40" height="120" fill="rgba(11,45,114,0.25)" rx="3" />
+      <rect x="100" y="160" width="30" height="140" fill="rgba(11,45,114,0.2)" rx="3" />
+      <rect x="140" y="190" width="50" height="110" fill="rgba(11,45,114,0.22)" rx="3" />
 
       {/* Bridge towers (left) */}
-      <rect x="30"  y="100" width="18"  height="180" fill="rgba(246,180,120,0.55)" rx="2"/>
-      <rect x="70"  y="100" width="18"  height="180" fill="rgba(246,180,120,0.55)" rx="2"/>
+      <rect x="30" y="100" width="18" height="180" fill="rgba(246,180,120,0.55)" rx="2" />
+      <rect x="70" y="100" width="18" height="180" fill="rgba(246,180,120,0.55)" rx="2" />
       {/* Bridge cables */}
-      <line x1="39"  y1="105" x2="0"   y2="280" stroke="rgba(246,180,120,0.4)" strokeWidth="1.5"/>
-      <line x1="39"  y1="105" x2="160" y2="280" stroke="rgba(246,180,120,0.4)" strokeWidth="1.5"/>
-      <line x1="79"  y1="105" x2="0"   y2="280" stroke="rgba(246,180,120,0.4)" strokeWidth="1.5"/>
-      <line x1="79"  y1="105" x2="160" y2="280" stroke="rgba(246,180,120,0.4)" strokeWidth="1.5"/>
+      <line x1="39" y1="105" x2="0" y2="280" stroke="rgba(246,180,120,0.4)" strokeWidth="1.5" />
+      <line x1="39" y1="105" x2="160" y2="280" stroke="rgba(246,180,120,0.4)" strokeWidth="1.5" />
+      <line x1="79" y1="105" x2="0" y2="280" stroke="rgba(246,180,120,0.4)" strokeWidth="1.5" />
+      <line x1="79" y1="105" x2="160" y2="280" stroke="rgba(246,180,120,0.4)" strokeWidth="1.5" />
 
       {/* Mid buildings left cluster */}
-      <rect x="160" y="140" width="60"  height="140" fill="rgba(246,180,120,0.45)" rx="4"/>
-      <rect x="170" y="120" width="20"  height="25"  fill="rgba(246,180,120,0.5)"  rx="2"/>
-      <rect x="230" y="100" width="45"  height="180" fill="rgba(246,160,100,0.4)"  rx="4"/>
-      <rect x="240" y="80"  width="12"  height="25"  fill="rgba(246,160,100,0.5)"  rx="2"/>
-      <rect x="285" y="150" width="55"  height="130" fill="rgba(200,150,100,0.35)" rx="4"/>
+      <rect x="160" y="140" width="60" height="140" fill="rgba(246,180,120,0.45)" rx="4" />
+      <rect x="170" y="120" width="20" height="25" fill="rgba(246,180,120,0.5)" rx="2" />
+      <rect x="230" y="100" width="45" height="180" fill="rgba(246,160,100,0.4)" rx="4" />
+      <rect x="240" y="80" width="12" height="25" fill="rgba(246,160,100,0.5)" rx="2" />
+      <rect x="285" y="150" width="55" height="130" fill="rgba(200,150,100,0.35)" rx="4" />
 
       {/* Tall center spire */}
-      <rect x="360" y="60"  width="35"  height="220" fill="rgba(9,146,194,0.45)"  rx="4"/>
+      <rect x="360" y="60" width="35" height="220" fill="rgba(9,146,194,0.45)" rx="4" />
       <polygon points="360,60 377,20 395,60" fill="rgba(9,146,194,0.6)" />
-      <rect x="368" y="70"  width="6"   height="8"   fill="rgba(255,255,255,0.4)" rx="1"/>
-      <rect x="378" y="70"  width="6"   height="8"   fill="rgba(255,255,255,0.4)" rx="1"/>
-      <rect x="368" y="85"  width="6"   height="8"   fill="rgba(255,255,255,0.4)" rx="1"/>
-      <rect x="378" y="85"  width="6"   height="8"   fill="rgba(255,255,255,0.4)" rx="1"/>
+      <rect x="368" y="70" width="6" height="8" fill="rgba(255,255,255,0.4)" rx="1" />
+      <rect x="378" y="70" width="6" height="8" fill="rgba(255,255,255,0.4)" rx="1" />
+      <rect x="368" y="85" width="6" height="8" fill="rgba(255,255,255,0.4)" rx="1" />
+      <rect x="378" y="85" width="6" height="8" fill="rgba(255,255,255,0.4)" rx="1" />
 
       {/* Colorful mid-ground blocks */}
-      <rect x="410" y="130" width="50"  height="150" fill="rgba(9,146,194,0.5)"   rx="4"/>
-      <rect x="420" y="110" width="14"  height="24"  fill="rgba(9,146,194,0.6)"   rx="2"/>
-      <rect x="470" y="160" width="70"  height="120" fill="rgba(246,231,188,0.55)" rx="4"/>
-      <rect x="480" y="140" width="20"  height="24"  fill="rgba(246,231,188,0.65)" rx="2"/>
+      <rect x="410" y="130" width="50" height="150" fill="rgba(9,146,194,0.5)" rx="4" />
+      <rect x="420" y="110" width="14" height="24" fill="rgba(9,146,194,0.6)" rx="2" />
+      <rect x="470" y="160" width="70" height="120" fill="rgba(246,231,188,0.55)" rx="4" />
+      <rect x="480" y="140" width="20" height="24" fill="rgba(246,231,188,0.65)" rx="2" />
 
       {/* Center ground burst */}
-      <rect x="550" y="170" width="80"  height="110" fill="rgba(10,196,224,0.4)"  rx="4"/>
-      <rect x="560" y="145" width="24"  height="28"  fill="rgba(10,196,224,0.5)"  rx="2"/>
-      <rect x="592" y="155" width="16"  height="18"  fill="rgba(10,196,224,0.5)"  rx="2"/>
-      <rect x="640" y="140" width="55"  height="140" fill="rgba(9,146,194,0.6)"   rx="4"/>
-      <rect x="650" y="118" width="18"  height="26"  fill="rgba(9,146,194,0.65)"  rx="2"/>
+      <rect x="550" y="170" width="80" height="110" fill="rgba(10,196,224,0.4)" rx="4" />
+      <rect x="560" y="145" width="24" height="28" fill="rgba(10,196,224,0.5)" rx="2" />
+      <rect x="592" y="155" width="16" height="18" fill="rgba(10,196,224,0.5)" rx="2" />
+      <rect x="640" y="140" width="55" height="140" fill="rgba(9,146,194,0.6)" rx="4" />
+      <rect x="650" y="118" width="18" height="26" fill="rgba(9,146,194,0.65)" rx="2" />
 
       {/* Right cluster – blues */}
-      <rect x="710" y="100" width="45"  height="180" fill="rgba(11,45,114,0.4)"   rx="4"/>
-      <rect x="720" y="80"  width="10"  height="24"  fill="rgba(11,45,114,0.5)"   rx="2"/>
-      <rect x="765" y="130" width="60"  height="150" fill="rgba(11,45,114,0.35)"  rx="4"/>
-      <rect x="838" y="150" width="50"  height="130" fill="rgba(9,146,194,0.35)"  rx="4"/>
-      <rect x="848" y="130" width="14"  height="24"  fill="rgba(9,146,194,0.45)"  rx="2"/>
+      <rect x="710" y="100" width="45" height="180" fill="rgba(11,45,114,0.4)" rx="4" />
+      <rect x="720" y="80" width="10" height="24" fill="rgba(11,45,114,0.5)" rx="2" />
+      <rect x="765" y="130" width="60" height="150" fill="rgba(11,45,114,0.35)" rx="4" />
+      <rect x="838" y="150" width="50" height="130" fill="rgba(9,146,194,0.35)" rx="4" />
+      <rect x="848" y="130" width="14" height="24" fill="rgba(9,146,194,0.45)" rx="2" />
 
       {/* Far right towers */}
-      <rect x="900" y="110" width="55"  height="170" fill="rgba(10,196,224,0.38)" rx="4"/>
-      <rect x="912" y="90"  width="12"  height="24"  fill="rgba(10,196,224,0.48)" rx="2"/>
-      <rect x="968" y="170" width="65"  height="110" fill="rgba(11,45,114,0.3)"   rx="4"/>
-      <rect x="980" y="155" width="16"  height="18"  fill="rgba(11,45,114,0.4)"   rx="2"/>
-      <rect x="1045" y="140" width="45" height="140" fill="rgba(9,146,194,0.3)"   rx="4"/>
-      <rect x="1100" y="165" width="60" height="115" fill="rgba(11,45,114,0.25)"  rx="4"/>
-      <rect x="1165" y="180" width="35" height="100" fill="rgba(9,146,194,0.25)"  rx="4"/>
+      <rect x="900" y="110" width="55" height="170" fill="rgba(10,196,224,0.38)" rx="4" />
+      <rect x="912" y="90" width="12" height="24" fill="rgba(10,196,224,0.48)" rx="2" />
+      <rect x="968" y="170" width="65" height="110" fill="rgba(11,45,114,0.3)" rx="4" />
+      <rect x="980" y="155" width="16" height="18" fill="rgba(11,45,114,0.4)" rx="2" />
+      <rect x="1045" y="140" width="45" height="140" fill="rgba(9,146,194,0.3)" rx="4" />
+      <rect x="1100" y="165" width="60" height="115" fill="rgba(11,45,114,0.25)" rx="4" />
+      <rect x="1165" y="180" width="35" height="100" fill="rgba(9,146,194,0.25)" rx="4" />
 
       {/* Windows sprinkled */}
-      {[165,175,185,195,205,215,165,175,185,195].map((x,i) => (
-        <rect key={i} x={x} y={145 + (i%4)*20} width="8" height="6" fill="rgba(255,255,255,0.35)" rx="1"/>
+      {[165, 175, 185, 195, 205, 215, 165, 175, 185, 195].map((x, i) => (
+        <rect key={i} x={x} y={145 + (i % 4) * 20} width="8" height="6" fill="rgba(255,255,255,0.35)" rx="1" />
       ))}
-      {[413,424,435,413,424,435,413,424].map((x,i) => (
-        <rect key={`w2-${i}`} x={x} y={138 + (i%4)*20} width="8" height="6" fill="rgba(255,255,255,0.3)" rx="1"/>
+      {[413, 424, 435, 413, 424, 435, 413, 424].map((x, i) => (
+        <rect key={`w2-${i}`} x={x} y={138 + (i % 4) * 20} width="8" height="6" fill="rgba(255,255,255,0.3)" rx="1" />
       ))}
 
       {/* Seagulls */}
-      <path d="M500 80 Q504 76 508 80" stroke="rgba(255,255,255,0.7)" strokeWidth="1.5" fill="none"/>
-      <path d="M520 68 Q525 63 530 68" stroke="rgba(255,255,255,0.6)" strokeWidth="1.5" fill="none"/>
-      <path d="M820 95 Q825 90 830 95" stroke="rgba(255,255,255,0.65)" strokeWidth="1.5" fill="none"/>
+      <path d="M500 80 Q504 76 508 80" stroke="rgba(255,255,255,0.7)" strokeWidth="1.5" fill="none" />
+      <path d="M520 68 Q525 63 530 68" stroke="rgba(255,255,255,0.6)" strokeWidth="1.5" fill="none" />
+      <path d="M820 95 Q825 90 830 95" stroke="rgba(255,255,255,0.65)" strokeWidth="1.5" fill="none" />
 
       {/* Ground shadow line */}
       <rect x="0" y="278" width="1200" height="4" fill="rgba(11,45,114,0.15)" />
@@ -140,12 +140,12 @@ function CityscapeSVG() {
 }
 
 export default function LandingPage() {
-  const [user, setUser]         = useState(null);
-  const [tab, setTab]           = useState('rent');
-  const [roleTab, setRoleTab]   = useState('tenant');
-  const [query, setQuery]       = useState('');
+  const [user, setUser] = useState(null);
+  const [tab, setTab] = useState('rent');
+  const [roleTab, setRoleTab] = useState('tenant');
+  const [query, setQuery] = useState('');
   const [indicatorStyle, setIndicatorStyle] = useState({ left: 0, width: 0 });
-  const tenantBtnRef   = useRef(null);
+  const tenantBtnRef = useRef(null);
   const landlordBtnRef = useRef(null);
   const router = useRouter();
 
@@ -159,7 +159,7 @@ export default function LandingPage() {
     if (!btn) return;
     const parent = btn.parentElement;
     const parentRect = parent.getBoundingClientRect();
-    const btnRect    = btn.getBoundingClientRect();
+    const btnRect = btn.getBoundingClientRect();
     setIndicatorStyle({ left: btnRect.left - parentRect.left, width: btnRect.width });
   }, [roleTab]);
 
@@ -210,11 +210,10 @@ export default function LandingPage() {
                       key={t}
                       type="button"
                       onClick={() => setTab(t.toLowerCase())}
-                      className={`px-8 py-2.5 text-[0.85rem] font-semibold transition-all ${
-                        tab === t.toLowerCase()
+                      className={`px-8 py-2.5 text-[0.85rem] font-semibold transition-all ${tab === t.toLowerCase()
                           ? 'bg-white text-[#0992C2]'
                           : 'bg-white/15 text-white hover:bg-white/25'
-                      }`}
+                        }`}
                     >
                       {t}
                     </button>
@@ -275,9 +274,8 @@ export default function LandingPage() {
                 <Link
                   key={city.name}
                   href={`/browse?city=${city.name}`}
-                  className={`group relative block overflow-hidden rounded-3xl shadow-sm transition-transform duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] hover:-translate-y-2 hover:shadow-xl ${
-                    idx === 1 ? 'md:-mt-6' : idx === 2 ? 'md:mt-6' : ''
-                  }`}
+                  className={`group relative block overflow-hidden rounded-3xl shadow-sm transition-transform duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] hover:-translate-y-2 hover:shadow-xl ${idx === 1 ? 'md:-mt-6' : idx === 2 ? 'md:mt-6' : ''
+                    }`}
                 >
                   <div className="relative h-56 overflow-hidden">
                     <img
@@ -319,28 +317,24 @@ export default function LandingPage() {
           className="scroll-mt-20"
         >
           <div
-            className={`relative overflow-hidden transition-colors duration-500 px-6 py-16 md:px-16 lg:px-24 ${
-              roleTab === 'tenant'
+            className={`relative overflow-hidden transition-colors duration-500 px-6 py-16 md:px-16 lg:px-24 ${roleTab === 'tenant'
                 ? 'bg-[#F8843F]'
                 : 'bg-[#0B2D72]'
-            }`}
+              }`}
           >
             {/* Decorative blobs */}
-            <div className={`pointer-events-none absolute -left-24 top-0 h-72 w-72 rounded-full blur-3xl opacity-30 transition-colors duration-500 ${
-              roleTab === 'tenant' ? 'bg-white' : 'bg-[#0AC4E0]'
-            }`} />
-            <div className={`pointer-events-none absolute -right-24 bottom-0 h-80 w-80 rounded-full blur-3xl opacity-25 transition-colors duration-500 ${
-              roleTab === 'tenant' ? 'bg-[#0B2D72]' : 'bg-[#F8843F]'
-            }`} />
+            <div className={`pointer-events-none absolute -left-24 top-0 h-72 w-72 rounded-full blur-3xl opacity-30 transition-colors duration-500 ${roleTab === 'tenant' ? 'bg-white' : 'bg-[#0AC4E0]'
+              }`} />
+            <div className={`pointer-events-none absolute -right-24 bottom-0 h-80 w-80 rounded-full blur-3xl opacity-25 transition-colors duration-500 ${roleTab === 'tenant' ? 'bg-[#0B2D72]' : 'bg-[#F8843F]'
+              }`} />
 
             <div className="relative flex flex-col gap-12 lg:flex-row mx-auto max-w-7xl">
               {/* Left: info + toggle */}
               <div className="flex-shrink-0 lg:w-72 xl:w-80 space-y-6">
-                <div className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-[0.7rem] font-semibold uppercase tracking-[0.22em] ${
-                  roleTab === 'tenant'
+                <div className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-[0.7rem] font-semibold uppercase tracking-[0.22em] ${roleTab === 'tenant'
                     ? 'bg-white/20 text-white ring-1 ring-white/30'
                     : 'bg-white/10 text-white/80 ring-1 ring-white/20'
-                }`}>
+                  }`}>
                   <LayoutDashboard className="h-3.5 w-3.5" />
                   Role-specific workspaces
                 </div>
@@ -360,14 +354,12 @@ export default function LandingPage() {
                 </div>
 
                 {/* Role toggle */}
-                <div className={`inline-flex rounded-full p-1 shadow-sm ${
-                  roleTab === 'tenant' ? 'bg-white/20' : 'bg-white/10'
-                }`}>
+                <div className={`inline-flex rounded-full p-1 shadow-sm ${roleTab === 'tenant' ? 'bg-white/20' : 'bg-white/10'
+                  }`}>
                   <div className="relative flex gap-1 overflow-hidden rounded-full">
                     <div
-                      className={`absolute inset-y-1 rounded-full transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${
-                        roleTab === 'tenant' ? 'bg-white/30' : 'bg-white/20'
-                      }`}
+                      className={`absolute inset-y-1 rounded-full transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${roleTab === 'tenant' ? 'bg-white/30' : 'bg-white/20'
+                        }`}
                       style={{ left: indicatorStyle.left, width: indicatorStyle.width }}
                     />
                     <button
@@ -393,11 +385,10 @@ export default function LandingPage() {
                   {!user ? (
                     <Link
                       href="/register"
-                      className={`rf-btn text-[0.8rem] font-bold ${
-                        roleTab === 'tenant'
+                      className={`rf-btn text-[0.8rem] font-bold ${roleTab === 'tenant'
                           ? 'bg-white text-[#F8843F] hover:bg-white/90 shadow-lg shadow-black/10'
                           : 'bg-white text-[#0B2D72] hover:bg-white/90 shadow-lg shadow-black/20'
-                      }`}
+                        }`}
                     >
                       Get started free
                       <ArrowRight size={15} />
@@ -433,15 +424,13 @@ export default function LandingPage() {
                       <div
                         key={f.title}
                         style={{ animationDelay: `${i * 70}ms` }}
-                        className={`rf-fade-in-stagger rounded-2xl p-4 transition-transform duration-200 hover:-translate-y-1 ${
-                          isTenant
+                        className={`rf-fade-in-stagger rounded-2xl p-4 transition-transform duration-200 hover:-translate-y-1 ${isTenant
                             ? 'bg-white/20 ring-1 ring-white/25 hover:bg-white/25'
                             : 'bg-white/10 ring-1 ring-white/15 hover:bg-white/15'
-                        }`}
+                          }`}
                       >
-                        <div className={`mb-3 flex h-10 w-10 items-center justify-center rounded-2xl ${
-                          isTenant ? 'bg-white/30' : 'bg-[#0AC4E0]/30'
-                        }`}>
+                        <div className={`mb-3 flex h-10 w-10 items-center justify-center rounded-2xl ${isTenant ? 'bg-white/30' : 'bg-[#0AC4E0]/30'
+                          }`}>
                           <Icon size={18} className="text-white" />
                         </div>
                         <h3 className="mb-1 text-[0.9rem] font-semibold text-white">
@@ -501,9 +490,9 @@ export default function LandingPage() {
             <div className="flex flex-wrap items-center justify-center gap-4 text-[0.8rem] font-medium text-neutral-600">
               {[
                 { icon: ShieldCheck, text: 'Verified listings & landlords' },
-                { icon: Star,        text: '4.7★ average satisfaction' },
-                { icon: Globe,       text: '60+ countries supported' },
-                { icon: UserCheck,   text: 'In-line tenant screening' },
+                { icon: Star, text: '4.7★ average satisfaction' },
+                { icon: Globe, text: '60+ countries supported' },
+                { icon: UserCheck, text: 'In-line tenant screening' },
               ].map(({ icon: Icon, text }) => (
                 <div key={text} className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 shadow-sm shadow-[#0992C2]/15 border border-[#0992C2]/10">
                   <Icon size={16} className="text-[#0992C2]" />
@@ -516,47 +505,56 @@ export default function LandingPage() {
 
         {/* ── CTA ───────────────────────────────────────────────────── */}
         <MotionRevealSection className="py-16 bg-white">
-        {!user && (
-  <section
-    className="relative overflow-hidden px-6 py-24 text-center"
-    style={{ background: 'linear-gradient(135deg, #F6C87A 0%, #0AC4E0 45%, #0992C2 70%, #0B2D72 100%)' }}
-  >
-    <div className="pointer-events-none absolute -left-16 top-0 h-64 w-64 rounded-full bg-white/25 blur-3xl" />
-    <div className="pointer-events-none absolute -right-20 bottom-0 h-72 w-72 rounded-full bg-white/20 blur-3xl" />
-    <div className="relative mx-auto max-w-2xl space-y-5">
-      <h2 className="text-h2 text-white">Ready to make renting feel premium?</h2>
-      <p className="mx-auto max-w-md text-body text-white/85">
-        Join thousands of tenants and landlords who already manage their entire rental lifecycle inside RentifyPro.
-      </p>
-      <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
-        <Link href="/register" className="w-full sm:w-auto inline-flex items-center justify-center rounded-full bg-white px-7 py-2.5 text-[0.85rem] font-bold text-[#0992C2] shadow-md transition-all hover:scale-105 hover:shadow-lg">
-          Get started free
-        </Link>
-        <Link href="/browse" className="w-full sm:w-auto inline-flex items-center justify-center rounded-full border border-white/60 px-7 py-2.5 text-[0.85rem] font-semibold text-white transition-all hover:bg-white/10">
-          Browse listings
-        </Link>
-      </div>
-    </div>
-  </section>
-)}
-
-
-          {user && (
-            <div className="mx-auto max-w-4xl px-4 text-center">
-              <div className="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-[#0AC4E0]/10 via-white to-[#F6E7BC]/40 px-6 py-10 shadow-[0_22px_70px_rgba(11,45,114,0.12)] ring-1 ring-[#0992C2]/20">
-                <div className="pointer-events-none absolute -left-10 top-0 h-32 w-32 rounded-full bg-[#0AC4E0]/40 blur-2xl" />
-                <div className="pointer-events-none absolute -right-16 bottom-0 h-40 w-40 rounded-full bg-[#F6E7BC]/60 blur-3xl" />
-                <div className="relative space-y-4">
-                  <h2 className="text-h2 text-neutral-900">Welcome back, {user.name?.split(' ')[0]}.</h2>
-                  <p className="mx-auto max-w-md text-body text-neutral-600">
-                    Continue where you left off — your applications, leases, and payments are already synced.
-                  </p>
-                  <Link href="/dashboard" className="rf-btn rf-btn-primary inline-flex items-center justify-center text-[0.8rem]">
-                    <LayoutDashboard size={16} /> Go to dashboard
+          {!user && (
+            <section
+              className="relative overflow-hidden px-6 py-24 text-center"
+              style={{ background: 'linear-gradient(135deg, #F6C87A 0%, #0AC4E0 45%, #0992C2 70%, #0B2D72 100%)' }}
+            >
+              <div className="pointer-events-none absolute -left-16 top-0 h-64 w-64 rounded-full bg-white/25 blur-3xl" />
+              <div className="pointer-events-none absolute -right-20 bottom-0 h-72 w-72 rounded-full bg-white/20 blur-3xl" />
+              <div className="relative mx-auto max-w-2xl space-y-5">
+                <h2 className="text-h2 text-white">Ready to make renting feel premium?</h2>
+                <p className="mx-auto max-w-md text-body text-white/85">
+                  Join thousands of tenants and landlords who already manage their entire rental lifecycle inside RentifyPro.
+                </p>
+                <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
+                  <Link href="/register" className="w-full sm:w-auto inline-flex items-center justify-center rounded-full bg-white px-7 py-2.5 text-[0.85rem] font-bold text-[#0992C2] shadow-md transition-all hover:scale-105 hover:shadow-lg">
+                    Get started free
+                  </Link>
+                  <Link href="/browse" className="w-full sm:w-auto inline-flex items-center justify-center rounded-full border border-white/60 px-7 py-2.5 text-[0.85rem] font-semibold text-white transition-all hover:bg-white/10">
+                    Browse listings
                   </Link>
                 </div>
               </div>
-            </div>
+            </section>
+          )}
+
+
+          {user && (
+            <section className="relative overflow-hidden px-6 py-24 text-center bg-gradient-to-br from-[#0AC4E0]/10 via-[#F8FBFC] to-[#F6E7BC]/30 border-t border-[#0992C2]/10">
+              {/* Full-width decorative blobs */}
+              <div className="pointer-events-none absolute -left-16 top-0 h-80 w-80 rounded-full bg-[#0AC4E0]/20 blur-3xl" />
+              <div className="pointer-events-none absolute -right-20 bottom-0 h-96 w-96 rounded-full bg-[#F6E7BC]/40 blur-3xl" />
+
+              <div className="relative mx-auto max-w-2xl space-y-5">
+                <h2 className="text-h2 text-neutral-900">
+                  Welcome back, {user.name?.split(' ')[0]}.
+                </h2>
+                <p className="mx-auto max-w-md text-[1.05rem] leading-relaxed text-neutral-600">
+                  Continue where you left off — your applications, leases, and payments are already synced.
+                </p>
+
+                <div className="mt-8 flex justify-center">
+                  <Link
+                    href="/dashboard"
+                    className="rf-btn rf-btn-primary inline-flex items-center justify-center gap-2 px-8 py-3 text-[0.85rem]"
+                  >
+                    <LayoutDashboard size={18} />
+                    Go to dashboard
+                  </Link>
+                </div>
+              </div>
+            </section>
           )}
         </MotionRevealSection>
       </main>
