@@ -220,7 +220,7 @@ function ContactsPanel({ contacts, onSelect, onClose }) {
 
   return (
     <motion.div
-      className="fixed inset-0 z-[100] flex items-end sm:items-center justifycenter sm:p-6"
+      className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center sm:p-6"
       initial={{ opacity: 0 }}
       animate={{ opacity: show ? 1 : 0 }}
       transition={{ duration: 0.3 }}

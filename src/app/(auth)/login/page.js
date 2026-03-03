@@ -169,7 +169,7 @@ export default function LoginPage() {
           </div>
 
           {/* Right: glass login card */}
-          <div className="rf-glass-dark rf-fade-in-up w-full max-w-md justify-self-center px-8 py-9">
+          <div className="rf-glass-dark rf-fade-in-up w-full max-w-md justify-self-start px-8 py-9">
             <div className="mb-8 text-center md:text-left">
               <p className="text-micro text-slate-400">Welcome back</p>
               <h2 className="text-h2 mt-1 bg-gradient-to-r from-slate-50 via-sky-100 to-slate-200 bg-clip-text text-transparent">
