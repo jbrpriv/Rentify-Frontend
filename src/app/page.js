@@ -8,14 +8,13 @@ import {
   CheckCircle2, ArrowRight, Building2, MapPin, Globe,
   LayoutDashboard, Bell, MessageSquare, Wrench, ClipboardList,
   TrendingUp, Star, Key, BarChart2, UserCheck, Home,
-  Bed, Bath, Square // <-- Added these three!
+  Bed, Bath, Square
 } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { MotionRevealSection } from '@/components/ui/Motion';
 
 // ── CLOUDINARY IMAGE ──────────────────────────────────────────────────────────
-// Upload your cityscape to Cloudinary, paste the URL below
 const HERO_CITYSCAPE_URL = '';
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -68,7 +67,6 @@ export default function LandingPage() {
     if (stored) setUser(JSON.parse(stored));
   }, []);
 
-  // Animate the sliding pill indicator for the role toggle
   useEffect(() => {
     const btn = roleTab === 'tenant' ? tenantBtnRef.current : landlordBtnRef.current;
     if (!btn) return;
@@ -95,210 +93,121 @@ export default function LandingPage() {
 
       <main className="flex-grow pt-24">
 
-        {/* ── HERO – GREEN BENTO LAYOUT ─────────────────────────────────── */}
-        <MotionRevealSection
-          className="relative"
-        >
-          <div className="mx-auto flex max-w-6xl flex-col gap-10 px-4 pb-10 md:flex-row md:items-stretch md:gap-8 lg:px-0">
-            {/* Left column – copy + search */}
-            <div className="flex flex-1 flex-col gap-6">
-              <div className="inline-flex w-fit items-center gap-2 rounded-full border border-[#E0EDC5] bg-white/80 px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.25em] text-neutral-500 shadow-sm shadow-[#C7EABB]/40 backdrop-blur">
-                <span className="h-1.5 w-1.5 rounded-full bg-[#84B179]" />
-                60+ countries · 2M+ listings
-              </div>
-
-              <div className="space-y-4">
-                <h1 className="text-hero text-neutral-900">
-                  Renting, reimagined in
-                  <span className="bg-gradient-to-r from-[#84B179] via-[#A2CB8B] to-[#C7EABB] bg-clip-text text-transparent">
-                    {' '}
-                    one calm workspace.
-                  </span>
-                </h1>
-                <p className="max-w-xl text-body text-neutral-600">
-                  RentifyPro replaces scattered calls, PDFs, and spreadsheets with a single
-                  premium hub for tenants and landlords — from discovery to signed keys.
-                </p>
-              </div>
-
-              {/* Search bento card */}
-              <div className="mt-2 grid gap-3 md:grid-cols-[minmax(0,1.5fr),minmax(0,1fr)]">
-                <div className="rf-card-soft relative overflow-hidden">
-                  <div className="pointer-events-none absolute -left-6 -top-10 h-28 w-28 rounded-full bg-[#E8F5BD] blur-2xl" />
-                  <div className="pointer-events-none absolute -right-10 bottom-0 h-28 w-28 rounded-full bg-[#C7EABB] blur-2xl" />
-                  <div className="relative space-y-3">
-                    <div className="inline-flex items-center gap-1 rounded-full bg-white/70 px-2 py-1 text-[0.65rem] font-medium text-neutral-500 ring-1 ring-[#E0EDC5]">
-                      <CheckCircle2 className="h-3 w-3 text-[#84B179]" />
-                      <span>Verified listings & digital leases</span>
-                    </div>
-
-                    <div className="flex items-center gap-1 rounded-full bg-[#F2F7E5] p-1 text-[0.7rem] font-semibold text-neutral-600">
-                      {['Rent', 'Buy'].map((t) => (
-                        <button
-                          key={t}
-                          type="button"
-                          onClick={() => setTab(t.toLowerCase())}
-                          className={`flex-1 rounded-full px-3 py-1.5 transition-all ${
-                            tab === t.toLowerCase()
-                              ? 'bg-white text-neutral-900 shadow-sm shadow-[#C7EABB]/60'
-                              : 'text-neutral-500 hover:text-neutral-800'
-                          }`}
-                        >
-                          {t}
-                        </button>
-                      ))}
-                    </div>
-
-                    <form
-                      onSubmit={handleSearch}
-                      className="flex items-center gap-2 rounded-2xl border border-[#E0EDC5] bg-white/90 px-3 py-2.5 shadow-sm shadow-[#E1F0C9]/50 backdrop-blur"
-                    >
-                      <Search className="h-4 w-4 text-[#84B179]" />
-                      <input
-                        value={query}
-                        onChange={(e) => setQuery(e.target.value)}
-                        placeholder="Search by city, address, or ZIP"
-                        className="flex-1 bg-transparent text-sm text-neutral-800 placeholder:text-neutral-400 focus:outline-none"
-                      />
-                      <button
-                        type="submit"
-                        className="rf-btn rf-btn-primary hidden text-[0.7rem] md:inline-flex"
-                      >
-                        Search
-                      </button>
-                    </form>
-
-                    <div className="flex flex-wrap gap-3 text-[0.7rem] text-neutral-500">
-                      {['Verified landlords', 'Secure payments', 'AI match suggestions'].map(
-                        (item) => (
-                          <span
-                            key={item}
-                            className="inline-flex items-center gap-1 rounded-full bg-[#F5FAE9] px-2 py-1"
-                          >
-                            <CheckCircle2 className="h-3 w-3 text-[#84B179]" />
-                            {item}
-                          </span>
-                        ),
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Compact stat stack */}
-                <div className="flex flex-col gap-3">
-                  <div className="rf-card h-full min-h-[120px] rounded-2xl border border-[#E0EDC5] bg-gradient-to-br from-[#F9FCEB] via-white to-[#E8F5BD] p-4">
-                    <div className="flex items-center justify-between gap-3">
-                      <div>
-                        <p className="text-[0.7rem] font-semibold uppercase tracking-[0.22em] text-neutral-500">
-                          Live activity
-                        </p>
-                        <p className="mt-1 text-sm font-semibold text-neutral-900">
-                          Applications processed in the last 24h
-                        </p>
-                      </div>
-                      <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white/70 shadow-sm shadow-[#C7EABB]/60">
-                        <Home className="h-5 w-5 text-[#84B179]" />
-                      </div>
-                    </div>
-                    <div className="mt-4 flex items-end justify-between">
-                      <p className="text-2xl font-semibold text-neutral-900">8,412</p>
-                      <span className="inline-flex items-center gap-1 rounded-full bg-white/80 px-2 py-1 text-[0.65rem] font-medium text-[#1F7A3A]">
-                        <TrendingUp className="h-3 w-3" />
-                        +18% this week
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
+        {/* ── HERO – CENTERED LAYOUT ─────────────────────────────────── */}
+        <MotionRevealSection className="relative">
+          <div className="mx-auto flex max-w-4xl flex-col items-center justify-center text-center px-4 pb-16 pt-6 lg:px-0">
+            
+            {/* Pill Badge */}
+            <div className="inline-flex items-center gap-2 rounded-full border border-[#E0EDC5] bg-white/80 px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.25em] text-neutral-500 shadow-sm shadow-[#C7EABB]/40 backdrop-blur">
+              <span className="h-1.5 w-1.5 rounded-full bg-[#84B179]" />
+              60+ countries · 2M+ listings
             </div>
 
-            {/* Right column – overlapping cards bento */}
-            <div className="relative mt-4 flex flex-1 items-stretch md:mt-0">
-              <div className="pointer-events-none absolute -right-10 top-0 h-40 w-40 rounded-full bg-[#C7EABB] opacity-70 blur-3xl" />
-              <div className="pointer-events-none absolute -left-10 bottom-0 h-32 w-32 rounded-full bg-[#E8F5BD] opacity-80 blur-3xl" />
+            {/* Headings */}
+            <div className="mt-8 space-y-4">
+              <h1 className="text-hero text-neutral-900">
+                Renting, reimagined in
+                <br className="hidden md:block" />
+                <span className="bg-gradient-to-r from-[#84B179] via-[#A2CB8B] to-[#C7EABB] bg-clip-text text-transparent">
+                  {' '}one calm workspace.
+                </span>
+              </h1>
+              <p className="mx-auto max-w-2xl text-body text-neutral-600">
+                RentifyPro replaces scattered calls, PDFs, and spreadsheets with a single
+                premium hub for tenants and landlords — from discovery to signed keys.
+              </p>
+            </div>
 
-              <div className="relative mx-auto grid w-full max-w-md grid-cols-2 gap-4">
-                {/* Main vertical card */}
-                <div className="col-span-1 row-span-2 space-y-3 rounded-3xl bg-white/90 p-4 shadow-[0_24px_65px_rgba(148,163,120,0.55)] ring-1 ring-[#E0EDC5] backdrop-blur">
-                  <div className="flex items-center justify-between">
-                    <span className="rounded-full bg-[#F2F7E5] px-2 py-1 text-[0.7rem] font-medium text-neutral-600">
-                      Tenant view
-                    </span>
-                    <span className="text-[0.65rem] font-medium text-neutral-400">
-                      Digital lease · 12 mo
-                    </span>
+            {/* Centered Search & Stats Grid */}
+            <div className="mt-10 grid w-full max-w-3xl gap-4 md:grid-cols-[minmax(0,1.5fr),minmax(0,1fr)] text-left">
+              
+              {/* Search Card */}
+              <div className="rf-card-soft relative overflow-hidden">
+                <div className="pointer-events-none absolute -left-6 -top-10 h-28 w-28 rounded-full bg-[#E8F5BD] blur-2xl" />
+                <div className="pointer-events-none absolute -right-10 bottom-0 h-28 w-28 rounded-full bg-[#C7EABB] blur-2xl" />
+                
+                <div className="relative space-y-3 p-4 md:p-5">
+                  <div className="inline-flex items-center gap-1 rounded-full bg-white/70 px-2 py-1 text-[0.65rem] font-medium text-neutral-500 ring-1 ring-[#E0EDC5]">
+                    <CheckCircle2 className="h-3 w-3 text-[#84B179]" />
+                    <span>Verified listings & digital leases</span>
                   </div>
-                  <div className="mt-1 space-y-1.5">
-                    <p className="text-sm font-semibold text-neutral-900">
-                      2-bed in Uptown Green District
-                    </p>
-                    <p className="text-[0.7rem] text-neutral-500">
-                      ₹45,000 / month · Fully managed
-                    </p>
+
+                  <div className="flex items-center gap-1 rounded-full bg-[#F2F7E5] p-1 text-[0.7rem] font-semibold text-neutral-600">
+                    {['Rent', 'Buy'].map((t) => (
+                      <button
+                        key={t}
+                        type="button"
+                        onClick={() => setTab(t.toLowerCase())}
+                        className={`flex-1 rounded-full px-3 py-1.5 transition-all ${
+                          tab === t.toLowerCase()
+                            ? 'bg-white text-neutral-900 shadow-sm shadow-[#C7EABB]/60'
+                            : 'text-neutral-500 hover:text-neutral-800'
+                        }`}
+                      >
+                        {t}
+                      </button>
+                    ))}
                   </div>
-                  <div className="mt-3 flex items-center gap-2 text-[0.7rem] text-neutral-500">
-                    <span className="inline-flex items-center gap-1 rounded-full bg-[#F5FAE9] px-2 py-1">
-                      <Bed size={11} /> 2
-                    </span>
-                    <span className="inline-flex items-center gap-1 rounded-full bg-[#F5FAE9] px-2 py-1">
-                      <Bath size={11} /> 2
-                    </span>
-                    <span className="inline-flex items-center gap-1 rounded-full bg-[#F5FAE9] px-2 py-1">
-                      <Square size={11} /> 920 sq ft
-                    </span>
-                  </div>
-                  <div className="mt-4 flex items-center justify-between">
-                    <div className="space-y-1">
-                      <p className="text-[0.7rem] font-semibold uppercase tracking-[0.18em] text-neutral-400">
-                        Status
-                      </p>
-                      <p className="inline-flex items-center gap-1 rounded-full bg-[#E3F4D2] px-2 py-1 text-[0.7rem] font-semibold text-[#1F7A3A]">
-                        <ShieldCheck size={11} />
-                        Verified listing
-                      </p>
-                    </div>
+
+                  <form
+                    onSubmit={handleSearch}
+                    className="flex items-center gap-2 rounded-2xl border border-[#E0EDC5] bg-white/90 px-3 py-2.5 shadow-sm shadow-[#E1F0C9]/50 backdrop-blur"
+                  >
+                    <Search className="h-4 w-4 text-[#84B179]" />
+                    <input
+                      value={query}
+                      onChange={(e) => setQuery(e.target.value)}
+                      placeholder="Search by city, address, or ZIP"
+                      className="flex-1 bg-transparent text-sm text-neutral-800 placeholder:text-neutral-400 focus:outline-none"
+                    />
                     <button
-                      type="button"
-                      className="rf-btn rf-btn-primary text-[0.7rem]"
-                      onClick={() => router.push('/browse')}
+                      type="submit"
+                      className="rf-btn rf-btn-primary hidden text-[0.7rem] md:inline-flex"
                     >
-                      Explore listings
+                      Search
                     </button>
-                  </div>
-                </div>
+                  </form>
 
-                {/* Small landlord tile */}
-                <div className="rf-card-soft relative mt-6 flex flex-col justify-between rounded-3xl border border-[#E0EDC5] bg-white/80 p-3 shadow-md shadow-[#C7EABB]/40">
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="rounded-full bg-[#F5FAE9] px-2 py-1 text-[0.65rem] font-semibold text-neutral-600">
-                      Landlord inbox
-                    </span>
-                    <Bell className="h-3.5 w-3.5 text-[#84B179]" />
-                  </div>
-                  <div className="mt-2 space-y-1">
-                    <p className="text-[0.8rem] font-semibold text-neutral-900">
-                      5 new applications
-                    </p>
-                    <p className="text-[0.7rem] text-neutral-500">
-                      Screening queued · Auto reminders on
-                    </p>
-                  </div>
-                </div>
-
-                {/* Stats tile */}
-                <div className="rf-card-soft relative -mt-4 flex flex-col justify-between rounded-3xl border border-[#E0EDC5] bg-gradient-to-br from-[#F9FCEB] via-white to-[#E8F5BD] p-3 shadow-md shadow-[#C7EABB]/50">
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="text-[0.7rem] font-semibold text-neutral-600">
-                      Satisfaction
-                    </span>
-                    <Star className="h-3.5 w-3.5 fill-[#FACC15] text-[#EAB308]" />
-                  </div>
-                  <div className="mt-3 flex items-end justify-between">
-                    <p className="text-xl font-semibold text-neutral-900">4.7</p>
-                    <span className="text-[0.65rem] text-neutral-500">Avg rating</span>
+                  <div className="flex flex-wrap gap-2 text-[0.7rem] text-neutral-500">
+                    {['Verified landlords', 'Secure payments', 'AI match suggestions'].map(
+                      (item) => (
+                        <span
+                          key={item}
+                          className="inline-flex items-center gap-1 rounded-full bg-[#F5FAE9] px-2 py-1"
+                        >
+                          <CheckCircle2 className="h-3 w-3 text-[#84B179]" />
+                          {item}
+                        </span>
+                      ),
+                    )}
                   </div>
                 </div>
               </div>
+
+              {/* Live Activity Stat */}
+              <div className="rf-card flex flex-col justify-between min-h-[120px] rounded-2xl border border-[#E0EDC5] bg-gradient-to-br from-[#F9FCEB] via-white to-[#E8F5BD] p-4 md:p-5">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="text-[0.7rem] font-semibold uppercase tracking-[0.22em] text-neutral-500">
+                      Live activity
+                    </p>
+                    <p className="mt-1 text-sm font-semibold text-neutral-900 leading-tight">
+                      Applications processed in the last 24h
+                    </p>
+                  </div>
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-white/70 shadow-sm shadow-[#C7EABB]/60">
+                    <Home className="h-5 w-5 text-[#84B179]" />
+                  </div>
+                </div>
+                <div className="mt-4 flex items-end justify-between">
+                  <p className="text-3xl font-bold text-neutral-900 tracking-tight">8,412</p>
+                  <span className="inline-flex items-center gap-1 rounded-full bg-white/80 px-2 py-1 text-[0.65rem] font-medium text-[#1F7A3A]">
+                    <TrendingUp className="h-3 w-3" />
+                    +18% this week
+                  </span>
+                </div>
+              </div>
+
             </div>
           </div>
         </MotionRevealSection>
