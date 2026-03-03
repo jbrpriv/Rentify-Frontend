@@ -175,26 +175,52 @@
 
 /* ──────────────────────────────────────────────────────────────
    BUTTON SYSTEM
-   Tailwind-friendly, variant-based button primitives
+   Tailwind-friendly, variant-based button primitives.
+
+   Tailwind v4 rule: @apply only works with built-in Tailwind
+   utilities — never with custom CSS classes, even your own.
+   Solution: rf-btn is a standalone class; variants are always
+   used alongside it (e.g. "rf-btn rf-btn-primary") so they
+   don't need to @apply it — each variant inlines the shared
+   base styles directly.
    ──────────────────────────────────────────────────────────── */
 
-/* rf-btn must live in @layer utilities so variant classes can
-   @apply it — Tailwind v4 forbids @apply of component classes */
 @layer utilities {
+  /* Base shape & motion — always used together with a variant */
   .rf-btn {
-    @apply inline-flex items-center justify-center gap-2 text-sm font-semibold rounded-xl px-4 py-2.5 transition-transform duration-150;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    border-radius: 0.75rem;
+    padding: 0.625rem 1rem;
+    transform-origin: center;
     transition:
       transform var(--rf-duration-fast) var(--rf-ease-bouncy),
       box-shadow var(--rf-duration-normal) var(--rf-ease-standard),
       background-color var(--rf-duration-normal) var(--rf-ease-standard),
       color var(--rf-duration-normal) var(--rf-ease-standard);
-    transform-origin: center;
   }
-}
 
-@layer components {
+  /* ── Variants (each carries the full base so @apply is not needed) ── */
+
   .rf-btn-primary {
-    @apply rf-btn;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    border-radius: 0.75rem;
+    padding: 0.625rem 1rem;
+    transform-origin: center;
+    transition:
+      transform var(--rf-duration-fast) var(--rf-ease-bouncy),
+      box-shadow var(--rf-duration-normal) var(--rf-ease-standard),
+      background-color var(--rf-duration-normal) var(--rf-ease-standard),
+      color var(--rf-duration-normal) var(--rf-ease-standard);
     background: linear-gradient(135deg, var(--rf-color-primary-strong), var(--rf-color-primary));
     color: white;
     box-shadow: 0 18px 40px rgba(37, 99, 235, 0.4);
@@ -209,7 +235,21 @@
   }
 
   .rf-btn-secondary {
-    @apply rf-btn border rf-border-subtle text-sm;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    border-radius: 0.75rem;
+    padding: 0.625rem 1rem;
+    transform-origin: center;
+    transition:
+      transform var(--rf-duration-fast) var(--rf-ease-bouncy),
+      box-shadow var(--rf-duration-normal) var(--rf-ease-standard),
+      background-color var(--rf-duration-normal) var(--rf-ease-standard),
+      color var(--rf-duration-normal) var(--rf-ease-standard);
+    border: 1px solid var(--rf-color-border-subtle);
     background: rgba(15, 23, 42, 0.7);
     color: var(--rf-color-text-soft);
   }
@@ -220,7 +260,20 @@
   }
 
   .rf-btn-ghost {
-    @apply rf-btn text-sm;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    border-radius: 0.75rem;
+    padding: 0.625rem 1rem;
+    transform-origin: center;
+    transition:
+      transform var(--rf-duration-fast) var(--rf-ease-bouncy),
+      box-shadow var(--rf-duration-normal) var(--rf-ease-standard),
+      background-color var(--rf-duration-normal) var(--rf-ease-standard),
+      color var(--rf-duration-normal) var(--rf-ease-standard);
     background: transparent;
     color: var(--rf-color-text-soft);
   }
@@ -229,7 +282,20 @@
   }
 
   .rf-btn-danger {
-    @apply rf-btn;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    border-radius: 0.75rem;
+    padding: 0.625rem 1rem;
+    transform-origin: center;
+    transition:
+      transform var(--rf-duration-fast) var(--rf-ease-bouncy),
+      box-shadow var(--rf-duration-normal) var(--rf-ease-standard),
+      background-color var(--rf-duration-normal) var(--rf-ease-standard),
+      color var(--rf-duration-normal) var(--rf-ease-standard);
     background: linear-gradient(135deg, #dc2626, #ef4444);
     color: white;
     box-shadow: 0 18px 40px rgba(248, 113, 113, 0.35);
