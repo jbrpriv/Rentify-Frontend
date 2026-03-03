@@ -7,6 +7,7 @@ import {
   MessageSquare, Send, Loader2, X, Users, ChevronRight,
   Search, CheckCheck
 } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 const ROLE_COLORS = {
   landlord:        { bg: 'bg-indigo-100', text: 'text-indigo-700' },
@@ -113,18 +114,19 @@ function ChatModal({ active, user, onClose, onNewMessage }) {
   const me = user?._id;
 
   return (
-    <div
+    <motion.div
       className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center sm:p-6"
-      style={{ transition: 'opacity 300ms', opacity: show ? 1 : 0 }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: show ? 1 : 0 }}
+      transition={{ duration: 0.3 }}
     >
       <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={close} />
-      <div
+      <motion.div
         className="relative bg-white w-full sm:max-w-lg sm:rounded-3xl flex flex-col shadow-2xl overflow-hidden"
-        style={{
-          height: '82vh', maxHeight: '660px',
-          transition: 'transform 350ms cubic-bezier(0.34, 1.56, 0.64, 1)',
-          transform: show ? 'translateY(0) scale(1)' : 'translateY(48px) scale(0.95)',
-        }}
+        style={{ height: '82vh', maxHeight: '660px' }}
+        initial={{ y: 48, scale: 0.95 }}
+        animate={{ y: show ? 0 : 48, scale: show ? 1 : 0.95 }}
+        transition={{ duration: 0.35, ease: [0.34, 1.56, 0.64, 1] }}
       >
         {/* Header */}
         <div className="flex items-center gap-3 px-5 py-4 border-b border-gray-100 flex-shrink-0">
@@ -195,8 +197,8 @@ function ChatModal({ active, user, onClose, onNewMessage }) {
             {sending ? <Loader2 className="animate-spin w-4 h-4" /> : <Send className="w-4 h-4" />}
           </button>
         </form>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }
 
@@ -217,16 +219,19 @@ function ContactsPanel({ contacts, onSelect, onClose }) {
   );
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center sm:p-6"
-      style={{ transition: 'opacity 300ms', opacity: show ? 1 : 0 }}>
+    <motion.div
+      className="fixed inset-0 z-[100] flex items-end sm:items-center justifycenter sm:p-6"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: show ? 1 : 0 }}
+      transition={{ duration: 0.3 }}
+    >
       <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={close} />
-      <div
+      <motion.div
         className="relative bg-white w-full sm:max-w-sm sm:rounded-3xl flex flex-col shadow-2xl overflow-hidden"
-        style={{
-          maxHeight: '72vh',
-          transition: 'transform 350ms cubic-bezier(0.34, 1.56, 0.64, 1)',
-          transform: show ? 'translateY(0) scale(1)' : 'translateY(48px) scale(0.95)',
-        }}
+        style={{ maxHeight: '72vh' }}
+        initial={{ y: 48, scale: 0.95 }}
+        animate={{ y: show ? 0 : 48, scale: show ? 1 : 0.95 }}
+        transition={{ duration: 0.35, ease: [0.34, 1.56, 0.64, 1] }}
       >
         <div className="flex items-center justify-between px-5 pt-5 pb-3">
           <div>
@@ -272,8 +277,8 @@ function ContactsPanel({ contacts, onSelect, onClose }) {
             );
           })}
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }
 
@@ -406,7 +411,12 @@ export default function MessagesPage() {
         <ContactsPanel contacts={contacts} onSelect={openContact} onClose={() => setShowContacts(false)} />
       )}
 
-      <div className="max-w-2xl mx-auto">
+      <motion.div
+        className="max-w-2xl mx-auto"
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, ease: [0.21, 0.6, 0.35, 1] }}
+      >
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div>
@@ -415,9 +425,11 @@ export default function MessagesPage() {
               {conversations.length} conversation{conversations.length !== 1 ? 's' : ''}
             </p>
           </div>
-          <button
+          <motion.button
             onClick={() => setShowContacts(true)}
-            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-2xl text-sm font-bold shadow-lg shadow-blue-100 transition-all active:scale-95"
+            whileHover={{ y: -1 }}
+            whileTap={{ scale: 0.97 }}
+            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-2xl text-sm font-bold shadow-lg shadow-blue-100 transition-all"
           >
             <Users className="w-4 h-4" />
             Contacts
@@ -426,7 +438,7 @@ export default function MessagesPage() {
                 {contacts.length > 9 ? '9+' : contacts.length}
               </span>
             )}
-          </button>
+          </motion.button>
         </div>
 
         {/* Search */}
@@ -467,9 +479,10 @@ export default function MessagesPage() {
                 const unread = conv.unreadCount > 0;
                 return (
                   <li key={i}>
-                    <button
+                    <motion.button
                       onClick={() => openConversation(conv)}
                       className="w-full flex items-center gap-4 px-5 py-4 hover:bg-gray-50 transition-colors text-left"
+                      whileHover={{ backgroundColor: '#f9fafb' }}
                     >
                       <div className="relative flex-shrink-0">
                         <Avatar name={other?.name} size="lg" role={other?.role} />
@@ -499,14 +512,14 @@ export default function MessagesPage() {
                           {conv.unreadCount > 9 ? '9+' : conv.unreadCount}
                         </span>
                       )}
-                    </button>
+                    </motion.button>
                   </li>
                 );
               })}
             </ul>
           )}
         </div>
-      </div>
+      </motion.div>
     </>
   );
 }

@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import api from '@/utils/api';
 import { Wrench, Plus, Loader2, ChevronDown, ChevronUp, CheckCircle, Clock, AlertCircle, X } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 const STATUS_CONFIG = {
   open:        { label: 'Open',        color: 'bg-blue-100 text-blue-700' },
@@ -94,25 +95,38 @@ export default function MaintenancePage() {
   const canUpdate = ['landlord','property_manager','admin'].includes(user?.role);
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-500">
+    <motion.div
+      className="space-y-6"
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, ease: [0.21, 0.6, 0.35, 1] }}
+    >
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-black text-gray-900 tracking-tighter">Maintenance Requests</h1>
           <p className="text-gray-400 text-sm mt-1">{requests.length} requests</p>
         </div>
         {isTenant && (
-          <button
+          <motion.button
             onClick={() => setShowForm(v => !v)}
+            whileHover={{ y: -1 }}
+            whileTap={{ scale: 0.97 }}
             className="flex items-center gap-2 bg-blue-600 text-white px-5 py-2.5 rounded-xl text-sm font-black hover:bg-blue-700 transition"
           >
             <Plus className="w-4 h-4" /> New Request
-          </button>
+          </motion.button>
         )}
       </div>
 
       {/* Submit Form (Tenant Only) */}
       {showForm && isTenant && (
-        <form onSubmit={handleSubmit} className="bg-white rounded-2xl border border-blue-100 shadow-sm p-6 space-y-4">
+        <motion.form
+          onSubmit={handleSubmit}
+          className="bg-white rounded-2xl border border-blue-100 shadow-sm p-6 space-y-4"
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, ease: [0.21, 0.6, 0.35, 1] }}
+        >
           <h3 className="font-black text-gray-900">Submit Maintenance Request</h3>
 
           <select
@@ -167,18 +181,23 @@ export default function MaintenancePage() {
               {submitting ? <Loader2 className="animate-spin w-4 h-4 mx-auto" /> : 'Submit Request'}
             </button>
           </div>
-        </form>
+        </motion.form>
       )}
 
       {/* Requests List */}
       {loading ? (
         <div className="flex justify-center py-16"><Loader2 className="animate-spin h-8 w-8 text-blue-600" /></div>
       ) : requests.length === 0 ? (
-        <div className="text-center py-20 bg-white rounded-3xl border border-dashed border-gray-200">
+        <motion.div
+          className="text-center py-20 bg-white rounded-3xl border border-dashed border-gray-200"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35, ease: [0.21, 0.6, 0.35, 1] }}
+        >
           <Wrench className="w-12 h-12 mx-auto text-gray-300 mb-3" />
           <p className="font-bold text-gray-500">No maintenance requests</p>
           {isTenant && <p className="text-sm text-gray-400 mt-1">Submit a request if something needs fixing</p>}
-        </div>
+        </motion.div>
       ) : (
         <div className="space-y-3">
           {requests.map(r => {
@@ -186,7 +205,14 @@ export default function MaintenancePage() {
             const pc = PRIORITY_CONFIG[r.priority] || PRIORITY_CONFIG.medium;
 
             return (
-              <div key={r._id} className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+              <motion.div
+                key={r._id}
+                className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden"
+                initial={{ opacity: 0, y: 10, scale: 0.98 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                transition={{ duration: 0.35, ease: [0.22, 1.25, 0.36, 1] }}
+                whileHover={{ y: -3, scale: 1.01 }}
+              >
                 <div className="flex items-center justify-between p-5">
                   <div className="flex items-center gap-3 flex-1 min-w-0">
                     <span className={`text-[10px] font-black uppercase px-2 py-1 rounded-full shrink-0 ${sc.color}`}>{sc.label}</span>
@@ -281,11 +307,11 @@ export default function MaintenancePage() {
                     )}
                   </div>
                 )}
-              </div>
+              </motion.div>
             );
           })}
         </div>
       )}
-    </div>
+    </motion.div>
   );
 }

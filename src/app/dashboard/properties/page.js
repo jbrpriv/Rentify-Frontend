@@ -8,6 +8,7 @@ import {
   Building2, MapPin, Plus, FileText, Loader2, UserPlus,
   CheckCircle, Clock, Eye, EyeOff, X, AlertTriangle, Trash2,
 } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 /* ─── Confirm Modal (shared) ─────────────────────────────────────────────── */
 function ConfirmModal({ title, description, icon: Icon, iconBg, iconColor, confirmLabel, confirmBg, onConfirm, onCancel, loading }) {
@@ -118,7 +119,15 @@ export default function PropertiesPage() {
 
   if (loading) return (
     <div style={{ display:'flex',alignItems:'center',justifyContent:'center',minHeight:400 }}>
-      <Loader2 className="animate-spin" style={{ width:32,height:32,color:'#4F46E5' }}/>
+      <motion.div
+        initial={{ opacity: 0, y: 8, scale: 0.96 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ duration: 0.35, ease: [0.22, 1.25, 0.36, 1] }}
+        style={{ display:'flex',alignItems:'center',gap:10, padding:'10px 16px', borderRadius:16, background:'#1e293b', color:'#e5e7eb' }}
+      >
+        <Loader2 className="animate-spin" style={{ width:20,height:20,color:'#818cf8' }}/>
+        <span style={{ fontSize:'0.85rem', fontWeight:600 }}>Loading properties…</span>
+      </motion.div>
     </div>
   );
 
@@ -171,9 +180,19 @@ export default function PropertiesPage() {
         />
       )}
 
-      <div style={{ display:'flex',flexDirection:'column',gap:24 }}>
+      <motion.div
+        style={{ display:'flex',flexDirection:'column',gap:24 }}
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, ease: [0.21, 0.6, 0.35, 1] }}
+      >
         {/* Header */}
-        <div style={{ display:'flex',alignItems:'center',justifyContent:'space-between' }}>
+        <motion.div
+          style={{ display:'flex',alignItems:'center',justifyContent:'space-between' }}
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35, delay: 0.05, ease: [0.21, 0.6, 0.35, 1] }}
+        >
           <div>
             <h1 style={{ fontFamily:"'Outfit',sans-serif",fontWeight:800,fontSize:'1.8rem',color:'#0F172A',letterSpacing:'-0.02em',lineHeight:1 }}>My Properties</h1>
             <p style={{ color:'#94A3B8',fontSize:'0.83rem',marginTop:4 }}>{properties.length} propert{properties.length===1?'y':'ies'} in your portfolio</p>
@@ -182,28 +201,38 @@ export default function PropertiesPage() {
             style={{ display:'inline-flex',alignItems:'center',gap:8,padding:'10px 18px',background:'linear-gradient(135deg,#4F46E5,#7C3AED)',color:'white',borderRadius:12,fontSize:'0.85rem',fontWeight:700,textDecoration:'none',boxShadow:'0 4px 14px rgba(79,70,229,.3)',fontFamily:"'Outfit',sans-serif" }}>
             <Plus size={16}/> Add Property
           </Link>
-        </div>
+        </motion.div>
 
         {/* Toast */}
         {msg && (
-          <div style={{ borderRadius:12,padding:'12px 18px',fontSize:'0.875rem',fontWeight:600,display:'flex',alignItems:'center',gap:10,
-            background: msg.startsWith('✅') ? '#F0FDF4' : '#FFF7F7',
-            color:      msg.startsWith('✅') ? '#16A34A' : '#DC2626',
-            border:     `1px solid ${msg.startsWith('✅') ? '#BBF7D0' : '#FECACA'}`,
-          }}>
+          <motion.div
+            initial={{ opacity: 0, y: 4 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.25, ease: [0.21, 0.6, 0.35, 1] }}
+            style={{ borderRadius:12,padding:'12px 18px',fontSize:'0.875rem',fontWeight:600,display:'flex',alignItems:'center',gap:10,
+              background: msg.startsWith('✅') ? '#F0FDF4' : '#FFF7F7',
+              color:      msg.startsWith('✅') ? '#16A34A' : '#DC2626',
+              border:     `1px solid ${msg.startsWith('✅') ? '#BBF7D0' : '#FECACA'}`,
+            }}
+          >
             {msg.startsWith('✅') ? <CheckCircle size={16}/> : <X size={16}/>} {msg.slice(2)}
-          </div>
+          </motion.div>
         )}
 
         {properties.length === 0 ? (
-          <div style={{ textAlign:'center',padding:'56px 20px',background:'white',borderRadius:20,border:'2px dashed #E2E8F0' }}>
+          <motion.div
+            style={{ textAlign:'center',padding:'56px 20px',background:'white',borderRadius:20,border:'2px dashed #E2E8F0' }}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.35, ease: [0.21, 0.6, 0.35, 1] }}
+          >
             <Building2 size={44} style={{ color:'#CBD5E1',margin:'0 auto 12px' }}/>
             <h3 style={{ fontFamily:"'Outfit',sans-serif",fontWeight:700,color:'#475569',fontSize:'1.1rem' }}>No properties yet</h3>
             <p style={{ color:'#94A3B8',fontSize:'0.85rem',marginTop:4,marginBottom:20 }}>Create your first property to start managing tenants.</p>
             <Link href="/dashboard/properties/new" style={{ display:'inline-flex',alignItems:'center',gap:6,padding:'10px 20px',background:'#4F46E5',color:'white',borderRadius:10,fontSize:'0.85rem',fontWeight:700,textDecoration:'none' }}>
               <Plus size={15}/> Add Your First Property
             </Link>
-          </div>
+          </motion.div>
         ) : (
           <div style={{ display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(300px,1fr))',gap:18 }}>
             {properties.map(property => {
@@ -214,7 +243,14 @@ export default function PropertiesPage() {
               const isOccupied = property.status === 'occupied';
 
               return (
-                <div key={property._id} className="prop-card">
+                <motion.div
+                  key={property._id}
+                  className="prop-card"
+                  initial={{ opacity: 0, y: 10, scale: 0.98 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  transition={{ duration: 0.4, ease: [0.22, 1.25, 0.36, 1] }}
+                  whileHover={{ y: -4, scale: 1.01 }}
+                >
                   {heroImg
                     ? <img src={heroImg} alt={property.title} className="prop-img"/>
                     : <div className="prop-img-ph"><Building2 size={32} style={{ color:'#A78BFA' }}/></div>
@@ -292,12 +328,12 @@ export default function PropertiesPage() {
                       )}
                     </div>
                   </div>
-                </div>
+                </motion.div>
               );
             })}
           </div>
         )}
-      </div>
+      </motion.div>
     </>
   );
 }

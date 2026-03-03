@@ -8,6 +8,7 @@ import {
   TrendingUp, CheckCircle, Clock, AlertCircle, ArrowRight,
   Plus, Bell, Users, Key,
 } from 'lucide-react';
+import { motion } from 'framer-motion';
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell,
@@ -199,10 +200,20 @@ export default function DashboardHome() {
     <>
       <style>{`@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@700;800;900&display=swap');`}</style>
 
-      <div style={{ display:'flex', flexDirection:'column', gap:28, maxWidth:1200, margin:'0 auto' }}>
+      <motion.div
+        style={{ display:'flex', flexDirection:'column', gap:28, maxWidth:1200, margin:'0 auto' }}
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, ease: [0.21, 0.6, 0.35, 1] }}
+      >
 
         {/* ── Header ── */}
-        <div style={{ display:'flex', alignItems:'flex-end', justifyContent:'space-between', flexWrap:'wrap', gap:12 }}>
+        <motion.div
+          style={{ display:'flex', alignItems:'flex-end', justifyContent:'space-between', flexWrap:'wrap', gap:12 }}
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35, delay: 0.05, ease: [0.21, 0.6, 0.35, 1] }}
+        >
           <div>
             <h1 style={{ fontFamily:"'Outfit',sans-serif", fontWeight:900, fontSize:'2.4rem', color:'#0F172A', letterSpacing:'-0.04em', lineHeight:1, marginBottom:6 }}>
               Hi, {user.name?.split(' ')[0]} 👋
@@ -221,13 +232,24 @@ export default function DashboardHome() {
               {user.role?.replace('_',' ')}
             </span>
           </div>
-        </div>
+        </motion.div>
 
         {/* ── Alert ── */}
-        <AlertBanner tasks={tasks} role={user.role} theme={theme}/>
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35, delay: 0.1, ease: [0.21, 0.6, 0.35, 1] }}
+        >
+          <AlertBanner tasks={tasks} role={user.role} theme={theme}/>
+        </motion.div>
 
         {/* ── Stats ── */}
-        <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(180px,1fr))', gap:16 }}>
+        <motion.div
+          style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(180px,1fr))', gap:16 }}
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35, delay: 0.14, ease: [0.21, 0.6, 0.35, 1] }}
+        >
           {user.role === 'landlord' && (
             <>
               <StatCard label="Monthly Income"   value={`Rs. ${totalRevenue.toLocaleString()}`} icon={TrendingUp} theme={theme} sub={`${activeLeases.length} active lease(s)`}/>
@@ -260,18 +282,28 @@ export default function DashboardHome() {
               <StatCard label="Maintenance"   value={pendingMaint}        icon={Wrench}    theme={ROLE_THEME.property_manager}/>
             </>
           )}
-        </div>
+        </motion.div>
 
         {/* ── Quick Actions ── */}
         {qkActions.length > 0 && (
-          <div style={{ display:'flex', flexWrap:'wrap', gap:10, alignItems:'center' }}>
+          <motion.div
+            style={{ display:'flex', flexWrap:'wrap', gap:10, alignItems:'center' }}
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: 0.16, ease: [0.21, 0.6, 0.35, 1] }}
+          >
             <span style={{ fontSize:'0.7rem', fontWeight:700, color:'#CBD5E1', textTransform:'uppercase', letterSpacing:'0.1em', marginRight:4 }}>Quick</span>
             {qkActions.map(a => <ActionPill key={a.href} href={a.href} icon={a.icon} label={a.label} theme={theme}/>)}
-          </div>
+          </motion.div>
         )}
 
         {/* ── Charts ── */}
-        <div style={{ display:'grid', gridTemplateColumns:'2fr 1fr', gap:20 }}>
+        <motion.div
+          style={{ display:'grid', gridTemplateColumns:'2fr 1fr', gap:20 }}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.18, ease: [0.21, 0.6, 0.35, 1] }}
+        >
           {/* Bar chart */}
           <div style={{ background:'white', borderRadius:20, border:'1px solid #E8EAF0', padding:'24px' }}>
             <p style={{ fontSize:'0.75rem', fontWeight:700, color:'#94A3B8', textTransform:'uppercase', letterSpacing:'0.1em', marginBottom:16 }}>Monthly Payments (last 6 months)</p>
@@ -302,11 +334,16 @@ export default function DashboardHome() {
               </ResponsiveContainer>
             ) : <div style={{ height:200, display:'flex', alignItems:'center', justifyContent:'center', color:'#CBD5E1', fontSize:'0.85rem', fontWeight:600 }}>No agreements yet</div>}
           </div>
-        </div>
+        </motion.div>
 
         {/* ── Property status (landlord / PM) ── */}
         {propStatData.length > 0 && (
-          <div style={{ background:'white', borderRadius:20, border:'1px solid #E8EAF0', padding:'24px' }}>
+          <motion.div
+            style={{ background:'white', borderRadius:20, border:'1px solid #E8EAF0', padding:'24px' }}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.38, delay: 0.22, ease: [0.21, 0.6, 0.35, 1] }}
+          >
             <p style={{ fontSize:'0.75rem', fontWeight:700, color:'#94A3B8', textTransform:'uppercase', letterSpacing:'0.1em', marginBottom:16 }}>Portfolio Status</p>
             <div style={{ display:'flex', gap:12 }}>
               {propStatData.map((d, i) => (
@@ -316,11 +353,16 @@ export default function DashboardHome() {
                 </div>
               ))}
             </div>
-          </div>
+          </motion.div>
         )}
 
         {/* ── Active Occupancy ── */}
-        <div style={{ background:'white', borderRadius:20, border:'1px solid #E8EAF0', overflow:'hidden' }}>
+        <motion.div
+          style={{ background:'white', borderRadius:20, border:'1px solid #E8EAF0', overflow:'hidden' }}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.25, ease: [0.21, 0.6, 0.35, 1] }}
+        >
           <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'20px 24px', borderBottom:'1px solid #F1F5F9' }}>
             <p style={{ fontFamily:"'Outfit',sans-serif", fontWeight:800, fontSize:'1.15rem', color:'#0F172A' }}>Active Occupancy</p>
             {user.role === 'landlord' && (
@@ -337,9 +379,9 @@ export default function DashboardHome() {
               <p style={{ fontWeight:600, fontSize:'0.85rem' }}>No active leases found.</p>
             </div>
           )}
-        </div>
+        </motion.div>
 
-      </div>
+      </motion.div>
     </>
   );
 }

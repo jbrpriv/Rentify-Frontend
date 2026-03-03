@@ -11,6 +11,7 @@ import {
   ShieldCheck, Wrench, MessageSquare, CreditCard, BarChart2, Scale,
   ClipboardList, X, Tag,
 } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 const NAV_BY_ROLE = {
   landlord: [
@@ -156,11 +157,23 @@ export default function DashboardLayout({ children }) {
 
   useEffect(() => { if (pathname) fetchCounts(); }, [pathname, fetchCounts]);
 
-  if (!user) return (
-    <div className="h-screen flex items-center justify-center bg-white">
-      <Loader2 className="animate-spin h-10 w-10 text-violet-600" />
-    </div>
-  );
+  if (!user) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-slate-950">
+        <motion.div
+          initial={{ opacity: 0, y: 10, scale: 0.96 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ duration: 0.4, ease: [0.22, 1.25, 0.36, 1] }}
+          className="rf-card flex items-center gap-3 px-5 py-4 bg-slate-900/80"
+        >
+          <Loader2 className="h-6 w-6 animate-spin text-violet-400" />
+          <p className="text-sm font-semibold text-slate-100">
+            Loading your dashboard…
+          </p>
+        </motion.div>
+      </div>
+    );
+  }
 
   const role       = user.role || 'tenant';
   const currentNav = NAV_BY_ROLE[role] || NAV_BY_ROLE.tenant;
@@ -168,12 +181,17 @@ export default function DashboardLayout({ children }) {
   const badgeColor = ROLE_BADGE[role]  || 'bg-gray-100 text-gray-600 border-gray-200';
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: '#f7f8fc' }}>
+    <div className="min-h-screen flex flex-col">
       <Navbar />
       <NotificationToast notification={notification} onDismiss={() => setNotification(null)} />
 
       {/* Sub-nav bar */}
-      <div className="mt-16 sticky top-16 z-40 w-full" style={{ background: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(12px)', borderBottom: '1px solid #e8eaf0' }}>
+      <motion.div
+        className="mt-16 sticky top-16 z-40 w-full border-b border-slate-800/70 bg-slate-950/85 backdrop-blur-xl"
+        initial={{ opacity: 0, y: -8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.35, ease: [0.21, 0.6, 0.35, 1] }}
+      >
         <div className="w-full px-4 sm:px-8 lg:px-12">
           <div className="flex items-center justify-between h-14">
             <div className="flex space-x-0.5 overflow-x-auto no-scrollbar h-full items-center">
@@ -182,12 +200,14 @@ export default function DashboardLayout({ children }) {
                 const isActive = pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href));
                 const count    = item.badgeKey ? (badgeCounts[item.badgeKey] || 0) : 0;
                 return (
-                  <Link
+                  <motion.a
                     key={item.name}
                     href={item.href}
                     className={`relative flex items-center h-full px-3.5 text-[11px] font-bold tracking-wide border-b-2 transition-all whitespace-nowrap gap-1.5 ${
                       isActive ? 'border-violet-600 text-violet-700' : 'border-transparent text-gray-400 hover:text-gray-700 hover:border-gray-200'
                     }`}
+                    whileHover={{ y: -1 }}
+                    transition={{ duration: 0.15 }}
                   >
                     <Icon className={`h-3.5 w-3.5 ${isActive ? 'text-violet-600' : 'text-gray-400'}`} />
                     {item.name}
@@ -196,7 +216,7 @@ export default function DashboardLayout({ children }) {
                         {count > 9 ? '9+' : count}
                       </span>
                     )}
-                  </Link>
+                  </motion.a>
                 );
               })}
             </div>
@@ -208,11 +228,16 @@ export default function DashboardLayout({ children }) {
             </div>
           </div>
         </div>
-      </div>
+      </motion.div>
 
-      <main className="flex-grow py-8 px-4 sm:px-8 lg:px-12 w-full max-w-[1600px] mx-auto">
+      <motion.main
+        className="flex-grow py-8 px-4 sm:px-8 lg:px-12 w-full max-w-[1600px] mx-auto"
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, ease: [0.21, 0.6, 0.35, 1] }}
+      >
         {children}
-      </main>
+      </motion.main>
       <Footer />
     </div>
   );

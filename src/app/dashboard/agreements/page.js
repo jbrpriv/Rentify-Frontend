@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import api from '@/utils/api';
 import { FileText, Download, Calendar, User, Loader2, CheckCircle, Clock, PenLine } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 export default function AgreementsPage() {
   const router = useRouter();
@@ -116,19 +117,35 @@ export default function AgreementsPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <motion.div
+      className="space-y-6"
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, ease: [0.21, 0.6, 0.35, 1] }}
+    >
       <h1 className="text-2xl font-bold text-gray-900">Rental Agreements</h1>
 
       {agreements.length === 0 ? (
-        <div className="bg-white p-12 text-center rounded-lg shadow border-2 border-dashed border-gray-200">
+        <motion.div
+          className="bg-white p-12 text-center rounded-lg shadow border-2 border-dashed border-gray-200"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35, ease: [0.21, 0.6, 0.35, 1] }}
+        >
           <FileText className="mx-auto h-12 w-12 text-gray-400" />
           <p className="mt-2 text-gray-500">No agreements found.</p>
-        </div>
+        </motion.div>
       ) : (
         <div className="bg-white shadow overflow-hidden sm:rounded-md">
           <ul className="divide-y divide-gray-200">
             {agreements.map((ag) => (
-              <li key={ag._id} className="hover:bg-gray-50 transition-colors">
+              <motion.li
+                key={ag._id}
+                className="hover:bg-gray-50 transition-colors"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, ease: [0.21, 0.6, 0.35, 1] }}
+              >
                 <div className="px-6 py-5">
                   <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                     
@@ -201,11 +218,11 @@ export default function AgreementsPage() {
                     </div>
                   </div>
                 </div>
-              </li>
+              </motion.li>
             ))}
           </ul>
         </div>
       )}
-    </div>
+    </motion.div>
   );
 }

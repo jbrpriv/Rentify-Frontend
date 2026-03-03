@@ -8,6 +8,7 @@ import {
   Loader2, Clock, CheckCircle, XCircle, AlertCircle, Plus, RefreshCw,
   TrendingDown, TrendingUp, Minus,
 } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 /* ─── Palette ────────────────────────────────────────────────────────────── */
 const STATUS_META = {
@@ -153,7 +154,12 @@ function TenantOfferForm({ properties, onSubmit, loading }) {
   ];
 
   return (
-    <div style={{ background:'white', border:'1.5px solid #E2E8F0', borderRadius:16, padding:'24px', marginBottom:24 }}>
+    <motion.div
+      style={{ background:'white', border:'1.5px solid #E2E8F0', borderRadius:16, padding:'24px', marginBottom:24 }}
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.35, ease: [0.21, 0.6, 0.35, 1] }}
+    >
       <h3 style={{ fontFamily:"'Outfit',sans-serif", fontWeight:800, fontSize:'1.1rem', color:'#0F172A', marginBottom:16 }}>Submit a New Offer</h3>
 
       <div style={{ marginBottom:16 }}>
@@ -208,7 +214,7 @@ function TenantOfferForm({ properties, onSubmit, loading }) {
           </button>
         </>
       )}
-    </div>
+    </motion.div>
   );
 }
 
@@ -227,10 +233,16 @@ function OfferCard({ offer, user, onAction, actionLoading }) {
   const myTurn   = isLandlordView ? lastBy === 'tenant' : lastBy === 'landlord';
 
   return (
-    <div style={{
-      background:'white', borderRadius:16, border:`1.5px solid ${meta.border}`,
-      overflow:'hidden', transition:'box-shadow 0.2s',
-    }}>
+    <motion.div
+      style={{
+        background:'white', borderRadius:16, border:`1.5px solid ${meta.border}`,
+        overflow:'hidden', boxShadow:'0 1px 4px rgba(15,23,42,0.04)',
+      }}
+      initial={{ opacity: 0, y: 10, scale: 0.97 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ duration: 0.35, ease: [0.22, 1.25, 0.36, 1] }}
+      whileHover={{ y: -3, scale: 1.01 }}
+    >
       {/* Header row */}
       <div style={{ display:'flex', alignItems:'center', gap:14, padding:'16px 18px', cursor:'pointer' }} onClick={() => setExpanded(e => !e)}>
         {/* Property thumb */}
@@ -351,7 +363,7 @@ function OfferCard({ offer, user, onAction, actionLoading }) {
           )}
         </div>
       )}
-    </div>
+    </motion.div>
   );
 }
 
@@ -403,7 +415,15 @@ export default function OffersPage() {
 
   if (!user || loading) return (
     <div style={{ display:'flex', alignItems:'center', justifyContent:'center', minHeight:400 }}>
-      <Loader2 size={36} className="animate-spin" color="#4F46E5"/>
+      <motion.div
+        initial={{ opacity: 0, y: 8, scale: 0.96 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ duration: 0.35, ease: [0.22, 1.25, 0.36, 1] }}
+        style={{ display:'flex',alignItems:'center',gap:10, padding:'10px 16px', borderRadius:16, background:'#1e293b', color:'#e5e7eb' }}
+      >
+        <Loader2 className="animate-spin" size={18} color="#6366f1" />
+        <span style={{ fontSize:'0.85rem', fontWeight:600 }}>Loading offers…</span>
+      </motion.div>
     </div>
   );
 
@@ -415,10 +435,20 @@ export default function OffersPage() {
     <>
       <style>{`@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@700;800&display=swap');`}</style>
 
-      <div style={{ maxWidth:900, margin:'0 auto', display:'flex', flexDirection:'column', gap:20 }}>
+      <motion.div
+        style={{ maxWidth:900, margin:'0 auto', display:'flex', flexDirection:'column', gap:20 }}
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, ease: [0.21, 0.6, 0.35, 1] }}
+      >
 
         {/* Header */}
-        <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+        <motion.div
+          style={{ display:'flex', alignItems:'center', justifyContent:'space-between' }}
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35, delay: 0.05, ease: [0.21, 0.6, 0.35, 1] }}
+        >
           <div>
             <h1 style={{ fontFamily:"'Outfit',sans-serif", fontWeight:800, fontSize:'1.9rem', color:'#0F172A', letterSpacing:'-0.02em', lineHeight:1 }}>
               {user.role === 'landlord' ? 'Incoming Offers' : 'My Offers'}
@@ -432,13 +462,18 @@ export default function OffersPage() {
           <button onClick={fetchOffers} style={{ padding:'8px 14px', border:'1.5px solid #E2E8F0', borderRadius:10, background:'white', cursor:'pointer', display:'flex', alignItems:'center', gap:6, fontSize:'0.8rem', fontWeight:600, color:'#64748B' }}>
             <RefreshCw size={13}/> Refresh
           </button>
-        </div>
+        </motion.div>
 
         {/* Toast */}
         {toast && (
-          <div style={{ padding:'12px 16px', borderRadius:10, fontSize:'0.85rem', fontWeight:600, display:'flex', alignItems:'center', gap:8, background: toast.ok ? '#F0FDF4' : '#FFF7F7', color: toast.ok ? '#16A34A' : '#DC2626', border:`1px solid ${toast.ok ? '#BBF7D0' : '#FECACA'}` }}>
+          <motion.div
+            initial={{ opacity: 0, y: 4 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.25, ease: [0.21, 0.6, 0.35, 1] }}
+            style={{ padding:'12px 16px', borderRadius:10, fontSize:'0.85rem', fontWeight:600, display:'flex', alignItems:'center', gap:8, background: toast.ok ? '#F0FDF4' : '#FFF7F7', color: toast.ok ? '#16A34A' : '#DC2626', border:`1px solid ${toast.ok ? '#BBF7D0' : '#FECACA'}` }}
+          >
             {toast.ok ? <CheckCircle size={15}/> : <AlertCircle size={15}/>} {toast.msg}
-          </div>
+          </motion.div>
         )}
 
         {/* Filter tabs */}
@@ -484,7 +519,7 @@ export default function OffersPage() {
             ))}
           </div>
         )}
-      </div>
+      </motion.div>
     </>
   );
 }

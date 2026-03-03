@@ -8,7 +8,34 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        rentifyBlue: '#2563eb', // Matches the professional blue in your PRD
+        rentifyBlue: '#2563eb',
+        brand: {
+          primary: '#2563eb',
+          primarySoft: '#dbeafe',
+          primaryStrong: '#1d4ed8',
+        },
+        semantic: {
+          success: '#16a34a',
+          warning: '#f59e0b',
+          danger: '#ef4444',
+        },
+      },
+      borderRadius: {
+        'xl': '1.25rem',
+        '2xl': '1.5rem',
+      },
+      boxShadow: {
+        'soft': '0 18px 40px rgba(15, 23, 42, 0.25)',
+        'elevated': '0 24px 70px rgba(15, 23, 42, 0.42)',
+      },
+      transitionTimingFunction: {
+        'rf-standard': 'cubic-bezier(0.21, 0.6, 0.35, 1)',
+        'rf-bouncy': 'cubic-bezier(0.22, 1.25, 0.36, 1)',
+      },
+      transitionDuration: {
+        'fast': '140ms',
+        'normal': '220ms',
+        'slow': '320ms',
       },
     },
   },
