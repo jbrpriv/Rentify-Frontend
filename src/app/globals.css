@@ -1,35 +1,35 @@
 @import "tailwindcss";
 
 /* ──────────────────────────────────────────────────────────────
-   DESIGN TOKENS – RENTIFY GREEN THEME
+   DESIGN TOKENS – RENTIFY BLUE THEME
    Uses ONLY the requested palette:
-   #A2CB8B, #84B179, #C7EABB, #E8F5BD
+   #0992C2, #0B2D72, #0AC4E0, #F6E7BC
    ──────────────────────────────────────────────────────────── */
 
 :root {
-  /* Brand greens */
-  --rf-color-primary: #A2CB8B; /* muted green */
-  --rf-color-primary-strong: #84B179; /* deep green / hover */
-  --rf-color-primary-soft: #C7EABB; /* soft mint / secondary */
+  /* Brand colors */
+  --rf-color-primary: #0992C2; /* Mid Blue */
+  --rf-color-primary-strong: #0B2D72; /* Deep Blue / hover */
+  --rf-color-primary-soft: #0AC4E0; /* Cyan / secondary */
 
   /* Supporting tones from palette */
-  --rf-color-soft: #C7EABB;
-  --rf-color-soft-alt: #E8F5BD;
+  --rf-color-soft: #0AC4E0;
+  --rf-color-soft-alt: #F6E7BC; /* Warm Cream */
 
   /* Neutrals tuned for light, premium look */
-  --rf-color-bg: #F7FAF0;
-  --rf-color-bg-elevated: #FDFEF8;
+  --rf-color-bg: #F8FBFC;
+  --rf-color-bg-elevated: #FFFFFF;
   --rf-color-surface: #FFFFFF;
-  --rf-color-surface-soft: #F9FBEF;
-  --rf-color-border-subtle: rgba(148, 163, 120, 0.22);
-  --rf-color-border-strong: rgba(120, 140, 90, 0.5);
+  --rf-color-surface-soft: #F0F8FA;
+  --rf-color-border-subtle: rgba(11, 45, 114, 0.12); /* Deep Blue base */
+  --rf-color-border-strong: rgba(11, 45, 114, 0.35);
   --rf-color-text-main: #1F2933;
   --rf-color-text-soft: #4B5563;
   --rf-color-text-muted: #6B7280;
 
-  /* Semantic (kept but softly shifted toward green) */
-  --rf-color-success: #84B179;
-  --rf-color-success-soft: #E8F5BD;
+  /* Semantic */
+  --rf-color-success: #0992C2;
+  --rf-color-success-soft: #E6F4F8;
   --rf-color-warning: #EAB308;
   --rf-color-warning-soft: #FEF9C3;
   --rf-color-danger: #DC2626;
@@ -57,9 +57,9 @@
   --rf-radius-xl: 1.25rem;
   --rf-radius-2xl: 1.5rem;
 
-  /* Shadows tuned for soft, airy UI */
-  --rf-shadow-soft: 0 18px 40px rgba(148, 163, 120, 0.18);
-  --rf-shadow-elevated: 0 28px 80px rgba(120, 130, 80, 0.26);
+  /* Shadows tuned for soft, airy UI using Deep Blue base */
+  --rf-shadow-soft: 0 18px 40px rgba(11, 45, 114, 0.06);
+  --rf-shadow-elevated: 0 28px 80px rgba(11, 45, 114, 0.12);
 
   /* Motion */
   --rf-duration-fast: 140ms;
@@ -73,8 +73,8 @@
   body {
     color: var(--rf-color-text-main);
     background:
-      radial-gradient(circle at top left, #E8F5BD 0, #F7FAF0 32%, #FFFFFF 70%),
-      radial-gradient(circle at bottom right, #C7EABB 0, #FFFFFF 55%);
+      radial-gradient(circle at top left, rgba(246, 231, 188, 0.5) 0, #F8FBFC 32%, #FFFFFF 70%),
+      radial-gradient(circle at bottom right, rgba(10, 196, 224, 0.1) 0, #FFFFFF 55%);
     font-family: var(--font-geist-sans, var(--rf-font-sans));
     -webkit-font-smoothing: antialiased;
   }
@@ -82,9 +82,9 @@
   .rf-shell {
     min-height: 100vh;
     background:
-      radial-gradient(circle at 0% -10%, rgba(162, 203, 139, 0.65), transparent 55%),
-      radial-gradient(circle at 90% 0%, rgba(231, 245, 189, 0.9), transparent 62%),
-      radial-gradient(circle at 0% 80%, rgba(199, 234, 187, 0.75), transparent 60%);
+      radial-gradient(circle at 0% -10%, rgba(9, 146, 194, 0.15), transparent 55%),
+      radial-gradient(circle at 90% 0%, rgba(246, 231, 188, 0.5), transparent 62%),
+      radial-gradient(circle at 0% 80%, rgba(10, 196, 224, 0.12), transparent 60%);
   }
 }
 
@@ -148,7 +148,7 @@
 @layer utilities {
   .rf-card {
     border-radius: var(--rf-radius-2xl);
-    background: radial-gradient(circle at top left, #FFFFFF, #F9FBEF);
+    background: radial-gradient(circle at top left, #FFFFFF, #F0F8FA);
     box-shadow: var(--rf-shadow-soft);
     border: 1px solid var(--rf-color-border-subtle);
   }
@@ -156,8 +156,8 @@
   .rf-card-soft {
     border-radius: var(--rf-radius-xl);
     background: rgba(255, 255, 255, 0.9);
-    box-shadow: 0 22px 60px rgba(148, 163, 120, 0.24);
-    border: 1px solid rgba(148, 163, 120, 0.28);
+    box-shadow: 0 22px 60px rgba(11, 45, 114, 0.08);
+    border: 1px solid rgba(11, 45, 114, 0.12);
   }
 
   .rf-surface {
@@ -176,11 +176,11 @@
 }
 
 /* ──────────────────────────────────────────────────────────────
-   BUTTON SYSTEM – GREEN VARIANTS
+   BUTTON SYSTEM – BLUE VARIANTS
    ──────────────────────────────────────────────────────────── */
 
 @layer utilities {
-  /* Base shape & motion — always used together with a variant */
+  /* Base shape & motion */
   .rf-btn {
     display: inline-flex;
     align-items: center;
@@ -214,16 +214,16 @@
       background-color var(--rf-duration-normal) var(--rf-ease-standard),
       color var(--rf-duration-normal) var(--rf-ease-standard);
     background: linear-gradient(135deg, var(--rf-color-primary-strong), var(--rf-color-primary));
-    color: #1A2A1A;
-    box-shadow: 0 18px 40px rgba(132, 177, 121, 0.45);
+    color: #FFFFFF; /* Deep blue needs white text for contrast */
+    box-shadow: 0 18px 40px rgba(11, 45, 114, 0.25);
   }
   .rf-btn-primary:hover {
     transform: translateY(-1px) scale(1.03);
-    box-shadow: 0 22px 60px rgba(132, 177, 121, 0.6);
+    box-shadow: 0 22px 60px rgba(11, 45, 114, 0.35);
   }
   .rf-btn-primary:active {
     transform: translateY(0) scale(0.97);
-    box-shadow: 0 12px 32px rgba(132, 177, 121, 0.5);
+    box-shadow: 0 12px 32px rgba(11, 45, 114, 0.2);
   }
 
   .rf-btn-secondary {
@@ -242,11 +242,11 @@
       background-color var(--rf-duration-normal) var(--rf-ease-standard),
       color var(--rf-duration-normal) var(--rf-ease-standard);
     border: 1px solid var(--rf-color-border-subtle);
-    background: rgba(248, 250, 244, 0.95);
-    color: var(--rf-color-text-soft);
+    background: rgba(246, 231, 188, 0.25); /* Subtle tint of the cream */
+    color: var(--rf-color-text-main);
   }
   .rf-btn-secondary:hover {
-    background: #F1F7E4;
+    background: rgba(10, 196, 224, 0.1);
     border-color: var(--rf-color-border-strong);
     transform: translateY(-0.5px) scale(1.01);
   }
@@ -270,7 +270,7 @@
     color: var(--rf-color-text-soft);
   }
   .rf-btn-ghost:hover {
-    background: rgba(226, 240, 206, 0.8);
+    background: rgba(9, 146, 194, 0.08);
     color: #1F2933;
   }
 
@@ -314,8 +314,8 @@
   .rf-hover-card:hover {
     transform: translateY(-6px) translateZ(0) scale(1.01);
     box-shadow: var(--rf-shadow-elevated);
-    border-color: rgba(132, 177, 121, 0.9);
-    background-color: rgba(248, 252, 238, 0.96);
+    border-color: rgba(9, 146, 194, 0.4);
+    background-color: rgba(240, 248, 250, 0.96);
   }
 
   .rf-link {
@@ -332,7 +332,7 @@
     width: 0;
     height: 1.5px;
     border-radius: 999px;
-    background: linear-gradient(90deg, #A2CB8B, #C7EABB);
+    background: linear-gradient(90deg, #0992C2, #0AC4E0);
     transition: width var(--rf-duration-normal) var(--rf-ease-standard);
   }
   .rf-link:hover {
@@ -342,7 +342,7 @@
     width: 100%;
   }
 
-  /* Scroll-triggered fade/slide utilities (paired with IntersectionObserver or framer-motion) */
+  /* Scroll-triggered fade/slide utilities */
   .rf-fade-in-up {
     opacity: 0;
     transform: translateY(16px);
