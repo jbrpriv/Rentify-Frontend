@@ -1,10 +1,10 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
 
-export default function GoogleOAuthSuccessPage() {
+function GoogleOAuthSuccessContent() {
   const searchParams = useSearchParams();
   const router       = useRouter();
 
@@ -37,5 +37,18 @@ export default function GoogleOAuthSuccessPage() {
       <Loader2 className="animate-spin w-10 h-10 text-blue-600" />
       <p className="text-gray-500 font-medium">Signing you in with Google…</p>
     </div>
+  );
+}
+
+export default function GoogleOAuthSuccessPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center gap-4">
+        <Loader2 className="animate-spin w-10 h-10 text-blue-600" />
+        <p className="text-gray-500 font-medium">Signing you in with Google…</p>
+      </div>
+    }>
+      <GoogleOAuthSuccessContent />
+    </Suspense>
   );
 }

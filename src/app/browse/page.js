@@ -1,12 +1,12 @@
 'use client';
 
-import { useEffect, useState, useCallback, useRef } from 'react';
+import { useEffect, useState, useCallback, useRef, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import {
   Search, MapPin, Building2, Bed, Bath, Square,
   Heart, ChevronLeft, ChevronRight, SlidersHorizontal,
-  ChevronDown, Home, Star, ArrowUpDown, Tag,
+  ChevronDown, Home, Star, ArrowUpDown, Tag, Loader2,
 } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -93,7 +93,7 @@ function Dropdown({ label, options, value, onChange, wide }) {
   );
 }
 
-export default function BrowsePage() {
+function BrowseContent() {
   const searchParams = useSearchParams();
   const [listings,    setListings]    = useState([]);
   const [loading,     setLoading]     = useState(true);
@@ -264,5 +264,21 @@ export default function BrowsePage() {
       </main>
       <Footer />
     </div>
+  );
+}
+
+export default function BrowsePage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex flex-col bg-[#F7F8FA]">
+        <Navbar />
+        <div className="flex-grow flex items-center justify-center">
+          <Loader2 className="animate-spin h-8 w-8 text-violet-600" />
+        </div>
+        <Footer />
+      </div>
+    }>
+      <BrowseContent />
+    </Suspense>
   );
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import api from '@/utils/api';
 import { Loader2, Save, ArrowLeft, UserCheck, UserX, Search } from 'lucide-react';
@@ -12,7 +12,7 @@ const AMENITIES_LIST = [
   'Air Conditioning','Central Heating','Laundry','Rooftop Access'
 ];
 
-export default function EditPropertyPage() {
+function EditPropertyContent() {
   const router        = useRouter();
   const searchParams  = useSearchParams();
   const id            = searchParams.get('id');
@@ -349,6 +349,18 @@ export default function EditPropertyPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function EditPropertyPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex justify-center py-20">
+        <Loader2 className="animate-spin h-8 w-8 text-blue-600" />
+      </div>
+    }>
+      <EditPropertyContent />
+    </Suspense>
   );
 }
 
