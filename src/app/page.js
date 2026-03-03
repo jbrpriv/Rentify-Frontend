@@ -7,7 +7,8 @@ import {
   Search, FileText, CreditCard, Users, ShieldCheck,
   CheckCircle2, ArrowRight, Building2, MapPin, Globe,
   LayoutDashboard, Bell, MessageSquare, Wrench, ClipboardList,
-  TrendingUp, Star, Key, BarChart2, UserCheck, Home
+  TrendingUp, Star, Key, BarChart2, UserCheck, Home,
+  Bed, Bath, Square // <-- Added these three!
 } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
