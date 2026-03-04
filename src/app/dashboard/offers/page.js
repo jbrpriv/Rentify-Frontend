@@ -218,6 +218,105 @@ function TenantOfferForm({ properties, onSubmit, loading }) {
   );
 }
 
+
+/* ─── Accept modal — pick template + start date ─────────────────────────── */
+function AcceptModal({ offer, onConfirm, onClose, loading }) {
+  const [templates, setTemplates]   = React.useState([]);
+  const [tmplLoading, setTmplLoad] = React.useState(true);
+  const [templateId, setTemplateId] = React.useState('');
+  const [startDate, setStartDate]   = React.useState(() => new Date().toISOString().slice(0, 10));
+
+  React.useEffect(() => {
+    api.get('/agreement-templates?status=approved')
+      .then(({ data }) => setTemplates(data))
+      .catch(() => {})
+      .finally(() => setTmplLoad(false));
+  }, []);
+
+  return (
+    <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.45)', zIndex:200, display:'flex', alignItems:'center', justifyContent:'center', padding:16 }}>
+      <div style={{ background:'white', borderRadius:20, width:'100%', maxWidth:520, overflow:'hidden', boxShadow:'0 24px 80px rgba(0,0,0,0.18)' }}>
+        {/* Header */}
+        <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'20px 24px 16px', borderBottom:'1px solid #F1F5F9' }}>
+          <div>
+            <h3 style={{ fontWeight:800, fontSize:'1.05rem', color:'#0F172A', margin:0 }}>Accept Offer</h3>
+            <p style={{ fontSize:'0.78rem', color:'#94A3B8', margin:'3px 0 0' }}>Choose a template and lease start date</p>
+          </div>
+          <button onClick={onClose} style={{ background:'none', border:'none', cursor:'pointer', color:'#94A3B8' }}><X size={20}/></button>
+        </div>
+
+        <div style={{ padding:'20px 24px', display:'flex', flexDirection:'column', gap:18 }}>
+          {/* Offer summary */}
+          <div style={{ padding:'12px 16px', background:'#F8FAFC', borderRadius:12, border:'1px solid #E2E8F0' }}>
+            <p style={{ fontSize:'0.72rem', fontWeight:700, color:'#94A3B8', margin:'0 0 6px', textTransform:'uppercase', letterSpacing:'0.05em' }}>Agreed Terms</p>
+            <p style={{ fontWeight:700, color:'#0F172A', margin:0 }}>{offer.property?.title}</p>
+            <p style={{ fontSize:'0.82rem', color:'#64748B', margin:'4px 0 0' }}>
+              Rs. {(offer.history[offer.history.length-1]?.monthlyRent||0).toLocaleString()}/mo · Deposit Rs. {(offer.history[offer.history.length-1]?.securityDeposit||0).toLocaleString()} · {offer.history[offer.history.length-1]?.leaseDurationMonths} months
+            </p>
+          </div>
+
+          {/* Start date */}
+          <div>
+            <label style={{ fontSize:'0.78rem', fontWeight:700, color:'#475569', display:'flex', alignItems:'center', gap:6, marginBottom:7 }}>
+              <Calendar size={13}/> Lease Start Date
+            </label>
+            <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)}
+              style={{ width:'100%', padding:'10px 12px', border:'1.5px solid #E2E8F0', borderRadius:10, fontSize:'0.9rem', outline:'none', boxSizing:'border-box' }}/>
+          </div>
+
+          {/* Template picker */}
+          <div>
+            <label style={{ fontSize:'0.78rem', fontWeight:700, color:'#475569', display:'flex', alignItems:'center', gap:6, marginBottom:7 }}>
+              <FileText size={13}/> Agreement Template <span style={{ fontWeight:400, color:'#94A3B8' }}>(optional)</span>
+            </label>
+            {tmplLoading ? (
+              <div style={{ display:'flex', alignItems:'center', gap:8, padding:'12px', color:'#94A3B8', fontSize:'0.82rem' }}>
+                <Loader2 size={14} className="animate-spin"/> Loading templates…
+              </div>
+            ) : templates.length === 0 ? (
+              <div style={{ padding:'12px 14px', background:'#FFFBEB', border:'1px solid #FDE68A', borderRadius:10, fontSize:'0.8rem', color:'#92400E' }}>
+                No approved templates yet. <a href="/dashboard/agreement-templates" style={{ color:'#D97706', fontWeight:700 }}>Create one →</a>
+              </div>
+            ) : (
+              <>
+                <div onClick={() => setTemplateId('')}
+                  style={{ display:'flex', alignItems:'center', gap:10, padding:'10px 14px', borderRadius:10, border:`1.5px solid ${!templateId ? '#2563EB' : '#E2E8F0'}`, background: !templateId ? '#EFF6FF' : 'white', marginBottom:6, cursor:'pointer' }}>
+                  <div style={{ width:18, height:18, borderRadius:'50%', border:`2px solid ${!templateId ? '#2563EB' : '#CBD5E1'}`, background: !templateId ? '#2563EB' : 'white', flexShrink:0, display:'flex', alignItems:'center', justifyContent:'center' }}>
+                    {!templateId && <div style={{ width:6, height:6, borderRadius:'50%', background:'white' }}/>}
+                  </div>
+                  <span style={{ fontSize:'0.85rem', fontWeight:600, color: !templateId ? '#1D4ED8' : '#64748B' }}>No template — blank agreement</span>
+                </div>
+                {templates.map(t => (
+                  <div key={t._id} onClick={() => setTemplateId(t._id)}
+                    style={{ display:'flex', alignItems:'center', gap:10, padding:'10px 14px', borderRadius:10, border:`1.5px solid ${templateId===t._id ? '#2563EB' : '#E2E8F0'}`, background: templateId===t._id ? '#EFF6FF' : 'white', marginBottom:6, cursor:'pointer' }}>
+                    <div style={{ width:18, height:18, borderRadius:'50%', border:`2px solid ${templateId===t._id ? '#2563EB' : '#CBD5E1'}`, background: templateId===t._id ? '#2563EB' : 'white', flexShrink:0, display:'flex', alignItems:'center', justifyContent:'center' }}>
+                      {templateId===t._id && <div style={{ width:6, height:6, borderRadius:'50%', background:'white' }}/>}
+                    </div>
+                    <div style={{ flex:1, minWidth:0 }}>
+                      <p style={{ fontWeight:700, fontSize:'0.85rem', color: templateId===t._id ? '#1D4ED8' : '#0F172A', margin:0 }}>{t.name}</p>
+                      <p style={{ fontSize:'0.72rem', color:'#94A3B8', margin:'2px 0 0' }}>{t.clauseIds?.length || 0} clauses{t.description ? ` · ${t.description}` : ''}</p>
+                    </div>
+                  </div>
+                ))}
+              </>
+            )}
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div style={{ padding:'16px 24px', borderTop:'1px solid #F1F5F9', display:'flex', gap:10 }}>
+          <button onClick={onClose} style={{ flex:1, padding:'11px', border:'1.5px solid #E2E8F0', borderRadius:10, fontWeight:700, fontSize:'0.85rem', color:'#64748B', background:'white', cursor:'pointer' }}>Cancel</button>
+          <button onClick={() => onConfirm({ templateId: templateId || null, startDate })} disabled={loading}
+            style={{ flex:2, padding:'11px', background:'#16A34A', color:'white', border:'none', borderRadius:10, fontWeight:700, fontSize:'0.85rem', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', gap:8, opacity: loading ? 0.7 : 1 }}>
+            {loading ? <Loader2 size={15} className="animate-spin"/> : <Check size={15}/>}
+            Create Agreement
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ─── Single offer card ───────────────────────────────────────────────────── */
 function OfferCard({ offer, user, onAction, actionLoading }) {
   const [expanded, setExpanded]   = useState(false);
@@ -375,6 +474,7 @@ export default function OffersPage() {
   const [loading, setLoading]   = useState(true);
   const [actionLoading, setActionLoading] = useState(null);
   const [toast, setToast]       = useState(null);
+  const [acceptModal, setAcceptModal] = useState(null);
   const [filter, setFilter]     = useState('active'); // 'active' | 'history'
 
   const showToast = (msg, ok = true) => { setToast({ msg, ok }); setTimeout(() => setToast(null), 4000); };
@@ -395,11 +495,27 @@ export default function OffersPage() {
     fetchOffers();
   }, []); // eslint-disable-line
 
+  const handleAcceptConfirm = async ({ templateId, startDate }) => {
+    const offerId = acceptModal._id;
+    const key = `accept-${offerId}`;
+    setActionLoading(key);
+    try {
+      await api.put(`/offers/${offerId}/accept`, { templateId, startDate });
+      showToast('Offer accepted — agreement drafted');
+      setAcceptModal(null);
+      fetchOffers();
+    } catch (err) {
+      showToast(err.response?.data?.message || 'Accept failed', false);
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
   const handleAction = async (type, offerId, form) => {
+    if (type === 'accept') { setAcceptModal(offers.find(o => o._id === offerId)); return; }
     const key = `${type}-${offerId}`;
     setActionLoading(key);
     try {
-      if (type === 'accept')   await api.put(`/offers/${offerId}/accept`);
       if (type === 'decline')  await api.put(`/offers/${offerId}/decline`);
       if (type === 'withdraw') await api.delete(`/offers/${offerId}`);
       if (type === 'counter')  await api.post(`/offers/${offerId}/counter`, form);
@@ -520,6 +636,15 @@ export default function OffersPage() {
           </div>
         )}
       </motion.div>
+
+      {acceptModal && (
+        <AcceptModal
+          offer={acceptModal}
+          loading={!!actionLoading}
+          onConfirm={handleAcceptConfirm}
+          onClose={() => setAcceptModal(null)}
+        />
+      )}
     </>
   );
 }

@@ -9,7 +9,7 @@ import api from '@/utils/api';
 import {
   LayoutDashboard, Building2, FileText, Users, Key, User, Loader2, FolderOpen, Zap,
   ShieldCheck, Wrench, MessageSquare, CreditCard, BarChart2, Scale,
-  ClipboardList, X, Tag,
+  ClipboardList, X, Tag, BookOpen,
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -19,6 +19,7 @@ const NAV_BY_ROLE = {
     { name: 'Properties',  href: '/dashboard/properties',       icon: Building2 },
     { name: 'Offers',      href: '/dashboard/offers',           icon: Tag,           badgeKey: 'offers' },
     { name: 'Agreements',  href: '/dashboard/agreements',       icon: FileText,      badgeKey: 'agreements' },
+    { name: 'Agr. Templates', href: '/dashboard/agreement-templates', icon: BookOpen },
     { name: 'Tenants',     href: '/dashboard/landlord/tenants', icon: Users },
     { name: 'Maintenance', href: '/dashboard/maintenance',      icon: Wrench,        badgeKey: 'maintenance' },
     { name: 'Messages',    href: '/dashboard/messages',         icon: MessageSquare, badgeKey: 'messages' },
@@ -44,6 +45,7 @@ const NAV_BY_ROLE = {
     { name: 'Agreements',  href: '/dashboard/admin/agreements', icon: FileText },
     { name: 'Properties',  href: '/dashboard/admin/properties', icon: Building2 },
     { name: 'Templates',   href: '/dashboard/admin/templates',  icon: ClipboardList },
+    { name: 'Agr. Templates', href: '/dashboard/admin/agreement-templates', icon: BookOpen },
     { name: 'Disputes',    href: '/dashboard/disputes',         icon: Scale },
     { name: 'Messages',    href: '/dashboard/messages',         icon: MessageSquare, badgeKey: 'messages' },
     { name: 'Audit Logs',  href: '/dashboard/admin/audit-logs', icon: ShieldCheck },
