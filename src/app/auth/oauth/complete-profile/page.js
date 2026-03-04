@@ -35,31 +35,38 @@ function CompleteProfileContent() {
   const [error, setError]     = useState('');
   const [success, setSuccess] = useState('');
 
-  // Save token from URL immediately on mount — this ensures API calls work
-  // even if localStorage was cleared between the success page redirect and here
+  // Single init effect: save token FIRST, then send OTP if needed.
+  // Keeping both actions in one effect prevents the race condition where
+  // send-otp fires before the token is written to localStorage.
   useEffect(() => {
-    if (urlToken) {
-      localStorage.setItem('token', urlToken);
-    }
-    // Pre-fill from URL params (in case localStorage userInfo isn't set yet)
-    setFormData(f => ({
-      ...f,
-      name:  f.name  || providerName,
-      email: f.email || providerEmail,
-    }));
-  }, [urlToken, providerName, providerEmail]);
+    const init = async () => {
+      // 1. Persist token so all subsequent protected API calls work
+      if (urlToken) {
+        localStorage.setItem('token', urlToken);
+      }
 
-  // When the backend says the user already has a phone but it's unverified,
-  // we skip straight to the OTP step and re-send the code automatically.
-  useEffect(() => {
-    if (!skipToOTP) return;
-    api.post('/auth/send-otp').catch(() => {
-      // If send-otp fails (e.g. no phone on record), fall back to profile step
-      setStep('profile');
-      setError('Could not resend OTP. Please re-enter your details.');
-    });
+      // 2. Pre-fill form fields from URL params
+      setFormData(f => ({
+        ...f,
+        name:  f.name  || providerName,
+        email: f.email || providerEmail,
+      }));
+
+      // 3. Phone already set but unverified → fire OTP immediately
+      if (skipToOTP) {
+        try {
+          await api.post('/auth/send-otp');
+        } catch {
+          // Phone may have been wiped — fall back to full profile form
+          setStep('profile');
+          setError('Could not send OTP. Please re-enter your phone number.');
+        }
+      }
+    };
+
+    init();
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [skipToOTP]);
+  }, []); // run once on mount only
 
   // ── Step 1: save profile ──────────────────────────────────────────────────
   const handleProfileSubmit = async (e) => {
@@ -189,7 +196,9 @@ function CompleteProfileContent() {
           <p className="text-gray-400 text-sm mt-1">
             {step === 'profile'
               ? `Almost there! A few more details to finish your ${providerLabel} account.`
-              : `We sent a 6-digit code to ${formData.phoneNumber}`}
+              : skipToOTP
+                ? `We sent a new code to your registered phone number.`
+                : `We sent a 6-digit code to ${formData.phoneNumber}`}
           </p>
         </div>
 
