@@ -160,7 +160,7 @@ export default function DashboardLayout({ children }) {
       localStorage.removeItem('token');
       localStorage.removeItem('userInfo');
       // Best-effort cleanup — fire and forget, don't block the redirect
-      api.delete('/auth/oauth/abandon').catch(() => {});
+      api.post('/auth/oauth/abandon').catch(() => {}); // POST — matches route + sendBeacon
       router.replace('/login');
       return;
     }

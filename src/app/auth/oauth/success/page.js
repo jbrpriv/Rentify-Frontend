@@ -26,25 +26,30 @@ function OAuthSuccessContent() {
     }
 
     if (isNewUser) {
-      // DO NOT save token or userInfo to localStorage yet.
-      // The user still needs to complete their profile and verify their phone.
-      // localStorage is only written after verify-otp succeeds in complete-profile.
-      // The token travels via URL param only until that point.
+      // DO NOT write to localStorage — the user hasn't verified their phone yet.
+      // Persisting the session here is what causes "already logged in" on home page
+      // after closing the browser mid-flow. Token travels via URL only until
+      // verify-otp succeeds inside complete-profile.
       const params = new URLSearchParams({
         provider,
-        email:  email || '',
-        name:   name  || '',
+        email:       email || '',
+        name:        name  || '',
         token,
+        role:        role  || 'tenant',
+        phoneNumber: searchParams.get('phoneNumber') || '',
+        skipToOTP:   searchParams.get('skipToOTP')   || 'false',
       });
       router.replace(`/auth/oauth/complete-profile?${params.toString()}`);
     } else {
-      // Fully set-up returning user — safe to persist session now.
+      // Fully verified returning user — safe to persist session now.
       localStorage.setItem('token', token);
       localStorage.setItem('userInfo', JSON.stringify({
         _id: id, name, role, email, isPhoneVerified, provider,
       }));
       router.replace('/dashboard');
     }
+  // searchParams is stable in Next.js; router is stable. The ref guard below
+  // prevents React Strict Mode's double-invocation from firing twice.
   }, [searchParams, router]);
 
   const provider = searchParams.get('provider') || 'google';

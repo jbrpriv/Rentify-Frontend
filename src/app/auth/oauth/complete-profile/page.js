@@ -41,10 +41,8 @@ function CompleteProfileContent() {
   const [error, setError]     = useState('');
   const [success, setSuccess] = useState('');
 
-  // Inject the token into the api instance's default headers so all calls on
-  // this page are authenticated — but deliberately do NOT write to localStorage.
-  // localStorage is only written after the phone OTP is verified successfully.
-  // This means a tab-close at any point before that leaves zero session data.
+  // Set token in api header (NOT localStorage) so API calls work during this flow.
+  // localStorage is only written after verify-otp succeeds — never before.
   useEffect(() => {
     if (urlToken) {
       api.defaults.headers.common['Authorization'] = `Bearer ${urlToken}`;
@@ -61,15 +59,29 @@ function CompleteProfileContent() {
   // ── Abandon: delete the incomplete Mongo account and go back to login ───────
   const handleAbandon = async () => {
     try {
-      await api.delete('/auth/oauth/abandon');
+      await api.post('/auth/oauth/abandon'); // POST — matches route + sendBeacon method
     } catch { /* best-effort */ }
     // Nothing to clear in localStorage — we never wrote to it during this flow.
     router.replace('/login');
   };
 
-  // No beforeunload cleanup needed — we deliberately do NOT write to
-  // localStorage until phone verification succeeds (in handleVerifyPhone).
-  // If the user closes the tab, there is nothing persisted to clean up.
+  // When the user closes the tab mid-flow, fire a beacon to delete the incomplete
+  // Mongo account. sendBeacon sends POST (not DELETE), so the route must be POST.
+  // No localStorage to clean up because we never wrote to it during this flow.
+  useEffect(() => {
+    const onUnload = () => {
+      const url = `${process.env.NEXT_PUBLIC_API_URL}/auth/oauth/abandon`;
+      // sendBeacon requires a Blob with Content-Type for the token to be read,
+      // but abandon is protected — we pass it via the custom header blob.
+      const token = urlToken || api.defaults.headers.common['Authorization']?.replace('Bearer ', '');
+      if (!token) return;
+      const blob = new Blob([JSON.stringify({})], { type: 'application/json' });
+      navigator.sendBeacon(`${url}?_token=${encodeURIComponent(token)}`, blob);
+    };
+    window.addEventListener('beforeunload', onUnload);
+    return () => window.removeEventListener('beforeunload', onUnload);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // ── Step 1: save profile ──────────────────────────────────────────────────
   const handleProfileSubmit = async (e) => {
@@ -97,8 +109,7 @@ function CompleteProfileContent() {
           phoneNumber: formData.phoneNumber,
         });
 
-        // Update in-memory auth header with the new token from facebook/complete.
-        // Still do NOT persist to localStorage — wait for OTP verification.
+        // Update in-memory auth header only — no localStorage until OTP verified.
         if (data.token) {
           api.defaults.headers.common['Authorization'] = `Bearer ${data.token}`;
         }
@@ -114,8 +125,7 @@ function CompleteProfileContent() {
         });
       }
 
-      // Refresh in-memory phone number for the OTP step subtitle, but do NOT
-      // write to localStorage — session is only persisted after OTP is verified.
+      // Refresh in-memory phone for the OTP step subtitle — no localStorage write yet.
       const { data: freshUser } = await api.get('/users/me');
       setFormData(f => ({ ...f, phoneNumber: freshUser.phoneNumber || f.phoneNumber }));
 
@@ -135,7 +145,7 @@ function CompleteProfileContent() {
     setError('');
     try {
       await api.post('/auth/verify-otp', { code: otp });
-      // Phone verified — NOW it is safe to write the session to localStorage.
+      // OTP verified — NOW it is safe to write the session to localStorage.
       const { data: freshUser } = await api.get('/users/me');
       localStorage.setItem('token', urlToken);
       localStorage.setItem('userInfo', JSON.stringify({
