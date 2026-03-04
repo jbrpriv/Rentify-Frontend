@@ -114,6 +114,7 @@ function TemplateRow({ template, onReview, onDelete, actionId }) {
 
 export default function AdminAgreementTemplatesPage() {
   const router = useRouter();
+  const { user } = useUser();
   const [templates, setTemplates] = useState([]);
   const [loading, setLoading]     = useState(true);
   const [actionId, setActionId]   = useState(null);
@@ -127,7 +128,8 @@ export default function AdminAgreementTemplatesPage() {
     try {
       const params = statusFilter ? `?status=${statusFilter}` : '';
       const { data } = await api.get(`/agreement-templates${params}`);
-      setTemplates(data);
+      // Backend returns { templates: [...], jurisdictions: [...] }
+      setTemplates(Array.isArray(data) ? data : (data.templates || []));
     } catch { /* silent */ }
     finally { setLoading(false); }
   }, [statusFilter]);

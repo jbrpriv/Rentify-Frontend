@@ -226,7 +226,7 @@ function TemplateCard({ template, onEdit, onDelete, deleting }) {
           )}
           {template.status === 'pending' && (
             <div style={{ padding:'10px 14px', background:'#FFFBEB', border:'1px solid #FDE68A', borderRadius:10, marginBottom:12, fontSize:'0.8rem', color:'#92400E' }}>
-              ⏳ This template is awaiting admin review before it can be used.
+              ⏳ This template is awaiting admin review. Your clauses are approved — the template itself needs a one-time admin sign-off before it can be used in lease creation.
             </div>
           )}
           {(!template.clauseIds || template.clauseIds.length === 0) ? (
