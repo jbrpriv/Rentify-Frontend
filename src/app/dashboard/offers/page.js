@@ -470,7 +470,7 @@ function OfferCard({ offer, user, onAction, actionLoading }) {
 /* ─── Main page ──────────────────────────────────────────────────────────── */
 export default function OffersPage() {
   const router = useRouter();
-  const [user, setUser]         = useState(null);
+  const { user } = useUser();
   const [offers, setOffers]     = useState([]);
   const [loading, setLoading]   = useState(true);
   const [actionLoading, setActionLoading] = useState(null);
@@ -489,8 +489,6 @@ export default function OffersPage() {
   }, []);
 
   useEffect(() => {
-    const { user: u, setUser } = useUser();
-    setUser(u);
     fetchOffers();
   }, []); // eslint-disable-line
 

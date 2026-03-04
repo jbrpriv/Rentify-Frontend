@@ -4,11 +4,14 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import api from '@/utils/api';
 import { useUser } from '@/context/UserContext';
+import { useToast } from '@/context/ToastContext';
 import { FileText, Download, Calendar, User, Loader2, CheckCircle, Clock, PenLine } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export default function AgreementsPage() {
   const router = useRouter();
+  const { user: parsed } = useUser();
+  const { toast } = useToast();
   const [agreements, setAgreements] = useState([]);
   const [loading, setLoading] = useState(true);
   const [signingId, setSigningId]     = useState(null);
@@ -18,7 +21,6 @@ export default function AgreementsPage() {
   const [currentUser, setCurrentUser] = useState(null);
 
   useEffect(() => {
-    const { user: parsed } = useUser();
     // Tenants have their own dedicated lease page
     if (parsed.role === 'tenant') { router.push('/dashboard/my-lease'); return; }
     setCurrentUser(parsed);
@@ -42,10 +44,10 @@ export default function AgreementsPage() {
     setSigningId(agreementId);
     try {
       const { data } = await api.put(`/agreements/${agreementId}/sign`);
-      alert(`Signed successfully! Agreement status: ${data.status}`);
+      toast(`Signed successfully! Agreement status: ${data.status}`, 'info');
       fetchAgreements(); // Refresh the list
     } catch (error) {
-      alert(error.response?.data?.message || 'Failed to sign agreement');
+      toast(error.response?.data?.message || 'Failed to sign agreement', 'error');
     } finally {
       setSigningId(null);
     }
@@ -62,7 +64,7 @@ export default function AgreementsPage() {
       link.click();
       link.remove();
     } catch (error) {
-      alert('Error downloading PDF');
+      toast('Error downloading PDF', 'error');
     }
   };
 
@@ -98,11 +100,11 @@ export default function AgreementsPage() {
     setRenewLoading(true);
     try {
       await api.put(`/agreements/${renewModal._id}/renew`, renewForm);
-      alert('Renewal proposal sent to tenant!');
+      toast('Renewal proposal sent to tenant!', 'success');
       setRenewModal(null);
       fetchAgreements();
     } catch (err) {
-      alert(err.response?.data?.message || 'Failed to send proposal');
+      toast(err.response?.data?.message || 'Failed to send proposal', 'error');
     } finally { setRenewLoading(false); }
   };
 
@@ -110,9 +112,9 @@ export default function AgreementsPage() {
     if (!confirm(accept ? 'Accept this renewal proposal?' : 'Decline this renewal proposal?')) return;
     try {
       const { data } = await api.put(`/agreements/${id}/renew/respond`, { accept });
-      alert(data.message);
+      toast(data.message, 'info');
       fetchAgreements();
-    } catch (err) { alert(err.response?.data?.message || 'Error'); }
+    } catch (err) { toast(err.response?.data?.message || 'Error', 'error'); }
   };
 
   return (

@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import api from '@/utils/api';
 import { useUser } from '@/context/UserContext';
+import { useToast } from '@/context/ToastContext';
 import {
   Plus, ChevronDown, ChevronUp, Loader2, Trash2, Pencil,
   CheckCircle, Clock, XCircle, Tag, FileText, X, Save,
@@ -104,13 +105,14 @@ function ClausePickerModal({ selected, onSave, onClose }) {
 
 // ─── Template form (create / edit) ───────────────────────────────────────────
 function TemplateForm({ initial, onSave, onCancel, saving }) {
+  const { toast } = useToast();
   const [name, setName]           = useState(initial?.name        || '');
   const [desc, setDesc]           = useState(initial?.description || '');
   const [clauses, setClauses]     = useState(initial?.clauseIds   || []);
   const [showPicker, setShowPicker] = useState(false);
 
   const handleSubmit = () => {
-    if (!name.trim()) { alert('Template name is required'); return; }
+    if (!name.trim()) { toast('Template name is required', 'info'); return; }
     onSave({ name, description: desc, clauseIds: clauses.map(c => c._id) });
   };
 
@@ -254,15 +256,14 @@ function TemplateCard({ template, onEdit, onDelete, deleting }) {
 // ─── Main page ────────────────────────────────────────────────────────────────
 export default function AgreementTemplatesPage() {
   const router = useRouter();
+  const { user: parsed } = useUser();
+  const { toast } = useToast();
   const [templates, setTemplates] = useState([]);
   const [loading, setLoading]     = useState(true);
   const [showForm, setShowForm]   = useState(false);
   const [editing, setEditing]     = useState(null);
   const [saving, setSaving]       = useState(false);
   const [deleting, setDeleting]   = useState(null);
-  const [toast, setToast]         = useState(null);
-
-  const showToast = (msg, ok = true) => { setToast({ msg, ok }); setTimeout(() => setToast(null), 4000); };
 
   const fetchTemplates = useCallback(async () => {
     try {
@@ -273,8 +274,7 @@ export default function AgreementTemplatesPage() {
   }, []);
 
   useEffect(() => {
-    const { user: u } = useUser();
-    if (!['landlord', 'property_manager'].includes(user.role)) { router.push('/dashboard'); return; }
+    if (!['landlord', 'property_manager'].includes(parsed?.role)) { router.push('/dashboard'); return; }
     fetchTemplates();
   }, []); // eslint-disable-line
 
@@ -283,16 +283,16 @@ export default function AgreementTemplatesPage() {
     try {
       if (editing) {
         await api.put(`/agreement-templates/${editing._id}`, form);
-        showToast('Template updated — pending admin review');
+        toast('Template updated — pending admin review', 'success');
       } else {
         await api.post('/agreement-templates', form);
-        showToast('Template created — pending admin review');
+        toast('Template created — pending admin review', 'success');
       }
       setShowForm(false);
       setEditing(null);
       fetchTemplates();
     } catch (err) {
-      showToast(err.response?.data?.message || 'Save failed', false);
+      toast(err.response?.data?.message || 'Save failed', 'error');
     } finally {
       setSaving(false);
     }
@@ -303,10 +303,10 @@ export default function AgreementTemplatesPage() {
     setDeleting(id);
     try {
       await api.delete(`/agreement-templates/${id}`);
-      showToast('Template deleted');
+      toast('Template deleted', 'success');
       fetchTemplates();
     } catch (err) {
-      showToast(err.response?.data?.message || 'Delete failed', false);
+      toast(err.response?.data?.message || 'Delete failed', 'error');
     } finally {
       setDeleting(null);
     }
@@ -343,13 +343,6 @@ export default function AgreementTemplatesPage() {
           </button>
         )}
       </div>
-
-      {/* Toast */}
-      {toast && (
-        <div style={{ padding:'12px 16px', borderRadius:10, fontSize:'0.85rem', fontWeight:600, display:'flex', alignItems:'center', gap:8, marginBottom:16, background: toast.ok ? '#F0FDF4' : '#FFF7F7', color: toast.ok ? '#16A34A' : '#DC2626', border:`1px solid ${toast.ok ? '#BBF7D0' : '#FECACA'}` }}>
-          {toast.ok ? <CheckCircle size={15}/> : <XCircle size={15}/>} {toast.msg}
-        </div>
-      )}
 
       {/* Form */}
       {showForm && (

@@ -4,6 +4,7 @@ import { useEffect, useState, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import api from '@/utils/api';
 import { useUser } from '@/context/UserContext';
+import { useToast } from '@/context/ToastContext';
 import {
   MessageSquare, Send, Loader2, X, Users, ChevronRight,
   Search, CheckCheck
@@ -108,7 +109,7 @@ function ChatModal({ active, user, onClose, onNewMessage }) {
     } catch (err) {
       setMessages(m => m.filter(msg => msg._id !== opt._id));
       setContent(draft);
-      alert(err.response?.data?.message || 'Failed to send');
+      toast(err.response?.data?.message || 'Failed to send', 'error');
     } finally { setSending(false); }
   };
 
@@ -286,7 +287,8 @@ function ContactsPanel({ contacts, onSelect, onClose }) {
 // ── Main Page ─────────────────────────────────────────────────────────────────
 export default function MessagesPage() {
   const router = useRouter();
-  const [user, setUser] = useState(null);
+  const { user } = useUser();
+  const { toast } = useToast();
   const [conversations, setConvs] = useState([]);
   const [contacts, setContacts] = useState([]);
   const [active, setActive] = useState(null);
@@ -299,8 +301,6 @@ export default function MessagesPage() {
   useEffect(() => { activeRef.current = active; }, [active]);
 
   useEffect(() => {
-    const { user: u, setUser } = useUser();
-    setUser(u);
     fetchData();
 
     // ── Listen to socket events forwarded from the layout ─────────

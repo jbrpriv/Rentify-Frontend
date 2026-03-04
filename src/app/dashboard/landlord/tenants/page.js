@@ -9,9 +9,9 @@ import { Users, Loader2, Mail, Phone, Building2, Calendar, AlertCircle, CheckCir
 
 export default function LandlordTenantsPage() {
   const router = useRouter();
+  const { user: parsed } = useUser();
   // ── Role guard ────────────────────────────────────────────────────────────
   useEffect(() => {
-    const { user: parsed } = useUser();
     if (!['landlord','admin'].includes(parsed.role)) {
       router.push('/dashboard');
       return;

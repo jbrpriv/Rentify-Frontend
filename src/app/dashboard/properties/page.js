@@ -44,8 +44,8 @@ function ConfirmModal({ title, description, icon: Icon, iconBg, iconColor, confi
 
 export default function PropertiesPage() {
   const router = useRouter();
+  const { user: parsed } = useUser();
   useEffect(() => {
-    const { user: parsed } = useUser();
     if (!['landlord','admin'].includes(parsed.role)) { router.push('/dashboard'); return; }
   }, []);
 
