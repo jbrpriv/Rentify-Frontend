@@ -153,18 +153,16 @@ export default function DashboardLayout({ children }) {
     const u = JSON.parse(stored);
 
     // OAuth users (Google / Facebook) have their token saved before phone
-    // verification completes. If they close or cancel the complete-profile
-    // page, they'd land here with isPhoneVerified=false.
-    // Guard against that: send them back to finish verification.
+    // verification completes. If they abandon the flow and somehow reach the
+    // dashboard, delete the incomplete Mongo account, clear localStorage, and
+    // send them back to login to start fresh.
     if (u.isPhoneVerified === false && u.provider) {
-      const params = new URLSearchParams({
-        provider:  u.provider,
-        email:     u.email  || '',
-        name:      u.name   || '',
-        token:     localStorage.getItem('token') || '',
-        skipToOTP: 'true',
-      });
-      router.replace(`/auth/oauth/complete-profile?${params.toString()}`);
+      try {
+        await api.delete('/auth/oauth/abandon');
+      } catch { /* best-effort */ }
+      localStorage.removeItem('token');
+      localStorage.removeItem('userInfo');
+      router.replace('/login');
       return;
     }
 

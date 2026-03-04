@@ -56,6 +56,36 @@ function CompleteProfileContent() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // run once on mount only
 
+  // ── Abandon: wipe incomplete account from Mongo + localStorage ─────────────
+  const handleAbandon = async () => {
+    try {
+      await api.delete('/auth/oauth/abandon');
+    } catch {
+      // Best-effort — even if the API fails, clear locally so the user isn't
+      // trapped in a half-logged-in state.
+    } finally {
+      localStorage.removeItem('token');
+      localStorage.removeItem('userInfo');
+      router.replace('/login');
+    }
+  };
+
+  // If the user closes the tab or navigates away mid-flow, abandon the account.
+  // We use a synchronous beacon so it fires even on tab-close.
+  useEffect(() => {
+    const onUnload = () => {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+      // navigator.sendBeacon is fire-and-forget — perfect for unload
+      const url = `${process.env.NEXT_PUBLIC_API_URL}/auth/oauth/abandon`;
+      navigator.sendBeacon(url, JSON.stringify({}));
+      localStorage.removeItem('token');
+      localStorage.removeItem('userInfo');
+    };
+    window.addEventListener('beforeunload', onUnload);
+    return () => window.removeEventListener('beforeunload', onUnload);
+  }, []);
+
   // ── Step 1: save profile ──────────────────────────────────────────────────
   const handleProfileSubmit = async (e) => {
     e.preventDefault();
@@ -318,6 +348,13 @@ function CompleteProfileContent() {
             >
               {loading ? <Loader2 className="animate-spin w-4 h-4" /> : 'Continue →'}
             </button>
+            <button
+              type="button"
+              onClick={handleAbandon}
+              className="w-full text-xs text-gray-400 hover:text-red-500 transition mt-2"
+            >
+              Cancel &amp; delete this account
+            </button>
           </form>
         ) : (
           <form onSubmit={handleVerifyPhone} className="space-y-6">
@@ -356,6 +393,13 @@ function CompleteProfileContent() {
                 {sending ? 'Sending...' : "Didn't receive it? Resend OTP"}
               </button>
             </div>
+            <button
+              type="button"
+              onClick={handleAbandon}
+              className="w-full text-xs text-gray-400 hover:text-red-500 transition"
+            >
+              Cancel &amp; delete this account
+            </button>
           </form>
         )}
       </div>
