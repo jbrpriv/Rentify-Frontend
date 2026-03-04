@@ -2,6 +2,7 @@
 
 import { useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
+import { useUser } from '@/context/UserContext';
 import { Loader2 } from 'lucide-react';
 
 const PROVIDER_LABELS = { google: 'Google', facebook: 'Facebook' };

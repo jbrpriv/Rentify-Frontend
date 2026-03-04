@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import axios from 'axios';
 import api from '@/utils/api';
+import { useUser } from '@/context/UserContext';
 import { User, Mail, Lock, Phone, Building2, Loader2, CheckCircle, ShieldCheck } from 'lucide-react';
 
 

@@ -3,6 +3,7 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import api from '@/utils/api';
+import { useUser } from '@/context/UserContext';
 import { User, Phone, Building2, Mail, Loader2, CheckCircle, Lock } from 'lucide-react';
 
 function CompleteProfileContent() {
