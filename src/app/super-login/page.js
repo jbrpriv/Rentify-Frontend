@@ -107,10 +107,9 @@ export default function SuperLoginPage() {
         setSuccess(`Check your email ${formData.email} for the verification code.`);
         setStep('email');
       } else if (msg === 'PHONE_NOT_VERIFIED') {
-        const d = err.response?.data;
-        localStorage.setItem('token', d.token);
-        localStorage.setItem('userInfo', JSON.stringify({ email: formData.email }));
-        await api.post('/auth/send-otp');
+        // Don't try to store a token — the 403 error response has no token.
+        // Just track the email so send-otp / verify-otp can use it.
+        await api.post('/auth/send-otp', { email: formData.email });
         setSuccess('A verification code was sent to your phone number.');
         setStep('phone');
       } else {
@@ -134,10 +133,7 @@ export default function SuperLoginPage() {
       } catch (loginErr) {
         const msg = loginErr.response?.data?.message;
         if (msg === 'PHONE_NOT_VERIFIED') {
-          const d = loginErr.response?.data;
-          localStorage.setItem('token', d.token);
-          localStorage.setItem('userInfo', JSON.stringify({ email: formData.email }));
-          await api.post('/auth/send-otp');
+          await api.post('/auth/send-otp', { email: formData.email });
           setEmailCode('');
           setSuccess('Email verified! A code was sent to your phone number.');
           setStep('phone');
@@ -158,7 +154,7 @@ export default function SuperLoginPage() {
     setLoading(true);
     clearAlerts();
     try {
-      await api.post('/auth/verify-otp', { code: phoneOTP });
+      await api.post('/auth/verify-otp', { email: formData.email, code: phoneOTP });
       const recaptchaToken = await getRecaptchaToken('login');
       const { data } = await api.post('/auth/login', { email: formData.email, password: formData.password, recaptchaToken });
       proceedAfterLogin(data);
@@ -200,7 +196,7 @@ export default function SuperLoginPage() {
     setSending(true);
     clearAlerts();
     try {
-      await api.post('/auth/send-otp');
+      await api.post('/auth/send-otp', { email: formData.email });
       setSuccess('OTP resent to your phone.');
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to resend');
