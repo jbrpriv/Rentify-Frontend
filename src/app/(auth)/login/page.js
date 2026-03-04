@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import TextField from '@/components/ui/TextField';
+import { ArrowLeft } from 'lucide-react';
 
 // ─── reCAPTCHA v3 helper ──────────────────────────────────────────────────────
 const getRecaptchaToken = (action) => {
@@ -197,6 +198,9 @@ export default function LoginPage() {
 
           {/* Left: brand story */}
           <div className="hidden md:block">
+            <Link href="/" className="inline-flex items-center gap-1.5 text-[0.75rem] font-semibold text-neutral-500 hover:text-neutral-700 transition-colors mb-8">
+              <ArrowLeft className="h-3.5 w-3.5" /> Back to home
+            </Link>
             <div className="inline-flex items-center gap-2 rounded-full border border-[#0992C2]/30 bg-white/80 px-3 py-1 text-[0.7rem] font-semibold uppercase tracking-[0.25em] text-neutral-500 shadow-sm shadow-[#0992C2]/20 backdrop-blur-sm">
               <span className="h-1.5 w-1.5 rounded-full bg-[#0992C2]" />
               Secure rental workspace
@@ -226,6 +230,10 @@ export default function LoginPage() {
 
           {/* Right: login card */}
           <div className="rf-glass-dark rf-fade-in-up w-full max-w-md md:justify-self-end px-8 py-9">
+            {/* Mobile back link */}
+            <Link href="/" className="inline-flex items-center gap-1.5 text-[0.72rem] font-semibold text-slate-500 hover:text-slate-300 transition-colors mb-6 md:hidden">
+              <ArrowLeft className="h-3 w-3" /> Home
+            </Link>
             <div className="mb-8 text-center md:text-left">
               <p className="text-micro text-slate-400">Welcome back</p>
               <h2 className="text-h2 mt-1 bg-gradient-to-r from-slate-50 via-sky-100 to-slate-200 bg-clip-text text-transparent">

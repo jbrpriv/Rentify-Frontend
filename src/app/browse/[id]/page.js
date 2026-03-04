@@ -528,8 +528,14 @@ function ListingDetailContent() {
               <div className="info-card">
                 <p className="section-title">Listed By</p>
                 <div className="flex items-center gap-4">
-                  <div style={{ width:48, height:48, borderRadius:'50%', background:'linear-gradient(135deg,#5B21B6,#7C3AED)', display:'flex', alignItems:'center', justifyContent:'center', color:'white', fontWeight:700, fontSize:'1.1rem', fontFamily:"'Outfit',sans-serif" }}>
-                    {(listing.landlord?.name || 'L')[0].toUpperCase()}
+                  <div style={{ width:48, height:48, borderRadius:'50%', overflow:'hidden', flexShrink:0 }}>
+                    {listing.landlord?.profilePhoto ? (
+                      <img src={listing.landlord.profilePhoto} alt={listing.landlord.name} style={{ width:'100%', height:'100%', objectFit:'cover' }} />
+                    ) : (
+                      <div style={{ width:'100%', height:'100%', background:'linear-gradient(135deg,#5B21B6,#7C3AED)', display:'flex', alignItems:'center', justifyContent:'center', color:'white', fontWeight:700, fontSize:'1.1rem', fontFamily:"'Outfit',sans-serif" }}>
+                        {(listing.landlord?.name || 'L')[0].toUpperCase()}
+                      </div>
+                    )}
                   </div>
                   <div>
                     <p style={{ fontWeight:700, color:'#0F172A', fontSize:'0.95rem' }}>{listing.landlord?.name || 'Landlord'}</p>

@@ -2,7 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import api from '@/utils/api';
+import { useUser } from '@/context/UserContext';
 import {
   Check, X, Building2, Zap, Crown, ArrowRight,
   HelpCircle, Loader2, Star,
@@ -61,6 +63,8 @@ function FeatureCell({ value }) {
 }
 
 export default function PricingPage() {
+  const { user }                      = useUser();
+  const router                        = useRouter();
   const [plans, setPlans]             = useState([]);
   const [currentTier, setCurrentTier] = useState(null);
   const [stripeReady, setStripeReady] = useState(true);
@@ -163,12 +167,19 @@ export default function PricingPage() {
               </ul>
 
               {plan.tier === 'free' ? (
-                <Link
-                  href="/register"
-                  className="w-full py-3 rounded-xl font-black text-sm text-center bg-gray-100 text-gray-700 hover:bg-gray-200 transition"
-                >
-                  Get Started Free
-                </Link>
+                isCurrent ? (
+                  <Link href="/dashboard/billing" className="w-full py-3 rounded-xl font-black text-sm text-center bg-green-100 text-green-700 transition">
+                    ✓ Your Current Plan
+                  </Link>
+                ) : user ? (
+                  <Link href="/dashboard" className="w-full py-3 rounded-xl font-black text-sm text-center bg-gray-100 text-gray-700 hover:bg-gray-200 transition">
+                    Go to Dashboard
+                  </Link>
+                ) : (
+                  <Link href="/register" className="w-full py-3 rounded-xl font-black text-sm text-center bg-gray-100 text-gray-700 hover:bg-gray-200 transition">
+                    Get Started Free
+                  </Link>
+                )
               ) : isCurrent ? (
                 <Link
                   href="/dashboard/billing"
@@ -257,6 +268,7 @@ export default function PricingPage() {
       </div>
 
       {/* ── CTA ───────────────────────────────────────────────────────────── */}
+      {!user && (
       <div className="max-w-2xl mx-auto px-4 text-center">
         <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-3xl p-10 text-white">
           <h2 className="text-3xl font-black tracking-tighter mb-3">Ready to get started?</h2>
@@ -271,6 +283,7 @@ export default function PricingPage() {
           </Link>
         </div>
       </div>
+      )}
 
     </div>
   );

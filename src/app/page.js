@@ -448,61 +448,6 @@ export default function LandingPage() {
           </div>
         </MotionRevealSection>
 
-        {/* ── HOW IT WORKS ─────────────────────────────────────────── */}
-        <MotionRevealSection id="how-it-works" className="scroll-mt-24 py-20 bg-white">
-          <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-0">
-            <div className="mb-12 text-center">
-              <h2 className="text-h2 text-neutral-900">
-                From search to signed keys in three calm steps.
-              </h2>
-              <p className="mx-auto mt-3 max-w-md text-body text-neutral-600">
-                Every workflow is opinionated enough to be fast, flexible enough to mirror how your team works.
-              </p>
-            </div>
-            <div className="grid gap-8 md:grid-cols-3">
-              {[
-                { n: '01', title: 'Search & discover', desc: 'Verified listings, AI-powered recommendations, and filters that actually map to how you search.', icon: Search },
-                { n: '02', title: 'Apply & sign', desc: 'Tenant applications, screening, and digital agreements live in a single trackable thread.', icon: FileText },
-                { n: '03', title: 'Pay & stay synced', desc: 'Rent schedules, receipts, and maintenance all tied back to the same live agreement.', icon: Key },
-              ].map((step, idx) => {
-                const Icon = step.icon;
-                return (
-                  <div key={step.n} className="relative space-y-3 rounded-3xl border border-[#0992C2]/20 bg-white p-6 shadow-sm shadow-[#0992C2]/10">
-                    <div className="flex items-center justify-between gap-3">
-                      <span className="text-[0.8rem] font-semibold text-neutral-500">Step {step.n}</span>
-                      <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-[#0AC4E0]/15">
-                        <Icon className="h-4 w-4 text-[#0992C2]" />
-                      </div>
-                    </div>
-                    <h3 className="text-[1rem] font-semibold text-neutral-900">{step.title}</h3>
-                    <p className="text-[0.8rem] leading-relaxed text-neutral-600">{step.desc}</p>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </MotionRevealSection>
-
-        {/* ── TRUST SIGNALS ────────────────────────────────────────── */}
-        <MotionRevealSection className="py-14 bg-[#F8FBFC]">
-          <div className="mx-auto max-w-6xl px-4 text-center">
-            <p className="text-micro mb-6 text-neutral-500">TRUSTED BY TEAMS WHO CARE ABOUT THE EXPERIENCE</p>
-            <div className="flex flex-wrap items-center justify-center gap-4 text-[0.8rem] font-medium text-neutral-600">
-              {[
-                { icon: ShieldCheck, text: 'Verified listings & landlords' },
-                { icon: Star, text: '4.7★ average satisfaction' },
-                { icon: Globe, text: '60+ countries supported' },
-                { icon: UserCheck, text: 'In-line tenant screening' },
-              ].map(({ icon: Icon, text }) => (
-                <div key={text} className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 shadow-sm shadow-[#0992C2]/15 border border-[#0992C2]/10">
-                  <Icon size={16} className="text-[#0992C2]" />
-                  <span>{text}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </MotionRevealSection>
-
         {/* ── CTA ───────────────────────────────────────────────────── */}
         <MotionRevealSection className="py-16 bg-white">
           {!user && (

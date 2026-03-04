@@ -2,12 +2,90 @@
 
 import Link from 'next/link';
 import { useUser } from '@/context/UserContext';
-import { Building2, Globe, LayoutDashboard, Tag } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { Building2, Globe, LayoutDashboard, Tag, User, LogOut, Settings } from 'lucide-react';
+import { useEffect, useState, useRef } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 
+function AvatarDropdown({ user, logout, isTransparent }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+  const router = useRouter();
+
+  // Close on outside click
+  useEffect(() => {
+    const handler = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  const initial = user.name?.charAt(0).toUpperCase() || '?';
+
+  return (
+    <div ref={ref} className="relative">
+      {/* Avatar button */}
+      <button
+        onClick={() => setOpen(v => !v)}
+        className={`flex h-9 w-9 items-center justify-center rounded-full overflow-hidden ring-2 transition-all hover:scale-105 ${
+          isTransparent ? 'ring-white/40 hover:ring-white/70' : 'ring-[#0992C2]/30 hover:ring-[#0992C2]/60'
+        }`}
+        aria-label="Account menu"
+      >
+        {user.profilePhoto ? (
+          <img src={user.profilePhoto} alt={user.name} className="h-full w-full object-cover" />
+        ) : (
+          <div className={`flex h-full w-full items-center justify-center text-sm font-black ${
+            isTransparent ? 'bg-white/20 text-white' : 'bg-gradient-to-br from-[#0992C2] to-[#0B2D72] text-white'
+          }`}>
+            {initial}
+          </div>
+        )}
+      </button>
+
+      {/* Dropdown */}
+      {open && (
+        <div className="absolute right-0 top-11 z-50 w-52 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl shadow-slate-900/10 animate-in fade-in slide-in-from-top-2 duration-150">
+          {/* User info */}
+          <div className="border-b border-slate-100 px-4 py-3">
+            <p className="text-xs font-black text-slate-900 truncate">{user.name}</p>
+            <p className="text-[10px] text-slate-400 truncate mt-0.5">{user.email}</p>
+          </div>
+
+          {/* Profile Settings */}
+          <button
+            onClick={() => { setOpen(false); router.push('/dashboard/profile'); }}
+            className="flex w-full items-center gap-2.5 px-4 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors"
+          >
+            <Settings className="h-4 w-4 text-slate-400" />
+            Profile Settings
+          </button>
+
+          {/* Dashboard */}
+          <button
+            onClick={() => { setOpen(false); router.push('/dashboard'); }}
+            className="flex w-full items-center gap-2.5 px-4 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors"
+          >
+            <LayoutDashboard className="h-4 w-4 text-slate-400" />
+            Dashboard
+          </button>
+
+          <div className="border-t border-slate-100" />
+
+          {/* Logout */}
+          <button
+            onClick={() => { setOpen(false); logout(); }}
+            className="flex w-full items-center gap-2.5 px-4 py-3 text-sm font-semibold text-red-600 hover:bg-red-50 transition-colors"
+          >
+            <LogOut className="h-4 w-4" />
+            Log out
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function Navbar() {
-  const { user, logout }      = useUser();
+  const { user, logout }        = useUser();
   const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
 
@@ -82,7 +160,7 @@ export default function Navbar() {
         </div>
 
         {/* Right Actions */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <button
             type="button"
             className={`hidden items-center justify-center rounded-full p-2 transition-colors md:flex ${
@@ -93,26 +171,7 @@ export default function Navbar() {
           </button>
 
           {user ? (
-            <>
-              <div className="hidden flex-col items-end sm:flex mr-1">
-                <p className={`text-[0.6rem] font-semibold uppercase tracking-[0.2em] ${isTransparent ? 'text-white/50' : 'text-neutral-400'}`}>
-                  Signed in as
-                </p>
-                <p className={`text-xs font-semibold ${isTransparent ? 'text-white' : 'text-neutral-900'}`}>
-                  {user.name}
-                </p>
-              </div>
-              <button
-                onClick={logout}
-                className={`rounded-full border px-4 py-1.5 text-[0.75rem] font-semibold transition-all hover:scale-[1.02] ${
-                  isTransparent
-                    ? 'border-white/30 text-white hover:bg-white/10'
-                    : 'border-neutral-200 text-neutral-700 hover:bg-neutral-50'
-                }`}
-              >
-                Log Out
-              </button>
-            </>
+            <AvatarDropdown user={user} logout={logout} isTransparent={isTransparent} />
           ) : (
             <>
               <Link

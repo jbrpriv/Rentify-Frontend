@@ -233,13 +233,13 @@ function BrowseContent() {
                       <MapPin size={10} className="mt-0.5 flex-shrink-0 text-neutral-300"/>
                       {[listing.address?.street, listing.address?.city, listing.address?.state].filter(Boolean).join(', ')}
                     </p>
-                    <button
-                      onClick={e => e.preventDefault()}
+                    <div
+                      onClick={e => e.stopPropagation()}
                       className="flex w-full items-center justify-center gap-2 rounded-full border border-[#0992C2]/30 bg-white px-4 py-2 text-[0.8rem] font-semibold text-[#0992C2] transition-all hover:bg-[#0992C2] hover:text-white"
                     >
                       <Tag size={13}/>
                       View
-                    </button>
+                    </div>
                   </div>
                 </Link>
               ))}
