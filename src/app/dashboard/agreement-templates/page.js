@@ -287,7 +287,7 @@ export default function AgreementTemplatesPage() {
       } else {
         await api.post('/agreement-templates', form);
         showToast('Template created — pending admin review');
-      
+      }
       setShowForm(false);
       setEditing(null);
       fetchTemplates();

@@ -73,7 +73,7 @@ function RegisterContent() {
       } catch (otpErr) {
         // Non-fatal: show the phone step anyway so the user can hit Resend
         setError(otpErr.response?.data?.message || 'Could not send OTP — tap Resend to try again.');
-      
+      }
       setStep('verify-phone');
     } catch (err) { setError(err.response?.data?.message || 'Invalid code'); }
     finally { setLoading(false); }
