@@ -109,7 +109,7 @@ function LeaseRow({ lease, role }) {
 
 /* ─── Main ───────────────────────────────────────────────────────────────── */
 export default function DashboardHome() {
-  const [user, setUser]                 = useState(null);
+  const { user }                        = useUser();
   const [agreements, setAgreements]     = useState([]);
   const [properties, setProperties]     = useState([]);
   const [payments,   setPayments]       = useState([]);
@@ -119,7 +119,7 @@ export default function DashboardHome() {
   const [loading, setLoading]           = useState(true);
 
   useEffect(() => {
-    if (user) {
+    if (!user) return;
 
     (async () => {
       try {
@@ -130,7 +130,7 @@ export default function DashboardHome() {
         setAgreements(agResp.data || []);
         setOffers((offerResp.data?.offers || []));
 
-        if (['landlord','property_manager','admin'].includes(u.role)) {
+        if (['landlord','property_manager','admin'].includes(user.role)) {
           const propResp = await api.get('/properties').catch(() => ({ data: [] }));
           setProperties(Array.isArray(propResp.data) ? propResp.data : []);
         }
@@ -147,7 +147,7 @@ export default function DashboardHome() {
       } catch (e) { console.error(e); }
       finally { setLoading(false); }
     })();
-  }, []);
+  }, [user]);
 
   if (!user || loading) return null;
 

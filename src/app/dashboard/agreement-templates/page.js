@@ -274,7 +274,7 @@ export default function AgreementTemplatesPage() {
 
   useEffect(() => {
     const { user: u } = useUser();
-    if (!['landlord', 'property_manager'].includes(u.role)) { router.push('/dashboard'); return; }
+    if (!['landlord', 'property_manager'].includes(user.role)) { router.push('/dashboard'); return; }
     fetchTemplates();
   }, []); // eslint-disable-line
 
@@ -287,7 +287,7 @@ export default function AgreementTemplatesPage() {
       } else {
         await api.post('/agreement-templates', form);
         showToast('Template created — pending admin review');
-      }
+      
       setShowForm(false);
       setEditing(null);
       fetchTemplates();

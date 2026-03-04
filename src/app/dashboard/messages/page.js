@@ -314,7 +314,7 @@ export default function MessagesPage() {
         // Chat is open — the ChatModal's onNewMessage.handler already appended the message
         // and will call mark-as-read + dispatch refresh_counts. Just keep unread at 0 here.
         setConvs(prev => prev.map(c => {
-          const other = String(c.sender?._id || c.sender) === String(u._id) ? c.receiver : c.sender;
+          const other = String(c.sender?._id || c.sender) === String(user._id) ? c.receiver : c.sender;
           if (String(other?._id || other) === sId) return { ...c, unreadCount: 0 };
           return c;
         }));

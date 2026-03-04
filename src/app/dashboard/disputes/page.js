@@ -33,7 +33,7 @@ export default function DisputesPage() {
 
   useEffect(() => {
     if (user) {
-      if (['tenant','landlord'].includes(u.role)) {
+      if (['tenant','landlord'].includes(user.role)) {
         api.get('/agreements').then(({ data }) => {
           setAgreements(data.filter(a => ['active','expired','signed'].includes(a.status)));
         }).catch(console.error);

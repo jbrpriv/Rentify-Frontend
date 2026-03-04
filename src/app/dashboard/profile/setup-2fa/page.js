@@ -41,7 +41,6 @@ export default function Setup2FAPage() {
       await api.post('/auth/2fa/verify', { token });
       // Update context so UI reflects 2FA enabled
       setUser({ ...user, twoFactorEnabled: true });
-      }
       setStep('done');
     } catch (err) {
       setError(err.response?.data?.message || 'Invalid code — try again');

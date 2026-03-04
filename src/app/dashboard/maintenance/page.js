@@ -37,7 +37,7 @@ export default function MaintenancePage() {
 
   useEffect(() => {
     if (user) {
-      if (u.role === 'tenant') {
+      if (user.role === 'tenant') {
         // Load tenant's active agreements for property selection
         api.get('/agreements').then(({ data }) => {
           const active = data.filter(a => a.status === 'active');

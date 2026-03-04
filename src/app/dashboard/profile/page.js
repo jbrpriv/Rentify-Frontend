@@ -26,7 +26,7 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if (user) {
-      setForm({ name: u.name || '', phoneNumber: u.phoneNumber || '' });
+      setForm({ name: user.name || '', phoneNumber: user.phoneNumber || '' });
     }
     api.get('/users/me').then(({ data }) => {
       setDbUser(data);
