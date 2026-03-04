@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import axios from 'axios';
 import api from '@/utils/api';
@@ -25,12 +25,22 @@ const getRecaptchaToken = (action) => {
 
 const STEPS = ['register', 'verify-email', 'verify-phone'];
 
-export default function RegisterPage() {
-  const router = useRouter();
-  const [step, setStep] = useState('register');
+function RegisterContent() {
+  const router       = useRouter();
+  const searchParams = useSearchParams();
+
+  const [step, setStep]       = useState('register');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError]     = useState('');
   const [success, setSuccess] = useState('');
+  const [facebookNotice, setFacebookNotice] = useState(false);
+
+  // When redirected from Facebook OAuth with no email, show a clear explanation
+  useEffect(() => {
+    if (searchParams.get('notice') === 'facebook_no_email') {
+      setFacebookNotice(true);
+    }
+  }, [searchParams]);
   const [formData, setFormData] = useState({ name: '', email: '', password: '', phoneNumber: '', role: 'tenant' });
   const [emailToken, setEmailToken] = useState('');
   const [phoneOTP, setPhoneOTP] = useState('');
@@ -126,6 +136,11 @@ export default function RegisterPage() {
             </p>
           </div>
 
+          {facebookNotice && (
+            <div className="bg-amber-50 border border-amber-200 text-amber-800 px-4 py-3 rounded-xl text-sm mb-2">
+              <strong>Your Facebook email is not verified.</strong> Facebook didn&apos;t share a verified email with us, so we can&apos;t create your account automatically. Please sign up manually below.
+            </div>
+          )}
           {error && <div className="bg-red-50 text-red-500 p-3 rounded-xl text-sm text-center">{error}</div>}
           {success && <div className="bg-green-50 text-green-600 p-3 rounded-xl text-sm text-center">{success}</div>}
 
@@ -195,5 +210,13 @@ export default function RegisterPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function RegisterPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><Loader2 className="animate-spin w-8 h-8 text-blue-500" /></div>}>
+      <RegisterContent />
+    </Suspense>
   );
 }

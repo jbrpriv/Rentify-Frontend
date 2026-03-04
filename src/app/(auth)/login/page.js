@@ -85,6 +85,12 @@ export default function LoginPage() {
         localStorage.setItem('userInfo', JSON.stringify({ email: formData.email }));
         await api.post('/auth/send-otp');
         setNeedsPhoneVerify(true);
+      } else if (msg === 'OAUTH_ACCOUNT') {
+        // This email was registered via Google/Facebook — no password exists
+        const providerLabel = err.response?.data?.provider === 'google' ? 'Google'
+          : err.response?.data?.provider === 'facebook' ? 'Facebook'
+          : 'social login';
+        setError(`This account was created with ${providerLabel}. Please use the "Continue with ${providerLabel}" button below to sign in.`);
       } else {
         setError(msg || 'Login failed');
       }

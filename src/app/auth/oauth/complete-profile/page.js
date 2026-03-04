@@ -15,11 +15,14 @@ function CompleteProfileContent() {
   const needsEmail     = searchParams.get('needsEmail') === 'true';
   const facebookId     = searchParams.get('facebookId') || '';
   const urlToken       = searchParams.get('token')      || '';
+  // skipToOTP=true means the user already set their phone in a previous session
+  // but closed the tab before entering the OTP — jump straight to verification.
+  const skipToOTP      = searchParams.get('skipToOTP')  === 'true';
 
   // Email is locked when the provider supplied it; editable only for FB no-email case
   const emailLocked = !!providerEmail && !needsEmail;
 
-  const [step, setStep]     = useState('profile');
+  const [step, setStep]     = useState(skipToOTP ? 'verify-phone' : 'profile');
   const [formData, setFormData] = useState({
     name:        providerName,
     email:       providerEmail,
@@ -45,6 +48,18 @@ function CompleteProfileContent() {
       email: f.email || providerEmail,
     }));
   }, [urlToken, providerName, providerEmail]);
+
+  // When the backend says the user already has a phone but it's unverified,
+  // we skip straight to the OTP step and re-send the code automatically.
+  useEffect(() => {
+    if (!skipToOTP) return;
+    api.post('/auth/send-otp').catch(() => {
+      // If send-otp fails (e.g. no phone on record), fall back to profile step
+      setStep('profile');
+      setError('Could not resend OTP. Please re-enter your details.');
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [skipToOTP]);
 
   // ── Step 1: save profile ──────────────────────────────────────────────────
   const handleProfileSubmit = async (e) => {
