@@ -22,6 +22,22 @@ const ROLE_CONFIG = {
   },
 };
 
+// Reuse the same reCAPTCHA helper as the regular login page
+const getRecaptchaToken = (action) =>
+  new Promise((resolve) => {
+    if (typeof window === 'undefined' || !window.grecaptcha) return resolve(null);
+    window.grecaptcha.ready(async () => {
+      try {
+        const siteKey = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY;
+        if (!siteKey) return resolve(null);
+        const token = await window.grecaptcha.execute(siteKey, { action });
+        resolve(token);
+      } catch {
+        resolve(null);
+      }
+    });
+  });
+
 export default function SuperLoginPage() {
   const router = useRouter();
   const [selectedRole, setSelectedRole] = useState('admin');
@@ -62,14 +78,16 @@ export default function SuperLoginPage() {
     clearAlerts();
     try {
       if (mode === 'register') {
-        const payload = { ...formData, role: selectedRole };
+        const recaptchaToken = await getRecaptchaToken('register');
+        const payload = { ...formData, role: selectedRole, recaptchaToken };
         const { data } = await api.post('/auth/register', payload);
         localStorage.setItem('token', data.token);
         localStorage.setItem('userInfo', JSON.stringify(data));
         setSuccess(`A 6-digit verification code was sent to ${formData.email}`);
         setStep('email');
       } else {
-        const { data } = await api.post('/auth/login', { email: formData.email, password: formData.password });
+        const recaptchaToken = await getRecaptchaToken('login');
+        const { data } = await api.post('/auth/login', { email: formData.email, password: formData.password, recaptchaToken });
         if (!['admin', 'law_reviewer'].includes(data.role)) {
           setError('Access denied. This portal is for admins and law reviewers only.');
           return;
@@ -108,7 +126,8 @@ export default function SuperLoginPage() {
     try {
       await api.post('/auth/verify-email', { email: formData.email, code: emailCode });
       try {
-        const { data } = await api.post('/auth/login', { email: formData.email, password: formData.password });
+        const recaptchaToken = await getRecaptchaToken('login');
+        const { data } = await api.post('/auth/login', { email: formData.email, password: formData.password, recaptchaToken });
         proceedAfterLogin(data);
       } catch (loginErr) {
         const msg = loginErr.response?.data?.message;
@@ -138,7 +157,8 @@ export default function SuperLoginPage() {
     clearAlerts();
     try {
       await api.post('/auth/verify-otp', { code: phoneOTP });
-      const { data } = await api.post('/auth/login', { email: formData.email, password: formData.password });
+      const recaptchaToken = await getRecaptchaToken('login');
+      const { data } = await api.post('/auth/login', { email: formData.email, password: formData.password, recaptchaToken });
       proceedAfterLogin(data);
     } catch (err) {
       setError(err.response?.data?.message || 'Invalid OTP. Please try again.');
