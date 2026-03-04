@@ -96,7 +96,7 @@ function RegisterContent() {
     try {
       const { data } = await axios.post('/api/auth/verify-otp', { email: formData.email, code: phoneOTP });
       localStorage.setItem('token', data.token);
-      localStorage.setItem('userInfo', JSON.stringify({
+      setUser({
         _id:             data._id,
         name:            data.name,
         role:            data.role,
@@ -104,7 +104,7 @@ function RegisterContent() {
         isVerified:      true,
         isPhoneVerified: true,
         twoFactorEnabled: data.twoFactorEnabled || false,
-      }));
+      });
       router.push('/dashboard');
     } catch (err) { setError(err.response?.data?.message || 'Invalid OTP'); }
     finally { setLoading(false); }

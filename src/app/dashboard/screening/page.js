@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import api from '@/utils/api';
+import { useUser } from '@/context/UserContext';
 import {
   Building2, CheckCircle, XCircle, Loader2, Phone, Mail,
   MessageSquare, Calendar, Clock, ChevronDown, ChevronUp,
@@ -234,9 +235,7 @@ export default function ScreeningPage() {
   const router = useRouter();
 
   useEffect(() => {
-    const stored = localStorage.getItem('userInfo');
-    if (!stored) { router.push('/login'); return; }
-    const parsed = JSON.parse(stored);
+    const { user: parsed } = useUser();
     if (!['landlord', 'admin'].includes(parsed.role)) {
       router.push('/dashboard');
     }

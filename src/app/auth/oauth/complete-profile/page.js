@@ -7,6 +7,7 @@ import { User, Phone, Building2, Mail, Loader2, CheckCircle, Lock } from 'lucide
 
 function CompleteProfileContent() {
   const router       = useRouter();
+  const { setUser } = useUser();
   const searchParams = useSearchParams();
 
   const providerEmail  = searchParams.get('email')       || '';
@@ -148,7 +149,7 @@ function CompleteProfileContent() {
       // OTP verified — NOW it is safe to write the session to localStorage.
       const { data: freshUser } = await api.get('/users/me');
       localStorage.setItem('token', urlToken);
-      localStorage.setItem('userInfo', JSON.stringify({
+      setUser({
         _id:             freshUser._id,
         name:            freshUser.name,
         role:            freshUser.role,
@@ -157,7 +158,7 @@ function CompleteProfileContent() {
         isPhoneVerified: true,
         isVerified:      freshUser.isVerified,
         provider,
-      }));
+      });
       router.replace('/dashboard');
     } catch (err) {
       setError(err.response?.data?.message || 'Invalid OTP. Please try again.');

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import api from '@/utils/api';
+import { useUser } from '@/context/UserContext';
 import {
   Plus, CheckCircle, XCircle, Archive, Loader2,
   Scale, Filter, ChevronDown, ChevronUp,
@@ -24,8 +25,6 @@ export default function TemplatesPage() {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    const stored = localStorage.getItem('userInfo');
-    if (stored) setUser(JSON.parse(stored));
     fetchClauses();
   }, [catFilter, approvedFilter]);
 

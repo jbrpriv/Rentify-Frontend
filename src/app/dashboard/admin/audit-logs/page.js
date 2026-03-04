@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import api from '@/utils/api';
+import { useUser } from '@/context/UserContext';
 import { ShieldCheck, Loader2, ChevronLeft, ChevronRight, Filter } from 'lucide-react';
 
 const ACTION_COLORS = {
@@ -19,9 +20,7 @@ export default function AuditLogsPage() {
   const router = useRouter();
   // ── Role guard ────────────────────────────────────────────────────────────
   useEffect(() => {
-    const stored = localStorage.getItem('userInfo');
-    if (!stored) { router.push('/login'); return; }
-    const parsed = JSON.parse(stored);
+    const { user: parsed } = useUser();
     if (parsed.role !== 'admin') {
       router.push('/dashboard');
       return;

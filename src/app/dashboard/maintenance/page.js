@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import api from '@/utils/api';
+import { useUser } from '@/context/UserContext';
 import { Wrench, Plus, Loader2, ChevronDown, ChevronUp, CheckCircle, Clock, AlertCircle, X } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -35,10 +36,7 @@ export default function MaintenancePage() {
   const [updateForm, setUpdateForm] = useState({});
 
   useEffect(() => {
-    const stored = localStorage.getItem('userInfo');
-    if (stored) {
-      const u = JSON.parse(stored);
-      setUser(u);
+    if (user) {
       if (u.role === 'tenant') {
         // Load tenant's active agreements for property selection
         api.get('/agreements').then(({ data }) => {

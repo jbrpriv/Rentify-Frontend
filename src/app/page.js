@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
+import { useUser } from '@/context/UserContext';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
@@ -150,8 +151,7 @@ export default function LandingPage() {
   const router = useRouter();
 
   useEffect(() => {
-    const stored = localStorage.getItem('userInfo');
-    if (stored) setUser(JSON.parse(stored));
+    // user comes from UserContext — no localStorage read needed
   }, []);
 
   useEffect(() => {

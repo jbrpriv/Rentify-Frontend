@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import api from '@/utils/api';
+import { useUser } from '@/context/UserContext';
 import {
   Users, FileText, Building2, Wrench, TrendingUp,
   CheckCircle, Clock, AlertCircle, Zap, Crown, Loader2,
@@ -24,9 +25,8 @@ export default function AdminStatsPage() {
   const router = useRouter();
 
   useEffect(() => {
-    const stored = localStorage.getItem('userInfo');
-    if (!stored) { router.push('/login'); return; }
-    if (JSON.parse(stored).role !== 'admin') router.push('/dashboard');
+    if (!user) { router.push('/login'); return; }
+    if (user.role !== 'admin') router.push('/dashboard');
   }, []); // eslint-disable-line
 
   const [stats, setStats]     = useState(null);

@@ -1,33 +1,21 @@
 'use client';
 
 import Link from 'next/link';
+import { useUser } from '@/context/UserContext';
 import { Building2, Globe, LayoutDashboard, Tag } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 
 export default function Navbar() {
-  const [user, setUser]       = useState(null);
+  const { user, logout }      = useUser();
   const [scrolled, setScrolled] = useState(false);
-  const router   = useRouter();
   const pathname = usePathname();
-
-  useEffect(() => {
-    const stored = localStorage.getItem('userInfo');
-    if (stored) setUser(JSON.parse(stored));
-  }, [pathname]);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener('scroll', onScroll);
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
-
-  const handleLogout = () => {
-    localStorage.removeItem('userInfo');
-    localStorage.removeItem('token');
-    setUser(null);
-    router.push('/login');
-  };
 
   const isDashboard   = pathname?.startsWith('/dashboard');
   const isHeroPage    = pathname === '/';
@@ -115,7 +103,7 @@ export default function Navbar() {
                 </p>
               </div>
               <button
-                onClick={handleLogout}
+                onClick={logout}
                 className={`rounded-full border px-4 py-1.5 text-[0.75rem] font-semibold transition-all hover:scale-[1.02] ${
                   isTransparent
                     ? 'border-white/30 text-white hover:bg-white/10'

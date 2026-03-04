@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import api from '@/utils/api';
+import { useUser } from '@/context/UserContext';
 import {
   Tag, Building2, ChevronDown, ChevronUp, Check, X, ArrowLeftRight,
   Loader2, Clock, CheckCircle, XCircle, AlertCircle, Plus, RefreshCw,
@@ -488,9 +489,7 @@ export default function OffersPage() {
   }, []);
 
   useEffect(() => {
-    const stored = localStorage.getItem('userInfo');
-    if (!stored) { router.push('/login'); return; }
-    const u = JSON.parse(stored);
+    const { user: u, setUser } = useUser();
     setUser(u);
     fetchOffers();
   }, []); // eslint-disable-line

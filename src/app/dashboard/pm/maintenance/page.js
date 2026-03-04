@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import api from '@/utils/api';
+import { useUser } from '@/context/UserContext';
 import { Wrench, Plus, Loader2, ChevronDown, ChevronUp, CheckCircle, Clock, AlertCircle, X } from 'lucide-react';
 
 const STATUS_CONFIG = {
@@ -22,9 +23,7 @@ export default function MaintenancePage() {
   const router = useRouter();
   // ── Role guard ────────────────────────────────────────────────────────────
   useEffect(() => {
-    const stored = localStorage.getItem('userInfo');
-    if (!stored) { router.push('/login'); return; }
-    const parsed = JSON.parse(stored);
+    const { user: parsed, setUser } = useUser();
     if (!['property_manager','admin'].includes(parsed.role)) {
       router.push('/dashboard');
       return;
@@ -48,10 +47,7 @@ export default function MaintenancePage() {
   const [updateForm, setUpdateForm] = useState({});
 
   useEffect(() => {
-    const stored = localStorage.getItem('userInfo');
-    if (stored) {
-      const u = JSON.parse(stored);
-      setUser(u);
+    if (user) {
       if (u.role === 'tenant') {
         // Load tenant's active agreements for property selection
         api.get('/agreements').then(({ data }) => {

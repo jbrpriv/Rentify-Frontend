@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import api from '@/utils/api';
+import { useUser } from '@/context/UserContext';
 import {
   MessageSquare, Send, Loader2, X, Users, ChevronRight,
   Search, CheckCheck
@@ -298,9 +299,7 @@ export default function MessagesPage() {
   useEffect(() => { activeRef.current = active; }, [active]);
 
   useEffect(() => {
-    const stored = localStorage.getItem('userInfo');
-    if (!stored) { router.push('/login'); return; }
-    const u = JSON.parse(stored);
+    const { user: u, setUser } = useUser();
     setUser(u);
     fetchData();
 

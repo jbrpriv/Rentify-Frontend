@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import api from '@/utils/api';
+import { useUser } from '@/context/UserContext';
 import {
   Search, Shield, ShieldOff, ChevronLeft, ChevronRight,
   Loader2, UserCheck, UserX, RefreshCw,
@@ -21,9 +22,7 @@ export default function AdminUsersPage() {
   const router = useRouter();
   // ── Role guard ────────────────────────────────────────────────────────────
   useEffect(() => {
-    const stored = localStorage.getItem('userInfo');
-    if (!stored) { router.push('/login'); return; }
-    const parsed = JSON.parse(stored);
+    const { user: parsed } = useUser();
     if (parsed.role !== 'admin') {
       router.push('/dashboard');
       return;

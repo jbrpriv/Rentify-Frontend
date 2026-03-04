@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import api from '@/utils/api';
+import { useUser } from '@/context/UserContext';
 import { CreditCard, CheckCircle, Clock, AlertCircle, Loader2, Calendar } from 'lucide-react';
 
 const STATUS_CONFIG = {
@@ -16,16 +17,15 @@ const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov
 
 export default function PaymentsPage() {
   const router = useRouter();
+  const { user } = useUser();
+
   // ── Role guard ────────────────────────────────────────────────────────────
   useEffect(() => {
-    const stored = localStorage.getItem('userInfo');
-    if (!stored) { router.push('/login'); return; }
-    const parsed = JSON.parse(stored);
-    if (parsed.role !== 'tenant') {
+    if (!user) { router.push('/login'); return; }
+    if (user.role !== 'tenant') {
       router.push('/dashboard/agreements');
-      return;
     }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [user]); // eslint-disable-line react-hooks/exhaustive-deps
   // ─────────────────────────────────────────────────────────────────────────
 
   const [agreements, setAgreements] = useState([]);
@@ -50,10 +50,14 @@ export default function PaymentsPage() {
     if (!selected) return;
     setPaying(scheduleIndex);
     try {
-      const { data } = await api.post('/payments/pay-rent', {
-        agreementId: selected._id,
-        scheduleIndex,
-      });
+      // Use the pre-generated checkout URL from the scheduler if available,
+      // falling back to on-demand creation — GET /payments/active-checkout handles both.
+      const entry = selected.rentSchedule?.[scheduleIndex];
+      if (entry?.checkoutUrl) {
+        window.location.href = entry.checkoutUrl;
+        return;
+      }
+      const { data } = await api.get(`/payments/active-checkout/${selected._id}`);
       window.location.href = data.url;
     } catch (err) {
       alert(err.response?.data?.message || 'Failed to initiate payment');

@@ -9,6 +9,7 @@ const PROVIDER_LABELS = { google: 'Google', facebook: 'Facebook' };
 function OAuthSuccessContent() {
   const searchParams = useSearchParams();
   const router       = useRouter();
+  const { setUser }  = useUser();
 
   useEffect(() => {
     const token           = searchParams.get('token');
@@ -43,9 +44,7 @@ function OAuthSuccessContent() {
     } else {
       // Fully verified returning user — safe to persist session now.
       localStorage.setItem('token', token);
-      localStorage.setItem('userInfo', JSON.stringify({
-        _id: id, name, role, email, isPhoneVerified, provider,
-      }));
+      setUser({ _id: id, name, role, email, isPhoneVerified, provider });
       router.replace('/dashboard');
     }
   // searchParams is stable in Next.js; router is stable. The ref guard below

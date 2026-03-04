@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import api from '@/utils/api';
+import { useUser } from '@/context/UserContext';
 import {
   Scale, Plus, Loader2, ChevronDown, ChevronUp, Send,
   CheckCircle, Clock, AlertCircle, X
@@ -31,10 +32,7 @@ export default function DisputesPage() {
   const [form, setForm] = useState({ agreementId: '', title: '', description: '', category: 'other' });
 
   useEffect(() => {
-    const stored = localStorage.getItem('userInfo');
-    if (stored) {
-      const u = JSON.parse(stored);
-      setUser(u);
+    if (user) {
       if (['tenant','landlord'].includes(u.role)) {
         api.get('/agreements').then(({ data }) => {
           setAgreements(data.filter(a => ['active','expired','signed'].includes(a.status)));

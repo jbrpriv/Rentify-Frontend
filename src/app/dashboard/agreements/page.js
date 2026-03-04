@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import api from '@/utils/api';
+import { useUser } from '@/context/UserContext';
 import { FileText, Download, Calendar, User, Loader2, CheckCircle, Clock, PenLine } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -17,9 +18,7 @@ export default function AgreementsPage() {
   const [currentUser, setCurrentUser] = useState(null);
 
   useEffect(() => {
-    const stored = localStorage.getItem('userInfo');
-    if (!stored) { router.push('/login'); return; }
-    const parsed = JSON.parse(stored);
+    const { user: parsed } = useUser();
     // Tenants have their own dedicated lease page
     if (parsed.role === 'tenant') { router.push('/dashboard/my-lease'); return; }
     setCurrentUser(parsed);

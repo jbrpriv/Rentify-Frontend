@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import api from '@/utils/api';
 import Link from 'next/link';
+import { useUser } from '@/context/UserContext';
 import {
   Lock, Mail, Loader2, Eye, EyeOff,
   ShieldCheck, Phone, CheckCircle,
@@ -30,6 +31,7 @@ const getRecaptchaToken = (action) => {
 
 export default function LoginPage() {
   const router = useRouter();
+  const { setUser } = useUser();
   const [formData, setFormData]   = useState({ email: '', password: '' });
   const [loading,  setLoading]    = useState(false);
   const [error,    setError]      = useState('');
@@ -71,7 +73,7 @@ export default function LoginPage() {
         setNeeds2FA(true);
       } else {
         localStorage.setItem('token', data.token);
-        localStorage.setItem('userInfo', JSON.stringify(data));
+        setUser(data);
         router.push('/dashboard');
       }
     } catch (err) {
@@ -113,7 +115,7 @@ export default function LoginPage() {
     try {
       const { data } = await api.post('/auth/2fa/validate', { userId: userId2FA, token: totp });
       localStorage.setItem('token', data.token);
-      localStorage.setItem('userInfo', JSON.stringify(data));
+      setUser(data);
       router.push('/dashboard');
     } catch (err) { setError(err.response?.data?.message || 'Invalid 2FA code'); }
     finally { setTotpLoading(false); }
@@ -156,7 +158,7 @@ export default function LoginPage() {
       const { data } = await api.post('/auth/verify-otp', { email: pendingEmail, code: phoneOTP });
       // Server confirmed OTP and returned real tokens — safe to persist now
       localStorage.setItem('token', data.token);
-      localStorage.setItem('userInfo', JSON.stringify({
+      setUser({
         _id:             data._id,
         name:            data.name,
         role:            data.role,
@@ -164,7 +166,7 @@ export default function LoginPage() {
         isVerified:      true,
         isPhoneVerified: true,
         twoFactorEnabled: data.twoFactorEnabled || false,
-      }));
+      });
       router.push('/dashboard');
     } catch (err) { setError(err.response?.data?.message || 'Invalid OTP'); }
     finally { setLoading(false); }

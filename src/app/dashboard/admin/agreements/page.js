@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import api from '@/utils/api';
+import { useUser } from '@/context/UserContext';
 import {
   FileText, Search, Filter, Loader2, AlertCircle,
   CheckCircle, Clock, XCircle, Eye,
@@ -32,9 +33,7 @@ export default function AdminAgreementsPage() {
   const router = useRouter();
   // ── Role guard ────────────────────────────────────────────────────────────
   useEffect(() => {
-    const stored = localStorage.getItem('userInfo');
-    if (!stored) { router.push('/login'); return; }
-    const parsed = JSON.parse(stored);
+    const { user: parsed } = useUser();
     if (parsed.role !== 'admin') {
       router.push('/dashboard');
       return;
@@ -192,7 +191,7 @@ export default function AdminAgreementsPage() {
                     <td className="px-4 py-3">
                       <button
                         onClick={() => {
-                          const token = JSON.parse(localStorage.getItem('userInfo') || '{}')?.token || '';
+                          const token = localStorage.getItem('token') || '';
                           const url = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/agreements/${a._id}/pdf`;
                           fetch(url, { headers: { Authorization: `Bearer ${token}` } })
                             .then(r => r.blob())

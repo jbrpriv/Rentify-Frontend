@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { User, Mail, Phone, Shield, Save, Loader2, Bell, MessageSquare, ShieldCheck, ShieldOff, QrCode, CheckCircle, AlertTriangle } from 'lucide-react';
 import api from '@/utils/api';
+import { useUser } from '@/context/UserContext';
 
 export default function ProfilePage() {
   const [user, setUser]         = useState(null);
@@ -24,10 +25,7 @@ export default function ProfilePage() {
   const [disableVia,    setDisableVia]   = useState(''); // 'phone' | 'email'
 
   useEffect(() => {
-    const stored = localStorage.getItem('userInfo');
-    if (stored) {
-      const u = JSON.parse(stored);
-      setUser(u);
+    if (user) {
       setForm({ name: u.name || '', phoneNumber: u.phoneNumber || '' });
     }
     api.get('/users/me').then(({ data }) => {
@@ -35,10 +33,8 @@ export default function ProfilePage() {
       setPrefs({ smsOptIn: data.smsOptIn || false, emailOptIn: data.emailOptIn !== false });
       set2FAEnabled(data.twoFactorEnabled || false);
       setForm({ name: data.name || '', phoneNumber: data.phoneNumber || '' });
-      const stored = localStorage.getItem('userInfo');
-      if (stored) {
-        const u = JSON.parse(stored);
-        localStorage.setItem('userInfo', JSON.stringify({ ...u, ...data }));
+      setUser({ ...user, ...data });
+      if (true) {
         setUser(prev => ({ ...prev, ...data }));
       }
     }).catch(console.error);
@@ -51,10 +47,8 @@ export default function ProfilePage() {
     setSaving(true);
     try {
       const { data } = await api.put('/users/profile', form);
-      const stored = localStorage.getItem('userInfo');
-      if (stored) {
-        const u = JSON.parse(stored);
-        localStorage.setItem('userInfo', JSON.stringify({ ...u, name: data.name, phoneNumber: data.phoneNumber }));
+      setUser({ ...user, name: data.name, phoneNumber: data.phoneNumber });
+      if (true) {
       }
       setUser(prev => ({ ...prev, name: data.name, phoneNumber: data.phoneNumber }));
       setMsgTimeout('✅ Profile updated successfully!');

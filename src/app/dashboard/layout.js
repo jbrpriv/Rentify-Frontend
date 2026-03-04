@@ -6,6 +6,7 @@ import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import api from '@/utils/api';
+import { useUser } from '@/context/UserContext';
 import {
   LayoutDashboard, Building2, FileText, Users, Key, User, Loader2, FolderOpen, Zap,
   ShieldCheck, Wrench, MessageSquare, CreditCard, BarChart2, Scale,
@@ -137,7 +138,7 @@ function NotificationToast({ notification, onDismiss }) {
 export default function DashboardLayout({ children }) {
   const router   = useRouter();
   const pathname = usePathname();
-  const [user, setUser]             = useState(null);
+  const { user, logout } = useUser();
   const [badgeCounts, setBadgeCounts] = useState({});
   const [notification, setNotification] = useState(null);
   const socketRef = useRef(null);
@@ -150,36 +151,27 @@ export default function DashboardLayout({ children }) {
   }, []);
 
   useEffect(() => {
-    const stored = localStorage.getItem('userInfo');
-    if (!stored) { router.push('/login'); return; }
-    const u = JSON.parse(stored);
+    if (!user) { router.push('/login'); return; }
 
-    // Edge-case safety net: if somehow an OAuth session with an unverified
-    // phone is in localStorage (e.g. from an old app version), clear it and
-    // send the user back to login. Under the current flow this should never
-    // be reached because localStorage is only written after OTP verification.
-    if (u.isPhoneVerified === false && u.provider) {
-      localStorage.removeItem('token');
-      localStorage.removeItem('userInfo');
-      // Best-effort cleanup — fire and forget, don't block the redirect
-      api.post('/auth/oauth/abandon').catch(() => {}); // POST — matches route + sendBeacon
-      router.replace('/login');
+    // Edge-case: OAuth user with unverified phone still in state
+    if (user.isPhoneVerified === false && user.provider) {
+      logout();
+      api.post('/auth/oauth/abandon').catch(() => {});
       return;
     }
 
-    setUser(u);
     fetchCounts();
 
     const SOCKET_URL = process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://localhost:5000';
     import('socket.io-client').then(({ io }) => {
       const socket = io(SOCKET_URL, { transports: ['websocket', 'polling'] });
       socketRef.current = socket;
-      socket.on('connect', () => socket.emit('register', u._id));
+      socket.on('connect', () => socket.emit('register', user._id));
       socket.on('new_message', (msg) => {
         fetchCounts();
         window.dispatchEvent(new CustomEvent('dashboard:new_message', { detail: msg }));
         const sId = String(msg.sender?._id || msg.sender);
-        if (String(u._id) !== sId && !window.__activeChatUserId) {
+        if (String(user._id) !== sId && !window.__activeChatUserId) {
           setNotification({ senderName: msg.sender?.name || 'Someone', senderRole: msg.sender?.role, preview: msg.content?.slice(0, 60), propertyTitle: msg.property?.title });
         }
       });
@@ -189,7 +181,7 @@ export default function DashboardLayout({ children }) {
     const handleRefresh = () => fetchCounts();
     window.addEventListener('dashboard:refresh_counts', handleRefresh);
     return () => { clearInterval(interval); window.removeEventListener('dashboard:refresh_counts', handleRefresh); socketRef.current?.disconnect(); };
-  }, []); // eslint-disable-line
+  }, [user]); // eslint-disable-line
 
   useEffect(() => { if (pathname) fetchCounts(); }, [pathname, fetchCounts]);
 

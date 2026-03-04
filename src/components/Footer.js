@@ -1,20 +1,17 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useUser } from '@/context/UserContext';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Building2 } from 'lucide-react';
 
 export default function Footer() {
-  const [user, setUser] = useState(null);
+  const { user } = useUser();
   const pathname = usePathname();
 
   // Check auth state whenever the route changes
-  useEffect(() => {
-    const stored = localStorage.getItem('userInfo');
-    if (stored) setUser(JSON.parse(stored));
-    else setUser(null);
-  }, [pathname]);
+  
 
   return (
     <footer className="mt-auto border-t border-[#0992C2]/20 bg-gradient-to-t from-[#0AC4E0]/10 via-[#F6E7BC]/20 to-transparent">

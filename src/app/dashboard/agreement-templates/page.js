@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import api from '@/utils/api';
+import { useUser } from '@/context/UserContext';
 import {
   Plus, ChevronDown, ChevronUp, Loader2, Trash2, Pencil,
   CheckCircle, Clock, XCircle, Tag, FileText, X, Save,
@@ -272,9 +273,7 @@ export default function AgreementTemplatesPage() {
   }, []);
 
   useEffect(() => {
-    const stored = localStorage.getItem('userInfo');
-    if (!stored) { router.push('/login'); return; }
-    const u = JSON.parse(stored);
+    const { user: u } = useUser();
     if (!['landlord', 'property_manager'].includes(u.role)) { router.push('/dashboard'); return; }
     fetchTemplates();
   }, []); // eslint-disable-line

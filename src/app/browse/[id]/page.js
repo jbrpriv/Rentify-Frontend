@@ -3,6 +3,7 @@
 import { useEffect, useState, Suspense, useCallback } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import api from '@/utils/api';
+import { useUser } from '@/context/UserContext';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import {
@@ -308,8 +309,6 @@ function ListingDetailContent() {
   const [hasExistingOffer, setHasExistingOffer] = useState(false);
 
   useEffect(() => {
-    const stored = localStorage.getItem('userInfo');
-    const user   = stored ? JSON.parse(stored) : null;
     if (user) setCurrentUser(user);
 
     (async () => {

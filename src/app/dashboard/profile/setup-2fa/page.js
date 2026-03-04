@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import api from '@/utils/api';
+import { useUser } from '@/context/UserContext';
 import Link from 'next/link';
 import { ShieldCheck, ArrowLeft, Loader2, CheckCircle, QrCode, Smartphone } from 'lucide-react';
 import Image from 'next/image';
@@ -38,11 +39,8 @@ export default function Setup2FAPage() {
     setError('');
     try {
       await api.post('/auth/2fa/verify', { token });
-      // Update localStorage so UI reflects 2FA enabled
-      const stored = localStorage.getItem('userInfo');
-      if (stored) {
-        const u = JSON.parse(stored);
-        localStorage.setItem('userInfo', JSON.stringify({ ...u, twoFactorEnabled: true }));
+      // Update context so UI reflects 2FA enabled
+      setUser({ ...user, twoFactorEnabled: true });
       }
       setStep('done');
     } catch (err) {

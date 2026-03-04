@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import api from '@/utils/api';
+import { useUser } from '@/context/UserContext';
 import { 
   FileText, 
   Download, 
@@ -30,8 +31,6 @@ export default function MyLeasePage() {
   const [showLandlord, setShowLandlord] = useState({}); // Track which landlord details are expanded
 
   useEffect(() => {
-    const stored = localStorage.getItem('userInfo');
-    if (stored) setCurrentUser(JSON.parse(stored));
     fetchAgreements();
   }, []);
 

@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import api from '@/utils/api';
+import { useUser } from '@/context/UserContext';
 import Link from 'next/link';
 import { Users, Loader2, Mail, Phone, Building2, Calendar, AlertCircle, CheckCircle } from 'lucide-react';
 
@@ -10,9 +11,7 @@ export default function LandlordTenantsPage() {
   const router = useRouter();
   // ── Role guard ────────────────────────────────────────────────────────────
   useEffect(() => {
-    const stored = localStorage.getItem('userInfo');
-    if (!stored) { router.push('/login'); return; }
-    const parsed = JSON.parse(stored);
+    const { user: parsed } = useUser();
     if (!['landlord','admin'].includes(parsed.role)) {
       router.push('/dashboard');
       return;

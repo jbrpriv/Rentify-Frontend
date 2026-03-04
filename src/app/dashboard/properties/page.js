@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import api from '@/utils/api';
+import { useUser } from '@/context/UserContext';
 import {
   Building2, MapPin, Plus, FileText, Loader2, UserPlus,
   CheckCircle, Clock, Eye, EyeOff, X, AlertTriangle, Trash2,
@@ -44,9 +45,7 @@ function ConfirmModal({ title, description, icon: Icon, iconBg, iconColor, confi
 export default function PropertiesPage() {
   const router = useRouter();
   useEffect(() => {
-    const stored = localStorage.getItem('userInfo');
-    if (!stored) { router.push('/login'); return; }
-    const parsed = JSON.parse(stored);
+    const { user: parsed } = useUser();
     if (!['landlord','admin'].includes(parsed.role)) { router.push('/dashboard'); return; }
   }, []);
 

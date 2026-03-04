@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useUser } from '@/context/UserContext';
 import api from '@/utils/api';
 import { Lock, Mail, Loader2, Eye, EyeOff, ShieldCheck, Scale, UserPlus, LogIn, Phone, CheckCircle } from 'lucide-react';
 
@@ -40,6 +41,7 @@ const getRecaptchaToken = (action) =>
 
 export default function SuperLoginPage() {
   const router = useRouter();
+  const { setUser } = useUser();
   const [selectedRole, setSelectedRole] = useState('admin');
   const [mode, setMode] = useState('login');
   const [formData, setFormData] = useState({ name: '', email: '', password: '', phoneNumber: '' });
@@ -68,7 +70,7 @@ export default function SuperLoginPage() {
 
   const proceedAfterLogin = (loginData) => {
     localStorage.setItem('token', loginData.token);
-    localStorage.setItem('userInfo', JSON.stringify(loginData));
+    setUser(loginData);
     router.push('/dashboard');
   };
 
@@ -82,7 +84,7 @@ export default function SuperLoginPage() {
         const payload = { ...formData, role: selectedRole, recaptchaToken };
         const { data } = await api.post('/auth/register', payload);
         localStorage.setItem('token', data.token);
-        localStorage.setItem('userInfo', JSON.stringify(data));
+        setUser(data);
         setSuccess(`A 6-digit verification code was sent to ${formData.email}`);
         setStep('email');
       } else {

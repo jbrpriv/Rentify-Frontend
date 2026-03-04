@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import api from '@/utils/api';
+import { useUser } from '@/context/UserContext';
 import {
   Building2, FileText, CreditCard, Wrench, Tag, Scale,
   TrendingUp, CheckCircle, Clock, AlertCircle, ArrowRight,
@@ -118,10 +119,7 @@ export default function DashboardHome() {
   const [loading, setLoading]           = useState(true);
 
   useEffect(() => {
-    const stored = localStorage.getItem('userInfo');
-    if (!stored) return;
-    const u = JSON.parse(stored);
-    setUser(u);
+    if (user) {
 
     (async () => {
       try {

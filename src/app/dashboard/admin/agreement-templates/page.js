@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import api from '@/utils/api';
+import { useUser } from '@/context/UserContext';
 import {
   FileText, ChevronDown, ChevronUp, Loader2, Trash2,
   CheckCircle, XCircle, Clock, Tag, Filter,
@@ -132,9 +133,8 @@ export default function AdminAgreementTemplatesPage() {
   }, [statusFilter]);
 
   useEffect(() => {
-    const stored = localStorage.getItem('userInfo');
-    if (!stored) { router.push('/login'); return; }
-    if (JSON.parse(stored).role !== 'admin') { router.push('/dashboard'); return; }
+    if (!user) { router.push('/login'); return; }
+    if (user.role !== 'admin') { router.push('/dashboard'); return; }
     fetchTemplates();
   }, [fetchTemplates]); // eslint-disable-line
 
