@@ -7,7 +7,7 @@ import api from '@/utils/api';
 import { useUser } from '@/context/UserContext';
 import {
   Building2, MapPin, Plus, FileText, Loader2, UserPlus,
-  CheckCircle, Clock, Eye, EyeOff, X, AlertTriangle, Trash2,
+  CheckCircle, Clock, Eye, EyeOff, X, AlertTriangle, Trash2, Archive, ArchiveRestore,
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -55,8 +55,10 @@ export default function PropertiesPage() {
   const [msg,            setMsg]            = useState('');
   const [publishModal,   setPublishModal]   = useState(null);
   const [deleteModal,    setDeleteModal]    = useState(null);
+  const [archiveModal,   setArchiveModal]   = useState(null);
   const [publishLoading, setPublishLoading] = useState(false);
   const [deleteLoading,  setDeleteLoading]  = useState(false);
+  const [archiveLoading, setArchiveLoading] = useState(false);
 
   const flashMsg = (m) => { setMsg(m); setTimeout(() => setMsg(''), 5000); };
 
@@ -80,6 +82,23 @@ export default function PropertiesPage() {
       flashMsg('❌ ' + (err.response?.data?.message || 'Failed to update listing'));
       setPublishModal(null);
     } finally { setPublishLoading(false); }
+  };
+
+  /* Archive / Restore */
+  const confirmArchive = async () => {
+    if (!archiveModal) return;
+    setArchiveLoading(true);
+    const isArchived = archiveModal.property.isArchived;
+    const endpoint   = isArchived ? 'restore' : 'archive';
+    try {
+      await api.put(`/properties/${archiveModal.property._id}/${endpoint}`, { reason: 'Archived by landlord' });
+      flashMsg(`✅ Property ${isArchived ? 'restored' : 'archived'} successfully`);
+      fetchProperties();
+      setArchiveModal(null);
+    } catch (err) {
+      flashMsg('❌ ' + (err.response?.data?.message || 'Failed to update property'));
+      setArchiveModal(null);
+    } finally { setArchiveLoading(false); }
   };
 
   /* Delete */
@@ -176,6 +195,24 @@ export default function PropertiesPage() {
           onConfirm={confirmDelete}
           onCancel={() => setDeleteModal(null)}
           loading={deleteLoading}
+        />
+      )}
+
+      {archiveModal && (
+        <ConfirmModal
+          title={archiveModal.property.isArchived ? 'Restore Property?' : 'Archive Property?'}
+          description={archiveModal.property.isArchived
+            ? `"${archiveModal.property.title}" will be restored and available for listing again.`
+            : `"${archiveModal.property.title}" will be archived and hidden from listings. All history is preserved and it can be restored at any time.`
+          }
+          icon={archiveModal.property.isArchived ? ArchiveRestore : Archive}
+          iconBg={archiveModal.property.isArchived ? 'linear-gradient(135deg,#F0FDF4,#BBF7D0)' : 'linear-gradient(135deg,#FFFBEB,#FDE68A)'}
+          iconColor={archiveModal.property.isArchived ? '#16A34A' : '#D97706'}
+          confirmLabel={archiveModal.property.isArchived ? 'Yes, Restore' : 'Yes, Archive'}
+          confirmBg={archiveModal.property.isArchived ? 'linear-gradient(135deg,#16A34A,#22C55E)' : 'linear-gradient(135deg,#D97706,#F59E0B)'}
+          onConfirm={confirmArchive}
+          onCancel={() => setArchiveModal(null)}
+          loading={archiveLoading}
         />
       )}
 
@@ -315,6 +352,24 @@ export default function PropertiesPage() {
                         <button onClick={() => handleInviteManager(property._id)} disabled={inviting === property._id} className="act-btn"
                           style={{ background:'#F5F3FF',color:'#7C3AED',border:'1.5px solid #DDD6FE' }}>
                           {inviting === property._id ? <Loader2 size={13} className="animate-spin"/> : <UserPlus size={13}/>} Invite PM
+                        </button>
+                      )}
+
+                      {/* Archive / Restore */}
+                      {!isOccupied && (
+                        <button
+                          onClick={() => setArchiveModal({ property })}
+                          className="act-btn"
+                          style={property.isArchived
+                            ? { background:'#F0FDF4', color:'#16A34A', border:'1.5px solid #BBF7D0' }
+                            : { background:'#FFFBEB', color:'#D97706', border:'1.5px solid #FDE68A' }
+                          }
+                          title={property.isArchived ? 'Restore property' : 'Archive property'}
+                        >
+                          {property.isArchived
+                            ? <><ArchiveRestore size={13}/> Restore</>
+                            : <><Archive size={13}/> Archive</>
+                          }
                         </button>
                       )}
 

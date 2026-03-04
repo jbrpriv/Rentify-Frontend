@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import api from '@/utils/api';
 import { useUser } from '@/context/UserContext';
 import { useToast } from '@/context/ToastContext';
-import { FileText, Download, Calendar, User, Loader2, CheckCircle, Clock, PenLine } from 'lucide-react';
+import { FileText, Download, Calendar, User, Loader2, CheckCircle, Clock, PenLine, GitBranch, Mail, Eye } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export default function AgreementsPage() {
@@ -210,11 +210,38 @@ export default function AgreementsPage() {
                         </button>
                       )}
 
+                      {/* Send signing invites — landlord only, on draft/pending */}
+                      {currentUser?.role === 'landlord' &&
+                       ['draft', 'pending_signature'].includes(ag.status) && (
+                        <button
+                          onClick={async () => {
+                            try {
+                              await api.post(`/agreements/${ag._id}/send-invites`);
+                              toast('Signing invitations sent to both parties', 'success');
+                            } catch (err) {
+                              toast(err.response?.data?.message || 'Failed to send invites', 'error');
+                            }
+                          }}
+                          className="inline-flex items-center px-4 py-2 border border-purple-500 text-sm font-medium rounded-md text-purple-600 bg-white hover:bg-purple-50"
+                        >
+                          <Mail className="h-4 w-4 mr-2" /> Send Invites
+                        </button>
+                      )}
+
                       <button
                         onClick={() => handleDownload(ag._id, ag.property?.title)}
                         className="inline-flex items-center px-4 py-2 border border-blue-600 text-sm font-medium rounded-md text-blue-600 bg-white hover:bg-blue-50"
                       >
                         <Download className="h-4 w-4 mr-2" /> PDF
+                      </button>
+
+                      {/* Version history */}
+                      <button
+                        onClick={() => router.push(`/dashboard/agreements/${ag._id}/history`)}
+                        className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-600 bg-white hover:bg-gray-50"
+                        title="View version history"
+                      >
+                        <GitBranch className="h-4 w-4 mr-2" /> History
                       </button>
                     </div>
                   </div>
