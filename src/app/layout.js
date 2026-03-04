@@ -2,6 +2,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 import { UserProvider } from '@/context/UserContext';
+import { ToastProvider } from '@/context/ToastContext';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -23,7 +24,9 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased rf-shell`}>
         <UserProvider>
-          {children}
+          <ToastProvider>
+            {children}
+          </ToastProvider>
           {/* reCAPTCHA v3 — loaded site-wide, used on login and register */}
           {process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY && (
             <Script

@@ -4,10 +4,11 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import api from '@/utils/api';
 import { useUser } from '@/context/UserContext';
+import { useToast } from '@/context/ToastContext';
 import {
   Building2, CheckCircle, XCircle, Loader2, Phone, Mail,
   MessageSquare, Calendar, Clock, ChevronDown, ChevronUp,
-  Home, Shield, Wrench, Tag, Filter,
+  Shield, Wrench, Tag,
 } from 'lucide-react';
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
@@ -39,7 +40,6 @@ function OfferCard({ offer, processingId, onDecision }) {
 
   return (
     <div style={{
-      borderLeft: `4px solid ${borderColor}`,
       background: offer.status !== 'pending' ? '#FAFAFA' : 'white',
       borderRadius: '0 12px 12px 0',
       border: '1px solid #F1F5F9',
@@ -233,13 +233,14 @@ function PropertyGroup({ group, processingId, onDecision, filterType }) {
 
 export default function ScreeningPage() {
   const router = useRouter();
+  const { user: parsed } = useUser();
+  const { toast } = useToast();
 
   useEffect(() => {
-    const { user: parsed } = useUser();
-    if (!['landlord', 'admin'].includes(parsed.role)) {
+    if (parsed && !['landlord', 'admin'].includes(parsed.role)) {
       router.push('/dashboard');
     }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [parsed, router]);
 
   const [grouped, setGrouped]       = useState([]);
   const [loading, setLoading]       = useState(true);
@@ -261,17 +262,17 @@ export default function ScreeningPage() {
 
   const handleDecision = async (offerId, status) => {
     const action = status === 'accepted' ? 'accept and create a lease draft for' : 'decline';
-    if (!confirm(`Are you sure you want to ${action} this offer?`)) return;
+    if (!window.confirm(`Are you sure you want to ${action} this offer?`)) return;
 
     setProcessingId(offerId);
     try {
       await api.put(`/listings/offers/${offerId}`, { status });
       if (status === 'accepted') {
-        alert('Offer accepted! A draft agreement has been automatically generated in your Agreements tab.');
+        toast('Offer accepted! A draft agreement has been automatically generated in your Agreements tab.', 'success');
       }
       fetchOffers();
     } catch (err) {
-      alert(err.response?.data?.message || 'Failed to update offer');
+      toast(err.response?.data?.message || 'Failed to update offer', 'error');
     } finally {
       setProcessingId(null);
     }
