@@ -151,6 +151,23 @@ export default function DashboardLayout({ children }) {
     const stored = localStorage.getItem('userInfo');
     if (!stored) { router.push('/login'); return; }
     const u = JSON.parse(stored);
+
+    // OAuth users (Google / Facebook) have their token saved before phone
+    // verification completes. If they close or cancel the complete-profile
+    // page, they'd land here with isPhoneVerified=false.
+    // Guard against that: send them back to finish verification.
+    if (u.isPhoneVerified === false && u.provider) {
+      const params = new URLSearchParams({
+        provider:  u.provider,
+        email:     u.email  || '',
+        name:      u.name   || '',
+        token:     localStorage.getItem('token') || '',
+        skipToOTP: 'true',
+      });
+      router.replace(`/auth/oauth/complete-profile?${params.toString()}`);
+      return;
+    }
+
     setUser(u);
     fetchCounts();
 
