@@ -9,25 +9,31 @@ function CompleteProfileContent() {
   const router       = useRouter();
   const searchParams = useSearchParams();
 
-  const providerEmail  = searchParams.get('email')      || '';
-  const providerName   = searchParams.get('name')       || '';
-  const provider       = searchParams.get('provider')   || 'google';
-  const needsEmail     = searchParams.get('needsEmail') === 'true';
-  const facebookId     = searchParams.get('facebookId') || '';
-  const urlToken       = searchParams.get('token')      || '';
-  // skipToOTP=true means the user already set their phone in a previous session
-  // but closed the tab before entering the OTP — jump straight to verification.
-  const skipToOTP      = searchParams.get('skipToOTP')  === 'true';
+  const providerEmail  = searchParams.get('email')       || '';
+  const providerName   = searchParams.get('name')        || '';
+  const provider       = searchParams.get('provider')    || 'google';
+  const needsEmail     = searchParams.get('needsEmail')  === 'true';
+  const facebookId     = searchParams.get('facebookId')  || '';
+  const urlToken       = searchParams.get('token')       || '';
+  const existingPhone  = searchParams.get('phoneNumber') || '';
+  const providerRole   = searchParams.get('role')        || 'tenant';
+  // skipToOTP=true: the user already set name/role/phone in a prior session
+  // but closed before verifying. Show the profile form with name+role locked
+  // (they cannot be changed here) and phone pre-filled but editable so the
+  // user can correct it if they made a mistake last time.
+  const skipToOTP      = searchParams.get('skipToOTP')   === 'true';
 
   // Email is locked when the provider supplied it; editable only for FB no-email case
   const emailLocked = !!providerEmail && !needsEmail;
 
-  const [step, setStep]     = useState(skipToOTP ? 'verify-phone' : 'profile');
+  // Always start at the profile step — even for skipToOTP users we show the
+  // form so they can correct their phone number before we send the OTP.
+  const [step, setStep]     = useState('profile');
   const [formData, setFormData] = useState({
     name:        providerName,
     email:       providerEmail,
-    role:        'tenant',
-    phoneNumber: '',
+    role:        providerRole,
+    phoneNumber: existingPhone,
   });
   const [otp, setOtp]         = useState('');
   const [loading, setLoading] = useState(false);
@@ -35,36 +41,18 @@ function CompleteProfileContent() {
   const [error, setError]     = useState('');
   const [success, setSuccess] = useState('');
 
-  // Single init effect: save token FIRST, then send OTP if needed.
-  // Keeping both actions in one effect prevents the race condition where
-  // send-otp fires before the token is written to localStorage.
+  // Persist token on mount so all subsequent API calls are authenticated.
   useEffect(() => {
-    const init = async () => {
-      // 1. Persist token so all subsequent protected API calls work
-      if (urlToken) {
-        localStorage.setItem('token', urlToken);
-      }
-
-      // 2. Pre-fill form fields from URL params
-      setFormData(f => ({
-        ...f,
-        name:  f.name  || providerName,
-        email: f.email || providerEmail,
-      }));
-
-      // 3. Phone already set but unverified → fire OTP immediately
-      if (skipToOTP) {
-        try {
-          await api.post('/auth/send-otp');
-        } catch {
-          // Phone may have been wiped — fall back to full profile form
-          setStep('profile');
-          setError('Could not send OTP. Please re-enter your phone number.');
-        }
-      }
-    };
-
-    init();
+    if (urlToken) {
+      localStorage.setItem('token', urlToken);
+    }
+    // Pre-fill form in case state initialisation missed anything
+    setFormData(f => ({
+      ...f,
+      name:        f.name        || providerName,
+      email:       f.email       || providerEmail,
+      phoneNumber: f.phoneNumber || existingPhone,
+    }));
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // run once on mount only
 
@@ -195,10 +183,10 @@ function CompleteProfileContent() {
           </h2>
           <p className="text-gray-400 text-sm mt-1">
             {step === 'profile'
-              ? `Almost there! A few more details to finish your ${providerLabel} account.`
-              : skipToOTP
-                ? `We sent a new code to your registered phone number.`
-                : `We sent a 6-digit code to ${formData.phoneNumber}`}
+              ? skipToOTP
+                ? `Confirm your phone number — your name and role are already set.`
+                : `Almost there! A few more details to finish your ${providerLabel} account.`
+              : `We sent a 6-digit code to ${formData.phoneNumber}`}
           </p>
         </div>
 
@@ -259,33 +247,51 @@ function CompleteProfileContent() {
             <div>
               <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-1.5">Full Name</label>
               <div className="relative">
-                <User className="absolute left-3 top-3 w-4 h-4 text-gray-400" />
+                {skipToOTP
+                  ? <Lock className="absolute left-3 top-3 w-4 h-4 text-gray-300" />
+                  : <User className="absolute left-3 top-3 w-4 h-4 text-gray-400" />}
                 <input
                   type="text"
                   required
                   value={formData.name}
-                  onChange={e => setFormData(f => ({ ...f, name: e.target.value }))}
+                  onChange={e => !skipToOTP && setFormData(f => ({ ...f, name: e.target.value }))}
+                  readOnly={skipToOTP}
                   placeholder="Your full name"
-                  className="w-full pl-9 pr-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className={`w-full pl-9 pr-4 py-2.5 border rounded-xl text-sm focus:outline-none transition ${
+                    skipToOTP
+                      ? 'border-gray-100 bg-gray-50 text-gray-400 cursor-not-allowed'
+                      : 'border-gray-200 focus:ring-2 focus:ring-blue-500'
+                  }`}
                 />
               </div>
+              {skipToOTP && (
+                <p className="text-xs text-gray-400 mt-1">Name is locked — set from your {providerLabel} account.</p>
+              )}
             </div>
 
             {/* Account Type */}
             <div>
               <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-1.5">Account Type</label>
               <div className="relative">
-                <Building2 className="absolute left-3 top-3 w-4 h-4 text-gray-400" />
+                <Building2 className={`absolute left-3 top-3 w-4 h-4 ${skipToOTP ? 'text-gray-300' : 'text-gray-400'}`} />
                 <select
                   value={formData.role}
-                  onChange={e => setFormData(f => ({ ...f, role: e.target.value }))}
-                  className="w-full pl-9 pr-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                  onChange={e => !skipToOTP && setFormData(f => ({ ...f, role: e.target.value }))}
+                  disabled={skipToOTP}
+                  className={`w-full pl-9 pr-4 py-2.5 border rounded-xl text-sm focus:outline-none transition ${
+                    skipToOTP
+                      ? 'border-gray-100 bg-gray-50 text-gray-400 cursor-not-allowed'
+                      : 'border-gray-200 focus:ring-2 focus:ring-blue-500 bg-white'
+                  }`}
                 >
                   <option value="tenant">I am a Tenant</option>
                   <option value="landlord">I am a Landlord</option>
                   <option value="property_manager">I am a Property Manager</option>
                 </select>
               </div>
+              {skipToOTP && (
+                <p className="text-xs text-gray-400 mt-1">Role is locked — contact support to change it.</p>
+              )}
             </div>
 
             {/* Phone */}
