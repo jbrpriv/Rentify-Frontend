@@ -67,10 +67,10 @@ function ChatModal({ active, user, onClose, onNewMessage }) {
         String(msg.receiver?._id || msg.receiver) === String(active?.otherUserId);
       if (isRelevant) {
         setMessages(m => [...m, msg]);
-        // Silently call getConversation to mark the incoming message as read on the backend,
-        // then tell the layout to refresh its badge count
+        // N14 fix: pass ?markRead=true so only intentional opens mark messages as read,
+        // not background polling calls that would silently clear unread badges.
         const pid = active?.propertyId || 'null';
-        api.get(`/messages/${pid}/${active?.otherUserId}`)
+        api.get(`/messages/${pid}/${active?.otherUserId}?markRead=true`)
           .then(() => window.dispatchEvent(new CustomEvent('dashboard:refresh_counts')))
           .catch(() => {});
       }
@@ -81,9 +81,9 @@ function ChatModal({ active, user, onClose, onNewMessage }) {
     setLoading(true);
     try {
       const pid = active?.propertyId || 'null';
-      const { data } = await api.get(`/messages/${pid}/${active?.otherUserId}`);
+      const { data } = await api.get(`/messages/${pid}/${active?.otherUserId}?markRead=true`);
       setMessages(Array.isArray(data) ? data : []);
-      // getConversation marks messages as read — tell the layout to update its badge count now
+      // markRead=true tells the backend to mark messages as read — refresh badge count
       window.dispatchEvent(new CustomEvent('dashboard:refresh_counts'));
     } catch (e) { console.error(e); }
     finally { setLoading(false); }
