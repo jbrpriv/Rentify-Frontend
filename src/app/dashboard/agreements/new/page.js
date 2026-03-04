@@ -256,6 +256,10 @@ function AgreementForm() {
     endDate: '',
     rentAmount: '',
     depositAmount: '',
+    lateFeeAmount: '0',
+    lateFeeGracePeriodDays: '5',
+    rentEscalationEnabled: false,
+    rentEscalationPercentage: '5',
   });
 
   // ── When coming from "Accept & Draft Agreement" — pre-load offer details ──
@@ -343,12 +347,16 @@ function AgreementForm() {
     setLoading(true);
     try {
       const { data: agreement } = await api.post('/agreements', {
-        tenantId:      foundTenant._id,
+        tenantId:                  foundTenant._id,
         propertyId,
-        startDate:     formData.startDate,
-        endDate:       formData.endDate,
-        rentAmount:    Number(formData.rentAmount),
-        depositAmount: Number(formData.depositAmount),
+        startDate:                 formData.startDate,
+        endDate:                   formData.endDate,
+        rentAmount:                Number(formData.rentAmount),
+        depositAmount:             Number(formData.depositAmount),
+        lateFeeAmount:             Number(formData.lateFeeAmount) || 0,
+        lateFeeGracePeriodDays:    Number(formData.lateFeeGracePeriodDays) || 5,
+        rentEscalationEnabled:     formData.rentEscalationEnabled,
+        rentEscalationPercentage:  Number(formData.rentEscalationPercentage) || 0,
       });
       setCreatedAgreementId(agreement._id);
       setStep(3);
@@ -527,6 +535,67 @@ function AgreementForm() {
                 </div>
               </div>
 
+              {/* Late Fee Settings */}
+              <div className="grid grid-cols-2 gap-4 pt-2 border-t border-gray-100">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Late Fee Amount (Rs.)</label>
+                  <input
+                    type="number"
+                    min="0"
+                    className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                    value={formData.lateFeeAmount}
+                    onChange={(e) => setFormData({ ...formData, lateFeeAmount: e.target.value })}
+                    placeholder="0"
+                  />
+                  <p className="text-xs text-gray-400 mt-1">Applied after grace period expires</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Grace Period (days)</label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="30"
+                    className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                    value={formData.lateFeeGracePeriodDays}
+                    onChange={(e) => setFormData({ ...formData, lateFeeGracePeriodDays: e.target.value })}
+                  />
+                  <p className="text-xs text-gray-400 mt-1">Days after due date before late fee kicks in</p>
+                </div>
+              </div>
+
+              {/* Rent Escalation */}
+              <div className="pt-2 border-t border-gray-100 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <label className="text-sm font-medium text-gray-700">Annual Rent Escalation</label>
+                    <p className="text-xs text-gray-400">Automatically increase rent on each lease anniversary</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setFormData({ ...formData, rentEscalationEnabled: !formData.rentEscalationEnabled })}
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${formData.rentEscalationEnabled ? 'bg-blue-600' : 'bg-gray-200'}`}
+                  >
+                    <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${formData.rentEscalationEnabled ? 'translate-x-6' : 'translate-x-1'}`} />
+                  </button>
+                </div>
+                {formData.rentEscalationEnabled && (
+                  <div className="flex items-center gap-3 bg-blue-50 rounded-lg px-4 py-3">
+                    <label className="text-sm font-medium text-gray-700 flex-shrink-0">Increase by</label>
+                    <input
+                      type="number"
+                      min="1"
+                      max="50"
+                      className="w-20 rounded-md border border-gray-300 px-3 py-1.5 text-sm shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                      value={formData.rentEscalationPercentage}
+                      onChange={(e) => setFormData({ ...formData, rentEscalationPercentage: e.target.value })}
+                    />
+                    <span className="text-sm text-gray-700">% per year</span>
+                    <span className="text-xs text-blue-600 ml-auto">
+                      Rs. {formData.rentAmount ? Math.round(Number(formData.rentAmount) * (Number(formData.rentEscalationPercentage) / 100)).toLocaleString() : '—'} increase on year 1
+                    </span>
+                  </div>
+                )}
+              </div>
               <div className="pt-4 flex justify-end">
                 <button
                   type="submit"
@@ -604,7 +673,7 @@ function AgreementForm() {
       </div>
     </div>
   );
-}
+    }
 
 export default function Page() {
   return (

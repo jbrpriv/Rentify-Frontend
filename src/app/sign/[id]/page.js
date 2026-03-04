@@ -1,11 +1,98 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect, useRef, Suspense } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
 import {
   FileText, CheckCircle, XCircle, Loader2, Shield, Calendar, User, Building,
-  AlertTriangle, Eye, Download,
+  AlertTriangle, Eye, Pen, RotateCcw,
 } from 'lucide-react';
+
+// ─── Signature Canvas ─────────────────────────────────────────────────────────
+function SignatureCanvas({ onCapture, onClear }) {
+  const canvasRef   = useRef(null);
+  const drawing     = useRef(false);
+  const lastPos     = useRef(null);
+  const [hasDrawn, setHasDrawn]   = useState(false);
+
+  const getPos = (e, canvas) => {
+    const rect = canvas.getBoundingClientRect();
+    const src  = e.touches ? e.touches[0] : e;
+    return { x: src.clientX - rect.left, y: src.clientY - rect.top };
+  };
+
+  const startDraw = (e) => {
+    e.preventDefault();
+    const canvas = canvasRef.current;
+    drawing.current = true;
+    lastPos.current = getPos(e, canvas);
+  };
+
+  const draw = (e) => {
+    e.preventDefault();
+    if (!drawing.current) return;
+    const canvas = canvasRef.current;
+    const ctx    = canvas.getContext('2d');
+    const pos    = getPos(e, canvas);
+    ctx.beginPath();
+    ctx.moveTo(lastPos.current.x, lastPos.current.y);
+    ctx.lineTo(pos.x, pos.y);
+    ctx.strokeStyle = '#1e40af';
+    ctx.lineWidth   = 2.5;
+    ctx.lineCap     = 'round';
+    ctx.lineJoin    = 'round';
+    ctx.stroke();
+    lastPos.current = pos;
+    setHasDrawn(true);
+  };
+
+  const endDraw = () => {
+    drawing.current = false;
+    if (hasDrawn) {
+      onCapture(canvasRef.current.toDataURL('image/png'));
+    }
+  };
+
+  const clear = () => {
+    const canvas = canvasRef.current;
+    canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+    setHasDrawn(false);
+    onClear();
+  };
+
+  return (
+    <div className="space-y-2">
+      <div className="relative border-2 border-blue-200 rounded-xl overflow-hidden bg-white" style={{ touchAction: 'none' }}>
+        <canvas
+          ref={canvasRef}
+          width={560}
+          height={140}
+          className="w-full cursor-crosshair"
+          onMouseDown={startDraw}
+          onMouseMove={draw}
+          onMouseUp={endDraw}
+          onMouseLeave={endDraw}
+          onTouchStart={startDraw}
+          onTouchMove={draw}
+          onTouchEnd={endDraw}
+        />
+        {!hasDrawn && (
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <span className="text-gray-300 text-sm flex items-center gap-2">
+              <Pen className="w-4 h-4" /> Draw your signature here
+            </span>
+          </div>
+        )}
+        <div className="absolute bottom-0 left-0 right-0 h-px bg-gray-200 mx-4" />
+      </div>
+      {hasDrawn && (
+        <button type="button" onClick={clear}
+          className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-red-500 transition">
+          <RotateCcw className="w-3.5 h-3.5" /> Clear and redraw
+        </button>
+      )}
+    </div>
+  );
+}
 
 // ─── Inline PDF Preview ───────────────────────────────────────────────────────
 function PDFPreview({ agreementId, token }) {
@@ -20,40 +107,22 @@ function PDFPreview({ agreementId, token }) {
     })
       .then(r => r.json())
       .then(data => {
-        if (data.url) {
-          setPreviewUrl(data.url);
-        } else if (data.base64) {
-          setPreviewUrl(`data:application/pdf;base64,${data.base64}`);
-        }
+        if (data.url)    setPreviewUrl(data.url);
+        else if (data.base64) setPreviewUrl(`data:application/pdf;base64,${data.base64}`);
       })
       .catch(() => setError('Could not load preview'))
       .finally(() => setLoading(false));
   }, [agreementId, token]);
 
-  if (loading) return (
-    <div className="flex items-center justify-center h-64 bg-gray-50 rounded-lg">
-      <Loader2 className="animate-spin w-6 h-6 text-gray-400" />
-    </div>
-  );
-
-  if (error) return (
-    <div className="flex items-center justify-center h-32 bg-gray-50 rounded-lg text-gray-500 text-sm gap-2">
-      <AlertTriangle className="w-4 h-4" /> {error}
-    </div>
-  );
+  if (loading) return <div className="flex items-center justify-center h-64 bg-gray-50 rounded-lg"><Loader2 className="animate-spin w-6 h-6 text-gray-400" /></div>;
+  if (error)   return <div className="flex items-center justify-center h-32 bg-gray-50 rounded-lg text-gray-500 text-sm gap-2"><AlertTriangle className="w-4 h-4" /> {error}</div>;
 
   return (
     <div className="border rounded-xl overflow-hidden shadow-sm">
       <div className="bg-gray-100 px-4 py-2 flex items-center gap-2 text-sm text-gray-600 border-b">
-        <Eye className="w-4 h-4" />
-        <span>Agreement Preview</span>
+        <Eye className="w-4 h-4" /><span>Agreement Preview</span>
       </div>
-      <iframe
-        src={previewUrl}
-        title="Agreement PDF Preview"
-        className="w-full"
-        style={{ height: '600px', border: 'none' }}
-      />
+      <iframe src={previewUrl} title="Agreement PDF Preview" className="w-full" style={{ height: '600px', border: 'none' }} />
     </div>
   );
 }
@@ -65,41 +134,34 @@ function SignPageContent() {
   const token  = searchParams.get('token');
   const party  = searchParams.get('party');
 
-  const [agreement, setAgreement] = useState(null);
-  const [loading, setLoading]     = useState(true);
-  const [signing, setSigning]     = useState(false);
-  const [signed, setSigned]       = useState(false);
-  const [error, setError]         = useState('');
-  const [agreed, setAgreed]       = useState(false);
+  const [agreement, setAgreement]   = useState(null);
+  const [loading, setLoading]       = useState(true);
+  const [signing, setSigning]       = useState(false);
+  const [signed, setSigned]         = useState(false);
+  const [error, setError]           = useState('');
+  const [agreed, setAgreed]         = useState(false);
   const [showPreview, setShowPreview] = useState(false);
+  const [drawData, setDrawData]     = useState(null); // base64 canvas PNG
 
   useEffect(() => {
-    if (!params.id || !token) {
-      setError('Invalid signing link — token is missing.');
-      setLoading(false);
-      return;
-    }
-
-    // Fetch agreement summary (public endpoint using token)
+    if (!params.id || !token) { setError('Invalid signing link — token is missing.'); setLoading(false); return; }
     fetch(`/api/agreements/${params.id}?token=${token}`)
       .then(r => r.json())
-      .then(data => {
-        if (data.message) setError(data.message);
-        else setAgreement(data);
-      })
+      .then(data => { if (data.message) setError(data.message); else setAgreement(data); })
       .catch(() => setError('Could not load agreement details.'))
       .finally(() => setLoading(false));
   }, [params.id, token]);
 
   const handleSign = async () => {
     if (!agreed) return;
+    if (!drawData) { setError('Please draw your signature before signing.'); return; }
     setSigning(true);
     setError('');
     try {
       const res = await fetch(`/api/agreements/${params.id}/sign-via-token`, {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ token, party }),
+        body:    JSON.stringify({ token, party, drawData }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || 'Signing failed');
@@ -127,15 +189,10 @@ function SignPageContent() {
           <CheckCircle className="w-10 h-10 text-green-600" />
         </div>
         <h1 className="text-2xl font-bold text-gray-900 mb-3">Agreement Signed!</h1>
-        <p className="text-gray-600 mb-2">
-          Your signature has been recorded with a timestamp and your IP address for legal verification.
-        </p>
-        <p className="text-sm text-gray-400 mt-6">
-          You may close this window. A copy will be sent to all parties once everyone has signed.
-        </p>
+        <p className="text-gray-600 mb-2">Your signature has been captured and recorded with a timestamp and IP address for legal verification.</p>
+        <p className="text-sm text-gray-400 mt-6">You may close this window. A copy will be sent to all parties once everyone has signed.</p>
         <div className="mt-6 p-4 bg-green-50 rounded-xl border border-green-200 text-sm text-green-700">
-          <Shield className="w-4 h-4 inline mr-1.5" />
-          Legally binding e-signature recorded
+          <Shield className="w-4 h-4 inline mr-1.5" />Legally binding e-signature recorded
         </div>
       </div>
     </div>
@@ -149,9 +206,7 @@ function SignPageContent() {
         </div>
         <h1 className="text-2xl font-bold text-gray-900 mb-3">Invalid Link</h1>
         <p className="text-gray-600">{error}</p>
-        <p className="text-sm text-gray-400 mt-4">
-          This link may have expired or already been used. Contact the landlord for a new invitation.
-        </p>
+        <p className="text-sm text-gray-400 mt-4">This link may have expired or already been used. Contact the landlord for a new invitation.</p>
       </div>
     </div>
   );
@@ -165,8 +220,7 @@ function SignPageContent() {
         {/* Header */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center gap-2 bg-white px-4 py-2 rounded-full shadow-sm border text-sm text-gray-600 mb-4">
-            <Shield className="w-4 h-4 text-blue-600" />
-            Secure Document Signing
+            <Shield className="w-4 h-4 text-blue-600" />Secure Document Signing
           </div>
           <h1 className="text-3xl font-bold text-gray-900">Review & Sign Agreement</h1>
           <p className="text-gray-500 mt-2">Signing as: <span className="font-semibold text-blue-700">{partyLabel}</span></p>
@@ -184,7 +238,6 @@ function SignPageContent() {
                 </div>
               </div>
             </div>
-
             <div className="p-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
               {agreement.property && (
                 <div className="flex items-start gap-3">
@@ -192,9 +245,7 @@ function SignPageContent() {
                   <div>
                     <p className="text-xs text-gray-400 uppercase tracking-wide">Property</p>
                     <p className="font-medium text-gray-800">{agreement.property?.title || '—'}</p>
-                    <p className="text-sm text-gray-500">
-                      {agreement.property?.address?.city}, {agreement.property?.address?.state}
-                    </p>
+                    <p className="text-sm text-gray-500">{agreement.property?.address?.city}, {agreement.property?.address?.state}</p>
                   </div>
                 </div>
               )}
@@ -204,11 +255,7 @@ function SignPageContent() {
                   <div>
                     <p className="text-xs text-gray-400 uppercase tracking-wide">Lease Term</p>
                     <p className="font-medium text-gray-800">{agreement.term?.durationMonths || '—'} months</p>
-                    <p className="text-sm text-gray-500">
-                      {agreement.term?.startDate
-                        ? new Date(agreement.term.startDate).toLocaleDateString()
-                        : '—'}
-                    </p>
+                    <p className="text-sm text-gray-500">{agreement.term?.startDate ? new Date(agreement.term.startDate).toLocaleDateString() : '—'}</p>
                   </div>
                 </div>
               )}
@@ -230,69 +277,73 @@ function SignPageContent() {
           </div>
         )}
 
-        {/* PDF Preview toggle */}
+        {/* PDF Preview */}
         <div className="mb-6">
           <button
             onClick={() => setShowPreview(v => !v)}
             className="flex items-center gap-2 text-sm text-blue-700 font-medium bg-blue-50 hover:bg-blue-100 transition px-4 py-2 rounded-lg border border-blue-200 w-full justify-center"
           >
-            <Eye className="w-4 h-4" />
-            {showPreview ? 'Hide' : 'View'} Full Agreement PDF
+            <Eye className="w-4 h-4" />{showPreview ? 'Hide' : 'View'} Full Agreement PDF
           </button>
-          {showPreview && (
-            <div className="mt-4">
-              <PDFPreview agreementId={params.id} token={token} />
-            </div>
-          )}
+          {showPreview && <div className="mt-4"><PDFPreview agreementId={params.id} token={token} /></div>}
         </div>
 
-        {/* Consent checkbox + sign button */}
-        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
-          <h3 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
-            <Shield className="w-5 h-5 text-blue-600" /> Legal Acknowledgement
+        {/* Consent + Signature */}
+        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 space-y-6">
+          <h3 className="font-semibold text-gray-800 flex items-center gap-2">
+            <Shield className="w-5 h-5 text-blue-600" /> Legal Acknowledgement & Signature
           </h3>
 
-          <label className="flex items-start gap-3 cursor-pointer mb-6 group">
-            <div className={`mt-0.5 w-5 h-5 rounded border-2 flex-shrink-0 flex items-center justify-center transition-all ${
-              agreed ? 'bg-blue-600 border-blue-600' : 'border-gray-300 group-hover:border-blue-400'
-            }`}
+          {/* Consent checkbox */}
+          <label className="flex items-start gap-3 cursor-pointer group">
+            <div
+              className={`mt-0.5 w-5 h-5 rounded border-2 flex-shrink-0 flex items-center justify-center transition-all ${agreed ? 'bg-blue-600 border-blue-600' : 'border-gray-300 group-hover:border-blue-400'}`}
               onClick={() => setAgreed(v => !v)}
             >
-              {agreed && <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-              </svg>}
+              {agreed && <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>}
             </div>
             <span className="text-sm text-gray-600 leading-relaxed">
               I, as the <strong>{partyLabel}</strong>, have read and understood the complete rental agreement above.
-              I agree to all terms and conditions. I understand that my electronic signature is legally
-              binding and equivalent to a handwritten signature under applicable law.
+              I agree to all terms and conditions. I understand that my electronic signature is legally binding and equivalent to a handwritten signature under applicable law.
             </span>
           </label>
 
+          {/* Signature canvas */}
+          <div>
+            <p className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+              <Pen className="w-4 h-4 text-blue-500" /> Draw Your Signature
+            </p>
+            <SignatureCanvas
+              onCapture={(data) => setDrawData(data)}
+              onClear={() => setDrawData(null)}
+            />
+            {drawData && (
+              <div className="mt-2 flex items-center gap-1.5 text-xs text-green-600">
+                <CheckCircle className="w-3.5 h-3.5" /> Signature captured
+              </div>
+            )}
+          </div>
+
           {error && (
-            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg flex items-start gap-2 text-sm text-red-700">
+            <div className="p-3 bg-red-50 border border-red-200 rounded-lg flex items-start gap-2 text-sm text-red-700">
               <AlertTriangle className="w-4 h-4 mt-0.5 flex-shrink-0" /> {error}
             </div>
           )}
 
           <button
             onClick={handleSign}
-            disabled={!agreed || signing}
+            disabled={!agreed || !drawData || signing}
             className={`w-full py-4 rounded-xl font-semibold text-lg transition-all flex items-center justify-center gap-3 ${
-              agreed && !signing
+              agreed && drawData && !signing
                 ? 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl'
                 : 'bg-gray-100 text-gray-400 cursor-not-allowed'
             }`}
           >
-            {signing ? (
-              <><Loader2 className="animate-spin w-5 h-5" /> Signing…</>
-            ) : (
-              <><CheckCircle className="w-5 h-5" /> Sign Agreement as {partyLabel}</>
-            )}
+            {signing ? <><Loader2 className="animate-spin w-5 h-5" /> Signing…</> : <><CheckCircle className="w-5 h-5" /> Sign Agreement as {partyLabel}</>}
           </button>
 
-          <p className="text-center text-xs text-gray-400 mt-4">
-            Your IP address and timestamp will be recorded as part of the legally binding signature.
+          <p className="text-center text-xs text-gray-400">
+            Your drawn signature, IP address and timestamp are recorded as part of the legally binding signature.
           </p>
         </div>
       </div>
