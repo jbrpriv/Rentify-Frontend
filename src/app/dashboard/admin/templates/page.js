@@ -11,9 +11,8 @@ import {
 const CATEGORIES = ['general','rent','deposit','maintenance','utilities','pets','termination','renewal','late_fee','subletting','noise'];
 
 export default function TemplatesPage() {
+  const { user } = useUser();
   const [clauses, setClauses]   = useState([]);
-  const [loading, setLoading]   = useState(true);
-  const [user, setUser]         = useState(null);
   const [actionId, setActionId] = useState(null);
   const [expanded, setExpanded] = useState({});
   const [catFilter, setCat]     = useState('');
