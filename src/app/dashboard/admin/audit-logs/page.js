@@ -29,11 +29,12 @@ export default function AuditLogsPage() {
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
   // ─────────────────────────────────────────────────────────────────────────
 
-  const [logs, setLogs]       = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [page, setPage]       = useState(1);
-  const [hasMore, setHasMore] = useState(false);
-  const [action, setAction]   = useState('');
+  const [logs, setLogs]         = useState([]);
+  const [loading, setLoading]   = useState(true);
+  const [page, setPage]         = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+  const [action, setAction]     = useState('');
 
   const LIMIT = 50;
 
@@ -43,8 +44,9 @@ export default function AuditLogsPage() {
       const params = new URLSearchParams({ page: p, limit: LIMIT });
       if (action) params.set('action', action);
       const { data } = await api.get(`/admin/audit-logs?${params}`);
-      setLogs(data);
-      setHasMore(data.length === LIMIT);
+      setLogs(data.logs || []);
+      setTotalPages(data.pagination?.totalPages || 1);
+      setTotalCount(data.pagination?.total || 0);
     } catch (err) {
       console.error(err);
     } finally {
@@ -124,7 +126,7 @@ export default function AuditLogsPage() {
 
         {!loading && (
           <div className="flex items-center justify-between px-6 py-4 border-t border-gray-100">
-            <span className="text-xs text-gray-400">Page {page}</span>
+            <span className="text-xs text-gray-400">Page {page} of {totalPages} &nbsp;·&nbsp; {totalCount} total entries</span>
             <div className="flex gap-2">
               <button
                 disabled={page <= 1}
@@ -134,7 +136,7 @@ export default function AuditLogsPage() {
                 <ChevronLeft className="w-4 h-4" />
               </button>
               <button
-                disabled={!hasMore}
+                disabled={page >= totalPages}
                 onClick={() => setPage(p => p + 1)}
                 className="p-2 border border-gray-200 rounded-lg disabled:opacity-40 hover:border-blue-400 transition"
               >
