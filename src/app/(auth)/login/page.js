@@ -47,7 +47,11 @@ export default function LoginPage() {
   const [emailToken,       setEmailToken]       = useState('');
 
   // Phone verification flow
+  // pendingEmail is the only thing held between the login response and the
+  // successful OTP confirm.  No token, no userInfo enters localStorage until
+  // verifyPhoneOTP returns a real JWT.
   const [needsPhoneVerify, setNeedsPhoneVerify] = useState(false);
+  const [pendingEmail,     setPendingEmail]     = useState('');
   const [phoneOTP,         setPhoneOTP]         = useState('');
   const [sending,          setSending]          = useState(false);
   const [success,          setSuccess]          = useState('');
@@ -76,15 +80,20 @@ export default function LoginPage() {
         setEmailForVerify(formData.email);
         setNeedsEmailVerify(true);
       } else if (msg === 'PHONE_NOT_VERIFIED') {
-        // N7 fix: store the token so protected calls work, but keep userInfo minimal
-        // — full userInfo is written after phone OTP is verified below
-        const d = err.response?.data;
-        localStorage.setItem('token', d.token);
-        // Store only what is needed to call /auth/send-otp; dashboard must not be
-        // accessible with this incomplete object
-        localStorage.setItem('userInfo', JSON.stringify({ email: formData.email }));
-        await api.post('/auth/send-otp');
+        // Server confirmed email is verified but phone is not.
+        // Store ONLY the email in React state — nothing goes into localStorage
+        // until the user proves phone ownership below.
+        // If the user closes the tab now and comes back days later, localStorage
+        // is empty so the dashboard guard sends them back to /login, which
+        // hits the server again and returns PHONE_NOT_VERIFIED again — correct flow.
+        const email = err.response?.data?.email || formData.email;
+        setPendingEmail(email);
         setNeedsPhoneVerify(true);
+        try {
+          await api.post('/auth/send-otp', { email });
+        } catch (otpErr) {
+          setError(otpErr.response?.data?.message || 'Could not send OTP — tap Resend to try again.');
+        }
       } else if (msg === 'OAUTH_ACCOUNT') {
         // This email was registered via Google/Facebook — no password exists
         const providerLabel = err.response?.data?.provider === 'google' ? 'Google'
@@ -125,22 +134,24 @@ export default function LoginPage() {
     finally { setLoading(false); }
   };
 
-  // ─── Phone verification (N7 fix: fetch full profile after OTP confirmed) ────
+  // ─── Phone verification ─────────────────────────────────────────────────────
+  // verify-otp is now public and returns a real JWT on success.
+  // This is the ONLY place anything is written to localStorage in the phone flow.
   const handleVerifyPhone = async (e) => {
     e.preventDefault();
     setLoading(true); setError('');
     try {
-      await api.post('/auth/verify-otp', { code: phoneOTP });
-      // N7 fix: pull the complete user profile so userInfo has _id, role, name etc.
-      const { data: freshUser } = await api.get('/users/me');
+      const { data } = await api.post('/auth/verify-otp', { email: pendingEmail, code: phoneOTP });
+      // Server confirmed OTP and returned real tokens — safe to persist now
+      localStorage.setItem('token', data.token);
       localStorage.setItem('userInfo', JSON.stringify({
-        _id:             freshUser._id,
-        name:            freshUser.name,
-        role:            freshUser.role,
-        email:           freshUser.email,
-        phoneNumber:     freshUser.phoneNumber,
+        _id:             data._id,
+        name:            data.name,
+        role:            data.role,
+        email:           data.email,
+        isVerified:      true,
         isPhoneVerified: true,
-        isVerified:      freshUser.isVerified,
+        twoFactorEnabled: data.twoFactorEnabled || false,
       }));
       router.push('/dashboard');
     } catch (err) { setError(err.response?.data?.message || 'Invalid OTP'); }
@@ -149,7 +160,11 @@ export default function LoginPage() {
 
   const handleResendOTP = async () => {
     setSending(true);
-    try { await api.post('/auth/send-otp'); setSuccess('OTP resent!'); setTimeout(() => setSuccess(''), 3000); }
+    try {
+      await api.post('/auth/send-otp', { email: pendingEmail });
+      setSuccess('OTP resent!');
+      setTimeout(() => setSuccess(''), 3000);
+    }
     catch (err) { setError(err.response?.data?.message || 'Failed'); }
     finally { setSending(false); }
   };

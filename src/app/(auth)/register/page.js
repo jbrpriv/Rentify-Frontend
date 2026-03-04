@@ -52,9 +52,10 @@ function RegisterContent() {
     setLoading(true); setError('');
     try {
       const recaptchaToken = await getRecaptchaToken('register');
-      const { data } = await axios.post('/api/auth/register', { ...formData, recaptchaToken });
-      localStorage.setItem('token', data.token);
-      localStorage.setItem('userInfo', JSON.stringify(data));
+      // Register returns a short-lived token so send-otp can identify the user,
+      // but we intentionally do NOT write it to localStorage yet.
+      // Nothing is persisted until the phone OTP is confirmed at the last step.
+      await axios.post('/api/auth/register', { ...formData, recaptchaToken });
       setStep('verify-email');
     } catch (err) { setError(err.response?.data?.message || 'Registration failed'); }
     finally { setLoading(false); }
@@ -65,9 +66,14 @@ function RegisterContent() {
     setLoading(true); setError('');
     try {
       await axios.post('/api/auth/verify-email', { email: formData.email, code: emailToken });
-      const stored = JSON.parse(localStorage.getItem('userInfo') || '{}');
-      localStorage.setItem('userInfo', JSON.stringify({ ...stored, isVerified: true }));
-      await api.post('/auth/send-otp');
+      // Email confirmed — now trigger the phone OTP using only the email address.
+      // send-otp is public so no token is needed.
+      try {
+        await axios.post('/api/auth/send-otp', { email: formData.email });
+      } catch (otpErr) {
+        // Non-fatal: show the phone step anyway so the user can hit Resend
+        setError(otpErr.response?.data?.message || 'Could not send OTP — tap Resend to try again.');
+      }
       setStep('verify-phone');
     } catch (err) { setError(err.response?.data?.message || 'Invalid code'); }
     finally { setLoading(false); }
@@ -82,21 +88,22 @@ function RegisterContent() {
     finally { setLoading(false); }
   };
 
+  // verify-otp is now public and returns the real JWT on success.
+  // This is the ONLY place anything is written to localStorage during registration.
   const handleVerifyPhone = async (e) => {
     e.preventDefault();
     setLoading(true); setError('');
     try {
-      await api.post('/auth/verify-otp', { code: phoneOTP });
-      // Fetch complete fresh user data to ensure role etc. are set
-      const { data: freshUser } = await api.get('/users/me');
+      const { data } = await axios.post('/api/auth/verify-otp', { email: formData.email, code: phoneOTP });
+      localStorage.setItem('token', data.token);
       localStorage.setItem('userInfo', JSON.stringify({
-        _id: freshUser._id,
-        name: freshUser.name,
-        role: freshUser.role,
-        email: freshUser.email,
-        phoneNumber: freshUser.phoneNumber,
+        _id:             data._id,
+        name:            data.name,
+        role:            data.role,
+        email:           data.email,
+        isVerified:      true,
         isPhoneVerified: true,
-        isVerified: freshUser.isVerified,
+        twoFactorEnabled: data.twoFactorEnabled || false,
       }));
       router.push('/dashboard');
     } catch (err) { setError(err.response?.data?.message || 'Invalid OTP'); }
@@ -105,7 +112,11 @@ function RegisterContent() {
 
   const handleResendOTP = async () => {
     setLoading(true);
-    try { await api.post('/auth/send-otp'); setSuccess('OTP resent!'); setTimeout(() => setSuccess(''), 3000); }
+    try {
+      await axios.post('/api/auth/send-otp', { email: formData.email });
+      setSuccess('OTP resent!');
+      setTimeout(() => setSuccess(''), 3000);
+    }
     catch (err) { setError(err.response?.data?.message || 'Failed'); }
     finally { setLoading(false); }
   };
