@@ -82,9 +82,9 @@ export default function SuperLoginPage() {
       if (mode === 'register') {
         const recaptchaToken = await getRecaptchaToken('register');
         const payload = { ...formData, role: selectedRole, recaptchaToken };
-        const { data } = await api.post('/auth/register', payload);
-        localStorage.setItem('token', data.token);
-        setUser(data);
+        await api.post('/auth/register', payload);
+        // No token in the register response — JWT is only issued after both
+        // email AND phone are verified inside verifyPhoneOTP.
         setSuccess(`A 6-digit verification code was sent to ${formData.email}`);
         setStep('email');
       } else {
@@ -129,6 +129,11 @@ export default function SuperLoginPage() {
       try {
         const recaptchaToken = await getRecaptchaToken('login');
         const { data } = await api.post('/auth/login', { email: formData.email, password: formData.password, recaptchaToken });
+        if (!['admin', 'law_reviewer'].includes(data.role)) {
+          setError('Access denied. This portal is for admins and law reviewers only.');
+          setStep('main');
+          return;
+        }
         proceedAfterLogin(data);
       } catch (loginErr) {
         const msg = loginErr.response?.data?.message;
@@ -154,9 +159,12 @@ export default function SuperLoginPage() {
     setLoading(true);
     clearAlerts();
     try {
-      await api.post('/auth/verify-otp', { email: formData.email, code: phoneOTP });
-      const recaptchaToken = await getRecaptchaToken('login');
-      const { data } = await api.post('/auth/login', { email: formData.email, password: formData.password, recaptchaToken });
+      // verify-otp returns the real JWT — no re-login needed.
+      const { data } = await api.post('/auth/verify-otp', { email: formData.email, code: phoneOTP });
+      if (!['admin', 'law_reviewer'].includes(data.role)) {
+        setError('Access denied. This portal is for admins and law reviewers only.');
+        return;
+      }
       proceedAfterLogin(data);
     } catch (err) {
       setError(err.response?.data?.message || 'Invalid OTP. Please try again.');
