@@ -1,14 +1,14 @@
 'use client';
 
 import Link from 'next/link';
-import { Building2, Globe, LayoutDashboard } from 'lucide-react';
+import { Building2, Globe, LayoutDashboard, Tag } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 
 export default function Navbar() {
-  const [user, setUser] = useState(null);
+  const [user, setUser]       = useState(null);
   const [scrolled, setScrolled] = useState(false);
-  const router = useRouter();
+  const router   = useRouter();
   const pathname = usePathname();
 
   useEffect(() => {
@@ -29,9 +29,15 @@ export default function Navbar() {
     router.push('/login');
   };
 
-  const isDashboard = pathname?.startsWith('/dashboard');
-  const isHeroPage = pathname === '/';
+  const isDashboard   = pathname?.startsWith('/dashboard');
+  const isHeroPage    = pathname === '/';
   const isTransparent = isHeroPage && !scrolled;
+
+  const navLinks = [
+    { href: '/browse',    label: 'Browse' },
+    { href: '/#features', label: 'Features' },
+    { href: '/pricing',   label: 'Pricing', icon: Tag },
+  ];
 
   return (
     <nav className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 ${
@@ -39,7 +45,6 @@ export default function Navbar() {
         ? 'bg-transparent'
         : 'bg-white/95 backdrop-blur-xl shadow-sm border-b border-black/5'
     }`}>
-      {/* Changed: removed max-w-7xl and mx-auto, added w-full and responsive padding */}
       <div className="flex w-full items-center justify-between px-6 py-3.5 md:px-12 lg:px-16">
 
         {/* Logo + Nav Links */}
@@ -59,21 +64,24 @@ export default function Navbar() {
           </Link>
 
           <div className="hidden items-center gap-6 md:flex">
-            {[
-              { href: '/browse', label: 'Browse' },
-              { href: '/#features', label: 'Features' },
-              { href: '/#how-it-works', label: 'How it works' },
-            ].map(({ href, label }) => (
-              <Link key={label} href={href}
-                className={`text-[0.8rem] font-semibold transition-colors ${
-                  isTransparent ? 'text-white/80 hover:text-white' : 'text-neutral-600 hover:text-neutral-900'
+            {navLinks.map(({ href, label, icon: Icon }) => (
+              <Link
+                key={label}
+                href={href}
+                className={`flex items-center gap-1 text-[0.8rem] font-semibold transition-colors ${
+                  pathname === href
+                    ? isTransparent ? 'text-white' : 'text-[#0B2D72]'
+                    : isTransparent ? 'text-white/80 hover:text-white' : 'text-neutral-600 hover:text-neutral-900'
                 }`}
               >
+                {Icon && <Icon className="h-3.5 w-3.5" />}
                 {label}
               </Link>
             ))}
+
             {user && (
-              <Link href="/dashboard"
+              <Link
+                href="/dashboard"
                 className={`flex items-center gap-1.5 text-[0.8rem] font-semibold transition-colors ${
                   isTransparent ? 'text-white/80 hover:text-white' : isDashboard ? 'text-[#0B2D72]' : 'text-neutral-600 hover:text-neutral-900'
                 }`}
@@ -87,7 +95,8 @@ export default function Navbar() {
 
         {/* Right Actions */}
         <div className="flex items-center gap-2">
-          <button type="button"
+          <button
+            type="button"
             className={`hidden items-center justify-center rounded-full p-2 transition-colors md:flex ${
               isTransparent ? 'text-white/70 hover:text-white hover:bg-white/10' : 'text-neutral-500 hover:bg-neutral-100'
             }`}
@@ -105,7 +114,8 @@ export default function Navbar() {
                   {user.name}
                 </p>
               </div>
-              <button onClick={handleLogout}
+              <button
+                onClick={handleLogout}
                 className={`rounded-full border px-4 py-1.5 text-[0.75rem] font-semibold transition-all hover:scale-[1.02] ${
                   isTransparent
                     ? 'border-white/30 text-white hover:bg-white/10'
@@ -117,14 +127,16 @@ export default function Navbar() {
             </>
           ) : (
             <>
-              <Link href="/login"
+              <Link
+                href="/login"
                 className={`hidden rounded-full px-4 py-1.5 text-[0.75rem] font-semibold transition-all sm:inline-flex ${
                   isTransparent ? 'text-white hover:bg-white/10' : 'text-neutral-700 hover:bg-neutral-100'
                 }`}
               >
                 Log In
               </Link>
-              <Link href="/register"
+              <Link
+                href="/register"
                 className={`rounded-full border px-4 py-1.5 text-[0.75rem] font-semibold transition-all hover:scale-[1.02] ${
                   isTransparent
                     ? 'border-white text-white hover:bg-white/10'

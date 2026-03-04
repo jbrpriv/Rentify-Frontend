@@ -1,165 +1,437 @@
-'use client';
+const User = require('../models/User');
+const Property = require('../models/Property');
+const Agreement = require('../models/Agreement');
+const Payment = require('../models/Payment');
+const Clause = require('../models/Clause');
+const MaintenanceRequest = require('../models/MaintenanceRequest');
 
-import { useState, useEffect } from 'react';
-import { useSearchParams } from 'next/navigation';
-import { Suspense } from 'react';
-import api from '@/utils/api';
-import { Check, Loader2, Zap, Building2, Star, Crown } from 'lucide-react';
+// @desc    Get platform-wide stats
+// @route   GET /api/admin/stats
+// @access  Private (Admin)
+const getStats = async (req, res) => {
+  try {
+    // ── Subscription counts ────────────────────────────────────────────────
+    const TIER_PRICES = { pro: 2999, enterprise: 9999 };
 
-const TIER_ICONS = { free: Building2, pro: Zap, enterprise: Crown };
-const TIER_COLORS = {
-  free:       'border-gray-200 bg-white',
-  pro:        'border-blue-500 bg-blue-50 ring-2 ring-blue-500',
-  enterprise: 'border-purple-500 bg-purple-50 ring-2 ring-purple-500',
+    const [
+      totalUsers,
+      totalPro,
+      totalEnterprise,
+      totalProperties,
+      totalAgreements,
+      activeAgreements,
+      pendingAgreements,
+      expiredAgreements,
+      openMaintenanceRequests,
+    ] = await Promise.all([
+      User.countDocuments(),
+      User.countDocuments({ subscriptionTier: 'pro' }),
+      User.countDocuments({ subscriptionTier: 'enterprise' }),
+      Property.countDocuments(),
+      Agreement.countDocuments(),
+      Agreement.countDocuments({ status: 'active' }),
+      Agreement.countDocuments({ status: { $in: ['draft', 'sent', 'signed'] } }),
+      Agreement.countDocuments({ status: 'expired' }),
+      MaintenanceRequest.countDocuments({ status: { $in: ['open', 'in_progress'] } }),
+    ]);
+
+    // Monthly subscription revenue = (pro × 2999) + (enterprise × 9999)
+    const monthlySubscriptionRevenue =
+      (totalPro * TIER_PRICES.pro) + (totalEnterprise * TIER_PRICES.enterprise);
+
+    // Users by subscription tier (replaces users-by-role pie chart)
+    const usersBySubscription = await User.aggregate([
+      { $group: { _id: { $ifNull: ['$subscriptionTier', 'free'] }, count: { $sum: 1 } } },
+      { $sort: { count: -1 } },
+    ]);
+
+    // Agreements created per month (last 6 months)
+    const sixMonthsAgo = new Date();
+    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+
+    const agreementsByMonth = await Agreement.aggregate([
+      { $match: { createdAt: { $gte: sixMonthsAgo } } },
+      {
+        $group: {
+          _id: { year: { $year: '$createdAt' }, month: { $month: '$createdAt' } },
+          count: { $sum: 1 },
+        },
+      },
+      { $sort: { '_id.year': 1, '_id.month': 1 } },
+    ]);
+
+    res.json({
+      totals: {
+        users: totalUsers,
+        pro: totalPro,
+        enterprise: totalEnterprise,
+        free: totalUsers - totalPro - totalEnterprise,
+        properties: totalProperties,
+        agreements: totalAgreements,
+        activeAgreements,
+        pendingAgreements,
+        expiredAgreements,
+        openMaintenanceRequests,
+      },
+      monthlySubscriptionRevenue,
+      usersBySubscription,
+      agreementsByMonth,
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 };
-const TIER_BTN = {
-  free:       'bg-gray-200 text-gray-600 cursor-default',
-  pro:        'bg-blue-600 text-white hover:bg-blue-700',
-  enterprise: 'bg-purple-600 text-white hover:bg-purple-700',
+
+// @desc    Get all users with filtering
+// @route   GET /api/admin/users
+// @access  Private (Admin)
+const getUsers = async (req, res) => {
+  try {
+    const { role, isActive, search, page = 1, limit = 20 } = req.query;
+    const filter = {};
+
+    if (role) filter.role = role;
+    if (isActive !== undefined) filter.isActive = isActive === 'true';
+    if (search) {
+      filter.$or = [
+        { name: { $regex: search, $options: 'i' } },
+        { email: { $regex: search, $options: 'i' } },
+      ];
+    }
+
+    const skip = (Number(page) - 1) * Number(limit);
+
+    const [users, total] = await Promise.all([
+      User.find(filter)
+        .select('-password -otpCode -otpExpiry -fcmToken -passwordResetToken -emailVerificationToken')
+        .sort('-createdAt')
+        .skip(skip)
+        .limit(Number(limit)),
+      User.countDocuments(filter),
+    ]);
+
+    res.json({
+      users,
+      pagination: {
+        total,
+        page: Number(page),
+        pages: Math.ceil(total / Number(limit)),
+      },
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 };
 
-function BillingContent() {
-  const searchParams = useSearchParams();
-  const [plans, setPlans] = useState([]);
-  const [currentTier, setCurrentTier] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [subscribing, setSubscribing] = useState('');
-  const [portalLoading, setPortalLoading] = useState(false);
-  const [toast, setToast] = useState('');
+// @desc    Get single user by ID
+// @route   GET /api/admin/users/:id
+// @access  Private (Admin)
+const getUserById = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id)
+      .select('-password -otpCode -otpExpiry -fcmToken -passwordResetToken -emailVerificationToken');
 
-  useEffect(() => {
-    if (searchParams.get('success') === 'true') {
-      setToast(`🎉 Subscription to ${searchParams.get('tier') || 'new plan'} activated!`);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    // Get their agreements and properties
+    const [agreements, properties] = await Promise.all([
+      Agreement.find({ $or: [{ landlord: user._id }, { tenant: user._id }] })
+        .select('status term financials property')
+        .populate('property', 'title'),
+      Property.find({ landlord: user._id }).select('title status isListed'),
+    ]);
+
+    res.json({ user, agreements, properties });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// @desc    Ban or unban a user
+// @route   PUT /api/admin/users/:id/ban
+// @access  Private (Admin)
+const toggleUserBan = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    // Prevent admin from banning themselves
+    if (user._id.toString() === req.user._id.toString()) {
+      return res.status(400).json({ message: 'You cannot ban your own account' });
     }
-    if (searchParams.get('canceled') === 'true') setToast('Subscription cancelled.');
 
-    Promise.all([api.get('/billing/plans'), api.get('/billing/status')])
-      .then(([plansRes, statusRes]) => {
-        setPlans(plansRes.data.plans);
-        setCurrentTier(statusRes.data.tier);
-      })
-      .finally(() => setLoading(false));
-  }, []);
+    user.isActive = !user.isActive;
+    await user.save();
 
-  const handleSubscribe = async (tier) => {
-    if (tier === 'free' || tier === currentTier) return;
-    setSubscribing(tier);
-    try {
-      const { data } = await api.post('/billing/subscribe', { tier });
-      window.location.href = data.url;
-    } catch (err) {
-      setToast(err.response?.data?.message || 'Failed to start checkout');
-      setSubscribing('');
+    res.json({
+      message: user.isActive ? 'User account reactivated' : 'User account suspended',
+      isActive: user.isActive,
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// @desc    Change a user's role
+// @route   PUT /api/admin/users/:id/role
+// @access  Private (Admin)
+const changeUserRole = async (req, res) => {
+  try {
+    const { role } = req.body;
+    const validRoles = ['landlord', 'tenant', 'admin', 'property_manager', 'law_reviewer'];
+
+    if (!validRoles.includes(role)) {
+      return res.status(400).json({ message: 'Invalid role' });
     }
-  };
 
-  const handlePortal = async () => {
-    setPortalLoading(true);
-    try {
-      const { data } = await api.post('/billing/portal');
-      window.location.href = data.url;
-    } catch (err) {
-      setToast(err.response?.data?.message || 'Portal unavailable');
-      setPortalLoading(false);
+    const user = await User.findByIdAndUpdate(
+      req.params.id,
+      { role },
+      { returnDocument: 'after' }
+    ).select('-password');
+
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    res.json({ message: `Role updated to ${role}`, user });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// @desc    Get all agreements platform-wide
+// @route   GET /api/admin/agreements
+// @access  Private (Admin)
+const getAllAgreements = async (req, res) => {
+  try {
+    const { status, page = 1, limit = 20 } = req.query;
+    const filter = {};
+    if (status) filter.status = status;
+
+    const skip = (Number(page) - 1) * Number(limit);
+
+    const [agreements, total] = await Promise.all([
+      Agreement.find(filter)
+        .populate('landlord', 'name email')
+        .populate('tenant', 'name email')
+        .populate('property', 'title address')
+        .sort('-createdAt')
+        .skip(skip)
+        .limit(Number(limit)),
+      Agreement.countDocuments(filter),
+    ]);
+
+    res.json({
+      agreements,
+      pagination: { total, page: Number(page), pages: Math.ceil(total / Number(limit)) },
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// @desc    Get platform-wide audit log (from all agreements)
+// @route   GET /api/admin/audit-logs
+// @access  Private (Admin)
+const getAuditLogs = async (req, res) => {
+  try {
+    const { page = 1, limit = 50, action } = req.query;
+    const skip = (Number(page) - 1) * Number(limit);
+
+    // Unwind agreement audit logs and sort by timestamp
+    const matchStage = action ? { 'auditLog.action': action } : {};
+
+    const logs = await Agreement.aggregate([
+      { $unwind: '$auditLog' },
+      ...(action ? [{ $match: { 'auditLog.action': action } }] : []),
+      { $sort: { 'auditLog.timestamp': -1 } },
+      { $skip: skip },
+      { $limit: Number(limit) },
+      {
+        $project: {
+          action: '$auditLog.action',
+          actor: '$auditLog.actor',
+          timestamp: '$auditLog.timestamp',
+          ipAddress: '$auditLog.ipAddress',
+          details: '$auditLog.details',
+          agreementId: '$_id',
+        },
+      },
+    ]);
+
+    res.json(logs);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// ─── Clause / Template Management ─────────────────────────────────────────────
+
+// @desc    Get all clauses
+// @route   GET /api/admin/clauses
+// @access  Private (Admin, Law Reviewer)
+const getClauses = async (req, res) => {
+  try {
+    const { category, isApproved, isArchived = false } = req.query;
+    const filter = { isArchived: isArchived === 'true' };
+
+    if (category) filter.category = category;
+    if (isApproved !== undefined) filter.isApproved = isApproved === 'true';
+
+    const clauses = await Clause.find(filter)
+      .populate('createdBy', 'name email')
+      .populate('approvedBy', 'name email')
+      .sort('-createdAt');
+
+    res.json(clauses);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// @desc    Create a new clause template
+// @route   POST /api/admin/clauses
+// @access  Private (Admin, Law Reviewer)
+const createClause = async (req, res) => {
+  try {
+    const { title, body, category, jurisdiction, isDefault } = req.body;
+
+    const clause = await Clause.create({
+      title,
+      body,
+      category: category || 'general',
+      jurisdiction: jurisdiction || 'Pakistan',
+      isDefault: isDefault || false,
+      createdBy: req.user._id,
+    });
+
+    res.status(201).json(clause);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// @desc    Approve or reject a clause
+// @route   PUT /api/admin/clauses/:id/approve
+// @access  Private (Admin, Law Reviewer)
+const reviewClause = async (req, res) => {
+  try {
+    const { approved, rejectionReason } = req.body;
+
+    const clause = await Clause.findById(req.params.id);
+    if (!clause) return res.status(404).json({ message: 'Clause not found' });
+
+    clause.isApproved = approved;
+    clause.approvedBy = approved ? req.user._id : null;
+    clause.approvedAt = approved ? new Date() : null;
+    clause.rejectionReason = approved ? '' : (rejectionReason || 'Not approved');
+
+    await clause.save();
+    res.json(clause);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// @desc    Archive a clause
+// @route   PUT /api/admin/clauses/:id/archive
+// @access  Private (Admin)
+const archiveClause = async (req, res) => {
+  try {
+    const clause = await Clause.findByIdAndUpdate(
+      req.params.id,
+      { isArchived: true, isLatestVersion: false },
+      { returnDocument: 'after' }
+    );
+    if (!clause) return res.status(404).json({ message: 'Clause not found' });
+    res.json({ message: 'Clause archived', clause });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// @desc    Get all properties with tenant info
+// @route   GET /api/admin/properties
+// @access  Private (Admin)
+const getAllProperties = async (req, res) => {
+  try {
+    const properties = await Property.find()
+      .populate('landlord', 'name email')
+      .populate('managedBy', 'name email')
+      .sort({ createdAt: -1 });
+
+    // Attach current tenant for each property
+    const propIds = properties.map(p => p._id);
+    const activeAgreements = await Agreement.find({
+      property: { $in: propIds },
+      status: 'active',
+    }).populate('tenant', 'name email');
+
+    const tenantMap = {};
+    activeAgreements.forEach(ag => {
+      tenantMap[ag.property.toString()] = ag;
+    });
+
+    const result = properties.map(p => ({
+      ...p.toObject(),
+      activeAgreement: tenantMap[p._id.toString()] || null,
+    }));
+
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// @desc    Kick tenant from property (terminate agreement)
+// @route   POST /api/admin/properties/:id/kick-tenant
+// @access  Private (Admin)
+const kickTenantFromProperty = async (req, res) => {
+  try {
+    const { reason } = req.body;
+    const propertyId = req.params.id;
+
+    const agreement = await Agreement.findOne({
+      property: propertyId,
+      status: 'active',
+    }).populate('tenant', 'name email').populate('property', 'title');
+
+    if (!agreement) {
+      return res.status(404).json({ message: 'No active tenant found for this property' });
     }
-  };
 
-  if (loading) return (
-    <div className="flex items-center justify-center h-64">
-      <Loader2 className="animate-spin w-8 h-8 text-blue-500" />
-    </div>
-  );
+    // Terminate the agreement
+    agreement.status = 'terminated';
+    agreement.auditLog.push({
+      action: 'TERMINATED_BY_ADMIN',
+      actor: req.user._id,
+      ipAddress: req.ip,
+      details: reason || 'Terminated by administrator',
+    });
+    await agreement.save();
 
-  return (
-    <div className="max-w-5xl mx-auto py-8">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900">Subscription & Billing</h1>
-        <p className="text-gray-500 mt-1">Manage your RentifyPro plan.</p>
-      </div>
+    // Mark property as vacant (not 'available' — that's not a valid enum value)
+    // Also reset isListed so landlord can consciously re-publish it
+    await Property.findByIdAndUpdate(propertyId, { status: 'vacant', isListed: false });
 
-      {toast && (
-        <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg text-green-700 text-sm">
-          {toast}
-        </div>
-      )}
+    res.json({ message: `Tenant ${agreement.tenant?.name} has been removed from ${agreement.property?.title}` });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
 
-      {/* Current plan banner */}
-      {currentTier && (
-        <div className="mb-8 p-4 bg-gray-50 rounded-lg border flex items-center justify-between flex-wrap gap-4">
-          <div>
-            <p className="text-sm text-gray-500">Current plan</p>
-            <p className="text-lg font-semibold text-gray-900 capitalize">{currentTier}</p>
-          </div>
-          {currentTier !== 'free' && (
-            <button
-              type="button"
-              onClick={handlePortal}
-              disabled={portalLoading}
-              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 border border-gray-300 rounded-md hover:bg-gray-100 disabled:opacity-60"
-            >
-              {portalLoading ? <Loader2 className="animate-spin w-4 h-4" /> : null}
-              Manage Subscription
-            </button>
-          )}
-        </div>
-      )}
-
-      {/* Plan cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {plans.map((plan) => {
-          const Icon = TIER_ICONS[plan.tier] || Star;
-          const isCurrentPlan = plan.tier === currentTier;
-          return (
-            <div key={plan.tier} className={`rounded-xl border-2 p-6 flex flex-col ${TIER_COLORS[plan.tier] || 'border-gray-200 bg-white'}`}>
-              <div className="flex items-center gap-3 mb-4">
-                <Icon className={`w-6 h-6 ${plan.tier === 'pro' ? 'text-blue-600' : plan.tier === 'enterprise' ? 'text-purple-600' : 'text-gray-500'}`} />
-                <div>
-                  <h3 className="font-semibold text-gray-900">{plan.name}</h3>
-                  {isCurrentPlan && <span className="text-xs text-green-600 font-medium">Current plan</span>}
-                </div>
-              </div>
-
-              <div className="mb-6">
-                <span className="text-3xl font-bold text-gray-900">
-                  {plan.price === 0 ? 'Free' : `Rs. ${plan.price.toLocaleString()}`}
-                </span>
-                {plan.price > 0 && <span className="text-gray-500 text-sm">/month</span>}
-              </div>
-
-              <ul className="space-y-2 mb-6 flex-1">
-                {plan.features.map((feature) => (
-                  <li key={feature} className="flex items-start gap-2 text-sm text-gray-700">
-                    <Check className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
-                    {feature}
-                  </li>
-                ))}
-              </ul>
-
-              <button
-                type="button"
-                disabled={isCurrentPlan || plan.tier === 'free' || !!subscribing}
-                onClick={() => handleSubscribe(plan.tier)}
-                className={`w-full py-2.5 rounded-lg font-medium text-sm transition-colors flex items-center justify-center gap-2 ${isCurrentPlan || plan.tier === 'free' ? TIER_BTN.free : TIER_BTN[plan.tier]}`}
-              >
-                {subscribing === plan.tier && <Loader2 className="animate-spin w-4 h-4" />}
-                {isCurrentPlan ? 'Current Plan' : plan.tier === 'free' ? 'Free Forever' : `Upgrade to ${plan.name}`}
-              </button>
-            </div>
-          );
-        })}
-      </div>
-
-      <p className="mt-6 text-xs text-center text-gray-400">
-        Payments are processed securely via Stripe. Cancel anytime from the Manage Subscription portal.
-      </p>
-    </div>
-  );
-}
-
-export default function BillingPage() {
-  return (
-    <Suspense fallback={<div className="flex items-center justify-center h-64"><Loader2 className="animate-spin w-8 h-8 text-blue-500" /></div>}>
-      <BillingContent />
-    </Suspense>
-  );
-}
+module.exports = {
+  getStats,
+  getUsers,
+  getUserById,
+  toggleUserBan,
+  changeUserRole,
+  getAllAgreements,
+  getAuditLogs,
+  getClauses,
+  createClause,
+  reviewClause,
+  archiveClause,
+  getAllProperties,
+  kickTenantFromProperty,
+};
