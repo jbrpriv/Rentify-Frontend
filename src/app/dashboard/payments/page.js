@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import api from '@/utils/api';
 import { useUser } from '@/context/UserContext';
-import { CreditCard, CheckCircle, Clock, AlertCircle, Loader2, Calendar } from 'lucide-react';
+import { CreditCard, CheckCircle, Clock, AlertCircle, Loader2, Calendar, X, Zap, Globe } from 'lucide-react';
 
 const STATUS_CONFIG = {
   paid:              { label: 'Paid',             color: 'bg-green-100 text-green-700',  dot: 'bg-green-500', icon: CheckCircle },
@@ -15,64 +15,194 @@ const STATUS_CONFIG = {
 
 const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
+// Gateway metadata for display
+const GATEWAY_META = {
+  stripe:   { label: 'Card / Stripe',  desc: 'Visa, Mastercard, debit cards',    icon: '💳', color: '#635bff' },
+  razorpay: { label: 'Razorpay',       desc: 'UPI, cards, net banking, wallets',  icon: '⚡', color: '#2563eb' },
+  paypal:   { label: 'PayPal',         desc: 'PayPal balance or linked card',     icon: '🌐', color: '#0070ba' },
+};
+
+// ─── Gateway Picker Modal ─────────────────────────────────────────────────────
+function GatewayModal({ gateways, amount, onSelect, onClose, loading }) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)' }}>
+      <div className="bg-white rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden">
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100">
+          <div>
+            <h3 className="font-black text-gray-900 text-lg">Choose Payment Method</h3>
+            <p className="text-sm text-gray-400 mt-0.5">Amount: <strong className="text-gray-700">Rs. {amount?.toLocaleString()}</strong></p>
+          </div>
+          <button onClick={onClose} className="p-2 rounded-xl hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        {/* Gateway list */}
+        <div className="p-4 space-y-3">
+          {gateways.map(gw => {
+            const meta = GATEWAY_META[gw.id] || { label: gw.name, desc: '', icon: '💰', color: '#374151' };
+            return (
+              <button
+                key={gw.id}
+                onClick={() => onSelect(gw.id)}
+                disabled={loading}
+                className="w-full flex items-center gap-4 p-4 rounded-2xl border-2 border-gray-100 hover:border-blue-200 hover:bg-blue-50/40 transition-all text-left group disabled:opacity-60"
+              >
+                <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl flex-shrink-0" style={{ background: `${meta.color}15` }}>
+                  {meta.icon}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-bold text-gray-900 text-sm">{meta.label}</p>
+                  <p className="text-xs text-gray-400 mt-0.5">{meta.desc}</p>
+                </div>
+                {loading ? (
+                  <Loader2 className="w-4 h-4 animate-spin text-gray-400 flex-shrink-0" />
+                ) : (
+                  <div className="w-5 h-5 rounded-full border-2 border-gray-200 group-hover:border-blue-400 transition flex-shrink-0" />
+                )}
+              </button>
+            );
+          })}
+        </div>
+
+        <p className="text-center text-xs text-gray-400 pb-5 px-6">
+          Payments are secured and encrypted. You will not be charged until you confirm.
+        </p>
+      </div>
+    </div>
+  );
+}
+
 export default function PaymentsPage() {
   const router = useRouter();
   const { user } = useUser();
 
-  // ── Role guard ────────────────────────────────────────────────────────────
   useEffect(() => {
     if (!user) { router.push('/login'); return; }
-    if (user.role !== 'tenant') {
-      router.push('/dashboard/agreements');
-    }
+    if (user.role !== 'tenant') { router.push('/dashboard/agreements'); }
   }, [user]); // eslint-disable-line react-hooks/exhaustive-deps
-  // ─────────────────────────────────────────────────────────────────────────
 
   const [agreements, setAgreements] = useState([]);
   const [selected, setSelected]     = useState(null);
   const [loading, setLoading]       = useState(true);
-  const [paying, setPaying]         = useState(null); // scheduleIndex being paid
+  const [paying, setPaying]         = useState(null);      // scheduleIndex being paid
+  const [gateways, setGateways]     = useState([]);
+  const [modalOpen, setModalOpen]   = useState(false);
+  const [pendingIdx, setPendingIdx] = useState(null);      // scheduleIndex awaiting gateway pick
+  const [gwLoading, setGwLoading]   = useState(false);
 
   useEffect(() => {
-    api.get('/agreements')
-      .then(({ data }) => {
-        const active = data.filter(a => a.status === 'active' && a.rentSchedule?.length > 0);
-        setAgreements(active);
-        if (active.length > 0) setSelected(active[0]);
-      })
-      .catch(console.error)
-      .finally(() => setLoading(false));
+    Promise.all([
+      api.get('/agreements'),
+      api.get('/payments/gateways'),
+    ]).then(([agrRes, gwRes]) => {
+      const active = agrRes.data.filter(a => a.status === 'active' && a.rentSchedule?.length > 0);
+      setAgreements(active);
+      if (active.length > 0) setSelected(active[0]);
+      setGateways(gwRes.data?.gateways || []);
+    }).catch(console.error).finally(() => setLoading(false));
   }, []);
 
   if (loading) return <div className="flex justify-center py-20"><Loader2 className="animate-spin h-8 w-8 text-blue-600" /></div>;
 
-  const handlePayRent = async (scheduleIndex) => {
+  // Called when tenant clicks "Pay Now" on a schedule entry
+  const handlePayNow = (scheduleIndex) => {
+    // If there's only one gateway, skip the picker
+    if (gateways.length === 1) {
+      processPayment(gateways[0].id, scheduleIndex);
+      return;
+    }
+    // Multiple gateways — show picker
+    setPendingIdx(scheduleIndex);
+    setModalOpen(true);
+  };
+
+  // Called after gateway is selected from the modal
+  const handleGatewaySelect = async (gatewayId) => {
+    setModalOpen(false);
+    await processPayment(gatewayId, pendingIdx);
+    setPendingIdx(null);
+  };
+
+  const processPayment = async (gatewayId, scheduleIndex) => {
     if (!selected) return;
     setPaying(scheduleIndex);
     try {
-      // Use the pre-generated checkout URL from the scheduler if available,
-      // falling back to on-demand creation — GET /payments/active-checkout handles both.
-      const entry = selected.rentSchedule?.[scheduleIndex];
-      if (entry?.checkoutUrl) {
-        window.location.href = entry.checkoutUrl;
-        return;
+      if (gatewayId === 'stripe') {
+        // Stripe: redirect to hosted checkout
+        const entry = selected.rentSchedule?.[scheduleIndex];
+        if (entry?.checkoutUrl) { window.location.href = entry.checkoutUrl; return; }
+        const { data } = await api.get(`/payments/active-checkout/${selected._id}`);
+        window.location.href = data.url;
+
+      } else if (gatewayId === 'razorpay') {
+        // Razorpay: open inline modal
+        const { data: order } = await api.post('/payments/razorpay/create-order', { agreementId: selected._id });
+
+        const rzp = new window.Razorpay({
+          key:         order.keyId,
+          amount:      order.amount,
+          currency:    order.currency,
+          order_id:    order.orderId,
+          name:        'RentifyPro',
+          description: 'Rent Payment',
+          prefill:     order.prefill,
+          theme:       { color: '#2563eb' },
+          handler: async (response) => {
+            setGwLoading(true);
+            try {
+              await api.post('/payments/razorpay/verify', {
+                razorpay_order_id:   response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature:  response.razorpay_signature,
+                agreementId:         selected._id,
+              });
+              router.push('/dashboard/payments?success=razorpay');
+            } catch (err) {
+              alert(err.response?.data?.message || 'Payment verification failed');
+            } finally {
+              setGwLoading(false);
+            }
+          },
+          modal: { ondismiss: () => setPaying(null) },
+        });
+        rzp.open();
+
+      } else if (gatewayId === 'paypal') {
+        const { data } = await api.post('/payments/paypal/create-order', { agreementId: selected._id });
+        window.location.href = data.approvalUrl;
       }
-      const { data } = await api.get(`/payments/active-checkout/${selected._id}`);
-      window.location.href = data.url;
     } catch (err) {
       alert(err.response?.data?.message || 'Failed to initiate payment');
       setPaying(null);
     }
   };
 
-  const schedule = selected?.rentSchedule || [];
-  const paid     = schedule.filter(e => e.status === 'paid').length;
-  const overdue  = schedule.filter(e => ['overdue','late_fee_applied'].includes(e.status)).length;
-  const pending  = schedule.filter(e => e.status === 'pending').length;
+  const schedule  = selected?.rentSchedule || [];
+  const paid      = schedule.filter(e => e.status === 'paid').length;
+  const overdue   = schedule.filter(e => ['overdue','late_fee_applied'].includes(e.status)).length;
+  const pending   = schedule.filter(e => e.status === 'pending').length;
   const totalPaid = schedule.filter(e => e.status === 'paid').reduce((s, e) => s + (e.paidAmount || e.amount), 0);
+
+  // Amount for the modal (current month or first overdue)
+  const pendingEntry = pendingIdx !== null ? schedule[pendingIdx] : null;
+  const pendingAmount = pendingEntry ? (pendingEntry.amount + (pendingEntry.lateFeeAmount || 0)) : 0;
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
+
+      {/* Gateway picker modal */}
+      {modalOpen && (
+        <GatewayModal
+          gateways={gateways}
+          amount={pendingAmount}
+          onSelect={handleGatewaySelect}
+          onClose={() => { setModalOpen(false); setPendingIdx(null); }}
+          loading={gwLoading}
+        />
+      )}
+
       <div>
         <h1 className="text-3xl font-black text-gray-900 tracking-tighter">Payment Schedule</h1>
         <p className="text-gray-400 text-sm mt-1">Track your rent payments across all months</p>
@@ -109,10 +239,10 @@ export default function PaymentsPage() {
             <>
               {/* Summary Stats */}
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                <SummaryCard label="Months Paid"   value={paid}                                  icon={CheckCircle}  color="text-green-600"  bg="bg-green-50" />
-                <SummaryCard label="Pending"        value={pending}                               icon={Clock}        color="text-blue-600"   bg="bg-blue-50" />
-                <SummaryCard label="Overdue"        value={overdue}                               icon={AlertCircle}  color="text-red-600"    bg="bg-red-50" />
-                <SummaryCard label="Total Paid"     value={`Rs. ${totalPaid.toLocaleString()}`}  icon={CreditCard}   color="text-indigo-600" bg="bg-indigo-50" />
+                <SummaryCard label="Months Paid"  value={paid}                                  icon={CheckCircle}  color="text-green-600"  bg="bg-green-50" />
+                <SummaryCard label="Pending"       value={pending}                               icon={Clock}        color="text-blue-600"   bg="bg-blue-50" />
+                <SummaryCard label="Overdue"       value={overdue}                               icon={AlertCircle}  color="text-red-600"    bg="bg-red-50" />
+                <SummaryCard label="Total Paid"    value={`Rs. ${totalPaid.toLocaleString()}`}  icon={CreditCard}   color="text-indigo-600" bg="bg-indigo-50" />
               </div>
 
               {/* Property & Lease Info */}
@@ -125,6 +255,20 @@ export default function PaymentsPage() {
                   <span>Late fee: <strong className="text-gray-900">Rs. {selected.financials?.lateFeeAmount}</strong></span>
                   <span>Lease ends: <strong className="text-gray-900">{new Date(selected.term?.endDate).toLocaleDateString()}</strong></span>
                 </div>
+                {/* Available gateways indicator */}
+                {gateways.length > 0 && (
+                  <div className="flex items-center gap-2 mt-3 pt-3 border-t border-gray-100">
+                    <span className="text-xs text-gray-400">Pay via:</span>
+                    {gateways.map(gw => {
+                      const meta = GATEWAY_META[gw.id] || { label: gw.name, icon: '💰' };
+                      return (
+                        <span key={gw.id} className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full font-semibold">
+                          {meta.icon} {meta.label}
+                        </span>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
 
               {/* Calendar Grid */}
@@ -143,9 +287,7 @@ export default function PaymentsPage() {
                       <div
                         key={i}
                         className={`rounded-2xl p-4 border-2 transition-all ${
-                          isThisMonth
-                            ? 'border-blue-400 shadow-md'
-                            : 'border-transparent bg-gray-50'
+                          isThisMonth ? 'border-blue-400 shadow-md' : 'border-transparent bg-gray-50'
                         }`}
                       >
                         <div className="flex items-center justify-between mb-2">
@@ -155,7 +297,7 @@ export default function PaymentsPage() {
                           {isThisMonth && <span className="text-[9px] bg-blue-100 text-blue-700 font-black uppercase px-1.5 py-0.5 rounded-full">This Month</span>}
                         </div>
 
-                        <div className={`flex items-center gap-1.5 mb-3`}>
+                        <div className="flex items-center gap-1.5 mb-3">
                           <div className={`w-2 h-2 rounded-full ${cfg.dot}`} />
                           <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-full ${cfg.color}`}>
                             {cfg.label}
@@ -182,16 +324,15 @@ export default function PaymentsPage() {
                           Due: {date.toLocaleDateString()}
                         </p>
 
-                        {/* C5: Pay Now button for pending/overdue months */}
                         {['pending', 'overdue', 'late_fee_applied'].includes(entry.status) && (
                           <button
                             type="button"
-                            onClick={() => handlePayRent(i)}
-                            disabled={paying === i}
+                            onClick={() => handlePayNow(i)}
+                            disabled={paying === i || gwLoading}
                             className="mt-3 w-full flex items-center justify-center gap-1 py-1.5 px-2 bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-black uppercase rounded-lg disabled:opacity-60 transition-colors"
                           >
                             {paying === i ? <Loader2 className="w-3 h-3 animate-spin" /> : <CreditCard className="w-3 h-3" />}
-                            {paying === i ? 'Redirecting…' : 'Pay Now'}
+                            {paying === i ? 'Processing…' : 'Pay Now'}
                           </button>
                         )}
                       </div>
