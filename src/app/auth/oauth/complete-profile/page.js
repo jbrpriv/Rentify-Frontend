@@ -9,18 +9,17 @@ function CompleteProfileContent() {
   const router       = useRouter();
   const searchParams = useSearchParams();
 
-  // Read params passed from the OAuth success/callback redirect
-  const providerEmail  = searchParams.get('email')       || '';
-  const providerName   = searchParams.get('name')        || '';
-  const provider       = searchParams.get('provider')    || 'google';
-  const needsEmail     = searchParams.get('needsEmail')  === 'true'; // Facebook no-email case
+  const providerEmail  = searchParams.get('email')      || '';
+  const providerName   = searchParams.get('name')       || '';
+  const provider       = searchParams.get('provider')   || 'google';
+  const needsEmail     = searchParams.get('needsEmail') === 'true';
   const facebookId     = searchParams.get('facebookId') || '';
+  const urlToken       = searchParams.get('token')      || '';
 
-  // Email is locked (greyed) when the OAuth provider supplied it.
-  // It is editable only when Facebook gave no email (needsEmail=true).
+  // Email is locked when the provider supplied it; editable only for FB no-email case
   const emailLocked = !!providerEmail && !needsEmail;
 
-  const [step, setStep]     = useState('profile'); // profile | verify-phone
+  const [step, setStep]     = useState('profile');
   const [formData, setFormData] = useState({
     name:        providerName,
     email:       providerEmail,
@@ -33,16 +32,21 @@ function CompleteProfileContent() {
   const [error, setError]     = useState('');
   const [success, setSuccess] = useState('');
 
-  // If name/email arrive after hydration (edge case), sync them
+  // Save token from URL immediately on mount — this ensures API calls work
+  // even if localStorage was cleared between the success page redirect and here
   useEffect(() => {
+    if (urlToken) {
+      localStorage.setItem('token', urlToken);
+    }
+    // Pre-fill from URL params (in case localStorage userInfo isn't set yet)
     setFormData(f => ({
       ...f,
       name:  f.name  || providerName,
       email: f.email || providerEmail,
     }));
-  }, [providerName, providerEmail]);
+  }, [urlToken, providerName, providerEmail]);
 
-  // ── Step 1: save profile details ──────────────────────────────────────────
+  // ── Step 1: save profile ──────────────────────────────────────────────────
   const handleProfileSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -58,18 +62,33 @@ function CompleteProfileContent() {
 
     setLoading(true);
     try {
-      // For Facebook no-email case: we need to finalise account creation
-      // by supplying the email before calling /users/profile.
       if (needsEmail && facebookId) {
-        await api.post('/auth/facebook/complete', {
+        // Facebook no-email: create account first, get token back
+        const { data } = await api.post('/auth/facebook/complete', {
           facebookId,
           email:       formData.email,
           name:        formData.name,
           role:        formData.role,
           phoneNumber: formData.phoneNumber,
         });
+
+        // Save the token returned by the endpoint so all subsequent calls work
+        if (data.token) {
+          localStorage.setItem('token', data.token);
+          localStorage.setItem('userInfo', JSON.stringify({
+            _id:   data._id,
+            name:  data.name,
+            email: data.email,
+            role:  data.role,
+            isPhoneVerified: false,
+            isVerified:      true,
+          }));
+        }
+
+        // If the email matched an existing account, they're already set up —
+        // just send the phone OTP to finish the flow
       } else {
-        // Standard case: account already exists, just update profile
+        // Standard case: account exists, just update profile fields
         await api.put('/users/profile', {
           name:        formData.name,
           role:        formData.role,
@@ -77,7 +96,7 @@ function CompleteProfileContent() {
         });
       }
 
-      // Refresh localStorage with latest user data
+      // Refresh localStorage with latest data from server
       const { data: freshUser } = await api.get('/users/me');
       localStorage.setItem('userInfo', JSON.stringify({
         _id:             freshUser._id,
@@ -92,7 +111,7 @@ function CompleteProfileContent() {
       await api.post('/auth/send-otp');
       setStep('verify-phone');
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to save profile');
+      setError(err.response?.data?.message || 'Failed to save profile. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -117,7 +136,7 @@ function CompleteProfileContent() {
       }));
       router.replace('/dashboard');
     } catch (err) {
-      setError(err.response?.data?.message || 'Invalid OTP');
+      setError(err.response?.data?.message || 'Invalid OTP. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -154,31 +173,24 @@ function CompleteProfileContent() {
           </h2>
           <p className="text-gray-400 text-sm mt-1">
             {step === 'profile'
-              ? `Almost there! We need a few more details to finish setting up your ${providerLabel} account.`
+              ? `Almost there! A few more details to finish your ${providerLabel} account.`
               : `We sent a 6-digit code to ${formData.phoneNumber}`}
           </p>
         </div>
 
-        {/* Progress bar */}
+        {/* Progress */}
         <div className="flex gap-2 mb-8">
           {['profile', 'verify-phone'].map((s, i) => (
-            <div
-              key={s}
-              className={`flex-1 h-1.5 rounded-full transition-all ${
-                step === s
-                  ? 'bg-blue-600'
-                  : i < ['profile', 'verify-phone'].indexOf(step)
-                  ? 'bg-green-500'
-                  : 'bg-gray-200'
-              }`}
-            />
+            <div key={s} className={`flex-1 h-1.5 rounded-full transition-all ${
+              step === s ? 'bg-blue-600'
+              : i < ['profile', 'verify-phone'].indexOf(step) ? 'bg-green-500'
+              : 'bg-gray-200'
+            }`} />
           ))}
         </div>
 
         {error && (
-          <div className="bg-red-50 text-red-600 px-4 py-3 rounded-xl text-sm mb-4">
-            {error}
-          </div>
+          <div className="bg-red-50 text-red-600 px-4 py-3 rounded-xl text-sm mb-4">{error}</div>
         )}
         {success && (
           <div className="bg-green-50 text-green-600 px-4 py-3 rounded-xl text-sm mb-4 flex items-center gap-2">
@@ -189,7 +201,7 @@ function CompleteProfileContent() {
         {step === 'profile' ? (
           <form onSubmit={handleProfileSubmit} className="space-y-4">
 
-            {/* Email — locked if provider gave it, editable if Facebook no-email */}
+            {/* Email */}
             <div>
               <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-1.5">
                 Email Address
@@ -214,16 +226,14 @@ function CompleteProfileContent() {
               </div>
               {emailLocked && (
                 <p className="text-xs text-gray-400 mt-1">
-                  Email confirmed by {providerLabel} — cannot be changed here.
+                  Confirmed by {providerLabel} — cannot be changed here.
                 </p>
               )}
             </div>
 
             {/* Full Name */}
             <div>
-              <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-1.5">
-                Full Name
-              </label>
+              <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-1.5">Full Name</label>
               <div className="relative">
                 <User className="absolute left-3 top-3 w-4 h-4 text-gray-400" />
                 <input
@@ -239,9 +249,7 @@ function CompleteProfileContent() {
 
             {/* Account Type */}
             <div>
-              <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-1.5">
-                Account Type
-              </label>
+              <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-1.5">Account Type</label>
               <div className="relative">
                 <Building2 className="absolute left-3 top-3 w-4 h-4 text-gray-400" />
                 <select
@@ -256,11 +264,9 @@ function CompleteProfileContent() {
               </div>
             </div>
 
-            {/* Phone Number */}
+            {/* Phone */}
             <div>
-              <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-1.5">
-                Phone Number
-              </label>
+              <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-1.5">Phone Number</label>
               <div className="relative">
                 <Phone className="absolute left-3 top-3 w-4 h-4 text-gray-400" />
                 <input
@@ -301,7 +307,6 @@ function CompleteProfileContent() {
                 className="w-full text-center text-3xl font-black tracking-[0.5em] border-2 border-gray-200 rounded-2xl py-4 focus:outline-none focus:border-blue-500 transition"
               />
             </div>
-
             <button
               type="submit"
               disabled={loading || otp.length < 6}
@@ -311,7 +316,6 @@ function CompleteProfileContent() {
                 ? <Loader2 className="animate-spin w-4 h-4" />
                 : <><CheckCircle className="w-4 h-4" /> Verify &amp; Enter Dashboard</>}
             </button>
-
             <div className="text-center">
               <button
                 type="button"
