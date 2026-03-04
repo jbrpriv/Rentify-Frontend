@@ -7,7 +7,7 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import api from '@/utils/api';
 import {
-  LayoutDashboard, Building2, FileText, Users, Key, User, Loader2,
+  LayoutDashboard, Building2, FileText, Users, Key, User, Loader2, FolderOpen, Zap,
   ShieldCheck, Wrench, MessageSquare, CreditCard, BarChart2, Scale,
   ClipboardList, X, Tag,
 } from 'lucide-react';
@@ -23,6 +23,7 @@ const NAV_BY_ROLE = {
     { name: 'Maintenance', href: '/dashboard/maintenance',      icon: Wrench,        badgeKey: 'maintenance' },
     { name: 'Messages',    href: '/dashboard/messages',         icon: MessageSquare, badgeKey: 'messages' },
     { name: 'Disputes',    href: '/dashboard/disputes',         icon: Scale },
+    { name: 'Billing',     href: '/dashboard/billing',          icon: Zap },
     { name: 'Profile',     href: '/dashboard/profile',          icon: User },
   ],
   tenant: [
@@ -31,6 +32,7 @@ const NAV_BY_ROLE = {
     { name: 'Offers',      href: '/dashboard/offers',      icon: Tag,           badgeKey: 'offers' },
     { name: 'Payments',    href: '/dashboard/payments',    icon: CreditCard },
     { name: 'Maintenance', href: '/dashboard/maintenance', icon: Wrench,        badgeKey: 'maintenance' },
+    { name: 'Documents',   href: '/dashboard/documents',   icon: FolderOpen },
     { name: 'Disputes',    href: '/dashboard/disputes',    icon: Scale },
     { name: 'Messages',    href: '/dashboard/messages',    icon: MessageSquare, badgeKey: 'messages' },
     { name: 'Profile',     href: '/dashboard/profile',     icon: User },

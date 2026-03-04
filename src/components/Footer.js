@@ -35,7 +35,7 @@ export default function Footer() {
         </div>
 
         {/* Links */}
-        <div className="flex items-center gap-6 text-xs font-medium text-neutral-500">
+        <div className="flex flex-wrap items-center justify-center gap-6 text-xs font-medium text-neutral-500">
           <Link href="/browse" className="rf-link">
             Browse
           </Link>
@@ -53,6 +53,12 @@ export default function Footer() {
               Dashboard
             </Link>
           )}
+          <Link href="/privacy" className="rf-link">
+            Privacy Policy
+          </Link>
+          <Link href="/data-deletion" className="rf-link">
+            Data Deletion
+          </Link>
         </div>
 
         {/* Copyright */}

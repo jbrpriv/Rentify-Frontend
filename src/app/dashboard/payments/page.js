@@ -31,6 +31,7 @@ export default function PaymentsPage() {
   const [agreements, setAgreements] = useState([]);
   const [selected, setSelected]     = useState(null);
   const [loading, setLoading]       = useState(true);
+  const [paying, setPaying]         = useState(null); // scheduleIndex being paid
 
   useEffect(() => {
     api.get('/agreements')
@@ -44,6 +45,21 @@ export default function PaymentsPage() {
   }, []);
 
   if (loading) return <div className="flex justify-center py-20"><Loader2 className="animate-spin h-8 w-8 text-blue-600" /></div>;
+
+  const handlePayRent = async (scheduleIndex) => {
+    if (!selected) return;
+    setPaying(scheduleIndex);
+    try {
+      const { data } = await api.post('/payments/pay-rent', {
+        agreementId: selected._id,
+        scheduleIndex,
+      });
+      window.location.href = data.url;
+    } catch (err) {
+      alert(err.response?.data?.message || 'Failed to initiate payment');
+      setPaying(null);
+    }
+  };
 
   const schedule = selected?.rentSchedule || [];
   const paid     = schedule.filter(e => e.status === 'paid').length;
@@ -161,6 +177,19 @@ export default function PaymentsPage() {
                         <p className="text-[10px] text-gray-400 mt-1">
                           Due: {date.toLocaleDateString()}
                         </p>
+
+                        {/* C5: Pay Now button for pending/overdue months */}
+                        {['pending', 'overdue', 'late_fee_applied'].includes(entry.status) && (
+                          <button
+                            type="button"
+                            onClick={() => handlePayRent(i)}
+                            disabled={paying === i}
+                            className="mt-3 w-full flex items-center justify-center gap-1 py-1.5 px-2 bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-black uppercase rounded-lg disabled:opacity-60 transition-colors"
+                          >
+                            {paying === i ? <Loader2 className="w-3 h-3 animate-spin" /> : <CreditCard className="w-3 h-3" />}
+                            {paying === i ? 'Redirecting…' : 'Pay Now'}
+                          </button>
+                        )}
                       </div>
                     );
                   })}

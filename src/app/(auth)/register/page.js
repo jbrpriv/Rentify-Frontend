@@ -7,6 +7,22 @@ import axios from 'axios';
 import api from '@/utils/api';
 import { User, Mail, Lock, Phone, Building2, Loader2, CheckCircle, ShieldCheck } from 'lucide-react';
 
+
+// ─── reCAPTCHA v3 helper ──────────────────────────────────────────────────────
+const getRecaptchaToken = (action) => {
+  return new Promise((resolve) => {
+    if (typeof window === 'undefined' || !window.grecaptcha) return resolve(null);
+    window.grecaptcha.ready(async () => {
+      try {
+        const siteKey = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY;
+        if (!siteKey) return resolve(null);
+        const token = await window.grecaptcha.execute(siteKey, { action });
+        resolve(token);
+      } catch { resolve(null); }
+    });
+  });
+};
+
 const STEPS = ['register', 'verify-email', 'verify-phone'];
 
 export default function RegisterPage() {
@@ -25,7 +41,8 @@ export default function RegisterPage() {
     e.preventDefault();
     setLoading(true); setError('');
     try {
-      const { data } = await axios.post('/api/auth/register', formData);
+      const recaptchaToken = await getRecaptchaToken('register');
+      const { data } = await axios.post('/api/auth/register', { ...formData, recaptchaToken });
       localStorage.setItem('token', data.token);
       localStorage.setItem('userInfo', JSON.stringify(data));
       setStep('verify-email');
