@@ -268,7 +268,8 @@ export default function AgreementTemplatesPage() {
   const fetchTemplates = useCallback(async () => {
     try {
       const { data } = await api.get('/agreement-templates');
-      setTemplates(data);
+      // Backend returns { templates: [...], jurisdictions: [...] }
+      setTemplates(Array.isArray(data) ? data : (data.templates || []));
     } catch { /* silent */ }
     finally { setLoading(false); }
   }, []);
