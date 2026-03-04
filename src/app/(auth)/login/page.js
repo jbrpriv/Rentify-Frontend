@@ -119,18 +119,30 @@ export default function LoginPage() {
     finally { setTotpLoading(false); }
   };
 
-  // ─── Email verification (N8 fix: send { email, code } not { token }) ────────
+  // ─── Email verification ──────────────────────────────────────────────────────
   const handleVerifyEmail = async (e) => {
     e.preventDefault();
     setLoading(true); setError('');
     try {
       await api.post('/auth/verify-email', { email: emailForVerify, code: emailToken });
-      setSuccess('Email verified! Signing you in…');
-      const { data } = await api.post('/auth/login', formData);
-      localStorage.setItem('token', data.token);
-      localStorage.setItem('userInfo', JSON.stringify(data));
-      router.push('/dashboard');
-    } catch (err) { setError(err.response?.data?.message || 'Invalid code'); }
+
+      // Email is confirmed. Phone verification always comes after email in the
+      // register flow, so if the user was stuck on email verify, their phone is
+      // definitely not verified either. Go straight to phone OTP — no need to
+      // hit /auth/login first (which would just bounce back with PHONE_NOT_VERIFIED
+      // anyway, plus require a reCAPTCHA round-trip).
+      const email = emailForVerify || formData.email;
+      setPendingEmail(email);
+      setNeedsEmailVerify(false);
+      setNeedsPhoneVerify(true);
+      try {
+        await api.post('/auth/send-otp', { email });
+      } catch (otpErr) {
+        setError(otpErr.response?.data?.message || 'Could not send OTP — tap Resend to try again.');
+      }
+    } catch (err) {
+      setError(err.response?.data?.message || 'Invalid code');
+    }
     finally { setLoading(false); }
   };
 
