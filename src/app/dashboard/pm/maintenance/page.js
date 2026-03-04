@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import api from '@/utils/api';
 import { useUser } from '@/context/UserContext';
+import { useToast } from '@/context/ToastContext';
 import { Wrench, Plus, Loader2, ChevronDown, ChevronUp, CheckCircle, Clock, AlertCircle, X } from 'lucide-react';
 
 const STATUS_CONFIG = {
@@ -21,9 +22,10 @@ const CATEGORIES = ['plumbing','electrical','hvac','appliance','structural','pes
 
 export default function MaintenancePage() {
   const router = useRouter();
+  const { user: parsed } = useUser();
+  const { toast } = useToast();
   // ── Role guard ────────────────────────────────────────────────────────────
   useEffect(() => {
-    const { user: parsed, setUser } = useUser();
     if (!['property_manager','admin'].includes(parsed.role)) {
       router.push('/dashboard');
       return;
@@ -47,8 +49,8 @@ export default function MaintenancePage() {
   const [updateForm, setUpdateForm] = useState({});
 
   useEffect(() => {
-    if (user) {
-      if (user.role === 'tenant') {
+    if (parsed) {
+      if (parsed.role === 'tenant') {
         // Load tenant's active agreements for property selection
         api.get('/agreements').then(({ data }) => {
           const active = data.filter(a => a.status === 'active');
@@ -77,7 +79,7 @@ export default function MaintenancePage() {
       setForm({ propertyId: '', title: '', description: '', priority: 'medium', category: 'other' });
       fetchRequests();
     } catch (err) {
-      alert(err.response?.data?.message || 'Error submitting request');
+      toast(err.response?.data?.message || 'Error submitting request', 'error');
     } finally { setSubmitting(false); }
   };
 
@@ -88,7 +90,7 @@ export default function MaintenancePage() {
     try {
       await api.put(`/maintenance/${id}`, data);
       fetchRequests();
-    } catch (err) { alert(err.response?.data?.message || 'Error'); }
+    } catch (err) { toast(err.response?.data?.message || 'Error', 'error'); }
     finally { setActionId(null); }
   };
 
@@ -97,11 +99,11 @@ export default function MaintenancePage() {
     try {
       await api.delete(`/maintenance/${id}`);
       fetchRequests();
-    } catch (err) { alert(err.response?.data?.message || 'Error'); }
+    } catch (err) { toast(err.response?.data?.message || 'Error', 'error'); }
   };
 
-  const isTenant = user?.role === 'tenant';
-  const canUpdate = ['landlord','property_manager','admin'].includes(user?.role);
+  const isTenant = parsed?.role === 'tenant';
+  const canUpdate = ['landlord','property_manager','admin'].includes(parsed?.role);
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">

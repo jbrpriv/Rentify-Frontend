@@ -172,7 +172,7 @@ function Lightbox({ images, startIndex, onClose }) {
 }
 
 /* ─── Offer form ──────────────────────────────────────────────────── */
-function OfferForm({ listing, currentUser, router, listingId }) {
+function OfferForm({ listing, user, router, listingId }) {
   const defaultDuration = String(listing.leaseTerms?.defaultDurationMonths || 12);
   const [form, setForm] = useState({ monthlyRent:'', securityDeposit:'', leaseDurationMonths: defaultDuration });
   const [submitting, setSubmitting] = useState(false);
@@ -187,7 +187,7 @@ function OfferForm({ listing, currentUser, router, listingId }) {
   ];
 
   const handleSubmit = async () => {
-    if (!currentUser) { router.push(`/login?redirect=/browse/${listingId}`); return; }
+    if (!user) { router.push(`/login?redirect=/browse/${listingId}`); return; }
     if (!form.monthlyRent || !form.securityDeposit || !form.leaseDurationMonths) {
       setError('Please fill in all three fields.'); return;
     }
@@ -267,7 +267,7 @@ function OfferForm({ listing, currentUser, router, listingId }) {
         <p style={{ marginTop:8, fontSize:'0.78rem', color:'#DC2626', background:'#FFF7F7', border:'1px solid #FECACA', borderRadius:7, padding:'7px 11px' }}>{error}</p>
       )}
 
-      {!currentUser && (
+      {!user && (
         <p style={{ marginTop:8, fontSize:'0.76rem', color:'#64748B', textAlign:'center' }}>
           <a href={`/login?redirect=/browse/${listingId}`} style={{ color:'#7C3AED', fontWeight:700 }}>Log in</a> to submit your offer
         </p>
@@ -286,7 +286,7 @@ function OfferForm({ listing, currentUser, router, listingId }) {
         }}
       >
         {submitting ? <Loader2 size={16} className="animate-spin"/> : <Tag size={16}/>}
-        {submitting ? 'Submitting…' : currentUser ? 'Submit Offer' : 'Login to Offer'}
+        {submitting ? 'Submitting…' : user ? 'Submit Offer' : 'Login to Offer'}
       </button>
     </div>
   );
@@ -297,11 +297,11 @@ function ListingDetailContent() {
   const { id }       = useParams();
   const router       = useRouter();
   const searchParams = useSearchParams();
+  const { user }     = useUser();
   const isViewOnly   = searchParams.get('viewOnly') === 'true';
 
   const [listing,          setListing]         = useState(null);
   const [loading,          setLoading]          = useState(true);
-  const [currentUser,      setCurrentUser]      = useState(null);
   const [activeImage,      setActiveImage]      = useState(0);
   const [lightboxOpen,     setLightboxOpen]     = useState(false);
   const [lightboxStart,    setLightboxStart]    = useState(0);
@@ -309,8 +309,6 @@ function ListingDetailContent() {
   const [hasExistingOffer, setHasExistingOffer] = useState(false);
 
   useEffect(() => {
-    if (user) setCurrentUser(user);
-
     (async () => {
       try {
         const { data } = await api.get(`/listings/${id}`);
@@ -356,8 +354,8 @@ function ListingDetailContent() {
     { label: listing.title, href: null },
   ];
 
-  const showOfferForm = !isViewOnly && currentUser?.role === 'tenant' && !hasExistingOffer;
-  const showActiveOffer = !isViewOnly && currentUser?.role === 'tenant' && hasExistingOffer;
+  const showOfferForm = !isViewOnly && user?.role === 'tenant' && !hasExistingOffer;
+  const showActiveOffer = !isViewOnly && user?.role === 'tenant' && hasExistingOffer;
 
   return (
     <>
@@ -587,8 +585,8 @@ function ListingDetailContent() {
                     </div>
                   </div>
                 ) : showOfferForm ? (
-                  <OfferForm listing={listing} currentUser={currentUser} router={router} listingId={id}/>
-                ) : !currentUser ? (
+                  <OfferForm listing={listing} user={user} router={router} listingId={id}/>
+                ) : !user ? (
                   <div style={{ padding:'16px 20px' }}>
                     <a href={`/login?redirect=/browse/${id}`} style={{
                       display:'flex', alignItems:'center', justifyContent:'center', gap:8,
