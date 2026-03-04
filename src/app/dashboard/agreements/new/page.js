@@ -239,6 +239,7 @@ function AgreementForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const propertyId = searchParams.get('propertyId');
+  const offerId    = searchParams.get('offerId'); // ← pre-fill from accepted offer
 
   const [loading, setLoading] = useState(false);
   const [step, setStep] = useState(1); // 1: Find Tenant, 2: Terms, 3: Clauses
@@ -248,6 +249,7 @@ function AgreementForm() {
   const [createdAgreementId, setCreatedAgreementId] = useState(null);
   const [savingClauses, setSavingClauses] = useState(false);
   const [showPDFPreview, setShowPDFPreview] = useState(false);
+  const [offerData, setOfferData] = useState(null); // populated when offerId present
 
   const [formData, setFormData] = useState({
     startDate: '',
@@ -256,19 +258,44 @@ function AgreementForm() {
     depositAmount: '',
   });
 
-  // H6 fix — Pre-fill rent/deposit from property defaults
+  // ── When coming from "Accept & Draft Agreement" — pre-load offer details ──
   useEffect(() => {
-    if (!propertyId) return;
+    if (!offerId) return;
+    setLoading(true);
+    api.get(`/offers/${offerId}`)
+      .then(({ data }) => {
+        const lastRound = data.history[data.history.length - 1];
+        const start = new Date();
+        const end   = new Date(start);
+        end.setMonth(end.getMonth() + (lastRound?.leaseDurationMonths || 12));
+        setOfferData(data);
+        setFoundTenant(data.tenant);
+        setTenantEmail(data.tenant?.email || '');
+        setFormData({
+          startDate:     start.toISOString().slice(0, 10),
+          endDate:       end.toISOString().slice(0, 10),
+          rentAmount:    String(lastRound?.monthlyRent     || ''),
+          depositAmount: String(lastRound?.securityDeposit || ''),
+        });
+        setStep(2); // skip "Find Tenant" — tenant is already known from offer
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, [offerId]);
+
+  // H6 fix — Pre-fill rent/deposit from property defaults (only when no offer)
+  useEffect(() => {
+    if (offerId || !propertyId) return;
     api.get(`/properties/${propertyId}`)
       .then(({ data }) => {
         setFormData((prev) => ({
           ...prev,
-          rentAmount:    data.financials?.monthlyRent   ? String(data.financials.monthlyRent)   : prev.rentAmount,
+          rentAmount:    data.financials?.monthlyRent    ? String(data.financials.monthlyRent)    : prev.rentAmount,
           depositAmount: data.financials?.securityDeposit ? String(data.financials.securityDeposit) : prev.depositAmount,
         }));
       })
-      .catch(() => {}); // silently ignore if property fetch fails
-  }, [propertyId]);
+      .catch(() => {});
+  }, [propertyId, offerId]);
 
   const lookupTenant = async () => {
     setLoading(true);
@@ -291,8 +318,28 @@ function AgreementForm() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!foundTenant || !propertyId) return;
 
+    // ── When accepting an offer: call PUT /offers/:id/accept ─────────────────
+    if (offerId) {
+      if (!foundTenant) return;
+      setLoading(true);
+      try {
+        const { data } = await api.put(`/offers/${offerId}/accept`, {
+          startDate: formData.startDate,
+          // templateId omitted here — landlord picks clauses individually in step 3
+        });
+        setCreatedAgreementId(data.agreement._id);
+        setStep(3);
+      } catch (error) {
+        alert(error.response?.data?.message || 'Failed to accept offer');
+      } finally {
+        setLoading(false);
+      }
+      return;
+    }
+
+    // ── Normal flow: create agreement directly ────────────────────────────────
+    if (!foundTenant || !propertyId) return;
     setLoading(true);
     try {
       const { data: agreement } = await api.post('/agreements', {
@@ -303,9 +350,8 @@ function AgreementForm() {
         rentAmount:    Number(formData.rentAmount),
         depositAmount: Number(formData.depositAmount),
       });
-
       setCreatedAgreementId(agreement._id);
-      setStep(3); // Move to clause picker step
+      setStep(3);
     } catch (error) {
       alert(error.response?.data?.message || 'Failed to create agreement');
     } finally {
@@ -340,16 +386,39 @@ function AgreementForm() {
   return (
     <div className="max-w-2xl mx-auto py-8">
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900">Create Rental Agreement</h1>
-        <p className="text-gray-500">Draft a new legal contract for your property.</p>
+        <h1 className="text-2xl font-bold text-gray-900">
+          {offerId ? 'Accept Offer & Draft Agreement' : 'Create Rental Agreement'}
+        </h1>
+        <p className="text-gray-500">
+          {offerId
+            ? 'Review the negotiated terms, add clauses, and finalise the agreement.'
+            : 'Draft a new legal contract for your property.'}
+        </p>
       </div>
+
+      {/* Banner shown when pre-filling from an offer */}
+      {offerId && offerData && (
+        <div className="mb-6 flex items-start gap-3 p-4 bg-green-50 border border-green-200 rounded-xl text-sm">
+          <CheckSquare className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+          <div>
+            <p className="font-semibold text-green-800">
+              Accepting offer from {offerData.tenant?.name}
+            </p>
+            <p className="text-green-700 mt-0.5">
+              {offerData.property?.title} · Rs.{' '}
+              {offerData.history[offerData.history.length - 1]?.monthlyRent?.toLocaleString()}/mo ·{' '}
+              {offerData.history[offerData.history.length - 1]?.leaseDurationMonths} months
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Progress indicator */}
       <div className="flex items-center mb-8">
         {['Find Tenant', 'Lease Terms', 'Clauses'].map((label, i) => (
           <div key={label} className="flex items-center">
-            <div className={`flex items-center justify-center w-8 h-8 rounded-full text-sm font-medium ${step > i + 1 ? 'bg-green-500 text-white' : step === i + 1 ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-500'}`}>
-              {step > i + 1 ? '✓' : i + 1}
+            <div className={`flex items-center justify-center w-8 h-8 rounded-full text-sm font-medium ${step > i + 1 || (offerId && i === 0) ? 'bg-green-500 text-white' : step === i + 1 ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-500'}`}>
+              {step > i + 1 || (offerId && i === 0) ? '✓' : i + 1}
             </div>
             <span className={`ml-2 text-sm font-medium ${step === i + 1 ? 'text-blue-600' : 'text-gray-500'}`}>{label}</span>
             {i < 2 && <div className="mx-4 flex-1 h-px bg-gray-200 w-8" />}
@@ -358,12 +427,18 @@ function AgreementForm() {
       </div>
 
       <div className="bg-white shadow rounded-lg overflow-hidden">
-        {/* Step 1: Tenant Lookup */}
+        {/* Step 1: Tenant Lookup — hidden/auto-completed when coming from offer */}
         <div className={`p-6 ${step !== 1 ? 'opacity-50 pointer-events-none' : ''}`}>
           <h2 className="text-lg font-medium text-gray-900 flex items-center mb-4">
             <Search className="w-5 h-5 mr-2 text-blue-500" />
             Step 1: Find Tenant
           </h2>
+          {offerId && foundTenant ? (
+            <div className="p-3 bg-green-50 text-green-700 rounded-md flex items-center">
+              <CheckSquare className="w-5 h-5 mr-2" />
+              Tenant pre-filled from offer: <strong className="ml-1">{foundTenant.name}</strong>&nbsp;({foundTenant.email})
+            </div>
+          ) : (
           <div className="flex gap-4">
             <input
               type="email"
@@ -382,6 +457,7 @@ function AgreementForm() {
               {loading ? <Loader2 className="animate-spin" /> : 'Search'}
             </button>
           </div>
+          )}
           {foundTenant && (
             <div className="mt-4 p-3 bg-green-50 text-green-700 rounded-md flex items-center">
               <UserCheck className="w-5 h-5 mr-2" />

@@ -7,7 +7,7 @@ import { useUser } from '@/context/UserContext';
 import {
   Tag, Building2, ChevronDown, ChevronUp, Check, X, ArrowLeftRight,
   Loader2, Clock, CheckCircle, XCircle, AlertCircle, Plus, RefreshCw,
-  TrendingDown, TrendingUp, Minus,
+  TrendingDown, TrendingUp, Minus, Calendar, FileText,
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -475,7 +475,6 @@ export default function OffersPage() {
   const [loading, setLoading]   = useState(true);
   const [actionLoading, setActionLoading] = useState(null);
   const [toast, setToast]       = useState(null);
-  const [acceptModal, setAcceptModal] = useState(null);
   const [filter, setFilter]     = useState('active'); // 'active' | 'history'
 
   const showToast = (msg, ok = true) => { setToast({ msg, ok }); setTimeout(() => setToast(null), 4000); };
@@ -492,24 +491,13 @@ export default function OffersPage() {
     fetchOffers();
   }, []); // eslint-disable-line
 
-  const handleAcceptConfirm = async ({ templateId, startDate }) => {
-    const offerId = acceptModal._id;
-    const key = `accept-${offerId}`;
-    setActionLoading(key);
-    try {
-      await api.put(`/offers/${offerId}/accept`, { templateId, startDate });
-      showToast('Offer accepted — agreement drafted');
-      setAcceptModal(null);
-      fetchOffers();
-    } catch (err) {
-      showToast(err.response?.data?.message || 'Accept failed', false);
-    } finally {
-      setActionLoading(null);
-    }
-  };
-
   const handleAction = async (type, offerId, form) => {
-    if (type === 'accept') { setAcceptModal(offers.find(o => o._id === offerId)); return; }
+    if (type === 'accept') {
+      // Redirect to the agreement draft page with offerId pre-filled
+      // The full drag-and-drop clause picker lives there
+      router.push(`/dashboard/agreements/new?offerId=${offerId}`);
+      return;
+    }
     const key = `${type}-${offerId}`;
     setActionLoading(key);
     try {
@@ -634,14 +622,6 @@ export default function OffersPage() {
         )}
       </motion.div>
 
-      {acceptModal && (
-        <AcceptModal
-          offer={acceptModal}
-          loading={!!actionLoading}
-          onConfirm={handleAcceptConfirm}
-          onClose={() => setAcceptModal(null)}
-        />
-      )}
     </>
   );
 }
