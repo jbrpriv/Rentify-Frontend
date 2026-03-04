@@ -25,23 +25,24 @@ function OAuthSuccessContent() {
       return;
     }
 
-    // Always save token immediately — complete-profile page needs it
-    localStorage.setItem('token', token);
-    localStorage.setItem('userInfo', JSON.stringify({
-      _id: id, name, role, email, isPhoneVerified, provider,
-    }));
-
     if (isNewUser) {
-      // Pass token in URL as well — belt-and-suspenders so complete-profile
-      // can re-save it even if localStorage is cleared between navigations
+      // DO NOT save token or userInfo to localStorage yet.
+      // The user still needs to complete their profile and verify their phone.
+      // localStorage is only written after verify-otp succeeds in complete-profile.
+      // The token travels via URL param only until that point.
       const params = new URLSearchParams({
         provider,
         email:  email || '',
         name:   name  || '',
-        token,           // ← passed through so complete-profile can always auth
+        token,
       });
       router.replace(`/auth/oauth/complete-profile?${params.toString()}`);
     } else {
+      // Fully set-up returning user — safe to persist session now.
+      localStorage.setItem('token', token);
+      localStorage.setItem('userInfo', JSON.stringify({
+        _id: id, name, role, email, isPhoneVerified, provider,
+      }));
       router.replace('/dashboard');
     }
   }, [searchParams, router]);

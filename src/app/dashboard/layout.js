@@ -152,16 +152,15 @@ export default function DashboardLayout({ children }) {
     if (!stored) { router.push('/login'); return; }
     const u = JSON.parse(stored);
 
-    // OAuth users (Google / Facebook) have their token saved before phone
-    // verification completes. If they abandon the flow and somehow reach the
-    // dashboard, delete the incomplete Mongo account, clear localStorage, and
-    // send them back to login to start fresh.
+    // Edge-case safety net: if somehow an OAuth session with an unverified
+    // phone is in localStorage (e.g. from an old app version), clear it and
+    // send the user back to login. Under the current flow this should never
+    // be reached because localStorage is only written after OTP verification.
     if (u.isPhoneVerified === false && u.provider) {
-      try {
-        await api.delete('/auth/oauth/abandon');
-      } catch { /* best-effort */ }
       localStorage.removeItem('token');
       localStorage.removeItem('userInfo');
+      // Best-effort cleanup — fire and forget, don't block the redirect
+      api.delete('/auth/oauth/abandon').catch(() => {});
       router.replace('/login');
       return;
     }
