@@ -12,7 +12,12 @@ import {
 } from 'lucide-react';
 
 // ─── Flow Tracker ─────────────────────────────────────────────────────────────
-function FlowTracker({ offerData }) {
+function FlowTracker({ offerData, step }) {
+  // step 1 = Lease Terms (Draft Agreement is active)
+  // step 2 = Clauses    (Draft Agreement is done, Sign & Activate is active)
+  const draftDone = step >= 2;
+  const signActive = step >= 2;
+
   const steps = [
     {
       key: 'browse',
@@ -31,15 +36,16 @@ function FlowTracker({ offerData }) {
     {
       key: 'agreement',
       label: 'Draft Agreement',
-      sublabel: 'Set terms & clauses',
-      done: false,
-      active: true,
+      sublabel: draftDone ? 'Terms set' : 'Set terms & clauses',
+      done: draftDone,
+      active: !draftDone,
     },
     {
       key: 'sign',
       label: 'Sign & Activate',
-      sublabel: 'Both parties sign',
+      sublabel: signActive ? 'Choose clauses & finish' : 'Both parties sign',
       done: false,
+      active: signActive,
     },
   ];
 
@@ -555,7 +561,7 @@ function AgreementForm() {
       {offerId && (
         <>
           {/* Flow tracker */}
-          <FlowTracker offerData={offerData} />
+          <FlowTracker offerData={offerData} step={step} />
 
           {/* Offer accepted banner */}
           {offerData && (
@@ -596,7 +602,7 @@ function AgreementForm() {
                   Step 1: Lease Terms
                 </h2>
 
-                <form onSubmit={handleSubmit} className="space-y-6">
+                <form onSubmit={handleSubmit} noValidate className="space-y-6">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700">Start Date</label>
