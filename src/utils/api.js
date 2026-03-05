@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: '/api',
+  baseURL: process.env.NEXT_PUBLIC_API_URL || '/api',
   headers: { 'Content-Type': 'application/json' },
   withCredentials: true, // Required to send the HttpOnly refresh cookie
 });
@@ -25,7 +25,11 @@ api.interceptors.response.use(
       originalRequest._retry = true; // Prevent infinite loop
 
       try {
-        const { data } = await axios.post('/api/auth/refresh', {}, { withCredentials: true });
+        const { data } = await axios.post(
+          `${process.env.NEXT_PUBLIC_API_URL || '/api'}/auth/refresh`,
+          {},
+          { withCredentials: true }
+        );
         localStorage.setItem('token', data.token);
         originalRequest.headers.Authorization = `Bearer ${data.token}`;
         return api(originalRequest); // Retry the original request
