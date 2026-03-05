@@ -174,14 +174,14 @@ function SidebarContent({ user, role, currentNav, pathname, badgeCounts, pulseCo
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.35, delay: 0.04 * index, ease: [0.21, 0.6, 0.35, 1] }}
               className={`group mb-0.5 flex w-full items-center justify-between rounded-2xl px-3 py-2.5 text-[0.8rem] font-semibold transition-all ${isActive
-                  ? 'bg-[#E6F4F8] text-neutral-900 shadow-sm shadow-[#0992C2]/25'
-                  : 'text-neutral-500 hover:bg-[#F0F8FA] hover:text-neutral-900'
+                ? 'bg-[#E6F4F8] text-neutral-900 shadow-sm shadow-[#0992C2]/25'
+                : 'text-neutral-500 hover:bg-[#F0F8FA] hover:text-neutral-900'
                 }`}
             >
               <span className="flex items-center gap-2">
                 <span className={`flex h-8 w-8 items-center justify-center rounded-2xl border ${isActive
-                    ? 'border-[#0992C2] bg-white'
-                    : 'border-transparent bg-white/70 group-hover:border-[#99E0F2]'
+                  ? 'border-[#0992C2] bg-white'
+                  : 'border-transparent bg-white/70 group-hover:border-[#99E0F2]'
                   }`}>
                   <Icon className={`h-3.5 w-3.5 ${isActive ? 'text-[#0992C2]' : 'text-neutral-500'}`} />
                 </span>
@@ -219,6 +219,44 @@ export default function DashboardLayout({ children }) {
     }
   }, [mobileOpen]);
   useEffect(() => { setMobileOpen(false); }, [pathname]);
+
+  // Role-based route protection
+  useEffect(() => {
+    if (!user) return;
+    const role = user.role;
+
+    // Admin routes
+    if (pathname.startsWith('/dashboard/admin')) {
+      if (role === 'law_reviewer' && pathname.startsWith('/dashboard/admin/templates')) return;
+      if (role !== 'admin') router.push('/dashboard');
+    }
+    // Landlord specific routes
+    else if (pathname.startsWith('/dashboard/landlord') || pathname.startsWith('/dashboard/billing') || pathname.startsWith('/dashboard/properties/new') || pathname.startsWith('/dashboard/agreements/new')) {
+      if (role !== 'landlord') router.push('/dashboard');
+    }
+    // Property Manager specific routes
+    else if (pathname.startsWith('/dashboard/pm')) {
+      if (role !== 'property_manager') router.push('/dashboard');
+    }
+    // Tenant specific routes
+    else if (pathname.startsWith('/dashboard/my-lease') || pathname.startsWith('/dashboard/payments') || pathname.startsWith('/dashboard/documents')) {
+      if (role !== 'tenant') router.push('/dashboard');
+    }
+    // Cross-role routes
+    else if (pathname === '/dashboard/properties') {
+      if (!['landlord', 'admin'].includes(role)) router.push('/dashboard');
+    }
+    else if (pathname === '/dashboard/agreements' || pathname.startsWith('/dashboard/agreements/')) {
+      // /agreements/new is already caught above
+      if (!['landlord', 'admin', 'law_reviewer'].includes(role)) router.push('/dashboard');
+    }
+    else if (pathname.startsWith('/dashboard/agreement-templates')) {
+      if (!['landlord', 'admin'].includes(role)) router.push('/dashboard');
+    }
+    else if (pathname.startsWith('/dashboard/offers')) {
+      if (!['landlord', 'tenant'].includes(role)) router.push('/dashboard');
+    }
+  }, [pathname, user, router]);
 
   const fetchCounts = useCallback(async () => {
     try {
