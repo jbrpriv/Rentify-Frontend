@@ -1,51 +1,669 @@
-describe('Agreements', () => {
+// cypress/e2e/agreements.cy.js
+// ─────────────────────────────────────────────────────────────────────────────
+// Full E2E coverage for:
+//   • Agreements list page     (/dashboard/agreements)
+//   • Agreement builder        (/dashboard/agreements/new)
+//   • Version history page     (/dashboard/agreements/:id/history)
+//   • Agreement templates page (/dashboard/agreement-templates)
+//   • Tenant lease page        (/dashboard/my-lease)
+//   • Public signing page      (/sign/:token)
+// ─────────────────────────────────────────────────────────────────────────────
+
+// ─── Shared intercepts ────────────────────────────────────────────────────────
+const mockAgreements = [
+    {
+        _id: 'agr_001',
+        status: 'pending_signature',
+        property: { _id: 'prop_001', title: 'Sunset Apartments' },
+        tenant: { _id: 'ten_001', name: 'Ali Hassan', email: 'ali@example.com' },
+        landlord: { _id: 'lnd_001', name: 'Test Landlord' },
+        term: { startDate: '2025-01-01', endDate: '2026-01-01', durationMonths: 12 },
+        financials: { rentAmount: 25000, depositAmount: 50000 },
+        signatures: {
+            landlord: { signed: false },
+            tenant: { signed: false },
+        },
+        rentEscalation: { enabled: false },
+    },
+    {
+        _id: 'agr_002',
+        status: 'active',
+        property: { _id: 'prop_002', title: 'Green Valley Flat' },
+        tenant: { _id: 'ten_002', name: 'Sara Khan', email: 'sara@example.com' },
+        landlord: { _id: 'lnd_001', name: 'Test Landlord' },
+        term: { startDate: '2024-06-01', endDate: '2025-06-01', durationMonths: 12 },
+        financials: { rentAmount: 35000, depositAmount: 70000 },
+        signatures: {
+            landlord: { signed: true },
+            tenant: { signed: true },
+        },
+        rentEscalation: { enabled: true, percentage: 5 },
+    },
+];
+
+const mockOffer = {
+    _id: 'offer_001',
+    status: 'countered',
+    property: {
+        _id: 'prop_001',
+        title: 'Sunset Apartments',
+        financials: { lateFeeAmount: 500, lateFeeGracePeriodDays: 5 },
+    },
+    tenant: { _id: 'ten_001', name: 'Ali Hassan', email: 'ali@example.com' },
+    landlord: { _id: 'lnd_001' },
+    history: [
+        {
+            round: 1, offeredBy: 'tenant',
+            monthlyRent: 25000, securityDeposit: 50000, leaseDurationMonths: 12,
+        },
+        {
+            round: 2, offeredBy: 'landlord',
+            monthlyRent: 27000, securityDeposit: 54000, leaseDurationMonths: 12,
+            note: 'Slight adjustment',
+        },
+    ],
+};
+
+const mockClauses = [
+    { _id: 'cl_001', title: 'No Pets Allowed', category: 'restrictions', isDefault: false, body: 'Tenant shall not keep any pets on the premises.' },
+    { _id: 'cl_002', title: 'Maintenance Duties', category: 'maintenance', isDefault: true, body: 'Tenant is responsible for minor maintenance.' },
+    { _id: 'cl_003', title: 'Sub-letting Ban', category: 'restrictions', isDefault: false, body: 'Tenant may not sub-let without written consent.' },
+];
+
+const mockTemplates = [
+    {
+        _id: 'tpl_001',
+        name: 'Standard Residential',
+        description: 'Basic clauses for a standard lease.',
+        status: 'approved',
+        clauseIds: [{ _id: 'cl_001' }, { _id: 'cl_002' }],
+    },
+];
+
+const mockVersionHistory = {
+    currentVersion: 2,
+    versionHistory: [
+        {
+            version: 1,
+            reason: 'Initial draft',
+            savedAt: new Date().toISOString(),
+            savedBy: { name: 'Test Landlord' },
+            snapshot: {
+                status: 'draft',
+                financials: { rentAmount: 25000, depositAmount: 50000 },
+                term: { durationMonths: 12, startDate: '2025-01-01', endDate: '2026-01-01' },
+                clauses: ['No Pets Allowed'],
+            },
+        },
+        {
+            version: 2,
+            reason: 'Clauses updated',
+            savedAt: new Date().toISOString(),
+            savedBy: { name: 'Test Landlord' },
+            snapshot: {
+                status: 'pending_signature',
+                financials: { rentAmount: 25000, depositAmount: 50000 },
+                term: { durationMonths: 12, startDate: '2025-01-01', endDate: '2026-01-01' },
+                clauses: ['No Pets Allowed', 'Maintenance Duties'],
+            },
+        },
+    ],
+    auditLog: [
+        {
+            action: 'AGREEMENT_CREATED',
+            timestamp: new Date().toISOString(),
+            details: 'Agreement drafted from offer.',
+            actor: { name: 'Test Landlord' },
+            ipAddress: '127.0.0.1',
+        },
+        {
+            action: 'CLAUSES_UPDATED',
+            timestamp: new Date().toISOString(),
+            details: '2 clauses attached.',
+            actor: { name: 'Test Landlord' },
+        },
+    ],
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// AGREEMENTS LIST
+// ─────────────────────────────────────────────────────────────────────────────
+describe('Agreements List — Landlord', () => {
 
     beforeEach(() => {
         cy.loginAsLandlord();
+        cy.intercept('GET', '/api/agreements', { statusCode: 200, body: mockAgreements }).as('getAgreements');
         cy.visit('/dashboard/agreements');
+        cy.wait('@getAgreements');
     });
 
-    it('renders the agreements list page', () => {
-        cy.contains(/agreements/i).should('exist');
+    it('renders the page heading', () => {
+        cy.contains(/rental agreements/i).should('be.visible');
         cy.url().should('include', '/dashboard/agreements');
     });
 
-    it('agreement builder directly blocks draft without offerId', () => {
-        cy.visit('/dashboard/agreements/new');
-        // Because there is no offerId in the URL, the manual form shouldn't be accessible
-        cy.contains(/Start from an Offer/i).should('exist');
-        cy.get('input[type="date"]').should('not.exist');
+    it('lists all agreements returned by the API', () => {
+        cy.contains('Sunset Apartments').should('be.visible');
+        cy.contains('Green Valley Flat').should('be.visible');
     });
 
-    it('shows agreement history tab', () => {
+    it('shows tenant name and lease end date for each agreement', () => {
+        cy.contains('Ali Hassan').should('be.visible');
+        cy.contains('Sara Khan').should('be.visible');
+        // End dates are rendered via toLocaleDateString — just assert the element exists
+        cy.contains(/ends:/i).should('exist');
+    });
+
+    it('shows correct signature status badges', () => {
+        // agr_001 — both unsigned
+        cy.contains('Landlord Pending').should('be.visible');
+        cy.contains('Tenant Pending').should('be.visible');
+        // agr_002 — both signed
+        cy.contains('Landlord Signed').should('be.visible');
+        cy.contains('Tenant Signed').should('be.visible');
+    });
+
+    it('shows rent escalation indicator for agreements that have it enabled', () => {
+        cy.contains('+5% / yr').should('be.visible');
+    });
+
+    it('shows the correct status pill for each agreement', () => {
+        cy.contains('Pending signature').should('be.visible');
+        cy.contains('Active').should('be.visible');
+    });
+
+    it('renders a Sign button only for unsigned, non-active/expired agreements', () => {
+        // agr_001 is pending_signature and unsigned — Sign should appear
+        // agr_002 is active — no Sign button expected
+        cy.get('button').filter(':contains("Sign")').should('have.length', 1);
+    });
+
+    it('renders Send Invites button for landlord on draft/pending agreements', () => {
+        cy.contains('button', /send invites/i).should('be.visible');
+    });
+
+    it('calls send-invites API and shows toast on success', () => {
+        cy.intercept('POST', '/api/agreements/agr_001/send-invites', {
+            statusCode: 200,
+            body: { message: 'Invites sent' },
+        }).as('sendInvites');
+
+        cy.contains('button', /send invites/i).click();
+        cy.wait('@sendInvites');
+        cy.contains(/signing invitations sent/i).should('be.visible');
+    });
+
+    it('downloads PDF when PDF button is clicked', () => {
+        cy.intercept('GET', '/api/agreements/agr_001/pdf', {
+            statusCode: 200,
+            body: new Blob(['%PDF'], { type: 'application/pdf' }),
+        }).as('downloadPdf');
+
+        cy.get('button').filter(':contains("PDF")').first().click();
+        cy.wait('@downloadPdf');
+    });
+
+    it('navigates to version history page when History button is clicked', () => {
+        cy.get('button').filter(':contains("History")').first().click();
+        cy.url().should('include', '/dashboard/agreements/agr_001/history');
+    });
+
+    it('opens the signature draw modal when Sign is clicked', () => {
+        cy.get('button').filter(':contains("Sign")').click();
+        // SignatureModal should appear
+        cy.contains(/sign/i).should('be.visible');
+        cy.get('canvas, [data-testid="signature-canvas"]').should('exist');
+    });
+
+    it('shows empty state when no agreements exist', () => {
+        cy.intercept('GET', '/api/agreements', { statusCode: 200, body: [] }).as('emptyAgreements');
         cy.visit('/dashboard/agreements');
-        cy.get('body').then(($body) => {
-            // If there are agreements, click the first one's history link
-            if ($body.find('[data-testid="agreement-row"]').length) {
-                cy.get('[data-testid="agreement-row"]').first().click();
-            }
-        });
-    });
-
-    it('agreement templates page loads', () => {
-        cy.visit('/dashboard/agreement-templates');
-        cy.contains(/templates/i).should('exist');
+        cy.wait('@emptyAgreements');
+        cy.contains(/no agreements found/i).should('be.visible');
     });
 });
 
-describe('Signing Flow (Tenant)', () => {
+// ─────────────────────────────────────────────────────────────────────────────
+// AGREEMENT BUILDER — /dashboard/agreements/new
+// ─────────────────────────────────────────────────────────────────────────────
+describe('Agreement Builder — offerId guard', () => {
+
+    beforeEach(() => {
+        cy.loginAsLandlord();
+    });
+
+    it('blocks access without offerId and shows the Start from an Offer screen', () => {
+        cy.visit('/dashboard/agreements/new');
+        cy.contains(/start from an offer/i).should('be.visible');
+        cy.get('input[type="date"]').should('not.exist');
+    });
+
+    it('the Start from an Offer CTA redirects to the offers page', () => {
+        cy.visit('/dashboard/agreements/new');
+        cy.contains('button', /view applications/i).click();
+        cy.url().should('include', '/dashboard/offers');
+    });
+});
+
+describe('Agreement Builder — with valid offerId', () => {
+
+    beforeEach(() => {
+        cy.loginAsLandlord();
+        cy.intercept('GET', '/api/offers/offer_001', { statusCode: 200, body: mockOffer }).as('getOffer');
+        cy.intercept('GET', '/api/agreements/clauses', { statusCode: 200, body: mockClauses }).as('getClauses');
+        cy.intercept('GET', '/api/agreement-templates', { statusCode: 200, body: mockTemplates }).as('getTemplates');
+        cy.visit('/dashboard/agreements/new?offerId=offer_001');
+        cy.wait('@getOffer');
+    });
+
+    // ── Flow tracker ───────────────────────────────────────────────────────────
+    it('renders the rental flow tracker with all four steps', () => {
+        cy.contains(/rental flow/i).should('be.visible');
+        cy.contains(/property listed/i).should('be.visible');
+        cy.contains(/offer negotiated/i).should('be.visible');
+        cy.contains(/draft agreement/i).should('be.visible');
+        cy.contains(/sign & activate/i).should('be.visible');
+    });
+
+    it('marks Property Listed and Offer Negotiated as done in the flow tracker', () => {
+        // The two completed steps use CheckCircle2; the active step shows step number "3"
+        cy.contains(/2 rounds/i).should('be.visible');
+        cy.contains(/27,000\/mo/i).should('be.visible');
+    });
+
+    // ── Offer accepted banner ──────────────────────────────────────────────────
+    it('shows the accepted-offer banner with tenant name and rent', () => {
+        cy.contains(/accepting offer from ali hassan/i).should('be.visible');
+        cy.contains(/sunset apartments/i).should('be.visible');
+        cy.contains(/27,000\/mo/i).should('be.visible');
+    });
+
+    // ── Step 1: Lease Terms ────────────────────────────────────────────────────
+    it('pre-fills rent and deposit from the offer and marks them disabled', () => {
+        cy.get('input[type="number"]').filter('[value="27000"]').should('be.disabled');
+        cy.get('input[type="number"]').filter('[value="54000"]').should('be.disabled');
+    });
+
+    it('pre-fills late fee and grace period from property settings and marks them disabled', () => {
+        cy.get('input[type="number"]').filter('[value="500"]').should('be.disabled');
+        cy.get('input[type="number"]').filter('[value="5"]').should('be.disabled');
+    });
+
+    it('validates that start date is required', () => {
+        // Clear the pre-filled start date and try to proceed
+        cy.get('input[type="date"]').first().clear();
+        cy.contains('button', /create agreement draft/i).click();
+        cy.contains(/start date is required/i).should('be.visible');
+    });
+
+    it('validates that end date must be after start date', () => {
+        cy.get('input[type="date"]').first().type('2025-06-01');
+        cy.get('input[type="date"]').last().type('2025-01-01');
+        cy.contains('button', /create agreement draft/i).click();
+        cy.contains(/end date must be after start date/i).should('be.visible');
+    });
+
+    it('shows rent escalation preview when the toggle is switched on', () => {
+        cy.contains(/annual rent escalation/i).should('be.visible');
+        // Toggle is a button — click it
+        cy.get('button[class*="rounded-full"]').click();
+        cy.contains(/increase by/i).should('be.visible');
+        cy.contains(/% per year/i).should('be.visible');
+        cy.contains(/increase on year 1/i).should('be.visible');
+    });
+
+    it('advances to Step 2 when valid lease terms are submitted', () => {
+        // Dates are already pre-filled by the offer mock; just submit
+        cy.contains('button', /create agreement draft/i).click();
+        cy.contains(/step 2/i).should('be.visible');
+        cy.contains(/additional clauses/i).should('be.visible');
+    });
+
+    // ── Step 2: Clauses ────────────────────────────────────────────────────────
+    describe('Step 2 — Clause Picker', () => {
+
+        beforeEach(() => {
+            // Advance to step 2
+            cy.contains('button', /create agreement draft/i).click();
+            cy.wait('@getClauses');
+        });
+
+        it('renders available clauses from the API', () => {
+            cy.contains('No Pets Allowed').should('be.visible');
+            cy.contains('Maintenance Duties').should('be.visible');
+            cy.contains('Sub-letting Ban').should('be.visible');
+        });
+
+        it('marks default/recommended clauses with a badge', () => {
+            cy.contains('Recommended').should('be.visible');
+        });
+
+        it('expands a clause to show its body text', () => {
+            cy.contains('No Pets Allowed')
+                .closest('[class*="border"]')
+                .find('button')
+                .last()
+                .click();
+            cy.contains('Tenant shall not keep any pets').should('be.visible');
+        });
+
+        it('adds a clause to the selected list when its checkbox is clicked', () => {
+            cy.contains('No Pets Allowed')
+                .closest('[class*="border"]')
+                .find('button')
+                .first()
+                .click();
+            // Clause should now appear in the selected section (blue bg)
+            cy.contains(/1 clause selected/i).should('be.visible');
+        });
+
+        it('removes a selected clause via its X button', () => {
+            // Add first
+            cy.contains('No Pets Allowed')
+                .closest('[class*="border"]')
+                .find('button').first().click();
+            cy.contains(/1 clause selected/i).should('be.visible');
+            // Remove
+            cy.get('[class*="bg-blue-50"]').find('button[title="Remove clause"]').click();
+            cy.contains(/1 clause selected/i).should('not.exist');
+        });
+
+        it('filters clauses by category', () => {
+            cy.contains('button', 'restrictions').click();
+            cy.contains('No Pets Allowed').should('be.visible');
+            cy.contains('Sub-letting Ban').should('be.visible');
+            cy.contains('Maintenance Duties').should('not.exist');
+        });
+
+        it('filters clauses by search text', () => {
+            cy.get('input[placeholder="Search clauses…"]').type('pets');
+            cy.contains('No Pets Allowed').should('be.visible');
+            cy.contains('Sub-letting Ban').should('not.exist');
+        });
+
+        it('shows the Use Template button', () => {
+            cy.contains('button', /use template/i).should('be.visible');
+        });
+
+        it('opens the template picker modal and lists approved templates', () => {
+            cy.contains('button', /use template/i).click();
+            cy.contains(/agreement templates/i).should('be.visible');
+            cy.contains('Standard Residential').should('be.visible');
+            cy.contains(/2 clauses included/i).should('be.visible');
+        });
+
+        it('closes the template picker when clicking outside', () => {
+            cy.contains('button', /use template/i).click();
+            cy.contains(/agreement templates/i).should('be.visible');
+            cy.get('[class*="fixed inset-0"]').click({ force: true });
+            cy.contains(/agreement templates/i).should('not.exist');
+        });
+
+        it('applies a template and shows the applied-template banner', () => {
+            cy.intercept('POST', '/api/agreement-templates/tpl_001/use', { statusCode: 200 }).as('trackUsage');
+            cy.contains('button', /use template/i).click();
+            cy.contains('button', 'Use').click();
+            cy.wait('@trackUsage');
+            cy.contains(/template applied: standard residential/i).should('be.visible');
+            cy.contains(/2 clauses selected/i).should('be.visible');
+        });
+
+        it('finishes without clauses by calling accept and redirecting', () => {
+            cy.intercept('PUT', '/api/offers/offer_001/accept', {
+                statusCode: 200,
+                body: { agreement: { _id: 'agr_new' } },
+            }).as('acceptOffer');
+
+            cy.contains('button', /finish without clauses/i).click();
+            cy.wait('@acceptOffer');
+            cy.url().should('include', '/dashboard/agreements');
+        });
+
+        it('attaches clauses and finishes when at least one clause is selected', () => {
+            cy.intercept('PUT', '/api/offers/offer_001/accept', {
+                statusCode: 200,
+                body: { agreement: { _id: 'agr_new' } },
+            }).as('acceptOffer');
+            cy.intercept('PUT', '/api/agreements/agr_new/clauses', { statusCode: 200 }).as('saveClauses');
+
+            cy.contains('No Pets Allowed')
+                .closest('[class*="border"]')
+                .find('button').first().click();
+
+            cy.contains('button', /attach.*clause.*finish/i).click();
+            cy.wait('@acceptOffer');
+            cy.wait('@saveClauses');
+            cy.url().should('include', '/dashboard/agreements');
+        });
+
+        it('Cancel Draft link navigates back to agreements list', () => {
+            cy.contains('a, button', /cancel draft/i).click();
+            cy.url().should('include', '/dashboard/agreements');
+        });
+    });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// VERSION HISTORY PAGE — /dashboard/agreements/:id/history
+// ─────────────────────────────────────────────────────────────────────────────
+describe('Agreement Version History', () => {
+
+    beforeEach(() => {
+        cy.loginAsLandlord();
+        cy.intercept('GET', '/api/agreements/agr_001/version-history', {
+            statusCode: 200,
+            body: mockVersionHistory,
+        }).as('getHistory');
+        cy.visit('/dashboard/agreements/agr_001/history');
+        cy.wait('@getHistory');
+    });
+
+    it('renders the Version History heading and version count', () => {
+        cy.contains(/version history/i).should('be.visible');
+        cy.contains(/2 version/i).should('be.visible');
+    });
+
+    it('renders both version cards in the Versions tab', () => {
+        cy.contains('v1').should('be.visible');
+        cy.contains('v2').should('be.visible');
+        cy.contains('Initial draft').should('be.visible');
+        cy.contains('Clauses updated').should('be.visible');
+    });
+
+    it('expands a version card to show snapshot details', () => {
+        cy.contains('v1').click();
+        cy.contains('Test Landlord').should('be.visible');
+        cy.contains('25,000').should('be.visible'); // rentAmount
+        cy.contains('12 months').should('be.visible');
+        cy.contains('No Pets Allowed').should('be.visible');
+    });
+
+    it('collapses an expanded version card on second click', () => {
+        cy.contains('v1').click();
+        cy.contains('25,000').should('be.visible');
+        cy.contains('v1').click();
+        cy.contains('25,000').should('not.exist');
+    });
+
+    it('switches to the Audit Log tab and shows audit events', () => {
+        cy.contains('button', /audit log/i).click();
+        cy.contains(/agreement created/i).should('be.visible');
+        cy.contains(/clauses updated/i).should('be.visible');
+        cy.contains('Test Landlord').should('be.visible');
+        cy.contains('127.0.0.1').should('be.visible');
+    });
+
+    it('shows tab counts for versions and audit log', () => {
+        cy.contains(/versions/i).contains('2');
+        cy.contains(/audit log/i).contains('2');
+    });
+
+    it('saves a manual snapshot and refreshes the list', () => {
+        const updated = {
+            ...mockVersionHistory,
+            currentVersion: 3,
+            versionHistory: [
+                ...mockVersionHistory.versionHistory,
+                {
+                    version: 3,
+                    reason: 'Manual snapshot by user',
+                    savedAt: new Date().toISOString(),
+                    savedBy: { name: 'Test Landlord' },
+                    snapshot: { status: 'pending_signature', clauses: [] },
+                },
+            ],
+        };
+
+        cy.intercept('POST', '/api/agreements/agr_001/snapshot', {
+            statusCode: 200,
+            body: { version: 3 },
+        }).as('saveSnapshot');
+        cy.intercept('GET', '/api/agreements/agr_001/version-history', {
+            statusCode: 200,
+            body: updated,
+        }).as('refreshHistory');
+
+        cy.contains('button', /save snapshot/i).click();
+        cy.wait('@saveSnapshot');
+        cy.wait('@refreshHistory');
+        cy.contains(/snapshot saved as version 3/i).should('be.visible');
+        cy.contains('v3').should('be.visible');
+    });
+
+    it('shows an error message when the snapshot API fails', () => {
+        cy.intercept('POST', '/api/agreements/agr_001/snapshot', {
+            statusCode: 500,
+            body: { message: 'Internal server error' },
+        }).as('failSnapshot');
+
+        cy.contains('button', /save snapshot/i).click();
+        cy.wait('@failSnapshot');
+        cy.contains(/internal server error/i).should('be.visible');
+    });
+
+    it('back button navigates to the previous page', () => {
+        cy.contains('button', '').find('svg').parents('button').first().click();
+        // Just assert we navigated away from the history page
+        cy.url().should('not.include', '/history');
+    });
+
+    it('shows the empty state when there are no version snapshots', () => {
+        cy.intercept('GET', '/api/agreements/agr_001/version-history', {
+            statusCode: 200,
+            body: { currentVersion: 0, versionHistory: [], auditLog: [] },
+        }).as('emptyHistory');
+
+        cy.visit('/dashboard/agreements/agr_001/history');
+        cy.wait('@emptyHistory');
+        cy.contains(/no version snapshots saved yet/i).should('be.visible');
+    });
+
+    it('shows error state when the history API fails', () => {
+        cy.intercept('GET', '/api/agreements/agr_001/version-history', {
+            statusCode: 404,
+            body: { message: 'Agreement not found' },
+        }).as('historyError');
+
+        cy.visit('/dashboard/agreements/agr_001/history');
+        cy.wait('@historyError');
+        cy.contains(/agreement not found/i).should('be.visible');
+    });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// AGREEMENT TEMPLATES PAGE
+// ─────────────────────────────────────────────────────────────────────────────
+describe('Agreement Templates Page', () => {
+
+    beforeEach(() => {
+        cy.loginAsLandlord();
+        cy.visit('/dashboard/agreement-templates');
+    });
+
+    it('loads the templates page and shows a templates-related heading', () => {
+        cy.contains(/templates/i).should('be.visible');
+        cy.url().should('include', '/dashboard/agreement-templates');
+    });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SIGNING FLOW — Tenant
+// ─────────────────────────────────────────────────────────────────────────────
+describe('Signing Flow — Tenant', () => {
 
     beforeEach(() => {
         cy.loginAsTenant();
     });
 
-    it('tenant can view my-lease page', () => {
-        cy.visit('/dashboard/my-lease');
-        cy.contains(/lease|agreement/i).should('exist');
+    it('tenant is redirected away from /dashboard/agreements to /dashboard/my-lease', () => {
+        cy.visit('/dashboard/agreements');
+        cy.url().should('include', '/dashboard/my-lease');
     });
 
-    it('sign page requires a valid token', () => {
+    it('tenant can view the my-lease page with lease/agreement content', () => {
+        cy.visit('/dashboard/my-lease');
+        cy.contains(/lease|agreement/i).should('be.visible');
+        cy.url().should('include', '/dashboard/my-lease');
+    });
+
+    it('sign page shows an error for an invalid token', () => {
         cy.visit('/sign/invalid-token-123');
-        cy.contains(/invalid|expired|not found/i).should('exist');
+        cy.contains(/invalid|expired|not found/i).should('be.visible');
+    });
+
+    it('sign page shows an error for a malformed token', () => {
+        cy.visit('/sign/!!!bad-token!!!');
+        cy.contains(/invalid|expired|not found/i).should('be.visible');
+    });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// EDGE CASES & API ERROR HANDLING
+// ─────────────────────────────────────────────────────────────────────────────
+describe('Agreements — API error handling', () => {
+
+    beforeEach(() => {
+        cy.loginAsLandlord();
+    });
+
+    it('shows an empty-state UI when GET /agreements returns an empty array', () => {
+        cy.intercept('GET', '/api/agreements', { statusCode: 200, body: [] }).as('empty');
+        cy.visit('/dashboard/agreements');
+        cy.wait('@empty');
+        cy.contains(/no agreements found/i).should('be.visible');
+    });
+
+    it('shows a toast error when signing fails', () => {
+        cy.intercept('GET', '/api/agreements', { statusCode: 200, body: mockAgreements }).as('getAgreements');
+        cy.intercept('PUT', '/api/agreements/agr_001/sign', {
+            statusCode: 400,
+            body: { message: 'Signature data is required' },
+        }).as('signFail');
+
+        cy.visit('/dashboard/agreements');
+        cy.wait('@getAgreements');
+        cy.get('button').filter(':contains("Sign")').click();
+
+        // Confirm modal (submit without drawing)
+        cy.get('button').filter(':contains("Confirm")').click();
+        cy.wait('@signFail');
+        cy.contains(/signature data is required/i).should('be.visible');
+    });
+
+    it('shows a toast error when the offer accept call fails during clause save', () => {
+        cy.intercept('GET', '/api/offers/offer_001', { statusCode: 200, body: mockOffer }).as('getOffer');
+        cy.intercept('GET', '/api/agreements/clauses', { statusCode: 200, body: mockClauses }).as('getClauses');
+        cy.intercept('PUT', '/api/offers/offer_001/accept', {
+            statusCode: 500,
+            body: { message: 'Failed to accept offer' },
+        }).as('acceptFail');
+
+        cy.visit('/dashboard/agreements/new?offerId=offer_001');
+        cy.wait('@getOffer');
+        cy.contains('button', /create agreement draft/i).click();
+        cy.wait('@getClauses');
+        cy.contains('button', /finish without clauses/i).click();
+        cy.wait('@acceptFail');
+        cy.contains(/failed to accept offer/i).should('be.visible');
     });
 });
