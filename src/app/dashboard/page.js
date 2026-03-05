@@ -135,8 +135,8 @@ export default function DashboardHome() {
           setProperties(Array.isArray(propResp.data) ? propResp.data : []);
         }
 
-        const payResp = await api.get('/payments').catch(() => ({ data: [] }));
-        setPayments(payResp.data || []);
+        const payResp = await api.get('/payments').catch(() => ({ data: { payments: [] } }));
+        setPayments(payResp.data?.payments || []);
 
         const [dispResp, maintResp] = await Promise.all([
           api.get('/disputes').catch(() => ({ data: { disputes: [] } })),
