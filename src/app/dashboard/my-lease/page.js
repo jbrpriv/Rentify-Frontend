@@ -23,6 +23,7 @@ const GATEWAY_META = {
 const ALL_GATEWAYS = [
   { id: 'stripe', name: 'Stripe' },
   { id: 'razorpay', name: 'Razorpay' },
+  { id: 'paypal', name: 'PayPal' },
 ];
 
 // ─── Gateway Picker Modal (toast-style, slides up from bottom on mobile) ──────

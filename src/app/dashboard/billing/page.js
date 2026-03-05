@@ -12,11 +12,13 @@ import {
 const GATEWAY_META = {
   stripe: { label: 'Card / Stripe', desc: 'Visa, Mastercard, debit cards', icon: '💳', color: '#635bff' },
   razorpay: { label: 'Razorpay', desc: 'UPI, cards, net banking, wallets', icon: '⚡', color: '#2563eb' },
+  paypal: { label: 'PayPal', desc: 'PayPal balance or linked card', icon: '🌐', color: '#0070ba' },
 };
 
 const ALL_GATEWAYS = [
   { id: 'stripe', name: 'Stripe' },
   { id: 'razorpay', name: 'Razorpay' },
+  { id: 'paypal', name: 'PayPal' },
 ];
 
 function GatewayModal({ enabledIds, onSelect, onClose, loading }) {

@@ -29,6 +29,7 @@ const GATEWAY_META = {
 const ALL_GATEWAYS = [
   { id: 'stripe', name: 'Stripe' },
   { id: 'razorpay', name: 'Razorpay' },
+  { id: 'paypal', name: 'PayPal' },
 ];
 
 function GatewayModal({ gateways, amount, onSelect, onClose, loading }) {
@@ -69,8 +70,8 @@ function GatewayModal({ gateways, amount, onSelect, onClose, loading }) {
                 onClick={() => !isDisabled && onSelect(gw.id)}
                 disabled={isDisabled}
                 className={`w-full flex items-center gap-4 p-4 rounded-2xl border-2 transition-all text-left group ${!gw.enabled
-                    ? 'border-gray-100 bg-gray-50 opacity-60 cursor-not-allowed'
-                    : 'border-gray-100 hover:border-blue-200 hover:bg-blue-50/40 disabled:opacity-60'
+                  ? 'border-gray-100 bg-gray-50 opacity-60 cursor-not-allowed'
+                  : 'border-gray-100 hover:border-blue-200 hover:bg-blue-50/40 disabled:opacity-60'
                   }`}
               >
                 <div
