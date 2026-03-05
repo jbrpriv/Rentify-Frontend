@@ -414,6 +414,8 @@ function AgreementForm() {
   const [showTemplatePicker, setShowTemplatePicker] = useState(false);
   const [appliedTemplate, setAppliedTemplate] = useState('');
   const [mounted, setMounted] = useState(false);
+  const startDateRef = useRef(null);
+  const endDateRef = useRef(null);
 
   useEffect(() => { setMounted(true); }, []);
 
@@ -456,12 +458,23 @@ function AgreementForm() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const errors = {};
-    const start = formData.startDate ? new Date(formData.startDate) : null;
-    const end = formData.endDate ? new Date(formData.endDate) : null;
+    // Read actual DOM values so Cypress .invoke('val', ...).trigger('change') is
+    // respected even when React's synthetic event system doesn't propagate the
+    // programmatic value change into controlled-input state.
+    const startDateValue = startDateRef.current?.value ?? formData.startDate;
+    const endDateValue = endDateRef.current?.value ?? formData.endDate;
 
-    if (!formData.startDate) errors.startDate = 'Start date is required.';
-    if (!formData.endDate) errors.endDate = 'End date is required.';
+    // Keep React state in sync so the rest of the submit flow uses correct values.
+    if (startDateValue !== formData.startDate || endDateValue !== formData.endDate) {
+      setFormData(prev => ({ ...prev, startDate: startDateValue, endDate: endDateValue }));
+    }
+
+    const errors = {};
+    const start = startDateValue ? new Date(startDateValue) : null;
+    const end = endDateValue ? new Date(endDateValue) : null;
+
+    if (!startDateValue) errors.startDate = 'Start date is required.';
+    if (!endDateValue) errors.endDate = 'End date is required.';
     if (start && end && end <= start) errors.endDate = 'End date must be after start date.';
 
     const rent = Number(formData.rentAmount);
@@ -601,6 +614,7 @@ function AgreementForm() {
                     <div>
                       <label className="block text-sm font-medium text-gray-700">Start Date</label>
                       <input
+                        ref={startDateRef}
                         type="date"
                         required
                         className={`mt-1 block w-full rounded-md border px-3 py-2 shadow-sm focus:ring-blue-500 focus:border-blue-500 ${formErrors.startDate ? 'border-red-400 bg-red-50' : 'border-gray-300'}`}
@@ -612,6 +626,7 @@ function AgreementForm() {
                     <div>
                       <label className="block text-sm font-medium text-gray-700">End Date</label>
                       <input
+                        ref={endDateRef}
                         type="date"
                         required
                         className={`mt-1 block w-full rounded-md border px-3 py-2 shadow-sm focus:ring-blue-500 focus:border-blue-500 ${formErrors.endDate ? 'border-red-400 bg-red-50' : 'border-gray-300'}`}
