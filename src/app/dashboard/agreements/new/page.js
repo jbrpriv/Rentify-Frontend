@@ -31,11 +31,11 @@ function TemplatePicker({ onApply, onClose }) {
       // Track usage
       await api.post(`/agreement-templates/${tpl._id}/use`);
       // Collect clause IDs from template (support both populated objects and bare IDs)
-      const clauseIds = (tpl.clauses || []).map(c => c._id || c);
+      const clauseIds = (tpl.clauseIds || []).map(c => c._id || c);
       onApply(clauseIds, tpl.name);
     } catch {
       // Still apply even if usage tracking fails
-      const clauseIds = (tpl.clauses || []).map(c => c._id || c);
+      const clauseIds = (tpl.clauseIds || []).map(c => c._id || c);
       onApply(clauseIds, tpl.name);
     } finally {
       setApplying(null);
