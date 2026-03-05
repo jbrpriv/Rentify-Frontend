@@ -78,7 +78,7 @@ function TemplatePicker({ onApply, onClose }) {
                     <p className="text-xs text-gray-500 mt-0.5 line-clamp-2">{tpl.description}</p>
                   )}
                   <p className="text-xs text-blue-600 mt-1">
-                    {(tpl.clauses || []).length} clause{(tpl.clauses || []).length !== 1 ? 's' : ''} included
+                    {(tpl.clauseIds || []).length} clause{(tpl.clauseIds || []).length !== 1 ? 's' : ''} included
                   </p>
                 </div>
                 <button
@@ -611,28 +611,30 @@ function AgreementForm() {
                 <div>
                   <label className="block text-sm font-medium text-gray-700">
                     Monthly Rent (Rs.)
-                    {formData.rentAmount && <span className="text-green-600 text-xs ml-2">Pre-filled from property</span>}
                   </label>
                   <input
                     type="number"
                     required
-                    className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                    disabled
+                    className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm bg-gray-50 text-gray-500 cursor-not-allowed"
                     value={formData.rentAmount}
                     onChange={(e) => setFormData({ ...formData, rentAmount: e.target.value })}
                   />
+                  <p className="text-xs text-gray-400 mt-1">Fixed based on {offerId ? 'offer terms' : 'property details'}</p>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700">
                     Security Deposit (Rs.)
-                    {formData.depositAmount && <span className="text-green-600 text-xs ml-2">Pre-filled from property</span>}
                   </label>
                   <input
                     type="number"
                     required
-                    className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                    disabled
+                    className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm bg-gray-50 text-gray-500 cursor-not-allowed"
                     value={formData.depositAmount}
                     onChange={(e) => setFormData({ ...formData, depositAmount: e.target.value })}
                   />
+                  <p className="text-xs text-gray-400 mt-1">Fixed based on {offerId ? 'offer terms' : 'property details'}</p>
                 </div>
               </div>
 
