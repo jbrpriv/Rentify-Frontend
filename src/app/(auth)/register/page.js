@@ -202,7 +202,7 @@ function RegisterContent() {
             {/* ── Step 1: Register ── */}
             {step === 'register' && (
               <>
-                <form onSubmit={handleRegister} className="space-y-4">
+                <form onSubmit={handleRegister} className="space-y-4" noValidate>
                   <TextField label="Full Name" type="text" name="name" required placeholder="Jane Smith" leadingIcon={User} onChange={handleChange} value={formData.name} />
                   <TextField label="Email" type="email" name="email" required placeholder="you@example.com" leadingIcon={Mail} onChange={handleChange} value={formData.email} />
                   <TextField label="Phone Number" type="tel" name="phoneNumber" required placeholder="+923xxxxxxxxx" leadingIcon={Phone} onChange={handleChange} value={formData.phoneNumber} />
@@ -235,8 +235,8 @@ function RegisterContent() {
                           type="button"
                           onClick={() => setFormData(f => ({ ...f, role: value }))}
                           className={`rounded-xl border py-2.5 px-2 text-center text-[0.7rem] font-semibold transition-all ${formData.role === value
-                              ? 'border-sky-400/70 bg-sky-900/40 text-sky-200 ring-1 ring-sky-400/40'
-                              : 'border-slate-700 bg-slate-800/50 text-slate-400 hover:border-slate-500 hover:text-slate-300'
+                            ? 'border-sky-400/70 bg-sky-900/40 text-sky-200 ring-1 ring-sky-400/40'
+                            : 'border-slate-700 bg-slate-800/50 text-slate-400 hover:border-slate-500 hover:text-slate-300'
                             }`}
                         >
                           <div className="text-lg mb-0.5">{emoji}</div>
