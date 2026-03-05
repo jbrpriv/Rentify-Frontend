@@ -10,12 +10,14 @@ import {
   Building2, User, Calendar, DollarSign, CreditCard,
   Eye, ChevronDown, ChevronUp, Mail, Phone, X,
 } from 'lucide-react';
+import SignatureModal from '@/components/SignatureModal';
+
 
 // ─── Gateway metadata ─────────────────────────────────────────────────────────
 const GATEWAY_META = {
-  stripe:   { label: 'Card / Stripe',  desc: 'Visa, Mastercard, debit cards',   icon: '💳', color: '#635bff' },
-  razorpay: { label: 'Razorpay',       desc: 'UPI, cards, net banking, wallets', icon: '⚡', color: '#2563eb' },
-  paypal:   { label: 'PayPal',         desc: 'PayPal balance or linked card',    icon: '🌐', color: '#0070ba' },
+  stripe: { label: 'Card / Stripe', desc: 'Visa, Mastercard, debit cards', icon: '💳', color: '#635bff' },
+  razorpay: { label: 'Razorpay', desc: 'UPI, cards, net banking, wallets', icon: '⚡', color: '#2563eb' },
+  paypal: { label: 'PayPal', desc: 'PayPal balance or linked card', icon: '🌐', color: '#0070ba' },
 };
 
 // ─── Gateway Picker Modal (toast-style, slides up from bottom on mobile) ──────
@@ -87,16 +89,21 @@ function GatewayModal({ gateways, amount, onSelect, onClose, loading }) {
 export default function MyLeasePage() {
   const { toast } = useToast();
 
-  const [agreements, setAgreements]   = useState([]);
-  const [loading, setLoading]         = useState(true);
-  const [signingId, setSigningId]     = useState(null);
+  const [agreements, setAgreements] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [showLandlord, setShowLandlord] = useState({});
 
   // Gateway picker state
-  const [gateways, setGateways]       = useState([]);
-  const [modalOpen, setModalOpen]     = useState(false);
+  const [gateways, setGateways] = useState([]);
+  const [modalOpen, setModalOpen] = useState(false);
   const [pendingAgreement, setPendingAgreement] = useState(null); // agreement being paid
-  const [gwLoading, setGwLoading]     = useState(false);
+  const [gwLoading, setGwLoading] = useState(false);
+
+  // Signature modal state
+  const [signModalOpen, setSignModalOpen] = useState(false);
+  const [pendingSignId, setPendingSignId] = useState(null);
+  const [pendingSignName, setPendingSignName] = useState('');
+  const [signLoading, setSignLoading] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -118,19 +125,27 @@ export default function MyLeasePage() {
     }
   };
 
-  const handleSign = async (agreementId) => {
-    if (!confirm('By clicking OK you are digitally signing this agreement. This action cannot be undone.')) return;
-    setSigningId(agreementId);
+  // Open the draw-signature modal instead of confirm()
+  const handleSign = (agreementId, propertyTitle) => {
+    setPendingSignId(agreementId);
+    setPendingSignName(propertyTitle || 'this agreement');
+    setSignModalOpen(true);
+  };
+
+  const handleSignConfirm = async (drawData) => {
+    setSignLoading(true);
     try {
-      const { data } = await api.put(`/agreements/${agreementId}/sign`);
+      const { data } = await api.put(`/agreements/${pendingSignId}/sign`, { drawData });
       toast(`Signed! Agreement status: ${data.status}`, 'success');
+      setSignModalOpen(false);
       fetchData();
     } catch (err) {
       toast(err.response?.data?.message || 'Failed to sign', 'error');
     } finally {
-      setSigningId(null);
+      setSignLoading(false);
     }
   };
+
 
   // Called when "Pay" button is clicked — shows gateway picker toast
   const handlePaymentClick = (agreement) => {
@@ -182,22 +197,22 @@ export default function MyLeasePage() {
         }
 
         const rzp = new window.Razorpay({
-          key:         order.keyId,
-          amount:      order.amount,
-          currency:    order.currency,
-          order_id:    order.orderId,
-          name:        'RentifyPro',
+          key: order.keyId,
+          amount: order.amount,
+          currency: order.currency,
+          order_id: order.orderId,
+          name: 'RentifyPro',
           description: 'Initial Deposit + 1st Month Rent',
-          prefill:     order.prefill,
-          theme:       { color: '#2563eb' },
+          prefill: order.prefill,
+          theme: { color: '#2563eb' },
           handler: async (response) => {
             setGwLoading(true);
             try {
               await api.post('/payments/razorpay/verify', {
-                razorpay_order_id:   response.razorpay_order_id,
+                razorpay_order_id: response.razorpay_order_id,
                 razorpay_payment_id: response.razorpay_payment_id,
-                razorpay_signature:  response.razorpay_signature,
-                agreementId:         agreement._id,
+                razorpay_signature: response.razorpay_signature,
+                agreementId: agreement._id,
               });
               toast('🎉 Payment successful! Lease is now active.', 'success');
               fetchData();
@@ -275,6 +290,17 @@ export default function MyLeasePage() {
   return (
     <div className="space-y-6 max-w-6xl mx-auto">
 
+      {/* Signature draw modal */}
+      {signModalOpen && (
+        <SignatureModal
+          open={signModalOpen}
+          onClose={() => { setSignModalOpen(false); setPendingSignId(null); }}
+          onConfirm={handleSignConfirm}
+          signerName={pendingSignName}
+          loading={signLoading}
+        />
+      )}
+
       {/* Gateway picker modal */}
       {modalOpen && (
         <GatewayModal
@@ -299,12 +325,12 @@ export default function MyLeasePage() {
       ) : (
         <div className="space-y-8">
           {agreements.map((ag) => {
-            const tenantSigned  = ag.signatures?.tenant?.signed;
+            const tenantSigned = ag.signatures?.tenant?.signed;
             const landlordSigned = ag.signatures?.landlord?.signed;
-            const style          = getStatusStyles(ag.status, ag.isPaid);
-            const StatusIcon     = style.icon;
-            const rent           = ag.financials?.rentAmount || 0;
-            const deposit        = ag.financials?.depositAmount || 0;
+            const style = getStatusStyles(ag.status, ag.isPaid);
+            const StatusIcon = style.icon;
+            const rent = ag.financials?.rentAmount || 0;
+            const deposit = ag.financials?.depositAmount || 0;
             const totalDueAtSigning = rent + deposit;
 
             return (
@@ -431,13 +457,11 @@ export default function MyLeasePage() {
                     <div className="flex w-full sm:w-auto gap-3">
                       {!tenantSigned && ag.status !== 'expired' && (
                         <button
-                          onClick={() => handleSign(ag._id)}
-                          disabled={signingId === ag._id}
+                          onClick={() => handleSign(ag._id, ag.property?.title)}
+                          disabled={signLoading && pendingSignId === ag._id}
                           className="flex-1 sm:flex-none inline-flex justify-center items-center px-6 py-2.5 bg-green-600 text-white text-sm font-semibold rounded-lg hover:bg-green-700 disabled:bg-green-400 transition-colors shadow-sm"
                         >
-                          {signingId === ag._id
-                            ? <Loader2 className="animate-spin h-4 w-4 mr-2" />
-                            : <PenLine className="h-4 w-4 mr-2" />}
+                          <PenLine className="h-4 w-4 mr-2" />
                           Sign Agreement
                         </button>
                       )}

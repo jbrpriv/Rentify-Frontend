@@ -7,6 +7,8 @@ import { useUser } from '@/context/UserContext';
 import { useToast } from '@/context/ToastContext';
 import { FileText, Download, Calendar, User, Loader2, CheckCircle, Clock, PenLine, GitBranch, Mail, Eye } from 'lucide-react';
 import { motion } from 'framer-motion';
+import SignatureModal from '@/components/SignatureModal';
+
 
 export default function AgreementsPage() {
   const router = useRouter();
@@ -14,11 +16,18 @@ export default function AgreementsPage() {
   const { toast } = useToast();
   const [agreements, setAgreements] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [signingId, setSigningId]     = useState(null);
-  const [renewModal, setRenewModal]   = useState(null); // holds agreement object
-  const [renewForm,  setRenewForm]    = useState({ newEndDate: '', newRentAmount: '', notes: '' });
+  const [signingId, setSigningId] = useState(null); // kept for compat but unused below
+  const [renewModal, setRenewModal] = useState(null); // holds agreement object
+  const [renewForm, setRenewForm] = useState({ newEndDate: '', newRentAmount: '', notes: '' });
   const [renewLoading, setRenewLoading] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
+
+  // Signature modal state
+  const [signModalOpen, setSignModalOpen] = useState(false);
+  const [pendingSignId, setPendingSignId] = useState(null);
+  const [pendingSignName, setPendingSignName] = useState('');
+  const [signLoading, setSignLoading] = useState(false);
+
 
   useEffect(() => {
     // Tenants have their own dedicated lease page
@@ -38,20 +47,27 @@ export default function AgreementsPage() {
     }
   };
 
-  const handleSign = async (agreementId) => {
-    if (!confirm('By clicking OK you are digitally signing this agreement. This action cannot be undone.')) return;
+  // Open the draw-signature modal
+  const handleSign = (agreementId, propertyTitle) => {
+    setPendingSignId(agreementId);
+    setPendingSignName(propertyTitle || 'this agreement');
+    setSignModalOpen(true);
+  };
 
-    setSigningId(agreementId);
+  const handleSignConfirm = async (drawData) => {
+    setSignLoading(true);
     try {
-      const { data } = await api.put(`/agreements/${agreementId}/sign`);
+      const { data } = await api.put(`/agreements/${pendingSignId}/sign`, { drawData });
       toast(`Signed successfully! Agreement status: ${data.status}`, 'info');
-      fetchAgreements(); // Refresh the list
+      setSignModalOpen(false);
+      fetchAgreements();
     } catch (error) {
       toast(error.response?.data?.message || 'Failed to sign agreement', 'error');
     } finally {
-      setSigningId(null);
+      setSignLoading(false);
     }
   };
+
 
   const handleDownload = async (id, title) => {
     try {
@@ -124,6 +140,15 @@ export default function AgreementsPage() {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, ease: [0.21, 0.6, 0.35, 1] }}
     >
+      {signModalOpen && (
+        <SignatureModal
+          open={signModalOpen}
+          onClose={() => { setSignModalOpen(false); setPendingSignId(null); }}
+          onConfirm={handleSignConfirm}
+          signerName={pendingSignName}
+          loading={signLoading}
+        />
+      )}
       <h1 className="text-2xl font-bold text-gray-900">Rental Agreements</h1>
 
       {agreements.length === 0 ? (
@@ -149,7 +174,7 @@ export default function AgreementsPage() {
               >
                 <div className="px-6 py-5">
                   <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                    
+
                     {/* Left: Info */}
                     <div className="flex items-center space-x-4">
                       <div className="bg-blue-100 p-3 rounded-lg">
@@ -196,37 +221,34 @@ export default function AgreementsPage() {
 
                       {/* Sign button — only show for parties involved in the agreement, not law_reviewer */}
                       {!hasUserSigned(ag) && ag.status !== 'active' && ag.status !== 'expired' &&
-                       currentUser?.role !== 'law_reviewer' && (
-                        <button
-                          onClick={() => handleSign(ag._id)}
-                          disabled={signingId === ag._id}
-                          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 disabled:bg-green-400"
-                        >
-                          {signingId === ag._id
-                            ? <Loader2 className="animate-spin h-4 w-4 mr-2" />
-                            : <PenLine className="h-4 w-4 mr-2" />
-                          }
-                          Sign
-                        </button>
-                      )}
+                        currentUser?.role !== 'law_reviewer' && (
+                          <button
+                            onClick={() => handleSign(ag._id, ag.property?.title)}
+                            disabled={signLoading && pendingSignId === ag._id}
+                            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 disabled:bg-green-400"
+                          >
+                            <PenLine className="h-4 w-4 mr-2" />
+                            Sign
+                          </button>
+                        )}
 
                       {/* Send signing invites — landlord only, on draft/pending */}
                       {currentUser?.role === 'landlord' &&
-                       ['draft', 'pending_signature'].includes(ag.status) && (
-                        <button
-                          onClick={async () => {
-                            try {
-                              await api.post(`/agreements/${ag._id}/send-invites`);
-                              toast('Signing invitations sent to both parties', 'success');
-                            } catch (err) {
-                              toast(err.response?.data?.message || 'Failed to send invites', 'error');
-                            }
-                          }}
-                          className="inline-flex items-center px-4 py-2 border border-purple-500 text-sm font-medium rounded-md text-purple-600 bg-white hover:bg-purple-50"
-                        >
-                          <Mail className="h-4 w-4 mr-2" /> Send Invites
-                        </button>
-                      )}
+                        ['draft', 'pending_signature'].includes(ag.status) && (
+                          <button
+                            onClick={async () => {
+                              try {
+                                await api.post(`/agreements/${ag._id}/send-invites`);
+                                toast('Signing invitations sent to both parties', 'success');
+                              } catch (err) {
+                                toast(err.response?.data?.message || 'Failed to send invites', 'error');
+                              }
+                            }}
+                            className="inline-flex items-center px-4 py-2 border border-purple-500 text-sm font-medium rounded-md text-purple-600 bg-white hover:bg-purple-50"
+                          >
+                            <Mail className="h-4 w-4 mr-2" /> Send Invites
+                          </button>
+                        )}
 
                       <button
                         onClick={() => handleDownload(ag._id, ag.property?.title)}
