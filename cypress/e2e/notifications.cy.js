@@ -228,8 +228,8 @@ describe('Notifications — Mark as Read', () => {
         cy.wait('@markRead');
     });
 
-    it('Mark all read button calls POST /notifications/mark-all-read', () => {
-        cy.intercept('POST', '/api/notifications/mark-all-read', {
+    it('Mark all read button calls PATCH /notifications/read-all', () => {
+        cy.intercept('PATCH', '/api/notifications/read-all', {
             statusCode: 200,
             body: { message: 'All marked as read' },
         }).as('markAll');
@@ -239,7 +239,7 @@ describe('Notifications — Mark as Read', () => {
     });
 
     it('Mark all read button disappears after all notifications are marked read', () => {
-        cy.intercept('POST', '/api/notifications/mark-all-read', { statusCode: 200 }).as('markAll');
+        cy.intercept('PATCH', '/api/notifications/read-all', { statusCode: 200 }).as('markAll');
         // After marking all read the component sets unreadCount → 0
         cy.contains('button', /mark all read/i).click();
         cy.wait('@markAll');

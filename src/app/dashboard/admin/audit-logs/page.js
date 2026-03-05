@@ -25,12 +25,12 @@ export default function AuditLogsPage() {
     if (user.role !== 'admin') router.push('/dashboard');
   }, [user]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const [logs, setLogs]         = useState([]);
-  const [loading, setLoading]   = useState(true);
-  const [page, setPage]         = useState(1);
+  const [logs, setLogs] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
-  const [action, setAction]     = useState('');
+  const [action, setAction] = useState('');
 
   const LIMIT = 50;
 
@@ -82,11 +82,6 @@ export default function AuditLogsPage() {
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
         {loading ? (
           <div className="flex justify-center py-16"><Loader2 className="animate-spin h-8 w-8 text-blue-600" /></div>
-        ) : logs.length === 0 ? (
-          <div className="text-center py-16 text-gray-400">
-            <ShieldCheck className="w-10 h-10 mx-auto mb-3 opacity-30" />
-            <p className="font-bold">No audit logs found</p>
-          </div>
         ) : (
           <table className="w-full text-sm">
             <thead>
@@ -99,7 +94,16 @@ export default function AuditLogsPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
-              {logs.map((log, i) => (
+              {logs.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="text-center py-16 text-gray-400">
+                    <div className="flex flex-col items-center">
+                      <ShieldCheck className="w-10 h-10 mb-3 opacity-30" />
+                      <p className="font-bold">No audit logs found</p>
+                    </div>
+                  </td>
+                </tr>
+              ) : logs.map((log, i) => (
                 <tr key={i} className="hover:bg-gray-50 transition-colors">
                   <td className="px-6 py-3 text-xs text-gray-500">
                     {new Date(log.timestamp).toLocaleString()}

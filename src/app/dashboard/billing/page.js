@@ -5,85 +5,8 @@ import { useSearchParams } from 'next/navigation';
 import api from '@/utils/api';
 import {
   Check, Loader2, Zap, Building2, Crown, AlertTriangle,
-  CreditCard, ArrowUpRight, X,
+  CreditCard, ArrowUpRight,
 } from 'lucide-react';
-
-// ── Gateway picker modal ───────────────────────────────────────────────────────
-const GATEWAY_META = {
-  stripe: { label: 'Card / Stripe', desc: 'Visa, Mastercard, debit cards', icon: '💳', color: '#635bff' },
-  razorpay: { label: 'Razorpay', desc: 'UPI, cards, net banking, wallets', icon: '⚡', color: '#2563eb' },
-  paypal: { label: 'PayPal', desc: 'PayPal balance or linked card', icon: '🌐', color: '#0070ba' },
-};
-
-const ALL_GATEWAYS = [
-  { id: 'stripe', name: 'Stripe' },
-  { id: 'razorpay', name: 'Razorpay' },
-  { id: 'paypal', name: 'PayPal' },
-];
-
-function GatewayModal({ enabledIds, onSelect, onClose, loading }) {
-  const displayGateways = ALL_GATEWAYS.map(gw => ({ ...gw, enabled: enabledIds.includes(gw.id) }));
-
-  return (
-    <div
-      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4"
-      style={{ background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(4px)', animation: 'gwFadeIn 0.2s ease' }}
-      onClick={(e) => e.target === e.currentTarget && onClose()}
-    >
-      <style>{`
-        @keyframes gwFadeIn { from { opacity: 0 } to { opacity: 1 } }
-        @keyframes gwSlideUp { from { transform: translateY(40px); opacity: 0 } to { transform: translateY(0); opacity: 1 } }
-        .gw-sheet { animation: gwSlideUp 0.28s cubic-bezier(0.3,1,0.4,1) both; }
-      `}</style>
-      <div className="gw-sheet bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl w-full sm:max-w-sm overflow-hidden">
-        <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100">
-          <h3 className="font-black text-gray-900 text-lg">Choose Payment Option</h3>
-          <button onClick={onClose} className="p-2 rounded-xl hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition">
-            <X className="w-5 h-5" />
-          </button>
-        </div>
-        <div className="p-4 space-y-3">
-          {displayGateways.map((gw) => {
-            const meta = GATEWAY_META[gw.id] || { label: gw.name, desc: '', icon: '💰', color: '#374151' };
-            const isDisabled = loading || !gw.enabled;
-            return (
-              <button
-                key={gw.id}
-                onClick={() => !isDisabled && onSelect(gw.id)}
-                disabled={isDisabled}
-                className={`w-full flex items-center gap-4 p-4 rounded-2xl border-2 transition-all text-left group ${!gw.enabled
-                  ? 'border-gray-100 bg-gray-50 opacity-60 cursor-not-allowed'
-                  : 'border-gray-100 hover:border-blue-200 hover:bg-blue-50/40 disabled:opacity-60'
-                  }`}
-              >
-                <div
-                  className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl flex-shrink-0"
-                  style={{ background: `${meta.color}18` }}
-                >
-                  {meta.icon}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-bold text-gray-900 text-sm">{meta.label}</p>
-                  <p className="text-xs text-gray-400 mt-0.5">
-                    {!gw.enabled ? 'Not configured by admin' : meta.desc}
-                  </p>
-                </div>
-                {loading ? (
-                  <Loader2 className="w-4 h-4 animate-spin text-gray-400 flex-shrink-0" />
-                ) : gw.enabled ? (
-                  <div className="w-5 h-5 rounded-full border-2 border-gray-200 group-hover:border-blue-400 transition flex-shrink-0" />
-                ) : (
-                  <span className="text-[10px] font-semibold text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full flex-shrink-0">Unavailable</span>
-                )}
-              </button>
-            );
-          })}
-        </div>
-        <p className="text-center text-xs text-gray-400 pb-5 px-6">Payments are secured and encrypted.</p>
-      </div>
-    </div>
-  );
-}
 
 // ── Tier config ────────────────────────────────────────────────────────────────
 const TIER_META = {
@@ -111,12 +34,9 @@ function BillingContent() {
   const [plans, setPlans] = useState([]);
   const [currentTier, setCurrentTier] = useState(null);
   const [stripeReady, setStripeReady] = useState(true);
-  const [razorpayReady, setRazorpayReady] = useState(false);
   const [loading, setLoading] = useState(true);
   const [subscribing, setSubscribing] = useState('');
   const [portalLoading, setPortalLoading] = useState(false);
-  const [modalOpen, setModalOpen] = useState(false);
-  const [pendingTier, setPendingTier] = useState(null);
   const [toast, setToast] = useState({ msg: '', type: 'success' });
 
   const showToast = (msg, type = 'success') => {
@@ -135,87 +55,22 @@ function BillingContent() {
         setPlans(plansRes.data.plans);
         setCurrentTier(statusRes.data.tier);
         setStripeReady(plansRes.data.stripeConfigured ?? true);
-        setRazorpayReady(plansRes.data.razorpayConfigured ?? false);
       })
       .catch(() => showToast('Failed to load billing info.', 'error'))
       .finally(() => setLoading(false));
   }, []); // eslint-disable-line
 
   // ── Subscription flow ──────────────────────────────────────────────────────
-  const handleSubscribe = (tier) => {
+  const handleSubscribe = async (tier) => {
     if (tier === 'free' || tier === currentTier) return;
-
-    const gateways = [
-      ...(stripeReady ? [{ id: 'stripe', name: 'Stripe' }] : []),
-      ...(razorpayReady ? [{ id: 'razorpay', name: 'Razorpay' }] : []),
-    ];
-
-    if (gateways.length === 0) {
+    if (!stripeReady) {
       showToast('Online payments are not yet enabled. Please contact the administrator.', 'warn');
       return;
     }
-
-    // Always show picker so user consciously chooses the gateway
-    setPendingTier(tier);
-    setModalOpen(true);
-  };
-
-  const handleGatewaySelect = async (gatewayId) => {
-    setModalOpen(false);
-    await processSubscription(gatewayId, pendingTier);
-    setPendingTier(null);
-  };
-
-  const processSubscription = async (gatewayId, tier) => {
     setSubscribing(tier);
     try {
-      if (gatewayId === 'stripe') {
-        const { data } = await api.post('/billing/subscribe', { tier, gateway: 'stripe' });
-        window.location.href = data.url;
-
-      } else if (gatewayId === 'razorpay') {
-        const { data: order } = await api.post('/billing/subscribe', { tier, gateway: 'razorpay' });
-
-        if (!window.Razorpay) {
-          await new Promise((resolve, reject) => {
-            const s = document.createElement('script');
-            s.src = 'https://checkout.razorpay.com/v1/checkout.js';
-            s.onload = resolve; s.onerror = reject;
-            document.body.appendChild(s);
-          });
-        }
-
-        const rzp = new window.Razorpay({
-          key: order.keyId,
-          subscription_id: order.subscriptionId,
-          name: 'RentifyPro',
-          description: `Subscribe to ${tier.toUpperCase()}`,
-          theme: { color: '#2563eb' },
-          handler: async (response) => {
-            setSubscribing('');
-            try {
-              await api.post('/billing/razorpay/verify', {
-                razorpay_payment_id: response.razorpay_payment_id,
-                razorpay_subscription_id: response.razorpay_subscription_id,
-                razorpay_signature: response.razorpay_signature,
-                tier,
-              });
-              showToast(`🎉 You are now on the ${tier} plan!`);
-              window.location.reload();
-            } catch (err) {
-              showToast(err.response?.data?.message || 'Verification failed', 'error');
-            }
-          },
-          modal: {
-            ondismiss: () => {
-              setSubscribing('');
-              showToast('Checkout cancelled.', 'warn');
-            },
-          },
-        });
-        rzp.open();
-        return; // don't clear subscribing — handler/ondismiss will
-      }
+      const { data } = await api.post('/billing/subscribe', { tier, gateway: 'stripe' });
+      window.location.href = data.url;
     } catch (err) {
       showToast(err.response?.data?.message || 'Failed to start checkout.', 'error');
       setSubscribing('');
@@ -242,23 +97,10 @@ function BillingContent() {
   const tierMeta = TIER_META[currentTier] || TIER_META.free;
   const TierIcon = tierMeta.icon;
 
-  const availableGateways = [
-    ...(stripeReady ? [{ id: 'stripe', name: 'Stripe' }] : []),
-    ...(razorpayReady ? [{ id: 'razorpay', name: 'Razorpay' }] : []),
-  ];
+
 
   return (
     <div className="max-w-5xl mx-auto py-8 space-y-8">
-
-      {/* Gateway picker modal */}
-      {modalOpen && (
-        <GatewayModal
-          enabledIds={availableGateways.map(g => g.id)}
-          onSelect={handleGatewaySelect}
-          onClose={() => { setModalOpen(false); setPendingTier(null); }}
-          loading={!!subscribing}
-        />
-      )}
 
       {/* ── Page header ──────────────────────────────────────────── */}
       <div>
@@ -281,7 +123,7 @@ function BillingContent() {
       )}
 
       {/* ── No payment gateway configured banner ──────────────────── */}
-      {!stripeReady && !razorpayReady && (
+      {!stripeReady && (
         <div className="flex items-start gap-3 px-5 py-4 bg-amber-50 border border-amber-200 rounded-2xl text-amber-800 text-sm">
           <AlertTriangle className="w-5 h-5 shrink-0 mt-0.5" />
           <div>
@@ -326,11 +168,11 @@ function BillingContent() {
           </div>
 
           <div className="flex items-center gap-3">
-            {currentTier !== 'free' && (
+            {stripeReady && (
               <button
                 type="button"
                 onClick={handlePortal}
-                disabled={portalLoading || !stripeReady}
+                disabled={portalLoading}
                 className="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-gray-700 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 disabled:opacity-50 transition shadow-sm"
               >
                 {portalLoading ? <Loader2 className="animate-spin w-4 h-4" /> : <CreditCard className="w-4 h-4" />}
@@ -341,7 +183,7 @@ function BillingContent() {
               <button
                 type="button"
                 onClick={() => handleSubscribe(currentTier === 'free' ? 'pro' : 'enterprise')}
-                disabled={!!subscribing || availableGateways.length === 0}
+                disabled={!!subscribing || !stripeReady}
                 className="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-blue-600 rounded-xl hover:bg-blue-700 disabled:opacity-50 transition shadow-sm"
               >
                 <ArrowUpRight className="w-4 h-4" />
@@ -362,7 +204,7 @@ function BillingContent() {
             const isCurrent = plan.tier === currentTier;
             const isDowngrade = (currentTier === 'enterprise' && plan.tier === 'pro') ||
               (currentTier !== 'free' && plan.tier === 'free');
-            const canUpgrade = !isCurrent && plan.tier !== 'free' && !isDowngrade && availableGateways.length > 0;
+            const canUpgrade = !isCurrent && plan.tier !== 'free' && !isDowngrade && stripeReady;
 
             return (
               <div
@@ -416,7 +258,7 @@ function BillingContent() {
                       ? 'Free Forever'
                       : isDowngrade
                         ? 'Current or Higher'
-                        : availableGateways.length === 0
+                        : !stripeReady
                           ? 'Contact Admin'
                           : `Upgrade to ${plan.name}`}
                 </button>

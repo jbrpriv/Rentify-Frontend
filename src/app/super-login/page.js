@@ -10,6 +10,7 @@ import { Lock, Mail, Loader2, Eye, EyeOff, ShieldCheck, Scale, UserPlus, LogIn, 
 const ROLE_CONFIG = {
   admin: {
     label: 'System Administrator',
+    shortLabel: 'Admin',
     icon: ShieldCheck,
     color: 'from-[#0B2D72] via-[#0992C2] to-[#0AC4E0]',
     badge: 'ADMIN PORTAL',
@@ -17,6 +18,7 @@ const ROLE_CONFIG = {
   },
   law_reviewer: {
     label: 'Law Reviewer',
+    shortLabel: 'Law',
     icon: Scale,
     color: 'from-[#0B2D72] via-[#0992C2] to-[#0AC4E0]',
     badge: 'LEGAL PORTAL',
@@ -301,12 +303,12 @@ export default function SuperLoginPage() {
                     key={role}
                     onClick={() => handleRoleSelect(role)}
                     className={`flex-1 rounded-2xl border px-4 py-3 text-sm font-bold transition-all flex items-center justify-center gap-2 ${selectedRole === role
-                        ? 'border-[#0992C2] bg-white text-[#0B2D72] shadow-sm shadow-[#0992C2]/25'
-                        : 'border-transparent bg-white/70 text-[#64748B] hover:border-[#99E0F2] hover:text-[#0B2D72]'
+                      ? 'border-[#0992C2] bg-white text-[#0B2D72] shadow-sm shadow-[#0992C2]/25'
+                      : 'border-transparent bg-white/70 text-[#64748B] hover:border-[#99E0F2] hover:text-[#0B2D72]'
                       }`}
                   >
                     <RIcon className="h-4 w-4" />
-                    {config.label.split(' ')[0]}
+                    {config.shortLabel || config.label.split(' ')[0]}
                   </button>
                 );
               })}
@@ -348,8 +350,8 @@ export default function SuperLoginPage() {
                       key={m}
                       onClick={() => { setMode(m); clearAlerts(); }}
                       className={`flex flex-1 items-center justify-center gap-2 rounded-lg py-2 text-sm font-bold transition-all ${mode === m
-                          ? 'bg-white text-[#0B2D72] shadow-sm shadow-[#0992C2]/25'
-                          : 'text-[#6B7280] hover:text-[#111827]'
+                        ? 'bg-white text-[#0B2D72] shadow-sm shadow-[#0992C2]/25'
+                        : 'text-[#6B7280] hover:text-[#111827]'
                         }`}
                     >
                       {m === 'login' ? (

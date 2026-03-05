@@ -52,10 +52,7 @@ describe('Payments — Payment Schedule Page', () => {
             statusCode: 200,
             body: [mockAgreementWithSchedule],
         }).as('getAgreements');
-        cy.intercept('GET', '/api/payments/gateways', {
-            statusCode: 200,
-            body: mockGateways,
-        }).as('getGateways');
+
         cy.visit('/dashboard/payments');
         cy.wait('@getAgreements');
     });
@@ -123,65 +120,6 @@ describe('Payments — Payment Schedule Page', () => {
         cy.intercept('GET', '/api/payments/gateways', { statusCode: 200, body: mockGateways }).as('getGateways');
         cy.visit('/dashboard/payments');
         cy.url().should('not.include', '/dashboard/payments');
-    });
-});
-
-// ─────────────────────────────────────────────────────────────────────────────
-// GATEWAY PICKER MODAL
-// ─────────────────────────────────────────────────────────────────────────────
-describe('Payments — Gateway Picker Modal', () => {
-
-    beforeEach(() => {
-        cy.loginAsTenant();
-        interceptTenantMe();
-        cy.intercept('GET', '/api/agreements', {
-            statusCode: 200,
-            body: [mockAgreementWithSchedule],
-        }).as('getAgreements');
-        cy.intercept('GET', '/api/payments/gateways', {
-            statusCode: 200,
-            body: { gateways: [{ id: 'stripe', name: 'Stripe' }, { id: 'razorpay', name: 'Razorpay' }] },
-        }).as('getGateways');
-        cy.visit('/dashboard/payments');
-        cy.wait('@getAgreements');
-    });
-
-    it('clicking a Pay button opens the Choose Payment Option modal', () => {
-        // Find the Pay button in the overdue calendar cell and click it
-        cy.contains('button', /pay/i).first().click();
-        cy.contains(/choose payment option/i).should('be.visible');
-    });
-
-    it('gateway modal lists enabled gateways', () => {
-        cy.contains('button', /pay/i).first().click();
-        cy.contains(/card.*stripe|stripe/i).should('exist');
-        cy.contains(/razorpay/i).should('exist');
-    });
-
-    it('gateway modal shows unavailable label for disabled gateways', () => {
-        cy.contains('button', /pay/i).first().click();
-        // PayPal is not in the enabled gateways list
-        cy.contains(/not configured|unavailable/i).should('exist');
-    });
-
-    it('gateway modal closes when clicking the X button', () => {
-        cy.contains('button', /pay/i).first().click();
-        cy.contains(/choose payment option/i).should('be.visible');
-        cy.get('button').filter(':contains("")').last().click({ force: true });
-        // Or target the X icon button specifically
-        cy.get('.fixed.inset-0').find('button').first().click({ force: true });
-        cy.contains(/choose payment option/i).should('not.exist');
-    });
-
-    it('shows a toast when no gateways are configured', () => {
-        cy.intercept('GET', '/api/payments/gateways', {
-            statusCode: 200,
-            body: { gateways: [] },
-        }).as('noGateways');
-        cy.visit('/dashboard/payments');
-        cy.wait('@noGateways');
-        cy.contains('button', /pay/i).first().click();
-        cy.contains(/no payment gateway|contact support/i).should('exist');
     });
 });
 
@@ -388,7 +326,7 @@ describe('Notifications Center', () => {
     });
 
     it('mark all read button works and disappears after click', () => {
-        cy.intercept('POST', '/api/notifications/mark-all-read', { statusCode: 200 }).as('markAll');
+        cy.intercept('PATCH', '/api/notifications/read-all', { statusCode: 200 }).as('markAll');
         cy.contains('button', /mark all read/i).should('be.visible').click();
         cy.wait('@markAll');
         cy.contains('button', /mark all read/i).should('not.exist');

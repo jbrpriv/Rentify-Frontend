@@ -134,12 +134,22 @@ describe('Authentication', () => {
     });
 
     it('logs in successfully and lands on dashboard', () => {
+        cy.intercept('POST', '/api/auth/login', {
+            statusCode: 200,
+            body: { _id: 'lnd_001', token: 'mock-token', name: 'Test Landlord', email: 'landlord@test.com', role: 'landlord' },
+        }).as('doLogin');
+        cy.intercept('GET', '/api/users/me', {
+            statusCode: 200,
+            body: { _id: 'lnd_001', name: 'Test Landlord', email: 'landlord@test.com', role: 'landlord' },
+        }).as('getMe');
+        cy.intercept('GET', '/api/notifications/counts', { statusCode: 200, body: { unreadCount: 0 } });
         cy.visit('/login');
         cy.get('input[type="email"], input[placeholder*="email" i]')
             .first().type(Cypress.env('LANDLORD_EMAIL') || 'landlord@test.com');
         cy.get('input[type="password"]')
             .first().type(Cypress.env('LANDLORD_PASSWORD') || 'Test@12345');
         cy.get('button[type="submit"]').first().click();
+        cy.wait('@doLogin');
         cy.url({ timeout: 10000 }).should('include', '/dashboard');
     });
 
@@ -226,16 +236,35 @@ describe('Authentication', () => {
     });
 
     it('logs in successfully as admin via super-login and lands on dashboard', () => {
+        cy.intercept('POST', '/api/auth/super-login', {
+            statusCode: 200,
+            body: { _id: 'admin_001', token: 'mock-token', name: 'Admin User', email: 'admin@test.com', role: 'admin' },
+        }).as('doSuperLogin');
+        cy.intercept('GET', '/api/users/me', {
+            statusCode: 200,
+            body: { _id: 'admin_001', name: 'Admin User', email: 'admin@test.com', role: 'admin' },
+        }).as('getAdminMe');
+        cy.intercept('GET', '/api/notifications/counts', { statusCode: 200, body: { unreadCount: 0 } });
         cy.visit('/super-login');
         cy.get('input[type="email"], input[placeholder*="email" i]')
             .first().type(Cypress.env('ADMIN_EMAIL') || 'admin@test.com');
         cy.get('input[type="password"]')
             .first().type(Cypress.env('ADMIN_PASSWORD') || 'Test@12345');
         cy.get('button[type="submit"]').first().click();
+        cy.wait('@doSuperLogin');
         cy.url({ timeout: 10000 }).should('include', '/dashboard');
     });
 
     it('logs in successfully as law reviewer via super-login and accesses templates', () => {
+        cy.intercept('POST', '/api/auth/super-login', {
+            statusCode: 200,
+            body: { _id: 'law_001', token: 'mock-token', name: 'Law Reviewer', email: 'law_reviewer@test.com', role: 'law_reviewer' },
+        }).as('doLawLogin');
+        cy.intercept('GET', '/api/users/me', {
+            statusCode: 200,
+            body: { _id: 'law_001', name: 'Law Reviewer', email: 'law_reviewer@test.com', role: 'law_reviewer' },
+        }).as('getLawMe');
+        cy.intercept('GET', '/api/notifications/counts', { statusCode: 200, body: { unreadCount: 0 } });
         cy.visit('/super-login');
         cy.contains('button', 'Law').click();
         cy.get('input[type="email"], input[placeholder*="email" i]')
@@ -243,6 +272,7 @@ describe('Authentication', () => {
         cy.get('input[type="password"]')
             .first().type(Cypress.env('LAW_REVIEWER_PASSWORD') || 'Test@12345');
         cy.get('button[type="submit"]').first().click();
+        cy.wait('@doLawLogin');
         cy.url({ timeout: 10000 }).should('include', '/dashboard');
         cy.contains('Templates', { timeout: 8000 }).should('exist');
     });

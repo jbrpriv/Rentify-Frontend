@@ -8,104 +8,11 @@ import { useToast } from '@/context/ToastContext';
 import {
   FileText, Download, CheckCircle, Clock, PenLine, Loader2,
   Building2, User, Calendar, DollarSign, CreditCard,
-  Eye, ChevronDown, ChevronUp, Mail, Phone, X, TrendingUp
+  Eye, ChevronDown, ChevronUp, Mail, Phone, TrendingUp
 } from 'lucide-react';
 import SignatureModal from '@/components/SignatureModal';
 
 
-// ─── Gateway metadata ─────────────────────────────────────────────────────────
-const GATEWAY_META = {
-  stripe: { label: 'Card / Stripe', desc: 'Visa, Mastercard, debit cards', icon: '💳', color: '#635bff' },
-  razorpay: { label: 'Razorpay', desc: 'UPI, cards, net banking, wallets', icon: '⚡', color: '#2563eb' },
-  paypal: { label: 'PayPal', desc: 'PayPal balance or linked card', icon: '🌐', color: '#0070ba' },
-};
-
-const ALL_GATEWAYS = [
-  { id: 'stripe', name: 'Stripe' },
-  { id: 'razorpay', name: 'Razorpay' },
-  { id: 'paypal', name: 'PayPal' },
-];
-
-// ─── Gateway Picker Modal (toast-style, slides up from bottom on mobile) ──────
-function GatewayModal({ gateways, amount, onSelect, onClose, loading }) {
-  const enabledIds = gateways.map(g => g.id);
-  const displayGateways = ALL_GATEWAYS.map(gw => ({ ...gw, enabled: enabledIds.includes(gw.id) }));
-
-  return (
-    <div
-      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4"
-      style={{ background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(4px)', animation: 'gwFadeIn 0.2s ease' }}
-      onClick={(e) => e.target === e.currentTarget && onClose()}
-    >
-      <style>{`
-        @keyframes gwFadeIn { from { opacity: 0 } to { opacity: 1 } }
-        @keyframes gwSlideUp { from { transform: translateY(40px); opacity: 0 } to { transform: translateY(0); opacity: 1 } }
-        .gw-sheet { animation: gwSlideUp 0.28s cubic-bezier(0.3,1,0.4,1) both; }
-      `}</style>
-      <div className="gw-sheet bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl w-full sm:max-w-sm overflow-hidden">
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100">
-          <div>
-            <h3 className="font-black text-gray-900 text-lg">Choose Payment Option</h3>
-            <p className="text-sm text-gray-400 mt-0.5">
-              Amount due:{' '}
-              <strong className="text-gray-800">Rs. {amount?.toLocaleString()}</strong>
-            </p>
-          </div>
-          <button
-            onClick={onClose}
-            className="p-2 rounded-xl hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
-
-        {/* Gateway list */}
-        <div className="p-4 space-y-3">
-          {displayGateways.map((gw) => {
-            const meta = GATEWAY_META[gw.id] || { label: gw.name, desc: '', icon: '💰', color: '#374151' };
-            const isDisabled = loading || !gw.enabled;
-            return (
-              <button
-                key={gw.id}
-                onClick={() => !isDisabled && onSelect(gw.id)}
-                disabled={isDisabled}
-                className={`w-full flex items-center gap-4 p-4 rounded-2xl border-2 transition-all text-left group ${!gw.enabled
-                  ? 'border-gray-100 bg-gray-50 opacity-60 cursor-not-allowed'
-                  : 'border-gray-100 hover:border-blue-200 hover:bg-blue-50/40 disabled:opacity-60'
-                  }`}
-              >
-                <div
-                  className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl flex-shrink-0"
-                  style={{ background: `${meta.color}18` }}
-                >
-                  {meta.icon}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-bold text-gray-900 text-sm">{meta.label}</p>
-                  <p className="text-xs text-gray-400 mt-0.5">
-                    {!gw.enabled ? 'Not configured by admin' : meta.desc}
-                  </p>
-                </div>
-                {loading ? (
-                  <Loader2 className="w-4 h-4 animate-spin text-gray-400 flex-shrink-0" />
-                ) : gw.enabled ? (
-                  <div className="w-5 h-5 rounded-full border-2 border-gray-200 group-hover:border-blue-400 transition flex-shrink-0" />
-                ) : (
-                  <span className="text-[10px] font-semibold text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full flex-shrink-0">Unavailable</span>
-                )}
-              </button>
-            );
-          })}
-        </div>
-
-        <p className="text-center text-xs text-gray-400 pb-5 px-6">
-          Payments are secured and encrypted. You will not be charged until you confirm on the next screen.
-        </p>
-      </div>
-    </div>
-  );
-}
 
 // ─── Main Page ────────────────────────────────────────────────────────────────
 export default function MyLeasePage() {
@@ -114,12 +21,6 @@ export default function MyLeasePage() {
   const [agreements, setAgreements] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showLandlord, setShowLandlord] = useState({});
-
-  // Gateway picker state
-  const [gateways, setGateways] = useState([]);
-  const [modalOpen, setModalOpen] = useState(false);
-  const [pendingAgreement, setPendingAgreement] = useState(null); // agreement being paid
-  const [gwLoading, setGwLoading] = useState(false);
 
   // Signature modal state
   const [signModalOpen, setSignModalOpen] = useState(false);
@@ -133,12 +34,8 @@ export default function MyLeasePage() {
 
   const fetchData = async () => {
     try {
-      const [agrRes, gwRes] = await Promise.all([
-        api.get('/agreements'),
-        api.get('/payments/gateways'),
-      ]);
+      const agrRes = await api.get('/agreements');
       setAgreements(agrRes.data);
-      setGateways(gwRes.data?.gateways || []);
     } catch (err) {
       console.error(err);
       toast('Failed to load agreements', 'error');
@@ -169,98 +66,18 @@ export default function MyLeasePage() {
   };
 
 
-  // Called when "Pay" button is clicked — always shows gateway picker
-  const handlePaymentClick = (agreement) => {
-    if (gateways.length === 0) {
-      toast('No payment gateways configured. Please contact support.', 'warning');
-      return;
-    }
-    // Always prompt — user picks the gateway consciously
-    setPendingAgreement(agreement);
-    setModalOpen(true);
-  };
+  const [initiatingPayment, setInitiatingPayment] = useState(false);
 
-  // Called after gateway selected from modal
-  const handleGatewaySelect = async (gatewayId) => {
-    setModalOpen(false);
-    if (pendingAgreement) {
-      await processPayment(gatewayId, pendingAgreement);
-    }
-    setPendingAgreement(null);
-  };
-
-  const processPayment = async (gatewayId, agreement) => {
-    setGwLoading(true);
+  const handlePaymentClick = async (agreement) => {
+    setInitiatingPayment(true);
     try {
-      if (gatewayId === 'stripe') {
-        const { data } = await api.post('/payments/create-checkout-session', {
-          agreementId: agreement._id,
-        });
-        window.location.href = data.url;
-
-      } else if (gatewayId === 'razorpay') {
-        const { data: order } = await api.post('/payments/razorpay/create-order', {
-          agreementId: agreement._id,
-        });
-
-        // Load Razorpay script if not already loaded
-        if (!window.Razorpay) {
-          await new Promise((resolve, reject) => {
-            const script = document.createElement('script');
-            script.src = 'https://checkout.razorpay.com/v1/checkout.js';
-            script.onload = resolve;
-            script.onerror = reject;
-            document.body.appendChild(script);
-          });
-        }
-
-        const rzp = new window.Razorpay({
-          key: order.keyId,
-          amount: order.amount,
-          currency: order.currency,
-          order_id: order.orderId,
-          name: 'RentifyPro',
-          description: 'Initial Deposit + 1st Month Rent',
-          prefill: order.prefill,
-          theme: { color: '#2563eb' },
-          handler: async (response) => {
-            setGwLoading(true);
-            try {
-              await api.post('/payments/razorpay/verify', {
-                razorpay_order_id: response.razorpay_order_id,
-                razorpay_payment_id: response.razorpay_payment_id,
-                razorpay_signature: response.razorpay_signature,
-                agreementId: agreement._id,
-              });
-              toast('🎉 Payment successful! Lease is now active.', 'success');
-              fetchData();
-            } catch (err) {
-              toast(err.response?.data?.message || 'Payment verification failed', 'error');
-            } finally {
-              setGwLoading(false);
-            }
-          },
-          modal: {
-            ondismiss: () => {
-              setGwLoading(false);
-              toast('Payment cancelled', 'warning');
-            },
-          },
-        });
-        rzp.open();
-        return; // Don't set gwLoading(false) yet — Razorpay modal is open
-
-      } else if (gatewayId === 'paypal') {
-        const { data } = await api.post('/payments/paypal/create-order', {
-          agreementId: agreement._id,
-        });
-        window.location.href = data.approveUrl;
-      }
+      const { data } = await api.post('/payments/create-checkout-session', {
+        agreementId: agreement._id,
+      });
+      window.location.href = data.url;
     } catch (err) {
       toast(err.response?.data?.message || 'Failed to initiate payment', 'error');
-    } finally {
-      // Don't clear for Razorpay (handled in handler/ondismiss)
-      if (gatewayId !== 'razorpay') setGwLoading(false);
+      setInitiatingPayment(false);
     }
   };
 
@@ -300,11 +117,6 @@ export default function MyLeasePage() {
       </div>
     );
 
-  // Amount shown in modal (deposit + rent)
-  const pendingAmount = pendingAgreement
-    ? (pendingAgreement.financials?.rentAmount || 0) + (pendingAgreement.financials?.depositAmount || 0)
-    : 0;
-
   return (
     <div className="space-y-6 max-w-6xl mx-auto">
 
@@ -316,17 +128,6 @@ export default function MyLeasePage() {
           onConfirm={handleSignConfirm}
           signerName={pendingSignName}
           loading={signLoading}
-        />
-      )}
-
-      {/* Gateway picker modal */}
-      {modalOpen && (
-        <GatewayModal
-          gateways={gateways}
-          amount={pendingAmount}
-          onSelect={handleGatewaySelect}
-          onClose={() => { setModalOpen(false); setPendingAgreement(null); }}
-          loading={gwLoading}
         />
       )}
 
@@ -506,10 +307,10 @@ export default function MyLeasePage() {
                         </p>
                         <button
                           onClick={() => handlePaymentClick(ag)}
-                          disabled={gwLoading}
+                          disabled={initiatingPayment}
                           className="w-full sm:w-auto inline-flex justify-center items-center px-8 py-3 bg-blue-600 text-white text-sm font-bold rounded-lg hover:bg-blue-700 shadow-md transform hover:-translate-y-0.5 transition-all disabled:opacity-60"
                         >
-                          {gwLoading
+                          {initiatingPayment
                             ? <Loader2 className="animate-spin h-5 w-5 mr-2" />
                             : <CreditCard className="h-5 w-5 mr-2" />}
                           Pay Total: Rs. {totalDueAtSigning.toLocaleString()}
