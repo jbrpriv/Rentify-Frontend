@@ -131,11 +131,7 @@ function BillingContent() {
       return;
     }
 
-    if (gateways.length === 1) {
-      processSubscription(gateways[0].id, tier);
-      return;
-    }
-
+    // Always show picker so user consciously chooses the gateway
     setPendingTier(tier);
     setModalOpen(true);
   };
@@ -253,8 +249,8 @@ function BillingContent() {
       {/* ── Toast ────────────────────────────────────────────────── */}
       {toast.msg && (
         <div className={`px-5 py-3.5 rounded-2xl text-sm font-medium border ${toast.type === 'success' ? 'bg-green-50 text-green-700 border-green-200' :
-            toast.type === 'warn' ? 'bg-amber-50 text-amber-700 border-amber-200' :
-              'bg-red-50 text-red-700 border-red-200'
+          toast.type === 'warn' ? 'bg-amber-50 text-amber-700 border-amber-200' :
+            'bg-red-50 text-red-700 border-red-200'
           }`}>
           {toast.msg}
         </div>
@@ -276,8 +272,8 @@ function BillingContent() {
       {/* ── Current subscription hero ─────────────────────────────── */}
       {currentTier && (
         <div className={`rounded-3xl border-2 p-6 flex items-center justify-between gap-4 flex-wrap ${currentTier === 'enterprise' ? 'border-purple-200 bg-gradient-to-r from-purple-50 to-indigo-50' :
-            currentTier === 'pro' ? 'border-blue-200 bg-gradient-to-r from-blue-50 to-cyan-50' :
-              'border-gray-200 bg-gray-50'
+          currentTier === 'pro' ? 'border-blue-200 bg-gradient-to-r from-blue-50 to-cyan-50' :
+            'border-gray-200 bg-gray-50'
           }`}>
           <div className="flex items-center gap-4">
             <div className={`w-14 h-14 rounded-2xl flex items-center justify-center ${tierMeta.bg}`}>
@@ -385,8 +381,8 @@ function BillingContent() {
                   disabled={!canUpgrade || !!subscribing}
                   onClick={() => handleSubscribe(plan.tier)}
                   className={`w-full py-2.5 rounded-xl font-black text-sm flex items-center justify-center gap-2 transition-all disabled:opacity-60 ${isCurrent || plan.tier === 'free' || isDowngrade
-                      ? BTN_STYLE.free
-                      : BTN_STYLE[plan.tier]
+                    ? BTN_STYLE.free
+                    : BTN_STYLE[plan.tier]
                     }`}
                 >
                   {subscribing === plan.tier && <Loader2 className="animate-spin w-4 h-4" />}

@@ -11,18 +11,18 @@ import {
 } from 'lucide-react';
 
 const STATUS_CONFIG = {
-  paid:             { label: 'Paid',             color: 'bg-green-100 text-green-700',  dot: 'bg-green-500', icon: CheckCircle },
-  pending:          { label: 'Upcoming',          color: 'bg-blue-100 text-blue-700',    dot: 'bg-blue-400',  icon: Clock },
-  overdue:          { label: 'Overdue',           color: 'bg-red-100 text-red-700',      dot: 'bg-red-500',   icon: AlertCircle },
-  late_fee_applied: { label: 'Late Fee Applied',  color: 'bg-orange-100 text-orange-700',dot: 'bg-orange-500',icon: AlertCircle },
+  paid: { label: 'Paid', color: 'bg-green-100 text-green-700', dot: 'bg-green-500', icon: CheckCircle },
+  pending: { label: 'Upcoming', color: 'bg-blue-100 text-blue-700', dot: 'bg-blue-400', icon: Clock },
+  overdue: { label: 'Overdue', color: 'bg-red-100 text-red-700', dot: 'bg-red-500', icon: AlertCircle },
+  late_fee_applied: { label: 'Late Fee Applied', color: 'bg-orange-100 text-orange-700', dot: 'bg-orange-500', icon: AlertCircle },
 };
 
-const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 const GATEWAY_META = {
-  stripe:   { label: 'Card / Stripe',  desc: 'Visa, Mastercard, debit cards',   icon: '💳', color: '#635bff' },
-  razorpay: { label: 'Razorpay',       desc: 'UPI, cards, net banking, wallets', icon: '⚡', color: '#2563eb' },
-  paypal:   { label: 'PayPal',         desc: 'PayPal balance or linked card',    icon: '🌐', color: '#0070ba' },
+  stripe: { label: 'Card / Stripe', desc: 'Visa, Mastercard, debit cards', icon: '💳', color: '#635bff' },
+  razorpay: { label: 'Razorpay', desc: 'UPI, cards, net banking, wallets', icon: '⚡', color: '#2563eb' },
+  paypal: { label: 'PayPal', desc: 'PayPal balance or linked card', icon: '🌐', color: '#0070ba' },
 };
 
 // ─── Gateway Picker Modal ─────────────────────────────────────────────────────
@@ -84,8 +84,8 @@ function GatewayModal({ gateways, amount, onSelect, onClose, loading }) {
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 export default function PaymentsPage() {
-  const router    = useRouter();
-  const { user }  = useUser();
+  const router = useRouter();
+  const { user } = useUser();
   const { toast } = useToast();
 
   useEffect(() => {
@@ -94,13 +94,13 @@ export default function PaymentsPage() {
   }, [user]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const [agreements, setAgreements] = useState([]);
-  const [selected, setSelected]     = useState(null);
-  const [loading, setLoading]       = useState(true);
-  const [paying, setPaying]         = useState(null);
-  const [gateways, setGateways]     = useState([]);
-  const [modalOpen, setModalOpen]   = useState(false);
+  const [selected, setSelected] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [paying, setPaying] = useState(null);
+  const [gateways, setGateways] = useState([]);
+  const [modalOpen, setModalOpen] = useState(false);
   const [pendingIdx, setPendingIdx] = useState(null);
-  const [gwLoading, setGwLoading]   = useState(false);
+  const [gwLoading, setGwLoading] = useState(false);
 
   useEffect(() => {
     Promise.all([
@@ -123,10 +123,7 @@ export default function PaymentsPage() {
       toast('No payment gateways available', 'warning');
       return;
     }
-    if (gateways.length === 1) {
-      processPayment(gateways[0].id, scheduleIndex);
-      return;
-    }
+    // Always prompt — user picks the gateway consciously
     setPendingIdx(scheduleIndex);
     setModalOpen(true);
   };
@@ -171,22 +168,22 @@ export default function PaymentsPage() {
         });
 
         const rzp = new window.Razorpay({
-          key:         order.keyId,
-          amount:      order.amount,
-          currency:    order.currency,
-          order_id:    order.orderId,
-          name:        'RentifyPro',
+          key: order.keyId,
+          amount: order.amount,
+          currency: order.currency,
+          order_id: order.orderId,
+          name: 'RentifyPro',
           description: 'Rent Payment',
-          prefill:     order.prefill,
-          theme:       { color: '#2563eb' },
+          prefill: order.prefill,
+          theme: { color: '#2563eb' },
           handler: async (response) => {
             setGwLoading(true);
             try {
               await api.post('/payments/razorpay/verify', {
-                razorpay_order_id:   response.razorpay_order_id,
+                razorpay_order_id: response.razorpay_order_id,
                 razorpay_payment_id: response.razorpay_payment_id,
-                razorpay_signature:  response.razorpay_signature,
-                agreementId:         selected._id,
+                razorpay_signature: response.razorpay_signature,
+                agreementId: selected._id,
               });
               toast('🎉 Payment successful!', 'success');
               router.push('/dashboard/payments?success=razorpay');
@@ -219,13 +216,13 @@ export default function PaymentsPage() {
     }
   };
 
-  const schedule   = selected?.rentSchedule || [];
-  const paid       = schedule.filter(e => e.status === 'paid').length;
-  const overdue    = schedule.filter(e => ['overdue','late_fee_applied'].includes(e.status)).length;
-  const pending    = schedule.filter(e => e.status === 'pending').length;
-  const totalPaid  = schedule.filter(e => e.status === 'paid').reduce((s, e) => s + (e.paidAmount || e.amount), 0);
+  const schedule = selected?.rentSchedule || [];
+  const paid = schedule.filter(e => e.status === 'paid').length;
+  const overdue = schedule.filter(e => ['overdue', 'late_fee_applied'].includes(e.status)).length;
+  const pending = schedule.filter(e => e.status === 'pending').length;
+  const totalPaid = schedule.filter(e => e.status === 'paid').reduce((s, e) => s + (e.paidAmount || e.amount), 0);
 
-  const pendingEntry  = pendingIdx !== null ? schedule[pendingIdx] : null;
+  const pendingEntry = pendingIdx !== null ? schedule[pendingIdx] : null;
   const pendingAmount = pendingEntry ? (pendingEntry.amount + (pendingEntry.lateFeeAmount || 0)) : 0;
 
   return (
@@ -260,11 +257,10 @@ export default function PaymentsPage() {
                 <button
                   key={a._id}
                   onClick={() => setSelected(a)}
-                  className={`px-4 py-2 rounded-xl text-sm font-semibold transition ${
-                    selected?._id === a._id
+                  className={`px-4 py-2 rounded-xl text-sm font-semibold transition ${selected?._id === a._id
                       ? 'bg-blue-600 text-white'
                       : 'bg-white border border-gray-200 text-gray-600 hover:border-blue-400'
-                  }`}
+                    }`}
                 >
                   {a.property?.title}
                 </button>
@@ -276,10 +272,10 @@ export default function PaymentsPage() {
             <>
               {/* Summary Stats */}
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                <SummaryCard label="Months Paid"  value={paid}                                 icon={CheckCircle}  color="text-green-600"  bg="bg-green-50" />
-                <SummaryCard label="Pending"      value={pending}                              icon={Clock}        color="text-blue-600"   bg="bg-blue-50" />
-                <SummaryCard label="Overdue"      value={overdue}                              icon={AlertCircle}  color="text-red-600"    bg="bg-red-50" />
-                <SummaryCard label="Total Paid"   value={`Rs. ${totalPaid.toLocaleString()}`} icon={CreditCard}   color="text-indigo-600" bg="bg-indigo-50" />
+                <SummaryCard label="Months Paid" value={paid} icon={CheckCircle} color="text-green-600" bg="bg-green-50" />
+                <SummaryCard label="Pending" value={pending} icon={Clock} color="text-blue-600" bg="bg-blue-50" />
+                <SummaryCard label="Overdue" value={overdue} icon={AlertCircle} color="text-red-600" bg="bg-red-50" />
+                <SummaryCard label="Total Paid" value={`Rs. ${totalPaid.toLocaleString()}`} icon={CreditCard} color="text-indigo-600" bg="bg-indigo-50" />
               </div>
 
               {/* Lease Info */}
@@ -312,7 +308,7 @@ export default function PaymentsPage() {
                 <h3 className="text-base font-black text-gray-900 mb-6 uppercase tracking-widest">Rent Calendar</h3>
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
                   {schedule.map((entry, i) => {
-                    const cfg  = STATUS_CONFIG[entry.status] || STATUS_CONFIG.pending;
+                    const cfg = STATUS_CONFIG[entry.status] || STATUS_CONFIG.pending;
                     const Icon = cfg.icon;
                     const date = new Date(entry.dueDate);
                     const isThisMonth =
@@ -322,9 +318,8 @@ export default function PaymentsPage() {
                     return (
                       <div
                         key={i}
-                        className={`rounded-2xl p-4 border-2 transition-all ${
-                          isThisMonth ? 'border-blue-400 shadow-md' : 'border-transparent bg-gray-50'
-                        }`}
+                        className={`rounded-2xl p-4 border-2 transition-all ${isThisMonth ? 'border-blue-400 shadow-md' : 'border-transparent bg-gray-50'
+                          }`}
                       >
                         <div className="flex items-center justify-between mb-2">
                           <p className="text-xs font-black uppercase text-gray-400">

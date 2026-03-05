@@ -147,17 +147,13 @@ export default function MyLeasePage() {
   };
 
 
-  // Called when "Pay" button is clicked — shows gateway picker toast
+  // Called when "Pay" button is clicked — always shows gateway picker
   const handlePaymentClick = (agreement) => {
     if (gateways.length === 0) {
       toast('No payment gateways configured. Please contact support.', 'warning');
       return;
     }
-    // If only one gateway, skip picker and go directly
-    if (gateways.length === 1) {
-      processPayment(gateways[0].id, agreement);
-      return;
-    }
+    // Always prompt — user picks the gateway consciously
     setPendingAgreement(agreement);
     setModalOpen(true);
   };

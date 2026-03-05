@@ -6,14 +6,110 @@ import api from '@/utils/api';
 import {
   Search, UserCheck, Calendar, FileText, Loader2,
   CheckSquare, Square, ChevronDown, ChevronUp, Tag,
-  GripVertical, Eye, EyeOff, AlertTriangle, X,
+  GripVertical, Eye, EyeOff, AlertTriangle, X, LayoutTemplate,
 } from 'lucide-react';
+
+// ─── Template Picker Modal ────────────────────────────────────────────────────
+function TemplatePicker({ onApply, onClose }) {
+  const [templates, setTemplates] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [applying, setApplying] = useState(null);
+
+  useEffect(() => {
+    api.get('/agreement-templates')
+      .then(({ data }) => setTemplates(Array.isArray(data) ? data.filter(t => t.status === 'approved') : []))
+      .catch(() => setTemplates([]))
+      .finally(() => setLoading(false));
+  }, []);
+
+  const handleSelect = async (tpl) => {
+    setApplying(tpl._id);
+    try {
+      // Track usage
+      await api.post(`/agreement-templates/${tpl._id}/use`);
+      // Collect clause IDs from template (support both populated objects and bare IDs)
+      const clauseIds = (tpl.clauses || []).map(c => c._id || c);
+      onApply(clauseIds, tpl.name);
+    } catch {
+      // Still apply even if usage tracking fails
+      const clauseIds = (tpl.clauses || []).map(c => c._id || c);
+      onApply(clauseIds, tpl.name);
+    } finally {
+      setApplying(null);
+    }
+  };
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50"
+      onClick={e => e.target === e.currentTarget && onClose()}
+    >
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[80vh] flex flex-col overflow-hidden">
+        <div className="flex items-center justify-between px-5 py-4 border-b bg-gray-50">
+          <div className="flex items-center gap-2 font-bold text-gray-800">
+            <LayoutTemplate className="w-5 h-5 text-blue-600" />
+            Agreement Templates
+          </div>
+          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-gray-200 transition text-gray-500">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        <div className="flex-1 overflow-y-auto p-4 space-y-3">
+          {loading && (
+            <div className="flex items-center justify-center py-10 gap-2 text-gray-400">
+              <Loader2 className="animate-spin w-5 h-5" /> Loading templates…
+            </div>
+          )}
+          {!loading && templates.length === 0 && (
+            <p className="text-sm text-gray-400 text-center py-8 italic">
+              No approved templates available. Ask an admin to create and approve templates.
+            </p>
+          )}
+          {!loading && templates.map(tpl => (
+            <div key={tpl._id} className="border border-gray-200 rounded-xl p-4 hover:border-blue-300 hover:bg-blue-50/30 transition">
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex-1 min-w-0">
+                  <h4 className="font-semibold text-gray-900 text-sm">{tpl.name}</h4>
+                  {tpl.description && (
+                    <p className="text-xs text-gray-500 mt-0.5 line-clamp-2">{tpl.description}</p>
+                  )}
+                  <p className="text-xs text-blue-600 mt-1">
+                    {(tpl.clauses || []).length} clause{(tpl.clauses || []).length !== 1 ? 's' : ''} included
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => handleSelect(tpl)}
+                  disabled={!!applying}
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 text-white text-xs font-semibold rounded-lg hover:bg-blue-700 disabled:opacity-60 transition shrink-0"
+                >
+                  {applying === tpl._id
+                    ? <Loader2 className="animate-spin w-3 h-3" />
+                    : <LayoutTemplate className="w-3 h-3" />}
+                  Use
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="px-5 py-3 border-t bg-gray-50">
+          <p className="text-xs text-gray-400">
+            Applying a template loads its clauses. You can still add or remove individual clauses after.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 
 // ─── Inline PDF Preview ───────────────────────────────────────────────────────
 function InlinePDFPreview({ agreementId, onClose }) {
   const [previewData, setPreviewData] = useState(null);
-  const [loading, setLoading]         = useState(true);
-  const [error, setError]             = useState('');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     if (!agreementId) return;
@@ -66,13 +162,13 @@ function InlinePDFPreview({ agreementId, onClose }) {
 
 // ─── Drag-and-Drop Clause Picker ──────────────────────────────────────────────
 function ClausePicker({ selectedClauseIds, onToggle, onReorder }) {
-  const [clauses, setClauses]         = useState([]);
-  const [loading, setLoading]         = useState(true);
-  const [expanded, setExpanded]       = useState({});
+  const [clauses, setClauses] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [expanded, setExpanded] = useState({});
   const [categoryFilter, setCategoryFilter] = useState('');
-  const [search, setSearch]           = useState('');
-  const dragItem                      = useRef(null);
-  const dragOverItem                  = useRef(null);
+  const [search, setSearch] = useState('');
+  const dragItem = useRef(null);
+  const dragOverItem = useRef(null);
 
   useEffect(() => {
     api.get('/agreements/clauses')
@@ -92,12 +188,12 @@ function ClausePicker({ selectedClauseIds, onToggle, onReorder }) {
   // Drag handlers for reordering selected clauses
   const handleDragStart = (idx) => { dragItem.current = idx; };
   const handleDragEnter = (idx) => { dragOverItem.current = idx; };
-  const handleDragEnd   = () => {
+  const handleDragEnd = () => {
     if (dragItem.current === null || dragOverItem.current === null) return;
     const reordered = [...selectedClauses];
-    const [moved]   = reordered.splice(dragItem.current, 1);
+    const [moved] = reordered.splice(dragItem.current, 1);
     reordered.splice(dragOverItem.current, 0, moved);
-    dragItem.current     = null;
+    dragItem.current = null;
     dragOverItem.current = null;
     onReorder(reordered.map(c => c._id));
   };
@@ -239,7 +335,7 @@ function AgreementForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const propertyId = searchParams.get('propertyId');
-  const offerId    = searchParams.get('offerId'); // ← pre-fill from accepted offer
+  const offerId = searchParams.get('offerId'); // ← pre-fill from accepted offer
 
   const [loading, setLoading] = useState(false);
   const [step, setStep] = useState(1); // 1: Find Tenant, 2: Terms, 3: Clauses
@@ -249,7 +345,9 @@ function AgreementForm() {
   const [createdAgreementId, setCreatedAgreementId] = useState(null);
   const [savingClauses, setSavingClauses] = useState(false);
   const [showPDFPreview, setShowPDFPreview] = useState(false);
-  const [offerData, setOfferData] = useState(null); // populated when offerId present
+  const [offerData, setOfferData] = useState(null);
+  const [showTemplatePicker, setShowTemplatePicker] = useState(false);
+  const [appliedTemplate, setAppliedTemplate] = useState('');
 
   const [formData, setFormData] = useState({
     startDate: '',
@@ -270,20 +368,20 @@ function AgreementForm() {
       .then(({ data }) => {
         const lastRound = data.history[data.history.length - 1];
         const start = new Date();
-        const end   = new Date(start);
+        const end = new Date(start);
         end.setMonth(end.getMonth() + (lastRound?.leaseDurationMonths || 12));
         setOfferData(data);
         setFoundTenant(data.tenant);
         setTenantEmail(data.tenant?.email || '');
         setFormData({
-          startDate:     start.toISOString().slice(0, 10),
-          endDate:       end.toISOString().slice(0, 10),
-          rentAmount:    String(lastRound?.monthlyRent     || ''),
+          startDate: start.toISOString().slice(0, 10),
+          endDate: end.toISOString().slice(0, 10),
+          rentAmount: String(lastRound?.monthlyRent || ''),
           depositAmount: String(lastRound?.securityDeposit || ''),
         });
         setStep(2); // skip "Find Tenant" — tenant is already known from offer
       })
-      .catch(() => {})
+      .catch(() => { })
       .finally(() => setLoading(false));
   }, [offerId]);
 
@@ -294,11 +392,11 @@ function AgreementForm() {
       .then(({ data }) => {
         setFormData((prev) => ({
           ...prev,
-          rentAmount:    data.financials?.monthlyRent    ? String(data.financials.monthlyRent)    : prev.rentAmount,
+          rentAmount: data.financials?.monthlyRent ? String(data.financials.monthlyRent) : prev.rentAmount,
           depositAmount: data.financials?.securityDeposit ? String(data.financials.securityDeposit) : prev.depositAmount,
         }));
       })
-      .catch(() => {});
+      .catch(() => { });
   }, [propertyId, offerId]);
 
   const lookupTenant = async () => {
@@ -347,16 +445,16 @@ function AgreementForm() {
     setLoading(true);
     try {
       const { data: agreement } = await api.post('/agreements', {
-        tenantId:                  foundTenant._id,
+        tenantId: foundTenant._id,
         propertyId,
-        startDate:                 formData.startDate,
-        endDate:                   formData.endDate,
-        rentAmount:                Number(formData.rentAmount),
-        depositAmount:             Number(formData.depositAmount),
-        lateFeeAmount:             Number(formData.lateFeeAmount) || 0,
-        lateFeeGracePeriodDays:    Number(formData.lateFeeGracePeriodDays) || 5,
-        rentEscalationEnabled:     formData.rentEscalationEnabled,
-        rentEscalationPercentage:  Number(formData.rentEscalationPercentage) || 0,
+        startDate: formData.startDate,
+        endDate: formData.endDate,
+        rentAmount: Number(formData.rentAmount),
+        depositAmount: Number(formData.depositAmount),
+        lateFeeAmount: Number(formData.lateFeeAmount) || 0,
+        lateFeeGracePeriodDays: Number(formData.lateFeeGracePeriodDays) || 5,
+        rentEscalationEnabled: formData.rentEscalationEnabled,
+        rentEscalationPercentage: Number(formData.rentEscalationPercentage) || 0,
       });
       setCreatedAgreementId(agreement._id);
       setStep(3);
@@ -375,6 +473,12 @@ function AgreementForm() {
 
   const handleReorderClauses = (reorderedIds) => {
     setSelectedClauseIds(reorderedIds);
+  };
+
+  const handleApplyTemplate = (clauseIds, templateName) => {
+    setSelectedClauseIds(clauseIds);
+    setAppliedTemplate(templateName);
+    setShowTemplatePicker(false);
   };
 
   const handleSaveClauses = async () => {
@@ -447,24 +551,24 @@ function AgreementForm() {
               Tenant pre-filled from offer: <strong className="ml-1">{foundTenant.name}</strong>&nbsp;({foundTenant.email})
             </div>
           ) : (
-          <div className="flex gap-4">
-            <input
-              type="email"
-              placeholder="Enter Tenant's Email"
-              className="flex-1 rounded-md border border-gray-300 px-4 py-2 focus:ring-blue-500 focus:border-blue-500"
-              value={tenantEmail}
-              onChange={(e) => setTenantEmail(e.target.value)}
-              disabled={step !== 1}
-            />
-            <button
-              type="button"
-              onClick={lookupTenant}
-              disabled={loading || !tenantEmail || step !== 1}
-              className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 disabled:bg-blue-300"
-            >
-              {loading ? <Loader2 className="animate-spin" /> : 'Search'}
-            </button>
-          </div>
+            <div className="flex gap-4">
+              <input
+                type="email"
+                placeholder="Enter Tenant's Email"
+                className="flex-1 rounded-md border border-gray-300 px-4 py-2 focus:ring-blue-500 focus:border-blue-500"
+                value={tenantEmail}
+                onChange={(e) => setTenantEmail(e.target.value)}
+                disabled={step !== 1}
+              />
+              <button
+                type="button"
+                onClick={lookupTenant}
+                disabled={loading || !tenantEmail || step !== 1}
+                className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 disabled:bg-blue-300"
+              >
+                {loading ? <Loader2 className="animate-spin" /> : 'Search'}
+              </button>
+            </div>
           )}
           {foundTenant && (
             <div className="mt-4 p-3 bg-green-50 text-green-700 rounded-md flex items-center">
@@ -610,16 +714,34 @@ function AgreementForm() {
           </div>
         )}
 
-        {/* Step 3: Clause Picker (H4) */}
         {step === 3 && (
           <div className="p-6 border-t border-gray-100">
-            <h2 className="text-lg font-medium text-gray-900 flex items-center mb-2">
-              <Tag className="w-5 h-5 mr-2 text-blue-500" />
-              Step 3: Additional Clauses
-              <span className="ml-2 text-sm font-normal text-gray-500">(optional)</span>
-            </h2>
+            <div className="flex items-center justify-between mb-2">
+              <h2 className="text-lg font-medium text-gray-900 flex items-center">
+                <Tag className="w-5 h-5 mr-2 text-blue-500" />
+                Step 3: Additional Clauses
+                <span className="ml-2 text-sm font-normal text-gray-500">(optional)</span>
+              </h2>
+              {/* Use Template button */}
+              <button
+                type="button"
+                onClick={() => setShowTemplatePicker(true)}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-semibold text-blue-700 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition"
+              >
+                <LayoutTemplate className="w-4 h-4" />
+                Use Template
+              </button>
+            </div>
+
+            {appliedTemplate && (
+              <div className="mb-3 flex items-center gap-2 text-xs px-3 py-2 bg-green-50 border border-green-200 rounded-lg text-green-700">
+                <CheckSquare className="w-3.5 h-3.5" />
+                Template applied: <strong>{appliedTemplate}</strong> — you can still adjust clauses below.
+              </div>
+            )}
+
             <p className="text-sm text-gray-500 mb-4">
-              Select approved clauses to include in your agreement. Drag selected clauses to reorder them.
+              Select approved clauses to include. Drag to reorder. Or start from a template above.
             </p>
 
             <ClausePicker
@@ -663,6 +785,14 @@ function AgreementForm() {
           </div>
         )}
 
+        {/* Template Picker Modal */}
+        {showTemplatePicker && (
+          <TemplatePicker
+            onApply={handleApplyTemplate}
+            onClose={() => setShowTemplatePicker(false)}
+          />
+        )}
+
         {/* PDF Preview Modal */}
         {showPDFPreview && createdAgreementId && (
           <InlinePDFPreview
@@ -673,7 +803,7 @@ function AgreementForm() {
       </div>
     </div>
   );
-    }
+}
 
 export default function Page() {
   return (
