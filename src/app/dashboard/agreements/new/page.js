@@ -12,12 +12,7 @@ import {
 } from 'lucide-react';
 
 // ─── Flow Tracker ─────────────────────────────────────────────────────────────
-function FlowTracker({ offerData, step }) {
-  // step 1 = Lease Terms (Draft Agreement is active)
-  // step 2 = Clauses    (Draft Agreement is done, Sign & Activate is active)
-  const draftDone = step >= 2;
-  const signActive = step >= 2;
-
+function FlowTracker({ offerData }) {
   const steps = [
     {
       key: 'browse',
@@ -36,16 +31,15 @@ function FlowTracker({ offerData, step }) {
     {
       key: 'agreement',
       label: 'Draft Agreement',
-      sublabel: draftDone ? 'Terms set' : 'Set terms & clauses',
-      done: draftDone,
-      active: !draftDone,
+      sublabel: 'Set terms & clauses',
+      done: false,
+      active: true,
     },
     {
       key: 'sign',
       label: 'Sign & Activate',
-      sublabel: signActive ? 'Choose clauses & finish' : 'Both parties sign',
+      sublabel: 'Both parties sign',
       done: false,
-      active: signActive,
     },
   ];
 
@@ -561,7 +555,7 @@ function AgreementForm() {
       {offerId && (
         <>
           {/* Flow tracker */}
-          <FlowTracker offerData={offerData} step={step} />
+          <FlowTracker offerData={offerData} />
 
           {/* Offer accepted banner */}
           {offerData && (
