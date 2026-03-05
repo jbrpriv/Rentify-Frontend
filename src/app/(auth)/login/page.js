@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import api from '@/utils/api';
 import { requestFCMToken } from '@/utils/firebase';
 import Link from 'next/link';
@@ -31,13 +31,20 @@ const getRecaptchaToken = (action) => {
   });
 };
 
-export default function LoginPage() {
+function LoginContent() {
   const router = useRouter();
   const { setUser } = useUser();
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [showPwd, setShowPwd] = useState(false);
+
+  const searchParams = useSearchParams();
+  const [facebookNotice, setFacebookNotice] = useState(false);
+
+  useEffect(() => {
+    if (searchParams.get('notice') === 'facebook_no_email') setFacebookNotice(true);
+  }, [searchParams]);
 
   // 2FA flow
   const [needs2FA, setNeeds2FA] = useState(false);
@@ -248,6 +255,11 @@ export default function LoginPage() {
               </p>
             </div>
 
+            {facebookNotice && (
+              <div className="mb-6 rounded-xl border border-amber-500/40 bg-amber-950/60 px-4 py-3 text-xs text-amber-100">
+                <strong>Facebook didn't share your email.</strong> Please sign up manually below.
+              </div>
+            )}
             {error && (
               <div className="mb-6 rounded-xl border border-red-500/50 bg-red-950/60 px-4 py-3 text-xs text-red-100">
                 {error}
@@ -438,5 +450,13 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><Loader2 className="animate-spin w-8 h-8 text-blue-500" /></div>}>
+      <LoginContent />
+    </Suspense>
   );
 }

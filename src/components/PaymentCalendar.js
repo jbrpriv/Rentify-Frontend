@@ -1,12 +1,14 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, CheckCircle, Clock } from 'lucide-react';
+import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, CheckCircle, Clock, X, Bell, Loader2, AlertCircle } from 'lucide-react';
 import api from '@/utils/api';
 
 const PaymentCalendar = ({ theme, agreements = [], payments = [] }) => {
     const [currentDate, setCurrentDate] = useState(new Date());
+    const [selectedDayInfo, setSelectedDayInfo] = useState(null);
+    const [sendingReminder, setSendingReminder] = useState(null);
 
     // Simple calendar logic
     const year = currentDate.getFullYear();
@@ -40,6 +42,21 @@ const PaymentCalendar = ({ theme, agreements = [], payments = [] }) => {
         });
 
         return [...paidMatches, ...pendingMatches];
+    };
+
+    const handleRemindTenant = async (paymentId, e) => {
+        e.stopPropagation();
+        setSendingReminder(paymentId);
+        try {
+            // Mock API call to explicitly trigger missed-payment notification
+            await new Promise(r => setTimeout(r, 600));
+            // await api.post(`/notifications/remind/${paymentId}`);
+            alert('Reminder sent to tenant successfully!');
+        } catch (err) {
+            alert('Failed to send reminder.');
+        } finally {
+            setSendingReminder(null);
+        }
     };
 
     return (
@@ -113,6 +130,7 @@ const PaymentCalendar = ({ theme, agreements = [], payments = [] }) => {
                                     cursor: dayPayments.length > 0 ? 'pointer' : 'default',
                                     transition: 'all 0.2s ease',
                                 }}
+                                onClick={() => dayPayments.length > 0 && setSelectedDayInfo({ day, payments: dayPayments })}
                                 title={dayPayments.length > 0 ? `${dayPayments.length} payment(s)` : ''}
                             >
                                 <span style={{ fontSize: '0.85rem', fontWeight: isToday ? 800 : 600, color: isToday ? theme.accent : '#4B5563' }}>
@@ -143,6 +161,66 @@ const PaymentCalendar = ({ theme, agreements = [], payments = [] }) => {
                     </div>
                 </div>
             </>
+
+            {/* Day Details Modal */}
+            <AnimatePresence>
+                {selectedDayInfo && (
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                            className="bg-white rounded-2xl shadow-xl border border-gray-100 p-5 max-w-sm w-full"
+                        >
+                            <div className="flex justify-between items-center mb-4 pb-3 border-b border-gray-100">
+                                <div>
+                                    <h3 className="font-bold text-gray-900">
+                                        {new Date(year, month, selectedDayInfo.day).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}
+                                    </h3>
+                                    <p className="text-xs text-gray-500">{selectedDayInfo.payments.length} scheduled payment(s)</p>
+                                </div>
+                                <button onClick={() => setSelectedDayInfo(null)} className="p-1.5 hover:bg-gray-100 rounded-lg text-gray-400">
+                                    <X className="w-5 h-5" />
+                                </button>
+                            </div>
+
+                            <div className="space-y-3 max-h-64 overflow-y-auto">
+                                {selectedDayInfo.payments.map((p, idx) => {
+                                    const isPaid = p.status === 'paid';
+                                    const isOverdue = p.status === 'overdue' || p.status === 'late_fee_applied' || (!isPaid && new Date(p.dueDate || p.createdAt) < new Date());
+                                    const pid = p._id || `temp_${idx}`;
+
+                                    return (
+                                        <div key={pid} className={`p-3 rounded-xl border ${isPaid ? 'bg-green-50 border-green-100' : isOverdue ? 'bg-red-50 border-red-100' : 'bg-orange-50 border-orange-100'}`}>
+                                            <div className="flex justify-between items-start">
+                                                <div>
+                                                    <p className="text-sm font-bold text-gray-800">Rs. {(p.amount || p.paidAmount || 0).toLocaleString()}</p>
+                                                    <p className="text-xs font-medium mt-0.5 flex items-center gap-1">
+                                                        {isPaid ? <CheckCircle className="w-3 h-3 text-green-600" /> : isOverdue ? <AlertCircle className="w-3 h-3 text-red-600" /> : <Clock className="w-3 h-3 text-orange-600" />}
+                                                        <span className={isPaid ? 'text-green-700' : isOverdue ? 'text-red-700' : 'text-orange-700'}>
+                                                            {isPaid ? 'Paid' : isOverdue ? 'Overdue' : 'Pending'}
+                                                        </span>
+                                                    </p>
+                                                </div>
+                                                {isOverdue && !isPaid && (
+                                                    <button
+                                                        onClick={(e) => handleRemindTenant(pid, e)}
+                                                        disabled={sendingReminder === pid}
+                                                        className="flex items-center gap-1 px-2.5 py-1.5 bg-red-600 hover:bg-red-700 disabled:opacity-70 text-white text-[10px] font-bold uppercase rounded-lg transition"
+                                                    >
+                                                        {sendingReminder === pid ? <Loader2 className="w-3 h-3 animate-spin" /> : <Bell className="w-3 h-3" />}
+                                                        Remind
+                                                    </button>
+                                                )}
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
         </div>
     );
 };

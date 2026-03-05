@@ -210,6 +210,17 @@ export default function DashboardHome() {
     if (pendingOffers.length) tasks.push(`${pendingOffers.length} offer(s) to review`);
     if (pendingDisputes > 0) tasks.push(`${pendingDisputes} open dispute(s)`);
     if (pendingMaint > 0) tasks.push(`${pendingMaint} maintenance request(s)`);
+
+    const now = new Date();
+    const RENEWAL_DAYS = 60;
+    const expiringLeases = activeLeases.filter(a => {
+      if (!a.term?.endDate) return false;
+      const diff = (new Date(a.term.endDate) - now) / (1000 * 60 * 60 * 24);
+      return diff > 0 && diff <= RENEWAL_DAYS;
+    });
+    if (expiringLeases.length > 0) {
+      tasks.push(`${expiringLeases.length} lease(s) ending within 60 days`);
+    }
   } else if (user.role === 'tenant') {
     const awaitSign = agreements.filter(a => a.status === 'sent' && !a.signatures?.tenant?.signed);
     if (awaitSign.length) tasks.push(`${awaitSign.length} agreement(s) to sign`);
@@ -301,6 +312,7 @@ export default function DashboardHome() {
           {user.role === 'landlord' && (
             <>
               <StatCard label="Monthly Income" value={`Rs. ${totalRevenue.toLocaleString()}`} icon={TrendingUp} theme={theme} sub={`${activeLeases.length} active lease(s)`} />
+              <StatCard label="Late Fees" value={`Rs. ${payments.reduce((s, p) => s + (p.lateFeeAmount || 0), 0).toLocaleString()}`} icon={AlertCircle} theme={ROLE_THEME.admin} sub={`${payments.filter(p => p.status === 'late_fee_applied').length} pending fee(s)`} />
               <StatCard label="Properties" value={properties.length} icon={Building2} theme={ROLE_THEME.property_manager} />
               <StatCard label="Agreements" value={agreements.length} icon={FileText} theme={theme} />
               <StatCard label="Active Offers" value={pendingOffers.length} icon={Tag} theme={ROLE_THEME.tenant} />

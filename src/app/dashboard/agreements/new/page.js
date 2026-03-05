@@ -230,8 +230,31 @@ function InlinePDFPreview({ agreementId, onClose }) {
   );
 }
 
+// ─── Variable Substitution Helper ───────────────────────────────────────────────
+function substituteVariables(text, offer, form) {
+  if (!text) return '';
+  let replaced = text;
+
+  const rules = {
+    '{{tenant_name}}': offer?.tenant?.name || '[Tenant Name]',
+    '{{landlord_name}}': offer?.property?.landlord?.name || '[Landlord Name]',
+    '{{property_address}}': offer?.property?.address ? `${offer.property.address.street}, ${offer.property.address.city}` : '[Property Address]',
+    '{{start_date}}': form?.startDate ? new Date(form.startDate).toLocaleDateString() : '[Start Date]',
+    '{{end_date}}': form?.endDate ? new Date(form.endDate).toLocaleDateString() : '[End Date]',
+    '{{rent_amount}}': form?.rentAmount ? `Rs. ${Number(form.rentAmount).toLocaleString()}` : '[Rent Amount]',
+    '{{deposit_amount}}': form?.depositAmount ? `Rs. ${Number(form.depositAmount).toLocaleString()}` : '[Deposit Amount]',
+    '{{late_fee_amount}}': form?.lateFeeAmount ? `Rs. ${Number(form.lateFeeAmount).toLocaleString()}` : '[Late Fee]',
+    '{{grace_period}}': form?.lateFeeGracePeriodDays ? `${form.lateFeeGracePeriodDays} days` : '[Grace Period]'
+  };
+
+  for (const [key, value] of Object.entries(rules)) {
+    replaced = replaced.replace(new RegExp(key, 'gi'), `<span class="bg-blue-100 text-blue-800 px-1 py-0.5 rounded font-medium">${value}</span>`);
+  }
+  return replaced;
+}
+
 // ─── Drag-and-Drop Clause Picker ──────────────────────────────────────────────
-function ClausePicker({ selectedClauseIds, onToggle, onReorder }) {
+function ClausePicker({ selectedClauseIds, onToggle, onReorder, offerData, formData }) {
   const [clauses, setClauses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState({});
@@ -378,7 +401,10 @@ function ClausePicker({ selectedClauseIds, onToggle, onReorder }) {
                 </div>
                 {open && (
                   <div className="px-11 pb-3">
-                    <p className="text-xs text-gray-600 leading-relaxed whitespace-pre-line">{clause.body}</p>
+                    <p
+                      className="text-xs text-gray-600 leading-relaxed whitespace-pre-line"
+                      dangerouslySetInnerHTML={{ __html: substituteVariables(clause.body, offerData, formData) }}
+                    />
                   </div>
                 )}
               </div>
@@ -774,6 +800,8 @@ function AgreementForm() {
                   selectedClauseIds={selectedClauseIds}
                   onToggle={handleToggleClause}
                   onReorder={handleReorderClauses}
+                  offerData={offerData}
+                  formData={formData}
                 />
 
                 {createdAgreementId && (
