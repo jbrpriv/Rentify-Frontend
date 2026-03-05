@@ -92,7 +92,7 @@ describe('Disputes — Tenant View', () => {
         cy.contains('button', /file dispute/i).click();
         cy.get('select').first().should('contain', 'Select Agreement');
         cy.get('input[placeholder*="Dispute title"]').should('exist');
-        cy.get('textarea').should('exist');
+        cy.get('textarea[placeholder*="Describe the issue"]').should('exist');
     });
 
     it('submitting the form calls POST /api/disputes', () => {
@@ -105,7 +105,7 @@ describe('Disputes — Tenant View', () => {
         cy.contains('button', /file dispute/i).click();
         cy.get('select').first().select('Sunset Apartments — active');
         cy.get('input[placeholder*="Dispute title"]').type('Deposit not returned');
-        cy.get('textarea').type('Landlord is holding deposit without reason.');
+        cy.get('textarea[placeholder*="Describe the issue"]').type('Landlord is holding deposit without reason.');
 
         cy.contains('button', /submit dispute/i).click();
         cy.wait('@fileDispute');

@@ -94,14 +94,14 @@ describe('Offers — Tenant View', () => {
 
     it('shows status badge "Pending" on the first offer', () => {
         cy.contains('Sunset Apartments')
-            .closest('[style]')
+            .closest('div[style*="border-radius"]')
             .contains(/pending/i)
             .should('exist');
     });
 
     it('shows "Countered" badge on countered offer', () => {
         cy.contains('Green Valley')
-            .closest('[style]')
+            .closest('div[style*="border-radius"]')
             .contains(/countered/i)
             .should('exist');
     });
@@ -211,7 +211,7 @@ describe('Offers — Landlord View', () => {
         cy.intercept('POST', '/api/offers/off_001/counter', { statusCode: 200, body: { message: 'Counter sent' } }).as('counter');
         cy.intercept('GET', '/api/offers', { statusCode: 200, body: { offers: [mockActiveOffer] } }).as('refresh');
         cy.contains('Sunset Apartments').click();
-        cy.contains('button', /^counter$/i).click();
+        cy.get('button').filter((_, el) => el.textContent.trim() === 'Counter').click();
         cy.contains('Your Counter-Offer').should('exist');
         cy.get('input[type="number"]').first().clear().type('24000');
         cy.contains('button', /send counter/i).click();
