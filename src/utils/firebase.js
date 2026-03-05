@@ -79,56 +79,65 @@ function isConfigured() {
  * @returns {Promise<string|null>} the FCM token, or null on failure/denied/unsupported
  */
 export async function requestFCMToken(promptPermission = false) {
-    // Guard: only runs in browser
     if (typeof window === 'undefined') return null;
 
-    // Guard: Firebase not configured in this environment
     if (!isConfigured()) {
-        console.info('FCM not configured — skipping push registration.');
+        console.error('[FCM] Not configured. Missing NEXT_PUBLIC_FIREBASE_* vars.');
         return null;
     }
 
-    // Guard: browser doesn't support notifications API at all
-    if (!('Notification' in window)) return null;
+    if (!('Notification' in window)) {
+        console.warn('[FCM] Browser does not support notifications.');
+        return null;
+    }
 
-    // Guard: Service worker support required for Web Push
-    if (!('serviceWorker' in navigator)) return null;
+    if (!('serviceWorker' in navigator)) {
+        console.warn('[FCM] Browser does not support service workers.');
+        return null;
+    }
 
     const currentPermission = Notification.permission;
+    console.log(`[FCM] Current permission: ${currentPermission}, Prompting: ${promptPermission}`);
 
-    // If the user has blocked notifications, there's nothing we can do
     if (currentPermission === 'denied') return null;
 
-    // If permission not yet asked and the caller doesn't want a prompt, exit early
-    if (currentPermission !== 'granted' && !promptPermission) return null;
+    if (currentPermission !== 'granted' && !promptPermission) {
+        console.log('[FCM] Permission not granted and prompt=false. Exiting.');
+        return null;
+    }
 
     try {
-        // Register (or re-use) the service worker that handles background messages
-        const registration = await navigator.serviceWorker.register(
-            '/firebase-messaging-sw.js',
-            { scope: '/' }
-        );
+        console.log('[FCM] Registering service worker...');
+        const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js', { scope: '/' });
+        console.log('[FCM] SW registered:', registration.active ? 'active' : 'installing');
 
         const messaging = getFirebaseMessaging();
 
-        // getToken() will trigger the browser permission dialog if promptPermission
-        // is true and permission hasn't been granted yet.
+        console.log('[FCM] Requesting token...');
         const token = await getToken(messaging, {
             vapidKey: VAPID_KEY,
             serviceWorkerRegistration: registration,
         });
 
-        if (!token) return null;
+        if (!token) {
+            console.warn('[FCM] getToken returned null or empty.');
+            return null;
+        }
 
-        // Persist to the backend (fire-and-forget; we don't block UX on this)
-        await api.post('/auth/fcm-token', { fcmToken: token }).catch((err) => {
-            console.warn('FCM token registration failed:', err.message);
+        console.log('[FCM] Token acquired, sending to backend...');
+
+        // Wait to make sure the token gets into localStorage from login first
+        await new Promise(r => setTimeout(r, 1000));
+
+        await api.post('/auth/fcm-token', { fcmToken: token }).then(() => {
+            console.log('[FCM] Successfully registered token with backend.');
+        }).catch((err) => {
+            console.error('[FCM] Backend registration failed:', err.response?.data?.message || err.message);
         });
 
         return token;
     } catch (err) {
-        // Common reasons: user dismissed the prompt, browser privacy mode, etc.
-        console.warn('FCM token request failed:', err.message);
+        console.error('[FCM] Fatal error during token request:', err);
         return null;
     }
 }
