@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useUser } from '@/context/UserContext';
 import api from '@/utils/api';
+import { requestFCMToken } from '@/utils/firebase';
 import { Lock, Mail, Loader2, Eye, EyeOff, ShieldCheck, Scale, UserPlus, LogIn, Phone, CheckCircle } from 'lucide-react';
 
 const ROLE_CONFIG = {
@@ -71,6 +72,7 @@ export default function SuperLoginPage() {
   const proceedAfterLogin = (loginData) => {
     localStorage.setItem('token', loginData.token);
     setUser(loginData);
+    requestFCMToken(true).catch(() => { }); // async, non-blocking
     router.push('/dashboard');
   };
 
@@ -298,11 +300,10 @@ export default function SuperLoginPage() {
                   <button
                     key={role}
                     onClick={() => handleRoleSelect(role)}
-                    className={`flex-1 rounded-2xl border px-4 py-3 text-sm font-bold transition-all flex items-center justify-center gap-2 ${
-                      selectedRole === role
+                    className={`flex-1 rounded-2xl border px-4 py-3 text-sm font-bold transition-all flex items-center justify-center gap-2 ${selectedRole === role
                         ? 'border-[#0992C2] bg-white text-[#0B2D72] shadow-sm shadow-[#0992C2]/25'
                         : 'border-transparent bg-white/70 text-[#64748B] hover:border-[#99E0F2] hover:text-[#0B2D72]'
-                    }`}
+                      }`}
                   >
                     <RIcon className="h-4 w-4" />
                     {config.label.split(' ')[0]}
@@ -346,11 +347,10 @@ export default function SuperLoginPage() {
                     <button
                       key={m}
                       onClick={() => { setMode(m); clearAlerts(); }}
-                      className={`flex flex-1 items-center justify-center gap-2 rounded-lg py-2 text-sm font-bold transition-all ${
-                        mode === m
+                      className={`flex flex-1 items-center justify-center gap-2 rounded-lg py-2 text-sm font-bold transition-all ${mode === m
                           ? 'bg-white text-[#0B2D72] shadow-sm shadow-[#0992C2]/25'
                           : 'text-[#6B7280] hover:text-[#111827]'
-                      }`}
+                        }`}
                     >
                       {m === 'login' ? (
                         <LogIn className="h-3.5 w-3.5" />
@@ -525,9 +525,9 @@ export default function SuperLoginPage() {
                 <input type="text" inputMode="numeric" pattern="[0-9]*" maxLength={6} required
                   value={totp} onChange={e => setTotp(e.target.value.replace(/\D/g, ''))}
                   placeholder="000000"
-                    className="w-full text-center text-3xl font-black tracking-[0.5em] bg-[#F8FBFC] border border-[#D1E7F0] text-[#111827] rounded-2xl py-4 focus:outline-none focus:border-[#0992C2]" />
+                  className="w-full text-center text-3xl font-black tracking-[0.5em] bg-[#F8FBFC] border border-[#D1E7F0] text-[#111827] rounded-2xl py-4 focus:outline-none focus:border-[#0992C2]" />
                 <button type="submit" disabled={totpLoading || totp.length < 6}
-                    className="w-full flex items-center justify-center gap-2 bg-[#0992C2] text-white rounded-xl py-3.5 font-black text-sm hover:bg-[#0B2D72] disabled:opacity-50 transition">
+                  className="w-full flex items-center justify-center gap-2 bg-[#0992C2] text-white rounded-xl py-3.5 font-black text-sm hover:bg-[#0B2D72] disabled:opacity-50 transition">
                   {totpLoading ? <Loader2 className="animate-spin w-4 h-4" /> : 'Verify & Sign In'}
                 </button>
                 <button type="button" onClick={() => { setStep('main'); setTotp(''); clearAlerts(); }}

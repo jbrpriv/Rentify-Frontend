@@ -28,6 +28,7 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import api from '@/utils/api';
+import { requestFCMToken } from '@/utils/firebase';
 
 const UserContext = createContext(null);
 
@@ -82,6 +83,9 @@ export function UserProvider({ children }) {
     const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
     if (token) {
       refreshUser();
+      // Silently re-register FCM token if the user already granted permission.
+      // We pass `false` so we never show a permission prompt unprompted.
+      requestFCMToken(false).catch(() => { });
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
