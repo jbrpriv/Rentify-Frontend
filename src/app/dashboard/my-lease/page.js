@@ -8,7 +8,7 @@ import { useToast } from '@/context/ToastContext';
 import {
   FileText, Download, CheckCircle, Clock, PenLine, Loader2,
   Building2, User, Calendar, DollarSign, CreditCard,
-  Eye, ChevronDown, ChevronUp, Mail, Phone, X,
+  Eye, ChevronDown, ChevronUp, Mail, Phone, X, TrendingUp
 } from 'lucide-react';
 import SignatureModal from '@/components/SignatureModal';
 
@@ -70,8 +70,8 @@ function GatewayModal({ gateways, amount, onSelect, onClose, loading }) {
                 onClick={() => !isDisabled && onSelect(gw.id)}
                 disabled={isDisabled}
                 className={`w-full flex items-center gap-4 p-4 rounded-2xl border-2 transition-all text-left group ${!gw.enabled
-                    ? 'border-gray-100 bg-gray-50 opacity-60 cursor-not-allowed'
-                    : 'border-gray-100 hover:border-blue-200 hover:bg-blue-50/40 disabled:opacity-60'
+                  ? 'border-gray-100 bg-gray-50 opacity-60 cursor-not-allowed'
+                  : 'border-gray-100 hover:border-blue-200 hover:bg-blue-50/40 disabled:opacity-60'
                   }`}
               >
                 <div
@@ -401,6 +401,12 @@ export default function MyLeasePage() {
                         Rs. {rent.toLocaleString()} <span className="text-xs font-normal text-gray-500">/mo</span>
                       </p>
                       <p className="text-xs text-gray-500 mt-1">Deposit: Rs. {deposit.toLocaleString()}</p>
+                      {ag.rentEscalation?.enabled && (
+                        <p className="text-xs text-purple-600 font-medium mt-1.5 flex items-center">
+                          <TrendingUp className="h-3 w-3 mr-1" />
+                          {ag.rentEscalation.percentage}% annual increase
+                        </p>
+                      )}
                     </div>
 
                     <div className="bg-gray-50 p-4 rounded-lg border border-gray-100">

@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import api from '@/utils/api';
 import { useUser } from '@/context/UserContext';
 import { useToast } from '@/context/ToastContext';
-import { FileText, Download, Calendar, User, Loader2, CheckCircle, Clock, PenLine, GitBranch, Mail, Eye } from 'lucide-react';
+import { FileText, Download, Calendar, User, Loader2, CheckCircle, Clock, PenLine, GitBranch, Mail, Eye, TrendingUp } from 'lucide-react';
 import { motion } from 'framer-motion';
 import SignatureModal from '@/components/SignatureModal';
 
@@ -193,6 +193,12 @@ export default function AgreementsPage() {
                             <Calendar className="h-4 w-4 mr-1" />
                             Ends: {new Date(ag.term?.endDate).toLocaleDateString()}
                           </span>
+                          {ag.rentEscalation?.enabled && (
+                            <span className="flex items-center text-purple-600 font-medium">
+                              <TrendingUp className="h-4 w-4 mr-1" />
+                              +{ag.rentEscalation.percentage}% / yr
+                            </span>
+                          )}
                         </div>
 
                         {/* Signature Status */}
