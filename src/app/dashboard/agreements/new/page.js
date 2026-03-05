@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import api from '@/utils/api';
+import { useToast } from '@/context/ToastContext';
 import {
   Search, UserCheck, Calendar, FileText, Loader2,
   CheckSquare, Square, ChevronDown, ChevronUp, Tag,
@@ -337,11 +338,13 @@ function ClausePicker({ selectedClauseIds, onToggle, onReorder }) {
 function AgreementForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { toast } = useToast();
   const propertyId = searchParams.get('propertyId');
   const offerId = searchParams.get('offerId'); // ← pre-fill from accepted offer
 
   const [loading, setLoading] = useState(false);
   const [step, setStep] = useState(1); // 1: Find Tenant, 2: Terms, 3: Clauses
+  const [formErrors, setFormErrors] = useState({});
   const [tenantEmail, setTenantEmail] = useState('');
   const [foundTenant, setFoundTenant] = useState(null);
   const [selectedClauseIds, setSelectedClauseIds] = useState([]);
@@ -411,14 +414,14 @@ function AgreementForm() {
     try {
       const { data } = await api.post('/users/lookup', { email: tenantEmail });
       if (data.role !== 'tenant') {
-        alert('This user is registered as a Landlord, not a Tenant.');
+        toast('This user is registered as a Landlord, not a Tenant.', 'error');
         setFoundTenant(null);
       } else {
         setFoundTenant(data);
         setStep(2);
       }
     } catch {
-      alert('Tenant not found. Please ask them to register first.');
+      toast('Tenant not found. Please ask them to register first.', 'error');
       setFoundTenant(null);
     } finally {
       setLoading(false);
@@ -429,8 +432,40 @@ function AgreementForm() {
     e.preventDefault();
     if (!offerId && (!foundTenant || !propertyId)) return;
 
-    // We defer the actual creation API call until Step 3 (handleSaveClauses), 
-    // so if the landlord navigates away in the middle of drafting, 
+    // ── Frontend validation ────────────────────────────────────────────────
+    const errors = {};
+
+    const start = formData.startDate ? new Date(formData.startDate) : null;
+    const end = formData.endDate ? new Date(formData.endDate) : null;
+
+    if (!formData.startDate) {
+      errors.startDate = 'Start date is required.';
+    }
+    if (!formData.endDate) {
+      errors.endDate = 'End date is required.';
+    }
+    if (start && end && end <= start) {
+      errors.endDate = 'End date must be after start date.';
+    }
+
+    const rent = Number(formData.rentAmount);
+    if (!formData.rentAmount || isNaN(rent) || rent <= 0) {
+      errors.rentAmount = 'Rent must be a positive number.';
+    }
+
+    const deposit = Number(formData.depositAmount);
+    if (!formData.depositAmount || isNaN(deposit) || deposit < 0) {
+      errors.depositAmount = 'Deposit must be 0 or more.';
+    }
+
+    if (Object.keys(errors).length > 0) {
+      setFormErrors(errors);
+      return;
+    }
+
+    setFormErrors({});
+    // We defer the actual creation API call until Step 3 (handleSaveClauses),
+    // so if the landlord navigates away in the middle of drafting,
     // the offer doesn't get prematurely "accepted" before clauses are done.
     setStep(3);
   };
@@ -486,7 +521,7 @@ function AgreementForm() {
       }
       router.push('/dashboard/agreements');
     } catch (error) {
-      alert(error.response?.data?.message || 'Failed to save agreement');
+      toast(error.response?.data?.message || 'Failed to save agreement', 'error');
     } finally {
       setSavingClauses(false);
     }
@@ -590,20 +625,22 @@ function AgreementForm() {
                   <input
                     type="date"
                     required
-                    className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                    className={`mt-1 block w-full rounded-md border px-3 py-2 shadow-sm focus:ring-blue-500 focus:border-blue-500 ${formErrors.startDate ? 'border-red-400 bg-red-50' : 'border-gray-300'}`}
                     value={formData.startDate}
-                    onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
+                    onChange={(e) => { setFormData({ ...formData, startDate: e.target.value }); setFormErrors((p) => ({ ...p, startDate: null })); }}
                   />
+                  {formErrors.startDate && <p className="mt-1 text-xs text-red-600 flex items-center gap-1"><AlertTriangle className="w-3 h-3" />{formErrors.startDate}</p>}
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700">End Date</label>
                   <input
                     type="date"
                     required
-                    className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                    className={`mt-1 block w-full rounded-md border px-3 py-2 shadow-sm focus:ring-blue-500 focus:border-blue-500 ${formErrors.endDate ? 'border-red-400 bg-red-50' : 'border-gray-300'}`}
                     value={formData.endDate}
-                    onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
+                    onChange={(e) => { setFormData({ ...formData, endDate: e.target.value }); setFormErrors((p) => ({ ...p, endDate: null })); }}
                   />
+                  {formErrors.endDate && <p className="mt-1 text-xs text-red-600 flex items-center gap-1"><AlertTriangle className="w-3 h-3" />{formErrors.endDate}</p>}
                 </div>
               </div>
 
@@ -620,6 +657,7 @@ function AgreementForm() {
                     value={formData.rentAmount}
                     onChange={(e) => setFormData({ ...formData, rentAmount: e.target.value })}
                   />
+                  {formErrors.rentAmount && <p className="mt-1 text-xs text-red-600 flex items-center gap-1"><AlertTriangle className="w-3 h-3" />{formErrors.rentAmount}</p>}
                   <p className="text-xs text-gray-400 mt-1">Fixed based on {offerId ? 'offer terms' : 'property details'}</p>
                 </div>
                 <div>
@@ -634,6 +672,7 @@ function AgreementForm() {
                     value={formData.depositAmount}
                     onChange={(e) => setFormData({ ...formData, depositAmount: e.target.value })}
                   />
+                  {formErrors.depositAmount && <p className="mt-1 text-xs text-red-600 flex items-center gap-1"><AlertTriangle className="w-3 h-3" />{formErrors.depositAmount}</p>}
                   <p className="text-xs text-gray-400 mt-1">Fixed based on {offerId ? 'offer terms' : 'property details'}</p>
                 </div>
               </div>
