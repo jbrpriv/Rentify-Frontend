@@ -88,6 +88,15 @@ function MobileDrawer({ user, logout, isOpen, onClose, navLinks, pathname }) {
   const router = useRouter();
   const initial = user.name?.charAt(0).toUpperCase() || '?';
 
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => { document.body.style.overflow = ''; };
+  }, [isOpen]);
+
   const go = (href) => { onClose(); router.push(href); };
 
   return (
@@ -159,8 +168,8 @@ function MobileDrawer({ user, logout, isOpen, onClose, navLinks, pathname }) {
                     key={label}
                     onClick={() => go(href)}
                     className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-2xl text-sm font-semibold transition-all ${isActive
-                        ? 'bg-[#E6F4F8] text-[#0992C2] shadow-sm'
-                        : 'text-neutral-600 hover:bg-[#F0F8FA] hover:text-neutral-900'
+                      ? 'bg-[#E6F4F8] text-[#0992C2] shadow-sm'
+                      : 'text-neutral-600 hover:bg-[#F0F8FA] hover:text-neutral-900'
                       }`}
                   >
                     <span className={`flex h-8 w-8 items-center justify-center rounded-xl border ${isActive ? 'border-[#0992C2] bg-white' : 'border-transparent bg-white/70'
@@ -176,8 +185,8 @@ function MobileDrawer({ user, logout, isOpen, onClose, navLinks, pathname }) {
               <button
                 onClick={() => go('/dashboard')}
                 className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-2xl text-sm font-semibold transition-all ${pathname?.startsWith('/dashboard')
-                    ? 'bg-[#E6F4F8] text-[#0992C2] shadow-sm'
-                    : 'text-neutral-600 hover:bg-[#F0F8FA] hover:text-neutral-900'
+                  ? 'bg-[#E6F4F8] text-[#0992C2] shadow-sm'
+                  : 'text-neutral-600 hover:bg-[#F0F8FA] hover:text-neutral-900'
                   }`}
               >
                 <span className={`flex h-8 w-8 items-center justify-center rounded-xl border ${pathname?.startsWith('/dashboard') ? 'border-[#0992C2] bg-white' : 'border-transparent bg-white/70'
@@ -252,8 +261,8 @@ export default function Navbar() {
   return (
     <>
       <nav className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 ${isTransparent
-          ? 'bg-transparent'
-          : 'bg-white/95 backdrop-blur-xl shadow-sm border-b border-black/5'
+        ? 'bg-transparent'
+        : 'bg-white/95 backdrop-blur-xl shadow-sm border-b border-black/5'
         }`}>
         <div className="flex w-full items-center justify-between px-6 py-3.5 md:px-12 lg:px-16">
 
@@ -280,8 +289,8 @@ export default function Navbar() {
                   key={label}
                   href={href}
                   className={`flex items-center gap-1 text-[0.8rem] font-semibold transition-colors ${pathname === href
-                      ? isTransparent ? 'text-white' : 'text-[#0B2D72]'
-                      : isTransparent ? 'text-white/80 hover:text-white' : 'text-neutral-600 hover:text-neutral-900'
+                    ? isTransparent ? 'text-white' : 'text-[#0B2D72]'
+                    : isTransparent ? 'text-white/80 hover:text-white' : 'text-neutral-600 hover:text-neutral-900'
                     }`}
                 >
                   {Icon && <Icon className="h-3.5 w-3.5" />}
@@ -322,8 +331,8 @@ export default function Navbar() {
                 <button
                   onClick={() => setMobileOpen(true)}
                   className={`flex h-9 w-9 items-center justify-center rounded-full transition-all md:hidden ${isTransparent
-                      ? 'bg-white/15 text-white hover:bg-white/25'
-                      : 'bg-[#E6F4F8] text-[#0992C2] hover:bg-[#d0eaf4]'
+                    ? 'bg-white/15 text-white hover:bg-white/25'
+                    : 'bg-[#E6F4F8] text-[#0992C2] hover:bg-[#d0eaf4]'
                     }`}
                   aria-label="Open menu"
                 >
@@ -342,8 +351,8 @@ export default function Navbar() {
                 <Link
                   href="/register"
                   className={`rounded-full border px-4 py-1.5 text-[0.75rem] font-semibold transition-all hover:scale-[1.02] ${isTransparent
-                      ? 'border-white text-white hover:bg-white/10'
-                      : 'border-[#0992C2] text-[#0992C2] hover:bg-[#0992C2]/5'
+                    ? 'border-white text-white hover:bg-white/10'
+                    : 'border-[#0992C2] text-[#0992C2] hover:bg-[#0992C2]/5'
                     }`}
                 >
                   List a Property

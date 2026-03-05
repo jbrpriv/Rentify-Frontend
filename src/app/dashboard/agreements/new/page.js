@@ -378,6 +378,8 @@ function AgreementForm() {
           endDate: end.toISOString().slice(0, 10),
           rentAmount: String(lastRound?.monthlyRent || ''),
           depositAmount: String(lastRound?.securityDeposit || ''),
+          lateFeeAmount: String(data.property?.financials?.lateFeeAmount || 0),
+          lateFeeGracePeriodDays: String(data.property?.financials?.lateFeeGracePeriodDays || 5),
         });
         setStep(2); // skip "Find Tenant" — tenant is already known from offer
       })
@@ -394,6 +396,8 @@ function AgreementForm() {
           ...prev,
           rentAmount: data.financials?.monthlyRent ? String(data.financials.monthlyRent) : prev.rentAmount,
           depositAmount: data.financials?.securityDeposit ? String(data.financials.securityDeposit) : prev.depositAmount,
+          lateFeeAmount: String(data.financials?.lateFeeAmount || 0),
+          lateFeeGracePeriodDays: String(data.financials?.lateFeeGracePeriodDays || 5),
         }));
       })
       .catch(() => { });
@@ -636,12 +640,13 @@ function AgreementForm() {
                   <input
                     type="number"
                     min="0"
-                    className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                    disabled
+                    className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm bg-gray-50 text-gray-500 cursor-not-allowed"
                     value={formData.lateFeeAmount}
                     onChange={(e) => setFormData({ ...formData, lateFeeAmount: e.target.value })}
                     placeholder="0"
                   />
-                  <p className="text-xs text-gray-400 mt-1">Applied after grace period expires</p>
+                  <p className="text-xs text-gray-400 mt-1">Pre-filled from property settings</p>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Grace Period (days)</label>
@@ -649,11 +654,12 @@ function AgreementForm() {
                     type="number"
                     min="1"
                     max="30"
-                    className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                    disabled
+                    className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm bg-gray-50 text-gray-500 cursor-not-allowed"
                     value={formData.lateFeeGracePeriodDays}
                     onChange={(e) => setFormData({ ...formData, lateFeeGracePeriodDays: e.target.value })}
                   />
-                  <p className="text-xs text-gray-400 mt-1">Days after due date before late fee kicks in</p>
+                  <p className="text-xs text-gray-400 mt-1">Pre-filled from property settings</p>
                 </div>
               </div>
 
