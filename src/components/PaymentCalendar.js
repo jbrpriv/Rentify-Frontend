@@ -72,12 +72,6 @@ const PaymentCalendar = ({ theme, agreements = [], payments = [] }) => {
                 </span>
             </div>
 
-            <div style={{ textAlign: 'center', marginBottom: 16 }}>
-                <span style={{ fontSize: '0.9rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: theme.accent }}>
-                    {currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
-                </span>
-            </div>
-
             <>
                 {/* Days of week header */}
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 8, marginBottom: 8 }}>
