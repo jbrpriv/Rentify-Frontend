@@ -17,7 +17,10 @@ function TemplatePicker({ onApply, onClose }) {
 
   useEffect(() => {
     api.get('/agreement-templates')
-      .then(({ data }) => setTemplates(Array.isArray(data) ? data.filter(t => t.status === 'approved') : []))
+      .then(({ data }) => {
+        const tpls = data.templates || data;
+        setTemplates(Array.isArray(tpls) ? tpls.filter(t => t.status === 'approved') : []);
+      })
       .catch(() => setTemplates([]))
       .finally(() => setLoading(false));
   }, []);
