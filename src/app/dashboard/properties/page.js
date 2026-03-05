@@ -23,17 +23,17 @@ function ConfirmModal({ title, description, icon: Icon, iconBg, iconColor, confi
       `}</style>
       <div className="cm-overlay" onClick={onCancel}>
         <div className="cm-card" onClick={e => e.stopPropagation()}>
-          <div style={{ width:60,height:60,borderRadius:18,margin:'0 auto 20px',background:iconBg,display:'flex',alignItems:'center',justifyContent:'center' }}>
-            <Icon size={26} style={{ color: iconColor }}/>
+          <div style={{ width: 60, height: 60, borderRadius: 18, margin: '0 auto 20px', background: iconBg, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Icon size={26} style={{ color: iconColor }} />
           </div>
-          <h2 style={{ fontFamily:"'Outfit',sans-serif",fontWeight:800,fontSize:'1.3rem',color:'#0F172A',textAlign:'center',marginBottom:8,letterSpacing:'-0.02em' }}>{title}</h2>
-          <p style={{ textAlign:'center',color:'#64748B',fontSize:'0.85rem',marginBottom:24,lineHeight:1.6 }}>{description}</p>
-          <div style={{ display:'flex',gap:10 }}>
-            <button onClick={onCancel} disabled={loading} style={{ flex:1,padding:'12px',border:'1.5px solid #E2E8F0',borderRadius:12,fontSize:'0.875rem',fontWeight:700,color:'#64748B',background:'white',cursor:'pointer' }}>
+          <h2 style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 800, fontSize: '1.3rem', color: '#0F172A', textAlign: 'center', marginBottom: 8, letterSpacing: '-0.02em' }}>{title}</h2>
+          <p style={{ textAlign: 'center', color: '#64748B', fontSize: '0.85rem', marginBottom: 24, lineHeight: 1.6 }}>{description}</p>
+          <div style={{ display: 'flex', gap: 10 }}>
+            <button onClick={onCancel} disabled={loading} style={{ flex: 1, padding: '12px', border: '1.5px solid #E2E8F0', borderRadius: 12, fontSize: '0.875rem', fontWeight: 700, color: '#64748B', background: 'white', cursor: 'pointer' }}>
               Cancel
             </button>
-            <button onClick={onConfirm} disabled={loading} style={{ flex:1.5,padding:'12px',border:'none',borderRadius:12,fontSize:'0.875rem',fontWeight:700,color:'white',cursor:loading?'not-allowed':'pointer',background:confirmBg,display:'flex',alignItems:'center',justifyContent:'center',gap:7 }}>
-              {loading ? <Loader2 size={15} className="animate-spin"/> : confirmLabel}
+            <button onClick={onConfirm} disabled={loading} style={{ flex: 1.5, padding: '12px', border: 'none', borderRadius: 12, fontSize: '0.875rem', fontWeight: 700, color: 'white', cursor: loading ? 'not-allowed' : 'pointer', background: confirmBg, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7 }}>
+              {loading ? <Loader2 size={15} className="animate-spin" /> : confirmLabel}
             </button>
           </div>
         </div>
@@ -46,18 +46,19 @@ export default function PropertiesPage() {
   const router = useRouter();
   const { user: parsed } = useUser();
   useEffect(() => {
-    if (!['landlord','admin'].includes(parsed.role)) { router.push('/dashboard'); return; }
-  }, []);
+    if (!parsed) return;
+    if (!['landlord', 'admin'].includes(parsed.role)) { router.push('/dashboard'); return; }
+  }, [parsed]);
 
-  const [properties,     setProperties]     = useState([]);
-  const [loading,        setLoading]        = useState(true);
-  const [inviting,       setInviting]       = useState('');
-  const [msg,            setMsg]            = useState('');
-  const [publishModal,   setPublishModal]   = useState(null);
-  const [deleteModal,    setDeleteModal]    = useState(null);
-  const [archiveModal,   setArchiveModal]   = useState(null);
+  const [properties, setProperties] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [inviting, setInviting] = useState('');
+  const [msg, setMsg] = useState('');
+  const [publishModal, setPublishModal] = useState(null);
+  const [deleteModal, setDeleteModal] = useState(null);
+  const [archiveModal, setArchiveModal] = useState(null);
   const [publishLoading, setPublishLoading] = useState(false);
-  const [deleteLoading,  setDeleteLoading]  = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
   const [archiveLoading, setArchiveLoading] = useState(false);
 
   const flashMsg = (m) => { setMsg(m); setTimeout(() => setMsg(''), 5000); };
@@ -89,7 +90,7 @@ export default function PropertiesPage() {
     if (!archiveModal) return;
     setArchiveLoading(true);
     const isArchived = archiveModal.property.isArchived;
-    const endpoint   = isArchived ? 'restore' : 'archive';
+    const endpoint = isArchived ? 'restore' : 'archive';
     try {
       await api.put(`/properties/${archiveModal.property._id}/${endpoint}`, { reason: 'Archived by landlord' });
       flashMsg(`✅ Property ${isArchived ? 'restored' : 'archived'} successfully`);
@@ -136,23 +137,23 @@ export default function PropertiesPage() {
   };
 
   if (loading) return (
-    <div style={{ display:'flex',alignItems:'center',justifyContent:'center',minHeight:400 }}>
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 400 }}>
       <motion.div
         initial={{ opacity: 0, y: 8, scale: 0.96 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ duration: 0.35, ease: [0.22, 1.25, 0.36, 1] }}
-        style={{ display:'flex',alignItems:'center',gap:10, padding:'10px 16px', borderRadius:16, background:'#1e293b', color:'#e5e7eb' }}
+        style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 16px', borderRadius: 16, background: '#1e293b', color: '#e5e7eb' }}
       >
-        <Loader2 className="animate-spin" style={{ width:20,height:20,color:'#818cf8' }}/>
-        <span style={{ fontSize:'0.85rem', fontWeight:600 }}>Loading properties…</span>
+        <Loader2 className="animate-spin" style={{ width: 20, height: 20, color: '#818cf8' }} />
+        <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>Loading properties…</span>
       </motion.div>
     </div>
   );
 
   const statusStyle = {
-    vacant:      { bg:'#EFF6FF',color:'#2563EB' },
-    occupied:    { bg:'#F0FDF4',color:'#16A34A' },
-    maintenance: { bg:'#FFFBEB',color:'#D97706' },
+    vacant: { bg: '#EFF6FF', color: '#2563EB' },
+    occupied: { bg: '#F0FDF4', color: '#16A34A' },
+    maintenance: { bg: '#FFFBEB', color: '#D97706' },
   };
 
   return (
@@ -217,25 +218,25 @@ export default function PropertiesPage() {
       )}
 
       <motion.div
-        style={{ display:'flex',flexDirection:'column',gap:24 }}
+        style={{ display: 'flex', flexDirection: 'column', gap: 24 }}
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, ease: [0.21, 0.6, 0.35, 1] }}
       >
         {/* Header */}
         <motion.div
-          style={{ display:'flex',alignItems:'center',justifyContent:'space-between' }}
+          style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
           initial={{ opacity: 0, y: 6 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.35, delay: 0.05, ease: [0.21, 0.6, 0.35, 1] }}
         >
           <div>
-            <h1 style={{ fontFamily:"'Outfit',sans-serif",fontWeight:800,fontSize:'1.8rem',color:'#0F172A',letterSpacing:'-0.02em',lineHeight:1 }}>My Properties</h1>
-            <p style={{ color:'#94A3B8',fontSize:'0.83rem',marginTop:4 }}>{properties.length} propert{properties.length===1?'y':'ies'} in your portfolio</p>
+            <h1 style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 800, fontSize: '1.8rem', color: '#0F172A', letterSpacing: '-0.02em', lineHeight: 1 }}>My Properties</h1>
+            <p style={{ color: '#94A3B8', fontSize: '0.83rem', marginTop: 4 }}>{properties.length} propert{properties.length === 1 ? 'y' : 'ies'} in your portfolio</p>
           </div>
           <Link href="/dashboard/properties/new"
-            style={{ display:'inline-flex',alignItems:'center',gap:8,padding:'10px 18px',background:'linear-gradient(135deg,#4F46E5,#7C3AED)',color:'white',borderRadius:12,fontSize:'0.85rem',fontWeight:700,textDecoration:'none',boxShadow:'0 4px 14px rgba(79,70,229,.3)',fontFamily:"'Outfit',sans-serif" }}>
-            <Plus size={16}/> Add Property
+            style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '10px 18px', background: 'linear-gradient(135deg,#4F46E5,#7C3AED)', color: 'white', borderRadius: 12, fontSize: '0.85rem', fontWeight: 700, textDecoration: 'none', boxShadow: '0 4px 14px rgba(79,70,229,.3)', fontFamily: "'Outfit',sans-serif" }}>
+            <Plus size={16} /> Add Property
           </Link>
         </motion.div>
 
@@ -245,32 +246,33 @@ export default function PropertiesPage() {
             initial={{ opacity: 0, y: 4 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.25, ease: [0.21, 0.6, 0.35, 1] }}
-            style={{ borderRadius:12,padding:'12px 18px',fontSize:'0.875rem',fontWeight:600,display:'flex',alignItems:'center',gap:10,
+            style={{
+              borderRadius: 12, padding: '12px 18px', fontSize: '0.875rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 10,
               background: msg.startsWith('✅') ? '#F0FDF4' : '#FFF7F7',
-              color:      msg.startsWith('✅') ? '#16A34A' : '#DC2626',
-              border:     `1px solid ${msg.startsWith('✅') ? '#BBF7D0' : '#FECACA'}`,
+              color: msg.startsWith('✅') ? '#16A34A' : '#DC2626',
+              border: `1px solid ${msg.startsWith('✅') ? '#BBF7D0' : '#FECACA'}`,
             }}
           >
-            {msg.startsWith('✅') ? <CheckCircle size={16}/> : <X size={16}/>} {msg.slice(2)}
+            {msg.startsWith('✅') ? <CheckCircle size={16} /> : <X size={16} />} {msg.slice(2)}
           </motion.div>
         )}
 
         {properties.length === 0 ? (
           <motion.div
-            style={{ textAlign:'center',padding:'56px 20px',background:'white',borderRadius:20,border:'2px dashed #E2E8F0' }}
+            style={{ textAlign: 'center', padding: '56px 20px', background: 'white', borderRadius: 20, border: '2px dashed #E2E8F0' }}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.35, ease: [0.21, 0.6, 0.35, 1] }}
           >
-            <Building2 size={44} style={{ color:'#CBD5E1',margin:'0 auto 12px' }}/>
-            <h3 style={{ fontFamily:"'Outfit',sans-serif",fontWeight:700,color:'#475569',fontSize:'1.1rem' }}>No properties yet</h3>
-            <p style={{ color:'#94A3B8',fontSize:'0.85rem',marginTop:4,marginBottom:20 }}>Create your first property to start managing tenants.</p>
-            <Link href="/dashboard/properties/new" style={{ display:'inline-flex',alignItems:'center',gap:6,padding:'10px 20px',background:'#4F46E5',color:'white',borderRadius:10,fontSize:'0.85rem',fontWeight:700,textDecoration:'none' }}>
-              <Plus size={15}/> Add Your First Property
+            <Building2 size={44} style={{ color: '#CBD5E1', margin: '0 auto 12px' }} />
+            <h3 style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 700, color: '#475569', fontSize: '1.1rem' }}>No properties yet</h3>
+            <p style={{ color: '#94A3B8', fontSize: '0.85rem', marginTop: 4, marginBottom: 20 }}>Create your first property to start managing tenants.</p>
+            <Link href="/dashboard/properties/new" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '10px 20px', background: '#4F46E5', color: 'white', borderRadius: 10, fontSize: '0.85rem', fontWeight: 700, textDecoration: 'none' }}>
+              <Plus size={15} /> Add Your First Property
             </Link>
           </motion.div>
         ) : (
-          <div style={{ display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(300px,1fr))',gap:18 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(300px,1fr))', gap: 18 }}>
             {properties.map(property => {
               const sc = statusStyle[property.status] || statusStyle.vacant;
               const heroImg = property.images?.[0];
@@ -288,70 +290,70 @@ export default function PropertiesPage() {
                   whileHover={{ y: -4, scale: 1.01 }}
                 >
                   {heroImg
-                    ? <img src={heroImg} alt={property.title} className="prop-img"/>
-                    : <div className="prop-img-ph"><Building2 size={32} style={{ color:'#A78BFA' }}/></div>
+                    ? <img src={heroImg} alt={property.title} className="prop-img" />
+                    : <div className="prop-img-ph"><Building2 size={32} style={{ color: '#A78BFA' }} /></div>
                   }
-                  <div style={{ padding:'16px 18px' }}>
+                  <div style={{ padding: '16px 18px' }}>
                     {/* Badges */}
-                    <div style={{ display:'flex',alignItems:'center',gap:6,marginBottom:8,flexWrap:'wrap' }}>
-                      <span style={{ padding:'3px 10px',borderRadius:20,fontSize:'0.7rem',fontWeight:700,background:sc.bg,color:sc.color,textTransform:'capitalize' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8, flexWrap: 'wrap' }}>
+                      <span style={{ padding: '3px 10px', borderRadius: 20, fontSize: '0.7rem', fontWeight: 700, background: sc.bg, color: sc.color, textTransform: 'capitalize' }}>
                         {property.status}
                       </span>
-                      {property.isListed && <span style={{ padding:'3px 10px',borderRadius:20,fontSize:'0.7rem',fontWeight:700,background:'#EDE9FE',color:'#7C3AED' }}>Listed</span>}
+                      {property.isListed && <span style={{ padding: '3px 10px', borderRadius: 20, fontSize: '0.7rem', fontWeight: 700, background: '#EDE9FE', color: '#7C3AED' }}>Listed</span>}
                     </div>
 
-                    <h3 style={{ fontFamily:"'Outfit',sans-serif",fontWeight:700,fontSize:'1rem',color:'#0F172A',marginBottom:4,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap' }}>
+                    <h3 style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 700, fontSize: '1rem', color: '#0F172A', marginBottom: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                       {property.title}
                     </h3>
-                    <p style={{ display:'flex',alignItems:'center',gap:4,color:'#94A3B8',fontSize:'0.8rem',marginBottom:14 }}>
-                      <MapPin size={12}/> {property.address?.city}, {property.address?.state}
+                    <p style={{ display: 'flex', alignItems: 'center', gap: 4, color: '#94A3B8', fontSize: '0.8rem', marginBottom: 14 }}>
+                      <MapPin size={12} /> {property.address?.city}, {property.address?.state}
                     </p>
 
-                    <div style={{ display:'grid',gridTemplateColumns:'1fr 1fr',gap:10,marginBottom:14,paddingTop:14,borderTop:'1px solid #F1F5F9' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 14, paddingTop: 14, borderTop: '1px solid #F1F5F9' }}>
                       <div>
-                        <p style={{ fontSize:'0.67rem',fontWeight:700,color:'#94A3B8',textTransform:'uppercase',letterSpacing:'0.06em',marginBottom:2 }}>Monthly Rent</p>
-                        <p style={{ fontFamily:"'Outfit',sans-serif",fontWeight:800,fontSize:'1.05rem',color:'#0F172A' }}>Rs. {property.financials?.monthlyRent?.toLocaleString()}</p>
+                        <p style={{ fontSize: '0.67rem', fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 2 }}>Monthly Rent</p>
+                        <p style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 800, fontSize: '1.05rem', color: '#0F172A' }}>Rs. {property.financials?.monthlyRent?.toLocaleString()}</p>
                       </div>
                       <div>
-                        <p style={{ fontSize:'0.67rem',fontWeight:700,color:'#94A3B8',textTransform:'uppercase',letterSpacing:'0.06em',marginBottom:2 }}>Type</p>
-                        <p style={{ fontWeight:600,fontSize:'0.875rem',color:'#374151',textTransform:'capitalize' }}>{property.type}</p>
+                        <p style={{ fontSize: '0.67rem', fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 2 }}>Type</p>
+                        <p style={{ fontWeight: 600, fontSize: '0.875rem', color: '#374151', textTransform: 'capitalize' }}>{property.type}</p>
                       </div>
                     </div>
 
                     {/* PM Status */}
                     {hasManager ? (
-                      <div style={{ display:'flex',alignItems:'center',gap:6,background:'#F0FDF4',border:'1px solid #BBF7D0',borderRadius:8,padding:'7px 10px',marginBottom:14 }}>
-                        <CheckCircle size={13} style={{ color:'#16A34A' }}/><span style={{ fontSize:'0.75rem',fontWeight:700,color:'#166534' }}>PM: {property.managedBy?.name}</span>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: '#F0FDF4', border: '1px solid #BBF7D0', borderRadius: 8, padding: '7px 10px', marginBottom: 14 }}>
+                        <CheckCircle size={13} style={{ color: '#16A34A' }} /><span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#166534' }}>PM: {property.managedBy?.name}</span>
                       </div>
                     ) : hasPendingInvite ? (
-                      <div style={{ display:'flex',alignItems:'center',gap:6,background:'#FFFBEB',border:'1px solid #FDE68A',borderRadius:8,padding:'7px 10px',marginBottom:14 }}>
-                        <Clock size={13} style={{ color:'#D97706' }}/><span style={{ fontSize:'0.75rem',fontWeight:700,color:'#92400E' }}>PM invitation pending</span>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: 8, padding: '7px 10px', marginBottom: 14 }}>
+                        <Clock size={13} style={{ color: '#D97706' }} /><span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#92400E' }}>PM invitation pending</span>
                       </div>
-                    ) : <div style={{ marginBottom:14 }}/>}
+                    ) : <div style={{ marginBottom: 14 }} />}
 
                     {/* Actions */}
-                    <div style={{ display:'flex',flexWrap:'wrap',gap:7,paddingTop:14,borderTop:'1px solid #F1F5F9' }}>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 7, paddingTop: 14, borderTop: '1px solid #F1F5F9' }}>
                       <Link href={`/dashboard/properties/edit?id=${property._id}`}
-                        className="act-btn" style={{ background:'#F8FAFC',color:'#475569',border:'1.5px solid #E2E8F0',textDecoration:'none' }}>
+                        className="act-btn" style={{ background: '#F8FAFC', color: '#475569', border: '1.5px solid #E2E8F0', textDecoration: 'none' }}>
                         Edit
                       </Link>
 
                       {!isOccupied && (
                         <button onClick={() => setPublishModal({ property })} className="act-btn"
-                          style={{ flex:1, background: property.isListed ? '#FFF7F7' : '#F5F3FF', color: property.isListed ? '#DC2626' : '#7C3AED', border:`1.5px solid ${property.isListed ? '#FECACA' : '#DDD6FE'}` }}>
-                          {property.isListed ? <><EyeOff size={13}/> Unpublish</> : <><Eye size={13}/> Publish</>}
+                          style={{ flex: 1, background: property.isListed ? '#FFF7F7' : '#F5F3FF', color: property.isListed ? '#DC2626' : '#7C3AED', border: `1.5px solid ${property.isListed ? '#FECACA' : '#DDD6FE'}` }}>
+                          {property.isListed ? <><EyeOff size={13} /> Unpublish</> : <><Eye size={13} /> Publish</>}
                         </button>
                       )}
 
                       <Link href={`/dashboard/agreements/new?propertyId=${property._id}`}
-                        className="act-btn" style={{ background:'#EFF6FF',color:'#2563EB',border:'1.5px solid #BFDBFE',textDecoration:'none' }}>
-                        <FileText size={13}/> Agreement
+                        className="act-btn" style={{ background: '#EFF6FF', color: '#2563EB', border: '1.5px solid #BFDBFE', textDecoration: 'none' }}>
+                        <FileText size={13} /> Agreement
                       </Link>
 
                       {!hasManager && !hasPendingInvite && (
                         <button onClick={() => handleInviteManager(property._id)} disabled={inviting === property._id} className="act-btn"
-                          style={{ background:'#F5F3FF',color:'#7C3AED',border:'1.5px solid #DDD6FE' }}>
-                          {inviting === property._id ? <Loader2 size={13} className="animate-spin"/> : <UserPlus size={13}/>} Invite PM
+                          style={{ background: '#F5F3FF', color: '#7C3AED', border: '1.5px solid #DDD6FE' }}>
+                          {inviting === property._id ? <Loader2 size={13} className="animate-spin" /> : <UserPlus size={13} />} Invite PM
                         </button>
                       )}
 
@@ -361,14 +363,14 @@ export default function PropertiesPage() {
                           onClick={() => setArchiveModal({ property })}
                           className="act-btn"
                           style={property.isArchived
-                            ? { background:'#F0FDF4', color:'#16A34A', border:'1.5px solid #BBF7D0' }
-                            : { background:'#FFFBEB', color:'#D97706', border:'1.5px solid #FDE68A' }
+                            ? { background: '#F0FDF4', color: '#16A34A', border: '1.5px solid #BBF7D0' }
+                            : { background: '#FFFBEB', color: '#D97706', border: '1.5px solid #FDE68A' }
                           }
                           title={property.isArchived ? 'Restore property' : 'Archive property'}
                         >
                           {property.isArchived
-                            ? <><ArchiveRestore size={13}/> Restore</>
-                            : <><Archive size={13}/> Archive</>
+                            ? <><ArchiveRestore size={13} /> Restore</>
+                            : <><Archive size={13} /> Archive</>
                           }
                         </button>
                       )}
@@ -376,8 +378,8 @@ export default function PropertiesPage() {
                       {/* Delete — only if NOT occupied */}
                       {!isOccupied && (
                         <button onClick={() => setDeleteModal({ property })} className="act-btn"
-                          style={{ background:'#FFF7F7',color:'#DC2626',border:'1.5px solid #FECACA' }}>
-                          <Trash2 size={13}/> Delete
+                          style={{ background: '#FFF7F7', color: '#DC2626', border: '1.5px solid #FECACA' }}>
+                          <Trash2 size={13} /> Delete
                         </button>
                       )}
                     </div>
