@@ -9,38 +9,38 @@ import {
 } from 'lucide-react';
 
 const STATUS_CONFIG = {
-  open:         { label: 'Open',         color: 'bg-blue-100 text-blue-700',    dot: 'bg-blue-500' },
-  under_review: { label: 'Under Review', color: 'bg-amber-100 text-amber-700',  dot: 'bg-amber-500' },
-  mediation:    { label: 'Mediation',    color: 'bg-purple-100 text-purple-700',dot: 'bg-purple-500' },
-  resolved:     { label: 'Resolved',     color: 'bg-green-100 text-green-700',  dot: 'bg-green-500' },
-  closed:       { label: 'Closed',       color: 'bg-gray-100 text-gray-500',    dot: 'bg-gray-400' },
+  open: { label: 'Open', color: 'bg-blue-100 text-blue-700', dot: 'bg-blue-500' },
+  under_review: { label: 'Under Review', color: 'bg-amber-100 text-amber-700', dot: 'bg-amber-500' },
+  mediation: { label: 'Mediation', color: 'bg-purple-100 text-purple-700', dot: 'bg-purple-500' },
+  resolved: { label: 'Resolved', color: 'bg-green-100 text-green-700', dot: 'bg-green-500' },
+  closed: { label: 'Closed', color: 'bg-gray-100 text-gray-500', dot: 'bg-gray-400' },
 };
 
-const CATEGORIES = ['rent','deposit','maintenance','noise','damage','lease_violation','other'];
+const CATEGORIES = ['rent', 'deposit', 'maintenance', 'noise', 'damage', 'lease_violation', 'other'];
 
 export default function DisputesPage() {
-  const [user,      setUser]      = useState(null);
-  const [disputes,  setDisputes]  = useState([]);
-  const [agreements,setAgreements]= useState([]);
-  const [loading,   setLoading]   = useState(true);
-  const [showForm,  setShowForm]  = useState(false);
-  const [expanded,  setExpanded]  = useState({});
+  const { user } = useUser();
+  const [disputes, setDisputes] = useState([]);
+  const [agreements, setAgreements] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [showForm, setShowForm] = useState(false);
+  const [expanded, setExpanded] = useState({});
   const [submitting, setSubmitting] = useState(false);
-  const [comment,   setComment]   = useState({});
-  const [posting,   setPosting]   = useState(null);
+  const [comment, setComment] = useState({});
+  const [posting, setPosting] = useState(null);
 
   const [form, setForm] = useState({ agreementId: '', title: '', description: '', category: 'other' });
 
   useEffect(() => {
     if (user) {
-      if (['tenant','landlord'].includes(user.role)) {
+      if (['tenant', 'landlord'].includes(user.role)) {
         api.get('/agreements').then(({ data }) => {
-          setAgreements(data.filter(a => ['active','expired','signed'].includes(a.status)));
+          setAgreements(data.filter(a => ['active', 'expired', 'signed'].includes(a.status)));
         }).catch(console.error);
       }
     }
     fetchDisputes();
-  }, []);
+  }, [user]);
 
   const fetchDisputes = async () => {
     setLoading(true);
@@ -83,8 +83,8 @@ export default function DisputesPage() {
     } catch (err) { alert(err.response?.data?.message || 'Error'); }
   };
 
-  const canFile   = ['tenant','landlord'].includes(user?.role);
-  const isAdmin   = user?.role === 'admin';
+  const canFile = ['tenant', 'landlord'].includes(user?.role);
+  const isAdmin = user?.role === 'admin';
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
@@ -144,7 +144,7 @@ export default function DisputesPage() {
             onChange={e => setForm(f => ({ ...f, category: e.target.value }))}
             className="border border-gray-200 rounded-xl px-3 py-2 text-sm"
           >
-            {CATEGORIES.map(c => <option key={c} value={c}>{c.replace('_',' ')}</option>)}
+            {CATEGORIES.map(c => <option key={c} value={c}>{c.replace('_', ' ')}</option>)}
           </select>
 
           <div className="flex gap-3">
@@ -170,7 +170,7 @@ export default function DisputesPage() {
           {disputes.map(d => {
             const sc = STATUS_CONFIG[d.status] || STATUS_CONFIG.open;
             const isOpen = expanded[d._id];
-            const myId   = user?._id;
+            const myId = user?._id;
 
             return (
               <div key={d._id} className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
@@ -178,7 +178,7 @@ export default function DisputesPage() {
                 <div className="flex items-center justify-between p-5">
                   <div className="flex items-center gap-3 flex-1 min-w-0">
                     <span className={`text-[10px] font-black uppercase px-2 py-1 rounded-full shrink-0 ${sc.color}`}>{sc.label}</span>
-                    <span className="text-[10px] font-black uppercase px-2 py-1 rounded-full bg-gray-100 text-gray-500 shrink-0">{d.category?.replace('_',' ')}</span>
+                    <span className="text-[10px] font-black uppercase px-2 py-1 rounded-full bg-gray-100 text-gray-500 shrink-0">{d.category?.replace('_', ' ')}</span>
                     <div className="min-w-0">
                       <p className="font-bold text-gray-900 truncate">{d.title}</p>
                       <p className="text-xs text-gray-400">
@@ -277,7 +277,7 @@ export default function DisputesPage() {
 
 function AdminControls({ dispute, onUpdate }) {
   const [status, setStatus] = useState(dispute.status);
-  const [note,   setNote]   = useState(dispute.resolutionNote || '');
+  const [note, setNote] = useState(dispute.resolutionNote || '');
 
   return (
     <div className="bg-amber-50 rounded-xl p-4 space-y-3 border border-amber-200">

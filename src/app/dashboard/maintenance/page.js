@@ -7,26 +7,26 @@ import { Wrench, Plus, Loader2, ChevronDown, ChevronUp, CheckCircle, Clock, Aler
 import { motion } from 'framer-motion';
 
 const STATUS_CONFIG = {
-  open:        { label: 'Open',        color: 'bg-blue-100 text-blue-700' },
+  open: { label: 'Open', color: 'bg-blue-100 text-blue-700' },
   in_progress: { label: 'In Progress', color: 'bg-amber-100 text-amber-700' },
-  resolved:    { label: 'Resolved',    color: 'bg-green-100 text-green-700' },
-  closed:      { label: 'Closed',      color: 'bg-gray-100 text-gray-500' },
+  resolved: { label: 'Resolved', color: 'bg-green-100 text-green-700' },
+  closed: { label: 'Closed', color: 'bg-gray-100 text-gray-500' },
 };
 const PRIORITY_CONFIG = {
-  low:    { color: 'bg-gray-100 text-gray-500' },
+  low: { color: 'bg-gray-100 text-gray-500' },
   medium: { color: 'bg-amber-100 text-amber-700' },
   urgent: { color: 'bg-red-100 text-red-700' },
 };
-const CATEGORIES = ['plumbing','electrical','hvac','appliance','structural','pest','other'];
+const CATEGORIES = ['plumbing', 'electrical', 'hvac', 'appliance', 'structural', 'pest', 'other'];
 
 export default function MaintenancePage() {
-  const [user, setUser]             = useState(null);
-  const [requests, setRequests]     = useState([]);
-  const [loading, setLoading]       = useState(true);
-  const [showForm, setShowForm]     = useState(false);
-  const [expanded, setExpanded]     = useState({});
+  const { user } = useUser();
+  const [requests, setRequests] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [showForm, setShowForm] = useState(false);
+  const [expanded, setExpanded] = useState({});
   const [properties, setProperties] = useState([]);
-  const [actionId, setActionId]     = useState(null);
+  const [actionId, setActionId] = useState(null);
 
   // Submit form state
   const [form, setForm] = useState({ propertyId: '', title: '', description: '', priority: 'medium', category: 'other' });
@@ -46,7 +46,7 @@ export default function MaintenancePage() {
       }
     }
     fetchRequests();
-  }, []);
+  }, [user]);
 
   const fetchRequests = async () => {
     setLoading(true);
@@ -90,7 +90,7 @@ export default function MaintenancePage() {
   };
 
   const isTenant = user?.role === 'tenant';
-  const canUpdate = ['landlord','property_manager','admin'].includes(user?.role);
+  const canUpdate = ['landlord', 'property_manager', 'admin'].includes(user?.role);
 
   return (
     <motion.div
@@ -256,7 +256,7 @@ export default function MaintenancePage() {
                           {r.statusHistory.map((h, i) => (
                             <div key={i} className="flex items-center gap-2 text-xs text-gray-500">
                               <span className="w-1.5 h-1.5 rounded-full bg-gray-300" />
-                              <span className="font-semibold">{h.status.replace('_',' ')}</span>
+                              <span className="font-semibold">{h.status.replace('_', ' ')}</span>
                               {h.note && <span>— {h.note}</span>}
                               <span className="text-gray-300">{new Date(h.changedAt).toLocaleString()}</span>
                             </div>

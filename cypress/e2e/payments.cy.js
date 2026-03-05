@@ -127,9 +127,9 @@ describe('Payments — Payment Schedule Page', () => {
 // BILLING PAGE
 // ─────────────────────────────────────────────────────────────────────────────
 const mockPlans = [
-    { tier: 'free', price: 0, features: ['1 property', 'Basic features'] },
-    { tier: 'pro', price: 2999, features: ['Up to 20 properties', 'All Pro features'] },
-    { tier: 'enterprise', price: 9999, features: ['Unlimited properties', 'Priority support'] },
+    { tier: 'free', name: 'Free', price: 0, features: ['1 property', 'Basic features'] },
+    { tier: 'pro', name: 'Pro', price: 2999, features: ['Up to 20 properties', 'All Pro features'] },
+    { tier: 'enterprise', name: 'Enterprise', price: 9999, features: ['Unlimited properties', 'Priority support'] },
 ];
 
 describe('Billing — Page Structure', () => {

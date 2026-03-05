@@ -59,6 +59,7 @@ describe('Authentication', () => {
         cy.visit('/register');
         cy.get('input[name="name"], input[placeholder*="name" i]').first().type('Test User');
         cy.get('input[name="email"], input[type="email"]').first().type('existing@test.com');
+        cy.get('input[name="phoneNumber"], input[type="tel"]').first().type('+923001234567');
         cy.get('input[name="password"], input[type="password"]').first().type('Test@12345');
         cy.get('button[type="submit"]').first().click();
         cy.wait('@registerFail');
@@ -74,6 +75,7 @@ describe('Authentication', () => {
         cy.visit('/register');
         cy.get('input[name="name"], input[placeholder*="name" i]').first().type('New User');
         cy.get('input[name="email"], input[type="email"]').first().type('newuser@test.com');
+        cy.get('input[name="phoneNumber"], input[type="tel"]').first().type('+923001234567');
         cy.get('input[name="password"], input[type="password"]').first().type('Test@12345');
         cy.get('button[type="submit"]').first().click();
         cy.wait('@register');
@@ -103,11 +105,9 @@ describe('Authentication', () => {
     it('password field toggles visibility when eye icon is clicked', () => {
         cy.visit('/login');
         cy.get('input[type="password"]').should('exist');
-        // Eye toggle button sits next to the password input
-        cy.get('input[type="password"]')
-            .parent()
-            .find('button')
-            .click();
+        // The eye button is in the outer .relative wrapper, one level above
+        // the inner wrapper that TextField renders around the <input>.
+        cy.get('button[title="Show password"]').click();
         cy.get('input[type="text"]').should('exist'); // password is now visible
     });
 
@@ -236,7 +236,7 @@ describe('Authentication', () => {
     });
 
     it('logs in successfully as admin via super-login and lands on dashboard', () => {
-        cy.intercept('POST', '/api/auth/super-login', {
+        cy.intercept('POST', '/api/auth/login', {
             statusCode: 200,
             body: { _id: 'admin_001', token: 'mock-token', name: 'Admin User', email: 'admin@test.com', role: 'admin' },
         }).as('doSuperLogin');
@@ -256,7 +256,7 @@ describe('Authentication', () => {
     });
 
     it('logs in successfully as law reviewer via super-login and accesses templates', () => {
-        cy.intercept('POST', '/api/auth/super-login', {
+        cy.intercept('POST', '/api/auth/login', {
             statusCode: 200,
             body: { _id: 'law_001', token: 'mock-token', name: 'Law Reviewer', email: 'law_reviewer@test.com', role: 'law_reviewer' },
         }).as('doLawLogin');
@@ -278,9 +278,11 @@ describe('Authentication', () => {
     });
 
     it('super-login blocks a non-admin/law_reviewer role and shows an error', () => {
-        cy.intercept('POST', '/api/auth/super-login', {
-            statusCode: 403,
-            body: { message: 'Access restricted to admins and law reviewers' },
+        // The page calls /api/auth/login and does its own role check client-side.
+        // Return a 200 with a non-admin role so the page shows "Access denied".
+        cy.intercept('POST', '/api/auth/login', {
+            statusCode: 200,
+            body: { _id: 'lnd_001', token: 'mock-token', name: 'Test Landlord', email: 'landlord@test.com', role: 'landlord' },
         }).as('superLoginFail');
 
         cy.visit('/super-login');
