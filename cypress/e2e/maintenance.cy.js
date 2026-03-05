@@ -90,7 +90,7 @@ describe('Maintenance — Tenant View', () => {
         cy.contains('button', /new request/i).click();
         cy.get('select').contains('Select Property').should('exist');
         cy.get('input[placeholder*="Issue title"]').should('exist');
-        cy.get('textarea').should('exist');
+        cy.get('textarea[placeholder*="Describe"]').should('exist');
     });
 
     it('submits new request via POST /api/maintenance', () => {
@@ -105,7 +105,7 @@ describe('Maintenance — Tenant View', () => {
         // Select the property from the dropdown
         cy.get('select').first().select('Sunset Apartments');
         cy.get('input[placeholder*="Issue title"]').type('Broken door lock');
-        cy.get('textarea').type('The front door lock is stuck and does not open from outside.');
+        cy.get('textarea[placeholder*="Describe"]').type('The front door lock is stuck and does not open from outside.');
 
         cy.contains('button', /submit request/i).click();
         cy.wait('@postMaintenance');

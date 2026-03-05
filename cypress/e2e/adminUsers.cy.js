@@ -209,8 +209,8 @@ describe('Admin Users — Management Page', () => {
             .contains('button', /change role/i)
             .click();
 
-        cy.get('.fixed select').select('property_manager');
-        cy.get('.fixed').contains('button', /save/i).click();
+        cy.contains('h3', 'Change Role').parent().find('select').select('property_manager');
+        cy.contains('h3', 'Change Role').parent().contains('button', /save/i).click();
         cy.wait('@changeRole');
     });
 
@@ -219,8 +219,8 @@ describe('Admin Users — Management Page', () => {
             .closest('tr')
             .contains('button', /change role/i)
             .click();
-        cy.contains(/change role/i).should('be.visible');
-        cy.get('.fixed').contains('button', /cancel/i).click();
-        cy.get('.fixed').should('not.exist');
+        cy.contains('h3', 'Change Role').should('be.visible');
+        cy.contains('h3', 'Change Role').parent().contains('button', /cancel/i).click();
+        cy.contains('h3', 'Change Role').should('not.exist');
     });
 });

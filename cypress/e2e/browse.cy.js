@@ -92,6 +92,7 @@ describe('Browse — Listings Page', () => {
     it('shows bedroom count on listings with specs', () => {
         cy.contains('Sunny Studio Downtown')
             .closest('a')
+            .find('span')
             .contains('1')
             .should('exist');
     });
@@ -198,7 +199,7 @@ describe('Browse — Beds Filter', () => {
 
     it('filtering by 4 beds hides 1-bedroom listings', () => {
         cy.contains('button', /^beds$/i).click();
-        cy.contains('4 beds').click();
+        cy.get('button').contains('4 beds').click();
         cy.contains('Sunny Studio Downtown').should('not.exist');
         cy.contains('Spacious Family House').should('exist');
     });

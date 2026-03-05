@@ -200,6 +200,10 @@ describe('Audit Trail — Action Filter', () => {
     });
 
     it('resetting filter to All Actions fetches without action param', () => {
+        cy.intercept('GET', '/api/admin/audit-logs*', { statusCode: 200, body: mockPagination }).as('getLogs');
+        cy.visit('/dashboard/admin/audit-logs');
+        cy.wait('@getLogs');
+
         // First select a specific action so the select is no longer on All Actions
         cy.intercept('GET', '/api/admin/audit-logs*action=SIGNED*', {
             statusCode: 200,
@@ -210,7 +214,7 @@ describe('Audit Trail — Action Filter', () => {
 
         // Now reset to All Actions — this fires onChange and triggers a fresh fetch
         cy.intercept('GET', '/api/admin/audit-logs*', { statusCode: 200, body: mockPagination }).as('getAll');
-        cy.get('select').select('All Actions');
+        cy.get('select').select('');
         cy.wait('@getAll');
         cy.get('table tbody tr').should('have.length', 3);
     });

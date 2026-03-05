@@ -12,15 +12,15 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 
 const PRICE_RANGES = [
-  { label: 'Any Price',      min: '',      max: ''      },
-  { label: 'Under Rs. 30K',  min: '',      max: '30000' },
-  { label: 'Rs. 30K – 60K',  min: '30000', max: '60000' },
-  { label: 'Rs. 60K – 100K', min: '60000', max: '100000'},
-  { label: 'Rs. 100K+',      min: '100000',max: ''      },
+  { label: 'Any Price', min: '', max: '' },
+  { label: 'Under Rs. 30K', min: '', max: '30000' },
+  { label: 'Rs. 30K – 60K', min: '30000', max: '60000' },
+  { label: 'Rs. 60K – 100K', min: '60000', max: '100000' },
+  { label: 'Rs. 100K+', min: '100000', max: '' },
 ];
-const TYPES = ['apartment','house','studio','commercial'];
-const BEDS  = ['1','2','3','4','5+'];
-const SORTS = ['Best Match','Price: Low to High','Price: High to Low','Newest'];
+const TYPES = ['apartment', 'house', 'studio', 'commercial'];
+const BEDS = ['1', '2', '3', '4', '5+'];
+const SORTS = ['Best Match', 'Price: Low to High', 'Price: High to Low', 'Newest'];
 
 function PhotoCarousel({ images, title }) {
   const [idx, setIdx] = useState(0);
@@ -32,32 +32,32 @@ function PhotoCarousel({ images, title }) {
   return (
     <div className="relative h-52 select-none overflow-hidden rounded-3xl bg-[#0AC4E0]/10">
       {src
-        ? <img src={src} alt={title} className="h-full w-full object-cover transition-opacity duration-300" loading="lazy"/>
+        ? <img src={src} alt={title} className="h-full w-full object-cover transition-opacity duration-300" loading="lazy" />
         : <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-[#F6E7BC]/80 to-[#0AC4E0]/30">
-            <Building2 className="h-14 w-14 text-white/80"/>
-          </div>
+          <Building2 className="h-14 w-14 text-white/80" />
+        </div>
       }
       <button onClick={e => e.preventDefault()}
         className="absolute right-2.5 top-2.5 flex h-7 w-7 items-center justify-center rounded-full bg-white/85 shadow-sm backdrop-blur-sm transition-all hover:bg-white"
       >
-        <Heart size={13} className="text-neutral-400 transition-colors hover:text-red-500"/>
+        <Heart size={13} className="text-neutral-400 transition-colors hover:text-red-500" />
       </button>
       {hasMany && (
         <>
           <button onClick={prev}
             className="arrow-btn absolute left-2 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full bg-white/85 opacity-0 shadow-sm backdrop-blur-sm transition-all hover:bg-white"
           >
-            <ChevronLeft size={14} className="text-[#0B2D72]"/>
+            <ChevronLeft size={14} className="text-[#0B2D72]" />
           </button>
           <button onClick={next}
             className="arrow-btn absolute right-2 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full bg-white/85 opacity-0 shadow-sm backdrop-blur-sm transition-all hover:bg-white"
           >
-            <ChevronRight size={14} className="text-[#0B2D72]"/>
+            <ChevronRight size={14} className="text-[#0B2D72]" />
           </button>
           <div className="absolute bottom-2 left-1/2 flex -translate-x-1/2 gap-1">
             {images.slice(0, 5).map((_, i) => (
               <button key={i} onClick={e => { e.preventDefault(); setIdx(i); }}
-                className={`h-1 rounded-full transition-all ${i === idx ? 'w-4 bg-white' : 'w-1.5 bg-white/50'}`}/>
+                className={`h-1 rounded-full transition-all ${i === idx ? 'w-4 bg-white' : 'w-1.5 bg-white/50'}`} />
             ))}
           </div>
         </>
@@ -79,7 +79,7 @@ function Dropdown({ label, options, value, onChange, wide }) {
       <button onClick={() => setOpen(o => !o)}
         className={`flex items-center gap-2 px-4 py-2 rounded-xl border text-sm font-semibold transition-all whitespace-nowrap
           ${open ? 'border-[#0992C2] bg-[#0992C2]/10 text-[#0B2D72]' : 'border-gray-200 bg-white text-gray-700 hover:border-[#0992C2]/30 hover:bg-[#F0F8FA]'}`}>
-        {label} <ChevronDown size={13} className={`transition-transform ${open ? 'rotate-180' : ''}`}/>
+        {label} <ChevronDown size={13} className={`transition-transform ${open ? 'rotate-180' : ''}`} />
       </button>
       {open && (
         <div className={`absolute top-full left-0 mt-2 bg-white border border-gray-200 rounded-2xl shadow-xl z-50 overflow-hidden ${wide ? 'w-52' : 'w-44'}`}>
@@ -98,14 +98,14 @@ function Dropdown({ label, options, value, onChange, wide }) {
 
 function BrowseContent() {
   const searchParams = useSearchParams();
-  const [listings,    setListings]    = useState([]);
-  const [loading,     setLoading]     = useState(true);
-  const [total,       setTotal]       = useState(0);
-  const [sort,        setSort]        = useState('Best Match');
-  const [city,        setCity]        = useState(searchParams?.get('city') || '');
-  const [type,        setType]        = useState('');
-  const [priceKey,    setPriceKey]    = useState('Any Price');
-  const [beds,        setBeds]        = useState('');
+  const [listings, setListings] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [total, setTotal] = useState(0);
+  const [sort, setSort] = useState('Best Match');
+  const [city, setCity] = useState(searchParams?.get('city') || '');
+  const [type, setType] = useState('');
+  const [priceKey, setPriceKey] = useState('Any Price');
+  const [beds, setBeds] = useState('');
   const [searchInput, setSearchInput] = useState(searchParams?.get('city') || '');
 
   const selectedPrice = PRICE_RANGES.find(r => r.label === priceKey) || PRICE_RANGES[0];
@@ -118,13 +118,13 @@ function BrowseContent() {
       if (type) params.append('type', type);
       if (selectedPrice.min) params.append('minRent', selectedPrice.min);
       if (selectedPrice.max) params.append('maxRent', selectedPrice.max);
-      const res  = await fetch(`/api/listings?${params.toString()}`);
+      const res = await fetch(`/api/listings?${params.toString()}`);
       const data = await res.json();
       let arr = Array.isArray(data) ? data : [];
-      if (sort === 'Price: Low to High') arr.sort((a,b) => (a.financials?.monthlyRent||0)-(b.financials?.monthlyRent||0));
-      if (sort === 'Price: High to Low') arr.sort((a,b) => (b.financials?.monthlyRent||0)-(a.financials?.monthlyRent||0));
-      if (sort === 'Newest')             arr.sort((a,b) => new Date(b.createdAt)-new Date(a.createdAt));
-      if (beds) { const min = parseInt(beds); arr = arr.filter(l => (l.specs?.bedrooms||0) >= min); }
+      if (sort === 'Price: Low to High') arr.sort((a, b) => (a.financials?.monthlyRent || 0) - (b.financials?.monthlyRent || 0));
+      if (sort === 'Price: High to Low') arr.sort((a, b) => (b.financials?.monthlyRent || 0) - (a.financials?.monthlyRent || 0));
+      if (sort === 'Newest') arr.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      if (beds) { const min = parseInt(beds); arr = arr.filter(l => (l.specs?.bedrooms || 0) >= min); }
       setListings(arr);
       setTotal(arr.length);
     } catch { setListings([]); }
@@ -144,20 +144,20 @@ function BrowseContent() {
             onSubmit={e => { e.preventDefault(); setCity(searchInput.trim()); }}
             className="flex max-w-xs flex-1 items-center gap-2 rounded-2xl border border-transparent bg-[#0AC4E0]/10 px-3 py-2.5 transition-colors focus-within:border-[#0992C2] focus-within:bg-white"
           >
-            <Search size={15} className="flex-shrink-0 text-[#0992C2]"/>
+            <Search size={15} className="flex-shrink-0 text-[#0992C2]" />
             <input value={searchInput} onChange={e => setSearchInput(e.target.value)}
               placeholder="City or address…"
-              className="min-w-0 flex-1 bg-transparent py-0 text-sm text-neutral-700 outline-none placeholder:text-neutral-400"/>
+              className="min-w-0 flex-1 bg-transparent py-0 text-sm text-neutral-700 outline-none placeholder:text-neutral-400" />
           </form>
-          <Dropdown label={priceKey === 'Any Price' ? 'Price' : priceKey} value={priceKey} onChange={setPriceKey} wide options={PRICE_RANGES.map(r=>({label:r.label,value:r.label}))}/>
-          <Dropdown label={type ? type[0].toUpperCase()+type.slice(1) : 'Type'} value={type} onChange={setType} options={[{label:'All Types',value:''},...TYPES.map(t=>({label:t[0].toUpperCase()+t.slice(1),value:t}))]}/>
-          <Dropdown label={beds ? `${beds} Beds` : 'Beds'} value={beds} onChange={setBeds} options={[{label:'Any Beds',value:''},...BEDS.map(b=>({label:`${b} bed${b==='1'?'':'s'}`,value:b}))]}/>
+          <Dropdown label={priceKey === 'Any Price' ? 'Price' : priceKey} value={priceKey} onChange={setPriceKey} wide options={PRICE_RANGES.map(r => ({ label: r.label, value: r.label }))} />
+          <Dropdown label={type ? type[0].toUpperCase() + type.slice(1) : 'Type'} value={type} onChange={setType} options={[{ label: 'All Types', value: '' }, ...TYPES.map(t => ({ label: t[0].toUpperCase() + t.slice(1), value: t }))]} />
+          <Dropdown label={beds ? `${beds} Beds` : 'Beds'} value={beds} onChange={setBeds} options={[{ label: 'Any Beds', value: '' }, ...BEDS.map(b => ({ label: `${b} bed${b === '1' ? '' : 's'}`, value: b }))]} />
           <button className="flex items-center gap-2 rounded-2xl border border-[#0992C2]/20 bg-white px-4 py-2 text-sm font-semibold text-neutral-700 transition-all hover:border-[#0992C2]/40 hover:bg-[#F0F8FA]">
-            <SlidersHorizontal size={14}/> Filters
+            <SlidersHorizontal size={14} /> Filters
           </button>
           <div className="ml-auto flex items-center gap-4 flex-shrink-0">
             {!loading && <p className="whitespace-nowrap text-sm font-medium text-neutral-500"><span className="font-bold text-neutral-900">{total.toLocaleString()}</span> listings</p>}
-            <Dropdown label={<span className="flex items-center gap-1.5"><ArrowUpDown size={13}/> {sort}</span>} value={sort} onChange={setSort} wide options={SORTS.map(s=>({label:s,value:s}))}/>
+            <Dropdown label={<span className="flex items-center gap-1.5"><ArrowUpDown size={13} /> {sort}</span>} value={sort} onChange={setSort} wide options={SORTS.map(s => ({ label: s, value: s }))} />
           </div>
         </div>
       </div>
@@ -172,14 +172,14 @@ function BrowseContent() {
 
           {loading && (
             <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-              {[...Array(10)].map((_,i) => (
+              {[...Array(10)].map((_, i) => (
                 <div key={i} className="overflow-hidden rounded-3xl bg-white shadow-sm">
-                  <div className="h-52 animate-pulse bg-[#0AC4E0]/10"/>
+                  <div className="h-52 animate-pulse bg-[#0AC4E0]/10" />
                   <div className="space-y-2.5 p-4">
-                    <div className="h-5 w-1/2 rounded-lg bg-[#0992C2]/15"/>
-                    <div className="h-3.5 w-3/4 rounded bg-[#0992C2]/10"/>
-                    <div className="h-3.5 w-2/3 rounded bg-[#0992C2]/10"/>
-                    <div className="mt-3 h-8 rounded-xl bg-[#0AC4E0]/15"/>
+                    <div className="h-5 w-1/2 rounded-lg bg-[#0992C2]/15" />
+                    <div className="h-3.5 w-3/4 rounded bg-[#0992C2]/10" />
+                    <div className="h-3.5 w-2/3 rounded bg-[#0992C2]/10" />
+                    <div className="mt-3 h-8 rounded-xl bg-[#0AC4E0]/15" />
                   </div>
                 </div>
               ))}
@@ -189,11 +189,11 @@ function BrowseContent() {
           {!loading && listings.length === 0 && (
             <div className="py-28 text-center">
               <div className="mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-full bg-[#0AC4E0]/10">
-                <Home className="h-10 w-10 text-[#0992C2]"/>
+                <Home className="h-10 w-10 text-[#0992C2]" />
               </div>
               <h3 className="mb-2 text-xl font-semibold text-neutral-800">No listings found</h3>
               <p className="text-sm text-neutral-500">Try adjusting your filters or search a different city</p>
-              <button onClick={() => { setCity(''); setSearchInput(''); setType(''); setPriceKey('Any Price'); setBeds(''); }}
+              <button onClick={() => { setCity(''); setSearchInput(''); setType(''); setPriceKey('Any Price'); setBeds(''); window.history.replaceState(null, '', '/browse'); }}
                 className="mt-6 rounded-full bg-[#0992C2] px-6 py-2.5 text-sm font-bold text-white transition-all hover:bg-[#0B2D72]">
                 Clear Filters
               </button>
@@ -208,36 +208,36 @@ function BrowseContent() {
                   href={`/browse/${listing._id}`}
                   className="group block overflow-hidden rounded-3xl border border-[#0992C2]/20 bg-white/95 shadow-[0_8px_26px_rgba(11,45,114,0.12)] transition-transform duration-300 ease-[cubic-bezier(0.34,1.2,0.64,1)] hover:-translate-y-2 hover:shadow-[0_22px_70px_rgba(11,45,114,0.25)]"
                 >
-                  <PhotoCarousel images={listing.images} title={listing.title}/>
+                  <PhotoCarousel images={listing.images} title={listing.title} />
                   <div className="p-3.5">
                     <div className="mb-1.5 flex items-center justify-between">
                       <span className="text-[1.1rem] font-semibold text-neutral-900">
-                        Rs. {(listing.financials?.monthlyRent||0).toLocaleString()}
+                        Rs. {(listing.financials?.monthlyRent || 0).toLocaleString()}
                       </span>
                       <button
                         onClick={e => e.preventDefault()}
                         className="flex h-7 w-7 items-center justify-center rounded-full border border-[#0992C2]/20 text-neutral-400 transition-colors hover:border-red-300 hover:text-red-500"
                       >
-                        <Heart size={13}/>
+                        <Heart size={13} />
                       </button>
                     </div>
                     <div className="mb-1.5 flex items-center gap-3 text-[11px] font-semibold text-neutral-500">
-                      {listing.specs?.bedrooms != null && <span className="flex items-center gap-1"><Bed size={11} className="text-neutral-400"/> {listing.specs.bedrooms}</span>}
-                      {listing.specs?.bathrooms != null && <span className="flex items-center gap-1"><Bath size={11} className="text-neutral-400"/> {listing.specs.bathrooms}</span>}
-                      {listing.specs?.sizeSqFt && <span className="flex items-center gap-1"><Square size={11} className="text-neutral-400"/> {listing.specs.sizeSqFt} sq ft</span>}
+                      {listing.specs?.bedrooms != null && <span className="flex items-center gap-1"><Bed size={11} className="text-neutral-400" /> {listing.specs.bedrooms}</span>}
+                      {listing.specs?.bathrooms != null && <span className="flex items-center gap-1"><Bath size={11} className="text-neutral-400" /> {listing.specs.bathrooms}</span>}
+                      {listing.specs?.sizeSqFt && <span className="flex items-center gap-1"><Square size={11} className="text-neutral-400" /> {listing.specs.sizeSqFt} sq ft</span>}
                       {!listing.specs?.bedrooms && !listing.specs?.bathrooms && !listing.specs?.sizeSqFt && (
                         <span className="capitalize text-[#0992C2]">{listing.type}</span>
                       )}
                     </div>
                     <p className="mb-3 flex items-start gap-1 text-[11px] font-medium leading-snug text-neutral-400">
-                      <MapPin size={10} className="mt-0.5 flex-shrink-0 text-neutral-300"/>
+                      <MapPin size={10} className="mt-0.5 flex-shrink-0 text-neutral-300" />
                       {[listing.address?.street, listing.address?.city, listing.address?.state].filter(Boolean).join(', ')}
                     </p>
                     <div
                       onClick={e => e.stopPropagation()}
                       className="flex w-full items-center justify-center gap-2 rounded-full border border-[#0992C2]/30 bg-white px-4 py-2 text-[0.8rem] font-semibold text-[#0992C2] transition-all hover:bg-[#0992C2] hover:text-white"
                     >
-                      <Tag size={13}/>
+                      <Tag size={13} />
                       View
                     </div>
                   </div>
@@ -247,7 +247,7 @@ function BrowseContent() {
               {listings.length >= 4 && (
                 <div className="flex min-h-[300px] flex-col items-center justify-center rounded-3xl bg-gradient-to-br from-[#0992C2] via-[#0AC4E0] to-[#F6E7BC] p-6 text-center text-white shadow-[0_22px_70px_rgba(11,45,114,0.3)]">
                   <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-white/20 backdrop-blur-sm">
-                    <Star size={20} className="text-white"/>
+                    <Star size={20} className="text-white" />
                   </div>
                   <h3 className="mb-2 text-lg font-semibold text-white">Discover more</h3>
                   <p className="mb-5 text-xs leading-relaxed text-white/90">
