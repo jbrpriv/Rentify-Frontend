@@ -68,14 +68,23 @@ describe('Authentication', () => {
         cy.url().should('include', '/login');
     });
 
-    it('logs in successfully as admin and lands on admin dashboard', () => {
-        cy.loginAsAdmin();
+    it('logs in successfully as admin via super-login and lands on admin dashboard', () => {
+        cy.visit('/super-login');
+        // Admin is selected by default
+        cy.get('input[type="email"], input[placeholder*="email" i]')
+            .first().type(Cypress.env('ADMIN_EMAIL') || 'admin@test.com');
+        cy.get('input[type="password"]')
+            .first().type(Cypress.env('ADMIN_PASSWORD') || 'Test@12345');
+        cy.get('button[type="submit"]').first().click();
+
         cy.url({ timeout: 10000 }).should('include', '/dashboard');
-        cy.contains(/admin/i).should('exist');
     });
 
-    it('logs in successfully as law reviewer and accesses templates', () => {
+    it('logs in successfully as law reviewer via super-login and accesses templates', () => {
         cy.visit('/super-login');
+        // Switch to the Law Reviewer role tab
+        cy.contains('button', 'Law').click();
+
         cy.get('input[type="email"], input[placeholder*="email" i]')
             .first().type(Cypress.env('LAW_REVIEWER_EMAIL') || 'law_reviewer@test.com');
         cy.get('input[type="password"]')

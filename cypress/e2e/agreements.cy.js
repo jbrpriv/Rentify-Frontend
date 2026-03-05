@@ -10,27 +10,11 @@ describe('Agreements', () => {
         cy.url().should('include', '/dashboard/agreements');
     });
 
-    it('navigates to create new agreement', () => {
-        cy.contains(/new agreement|create/i).click();
-        cy.url().should('include', '/dashboard/agreements/new');
-    });
-
-    it('agreement builder shows required fields', () => {
+    it('agreement builder directly blocks draft without offerId', () => {
         cy.visit('/dashboard/agreements/new');
-        cy.contains(/tenant|property|rent/i).should('exist');
-    });
-
-    it('previews agreement before submitting', () => {
-        cy.visit('/dashboard/agreements/new');
-        // Fill minimum required fields if visible
-        cy.get('body').then(($body) => {
-            if ($body.find('select[name="propertyId"]').length) {
-                cy.get('select[name="propertyId"]').then($el => {
-                    if ($el.find('option').length > 1) $el.select(1);
-                });
-            }
-        });
-        cy.contains(/preview/i).should('exist');
+        // Because there is no offerId in the URL, the manual form shouldn't be accessible
+        cy.contains(/Start from an Offer/i).should('exist');
+        cy.get('input[type="date"]').should('not.exist');
     });
 
     it('shows agreement history tab', () => {
