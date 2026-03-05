@@ -29,19 +29,19 @@ const getRecaptchaToken = (action) =>
 const STEPS = ['register', 'verify-email', 'verify-phone'];
 
 const ROLE_OPTIONS = [
-  { value: 'tenant',          label: 'I am a Tenant',           emoji: '🏠' },
-  { value: 'landlord',        label: 'I am a Landlord',         emoji: '🏢' },
-  { value: 'property_manager',label: 'I am a Property Manager', emoji: '🔑' },
+  { value: 'tenant', label: 'I am a Tenant', emoji: '🏠' },
+  { value: 'landlord', label: 'I am a Landlord', emoji: '🏢' },
+  { value: 'property_manager', label: 'I am a Property Manager', emoji: '🔑' },
 ];
 
 function RegisterContent() {
-  const router       = useRouter();
+  const router = useRouter();
   const searchParams = useSearchParams();
-  const { setUser }  = useUser();
+  const { setUser } = useUser();
 
-  const [step, setStep]       = useState('register');
+  const [step, setStep] = useState('register');
   const [loading, setLoading] = useState(false);
-  const [error, setError]     = useState('');
+  const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [showPwd, setShowPwd] = useState(false);
   const [facebookNotice, setFacebookNotice] = useState(false);
@@ -52,7 +52,7 @@ function RegisterContent() {
 
   const [formData, setFormData] = useState({ name: '', email: '', password: '', phoneNumber: '', role: 'tenant' });
   const [emailToken, setEmailToken] = useState('');
-  const [phoneOTP,   setPhoneOTP]   = useState('');
+  const [phoneOTP, setPhoneOTP] = useState('');
 
   const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
 
@@ -61,7 +61,7 @@ function RegisterContent() {
     setLoading(true); setError('');
     try {
       const recaptchaToken = await getRecaptchaToken('register');
-      await axios.post('/api/auth/register', { ...formData, recaptchaToken });
+      await api.post('/auth/register', { ...formData, recaptchaToken });
       setStep('verify-email');
     } catch (err) { setError(err.response?.data?.message || 'Registration failed'); }
     finally { setLoading(false); }
@@ -71,8 +71,8 @@ function RegisterContent() {
     e.preventDefault();
     setLoading(true); setError('');
     try {
-      await axios.post('/api/auth/verify-email', { email: formData.email, code: emailToken });
-      try { await axios.post('/api/auth/send-otp', { email: formData.email }); }
+      await api.post('/auth/verify-email', { email: formData.email, code: emailToken });
+      try { await api.post('/auth/send-otp', { email: formData.email }); }
       catch (otpErr) { setError(otpErr.response?.data?.message || 'Could not send OTP — tap Resend to try again.'); }
       setStep('verify-phone');
     } catch (err) { setError(err.response?.data?.message || 'Invalid code'); }
@@ -82,7 +82,7 @@ function RegisterContent() {
   const handleResendEmail = async () => {
     setLoading(true);
     try {
-      await axios.post('/api/auth/resend-verification', { email: formData.email });
+      await api.post('/auth/resend-verification', { email: formData.email });
       setSuccess('Email resent!'); setTimeout(() => setSuccess(''), 3000);
     } catch (err) { setError(err.response?.data?.message || 'Failed'); }
     finally { setLoading(false); }
@@ -92,7 +92,7 @@ function RegisterContent() {
     e.preventDefault();
     setLoading(true); setError('');
     try {
-      const { data } = await axios.post('/api/auth/verify-otp', { email: formData.email, code: phoneOTP });
+      const { data } = await api.post('/auth/verify-otp', { email: formData.email, code: phoneOTP });
       localStorage.setItem('token', data.token);
       setUser({
         _id: data._id, name: data.name, role: data.role, email: data.email,
@@ -106,7 +106,7 @@ function RegisterContent() {
   const handleResendOTP = async () => {
     setLoading(true);
     try {
-      await axios.post('/api/auth/send-otp', { email: formData.email });
+      await api.post('/auth/send-otp', { email: formData.email });
       setSuccess('OTP resent!'); setTimeout(() => setSuccess(''), 3000);
     } catch (err) { setError(err.response?.data?.message || 'Failed'); }
     finally { setLoading(false); }
@@ -140,8 +140,8 @@ function RegisterContent() {
             </p>
             <div className="mt-8 space-y-3 max-w-md">
               {[
-                { emoji: '✍️', title: 'Digital agreements',  desc: 'Sign legally binding leases from any device.' },
-                { emoji: '💳', title: 'Rent tracking',       desc: 'Automated schedules, receipts and reminders.' },
+                { emoji: '✍️', title: 'Digital agreements', desc: 'Sign legally binding leases from any device.' },
+                { emoji: '💳', title: 'Rent tracking', desc: 'Automated schedules, receipts and reminders.' },
                 { emoji: '🔧', title: 'Maintenance requests', desc: 'Log, track and resolve issues in one thread.' },
               ].map(({ emoji, title, desc }) => (
                 <div key={title} className="rf-card-soft flex items-start gap-3 p-4">
@@ -166,9 +166,8 @@ function RegisterContent() {
             {/* Step progress */}
             <div className="flex gap-1.5 mb-7">
               {STEPS.map((s, i) => (
-                <div key={s} className={`flex-1 h-1 rounded-full transition-all duration-300 ${
-                  i < stepIndex ? 'bg-emerald-400' : i === stepIndex ? 'bg-sky-400' : 'bg-slate-700'
-                }`} />
+                <div key={s} className={`flex-1 h-1 rounded-full transition-all duration-300 ${i < stepIndex ? 'bg-emerald-400' : i === stepIndex ? 'bg-sky-400' : 'bg-slate-700'
+                  }`} />
               ))}
             </div>
 
@@ -204,9 +203,9 @@ function RegisterContent() {
             {step === 'register' && (
               <>
                 <form onSubmit={handleRegister} className="space-y-4">
-                  <TextField label="Full Name"     type="text"     name="name"        required placeholder="Jane Smith"          leadingIcon={User}     onChange={handleChange} value={formData.name} />
-                  <TextField label="Email"         type="email"    name="email"       required placeholder="you@example.com"      leadingIcon={Mail}     onChange={handleChange} value={formData.email} />
-                  <TextField label="Phone Number"  type="tel"      name="phoneNumber" required placeholder="+923xxxxxxxxx"         leadingIcon={Phone}    onChange={handleChange} value={formData.phoneNumber} />
+                  <TextField label="Full Name" type="text" name="name" required placeholder="Jane Smith" leadingIcon={User} onChange={handleChange} value={formData.name} />
+                  <TextField label="Email" type="email" name="email" required placeholder="you@example.com" leadingIcon={Mail} onChange={handleChange} value={formData.email} />
+                  <TextField label="Phone Number" type="tel" name="phoneNumber" required placeholder="+923xxxxxxxxx" leadingIcon={Phone} onChange={handleChange} value={formData.phoneNumber} />
                   <div className="space-y-1.5">
                     <label className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">Password</label>
                     <div className="relative">
@@ -235,11 +234,10 @@ function RegisterContent() {
                           key={value}
                           type="button"
                           onClick={() => setFormData(f => ({ ...f, role: value }))}
-                          className={`rounded-xl border py-2.5 px-2 text-center text-[0.7rem] font-semibold transition-all ${
-                            formData.role === value
+                          className={`rounded-xl border py-2.5 px-2 text-center text-[0.7rem] font-semibold transition-all ${formData.role === value
                               ? 'border-sky-400/70 bg-sky-900/40 text-sky-200 ring-1 ring-sky-400/40'
                               : 'border-slate-700 bg-slate-800/50 text-slate-400 hover:border-slate-500 hover:text-slate-300'
-                          }`}
+                            }`}
                         >
                           <div className="text-lg mb-0.5">{emoji}</div>
                           <div className="leading-tight">{value === 'property_manager' ? 'PM' : label.replace('I am a ', '')}</div>
@@ -261,12 +259,12 @@ function RegisterContent() {
 
                 <a href="/api/auth/google"
                   className="mb-3 flex w-full items-center justify-center gap-3 rounded-2xl border border-slate-600/70 bg-slate-900/70 py-3 text-sm text-slate-50 hover:bg-slate-800/90 transition-colors">
-                  <svg viewBox="0 0 24 24" className="h-5 w-5"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+                  <svg viewBox="0 0 24 24" className="h-5 w-5"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" /><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" /><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" /><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" /></svg>
                   Continue with Google
                 </a>
                 <a href="/api/auth/facebook"
                   className="mb-5 flex w-full items-center justify-center gap-3 rounded-2xl border border-slate-600/70 bg-slate-900/70 py-3 text-sm text-slate-50 hover:bg-slate-800/90 transition-colors">
-                  <svg viewBox="0 0 24 24" className="h-5 w-5" fill="#1877F2"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+                  <svg viewBox="0 0 24 24" className="h-5 w-5" fill="#1877F2"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" /></svg>
                   Continue with Facebook
                 </a>
 

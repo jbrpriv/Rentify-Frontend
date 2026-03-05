@@ -105,7 +105,8 @@ export function UserProvider({ children }) {
     return () => window.removeEventListener('storage', handleStorage);
   }, []);
 
-  const logout = useCallback(() => {
+  const logout = useCallback(async () => {
+    try { await api.post('/auth/logout'); } catch (e) { /* ignore */ }
     localStorage.removeItem('token');
     localStorage.removeItem('userInfo');
     setUserState(null);
