@@ -13,17 +13,17 @@ import { useToast } from '@/context/ToastContext';
 
 /* ─── Config ─────────────────────────────────────────────────────────────── */
 const TABS = [
-  { id: 'profile',       label: 'Profile',       icon: User    },
-  { id: 'security',      label: 'Security',      icon: Lock    },
-  { id: 'notifications', label: 'Notifications', icon: Bell    },
+  { id: 'profile', label: 'Profile', icon: User },
+  { id: 'security', label: 'Security', icon: Lock },
+  { id: 'notifications', label: 'Notifications', icon: Bell },
 ];
 
 const ROLE_CONFIG = {
-  admin:            { label: 'Administrator', color: '#DC2626', bg: 'rgba(220,38,38,0.12)', icon: '⚡' },
-  landlord:         { label: 'Landlord',      color: '#ffffff', bg: 'rgba(255,255,255,0.2)', icon: '🏠' },
+  admin: { label: 'Administrator', color: '#DC2626', bg: 'rgba(220,38,38,0.12)', icon: '⚡' },
+  landlord: { label: 'Landlord', color: '#ffffff', bg: 'rgba(255,255,255,0.2)', icon: '🏠' },
   property_manager: { label: 'Prop. Manager', color: '#ffffff', bg: 'rgba(255,255,255,0.2)', icon: '🔑' },
-  tenant:           { label: 'Tenant',        color: '#ffffff', bg: 'rgba(255,255,255,0.2)', icon: '🏡' },
-  law_reviewer:     { label: 'Law Reviewer',  color: '#ffffff', bg: 'rgba(255,255,255,0.2)', icon: '⚖️' },
+  tenant: { label: 'Tenant', color: '#ffffff', bg: 'rgba(255,255,255,0.2)', icon: '🏡' },
+  law_reviewer: { label: 'Law Reviewer', color: '#ffffff', bg: 'rgba(255,255,255,0.2)', icon: '⚖️' },
 };
 
 /* ─── Small helpers ───────────────────────────────────────────────────────── */
@@ -76,7 +76,7 @@ function ProfileTab({ user, form, setForm, saving, onSubmit, photoFile, photoPre
             <div>
               <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Full Name</label>
               <div className="relative">
-                <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-350" style={{color:'#9CA3AF'}} />
+                <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-350" style={{ color: '#9CA3AF' }} />
                 <input
                   value={form.name}
                   onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
@@ -91,7 +91,7 @@ function ProfileTab({ user, form, setForm, saving, onSubmit, photoFile, photoPre
             <div>
               <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Phone Number</label>
               <div className="relative">
-                <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4" style={{color:'#9CA3AF'}} />
+                <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: '#9CA3AF' }} />
                 <input
                   value={form.phoneNumber}
                   onChange={e => setForm(f => ({ ...f, phoneNumber: e.target.value }))}
@@ -359,14 +359,14 @@ function SecurityTab({ user, twoFAEnabled, show2FASetup, qrCode, totpInput, setT
       <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-6 sm:p-7">
         <h3 className="text-base font-extrabold text-gray-900 mb-5">Account Details</h3>
         <div className="divide-y divide-gray-50">
-          <InfoRow icon={Mail}  label="Email"          value={user.email} />
-          <InfoRow icon={Phone} label="Phone"          value={user.phoneNumber} />
-          <InfoRow icon={Shield} label="Role"          value={user.role?.replace(/_/g, ' ')} />
+          <InfoRow icon={Mail} label="Email" value={user.email} />
+          <InfoRow icon={Phone} label="Phone" value={user.phoneNumber} />
+          <InfoRow icon={Shield} label="Role" value={user.role?.replace(/_/g, ' ')} />
           <InfoRow
             icon={CheckCircle}
             label="Email Verified"
-            value={user.isEmailVerified ? 'Verified' : 'Not verified'}
-            valueColor={user.isEmailVerified ? 'text-green-600' : 'text-amber-500'}
+            value={user.isVerified ? 'Verified' : 'Not verified'}
+            valueColor={user.isVerified ? 'text-green-600' : 'text-amber-500'}
           />
           <InfoRow
             icon={Calendar}
@@ -441,32 +441,32 @@ export default function ProfilePage() {
   const { toast } = useToast();
 
   const [activeTab, setActiveTab] = useState('profile');
-  const [dbUser,    setDbUser]    = useState(null);
-  const [loading,   setLoading]   = useState(true);
+  const [dbUser, setDbUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   // Profile form
-  const [form,   setForm]   = useState({ name: '', phoneNumber: '' });
+  const [form, setForm] = useState({ name: '', phoneNumber: '' });
   const [saving, setSaving] = useState(false);
 
   // Photo upload
-  const [photoFile,      setPhotoFile]      = useState(null);
-  const [photoPreview,   setPhotoPreview]   = useState(null);
+  const [photoFile, setPhotoFile] = useState(null);
+  const [photoPreview, setPhotoPreview] = useState(null);
   const [photoUploading, setPhotoUploading] = useState(false);
   const fileInputRef = useRef(null);
 
   // Notification prefs
-  const [prefs,       setPrefs]       = useState({ smsOptIn: false, emailOptIn: true });
-  const [prefSaving,  setPrefSaving]  = useState(false);
+  const [prefs, setPrefs] = useState({ smsOptIn: false, emailOptIn: true });
+  const [prefSaving, setPrefSaving] = useState(false);
 
   // 2FA
-  const [twoFAEnabled, set2FAEnabled]   = useState(false);
-  const [show2FASetup,  setShow2FASetup] = useState(false);
-  const [qrCode,        setQrCode]       = useState('');
-  const [totpInput,     setTotpInput]    = useState('');
-  const [twoFALoading,  set2FALoading]   = useState(false);
-  const [showDisable,   setShowDisable]  = useState(false);
-  const [disableOTP,    setDisableOTP]   = useState('');
-  const [disableVia,    setDisableVia]   = useState('');
+  const [twoFAEnabled, set2FAEnabled] = useState(false);
+  const [show2FASetup, setShow2FASetup] = useState(false);
+  const [qrCode, setQrCode] = useState('');
+  const [totpInput, setTotpInput] = useState('');
+  const [twoFALoading, set2FALoading] = useState(false);
+  const [showDisable, setShowDisable] = useState(false);
+  const [disableOTP, setDisableOTP] = useState('');
+  const [disableVia, setDisableVia] = useState('');
 
   /* Fetch from server */
   useEffect(() => {
@@ -477,7 +477,7 @@ export default function ProfilePage() {
         set2FAEnabled(data.twoFactorEnabled || false);
         setForm({ name: data.name || '', phoneNumber: data.phoneNumber || '' });
       })
-      .catch(() => {})
+      .catch(() => { })
       .finally(() => setLoading(false));
   }, []);
 
@@ -500,7 +500,7 @@ export default function ProfilePage() {
     const file = e.target.files?.[0];
     if (!file) return;
     if (!file.type.startsWith('image/')) { toast('Please select an image file', 'error'); return; }
-    if (file.size > 5 * 1024 * 1024)    { toast('Image must be under 5MB', 'error');       return; }
+    if (file.size > 5 * 1024 * 1024) { toast('Image must be under 5MB', 'error'); return; }
     setPhotoFile(file);
     setPhotoPreview(URL.createObjectURL(file));
   };
@@ -600,8 +600,8 @@ export default function ProfilePage() {
   const user = dbUser || ctxUser;
   if (!user) return null;
 
-  const roleConfig  = ROLE_CONFIG[user.role] || ROLE_CONFIG.tenant;
-  const joinedDate  = user.createdAt
+  const roleConfig = ROLE_CONFIG[user.role] || ROLE_CONFIG.tenant;
+  const joinedDate = user.createdAt
     ? new Date(user.createdAt).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
     : null;
   const displayPhoto = photoPreview || user.profilePhoto;
@@ -694,7 +694,7 @@ export default function ProfilePage() {
                   </>
                 )}
               </div>
-              {user.isEmailVerified && (
+              {user.isVerified && (
                 <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white/10 rounded-xl backdrop-blur-sm border border-white/10">
                   <CheckCircle className="w-3.5 h-3.5 text-green-300" />
                   <span className="text-xs text-green-200 font-semibold">Verified</span>
@@ -746,11 +746,10 @@ export default function ProfilePage() {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all focus:outline-none ${
-                active
+              className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all focus:outline-none ${active
                   ? 'bg-white text-[#0B2D72] shadow-sm shadow-black/5'
                   : 'text-gray-400 hover:text-gray-700'
-              }`}
+                }`}
             >
               <Icon className="w-4 h-4 flex-shrink-0" />
               <span className="hidden sm:inline">{tab.label}</span>

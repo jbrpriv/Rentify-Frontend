@@ -2,7 +2,7 @@ const { defineConfig } = require('cypress');
 
 module.exports = defineConfig({
     e2e: {
-        baseUrl: process.env.CYPRESS_BASE_URL || 'http://localhost:3000',
+        baseUrl: process.env.CYPRESS_BASE_URL || 'https://rentify-frontend-naa6.vercel.app',
         specPattern: 'cypress/e2e/**/*.cy.js',
         supportFile: 'cypress/support/e2e.js',
         viewportWidth: 1280,

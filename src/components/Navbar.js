@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useUser } from '@/context/UserContext';
 import {
   Building2, Globe, LayoutDashboard, Tag, User, LogOut,
-  Settings, Menu, X, Home, DollarSign,
+  Settings, Menu, X, Home, DollarSign, Bell
 } from 'lucide-react';
 import { useEffect, useState, useRef } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
@@ -324,20 +324,31 @@ export default function Navbar() {
 
             {user ? (
               <>
+                {/* Desktop: notifications bell */}
+                <Link
+                  href="/dashboard/messages"
+                  className={`hidden md:flex h-9 w-9 items-center justify-center rounded-full transition-all hover:scale-105 ${isTransparent ? 'bg-white/10 text-white hover:bg-white/20' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
+                  aria-label="Notifications"
+                >
+                  <Bell className="h-4.5 w-4.5" />
+                </Link>
+
                 {/* Desktop: avatar dropdown */}
                 <AvatarDropdown user={user} logout={logout} isTransparent={isTransparent} />
 
-                {/* Mobile: hamburger button (replaces DP button) */}
-                <button
-                  onClick={() => setMobileOpen(true)}
-                  className={`flex h-9 w-9 items-center justify-center rounded-full transition-all md:hidden ${isTransparent
-                    ? 'bg-white/15 text-white hover:bg-white/25'
-                    : 'bg-[#E6F4F8] text-[#0992C2] hover:bg-[#d0eaf4]'
-                    }`}
-                  aria-label="Open menu"
-                >
-                  <Menu className="h-4.5 w-4.5" />
-                </button>
+                {/* Mobile: hamburger button (replaces DP button, hidden on dashboard) */}
+                {!isDashboard && (
+                  <button
+                    onClick={() => setMobileOpen(true)}
+                    className={`flex h-9 w-9 items-center justify-center rounded-full transition-all md:hidden ${isTransparent
+                      ? 'bg-white/15 text-white hover:bg-white/25'
+                      : 'bg-[#E6F4F8] text-[#0992C2] hover:bg-[#d0eaf4]'
+                      }`}
+                    aria-label="Open menu"
+                  >
+                    <Menu className="h-4.5 w-4.5" />
+                  </button>
+                )}
               </>
             ) : (
               <>

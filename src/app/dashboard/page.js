@@ -14,6 +14,7 @@ import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell,
 } from 'recharts';
+import PaymentCalendar from '@/components/PaymentCalendar';
 
 /* ─── Colour tokens (Updated to New Palette) ─────────────────────────────── */
 const ROLE_THEME = {
@@ -428,6 +429,17 @@ export default function DashboardHome() {
             </div>
           )}
         </motion.div>
+
+        {/* ── Payment Calendar (Landlord Only) ── */}
+        {user.role === 'landlord' && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.28, ease: [0.21, 0.6, 0.35, 1] }}
+          >
+            <PaymentCalendar theme={theme} />
+          </motion.div>
+        )}
 
       </motion.div>
     </>
