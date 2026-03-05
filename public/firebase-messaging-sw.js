@@ -47,16 +47,20 @@ if (firebaseConfig.projectId) {
 
     // ─── Background message handler ───────────────────────────────────────────
     // Called when a push arrives while the page is in the background/closed.
-    // Firebase will automatically show a notification using the `notification`
-    // field. You can customise it here.
+    // NOTE: If the push payload contains a `notification` object, Firebase will
+    // AUTOMATICALLY display an OS notification. We do NOT need to call 
+    // `showNotification` manually unless we are handling pure "data" messages.
     messaging.onBackgroundMessage((payload) => {
-        const { title, body, icon } = payload.notification || {};
-        self.registration.showNotification(title || 'RentifyPro', {
-            body: body || '',
-            icon: icon || '/icons/icon-192x192.png',
-            badge: '/icons/icon-96x96.png',
-            data: payload.data || {},
-        });
+        console.log('[firebase-messaging-sw] Received background message:', payload);
+
+        // Only show manually if Firebase didn't automatically show it (i.e. data-only push)
+        if (!payload.notification && payload.data) {
+            self.registration.showNotification(payload.data.title || 'RentifyPro', {
+                body: payload.data.body || '',
+                icon: '/icons/icon-192x192.png',
+                data: payload.data,
+            });
+        }
     });
 
     // ─── Notification click handler ───────────────────────────────────────────
