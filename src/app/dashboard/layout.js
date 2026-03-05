@@ -9,7 +9,7 @@ import api from '@/utils/api';
 import { useUser } from '@/context/UserContext';
 import {
   LayoutDashboard, Building2, FileText, Users, Key, User, Loader2, FolderOpen, Zap,
-  ShieldCheck, Wrench, MessageSquare, CreditCard, BarChart2, Scale,
+  ShieldCheck, Wrench, MessageSquare, CreditCard, BarChart2, Scale, TrendingUp,
   ClipboardList, X, Tag, BookOpen, Menu,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -22,6 +22,7 @@ const NAV_BY_ROLE = {
     { name: 'Agreements', href: '/dashboard/agreements', icon: FileText, badgeKey: 'agreements' },
     { name: 'Agr. Templates', href: '/dashboard/agreement-templates', icon: BookOpen },
     { name: 'Tenants', href: '/dashboard/landlord/tenants', icon: Users },
+    { name: 'Analytics', href: '/dashboard/analytics', icon: BarChart2 },
     { name: 'Maintenance', href: '/dashboard/maintenance', icon: Wrench, badgeKey: 'maintenance' },
     { name: 'Messages', href: '/dashboard/messages', icon: MessageSquare, badgeKey: 'messages' },
     { name: 'Disputes', href: '/dashboard/disputes', icon: Scale },
@@ -42,6 +43,7 @@ const NAV_BY_ROLE = {
   admin: [
     { name: 'Overview', href: '/dashboard', icon: LayoutDashboard },
     { name: 'Stats', href: '/dashboard/admin', icon: BarChart2 },
+    { name: 'Analytics', href: '/dashboard/analytics', icon: TrendingUp },
     { name: 'Users', href: '/dashboard/admin/users', icon: Users },
     { name: 'Agreements', href: '/dashboard/admin/agreements', icon: FileText },
     { name: 'Properties', href: '/dashboard/admin/properties', icon: Building2 },
