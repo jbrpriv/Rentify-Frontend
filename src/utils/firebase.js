@@ -126,8 +126,22 @@ export async function requestFCMToken(promptPermission = false) {
 
         console.log('[FCM] Token acquired, sending to backend...');
 
-        // Wait to make sure the token gets into localStorage from login first
-        await new Promise(r => setTimeout(r, 1000));
+        // Wait until the auth token is in localStorage (set during login) before
+        // calling the backend — poll for up to 5 seconds instead of a blind delay.
+        const authReady = await new Promise((resolve) => {
+            if (localStorage.getItem('token')) { resolve(true); return; }
+            let elapsed = 0;
+            const interval = setInterval(() => {
+                elapsed += 100;
+                if (localStorage.getItem('token')) { clearInterval(interval); resolve(true); }
+                else if (elapsed >= 5000)           { clearInterval(interval); resolve(false); }
+            }, 100);
+        });
+
+        if (!authReady) {
+            console.warn('[FCM] Auth token not available after 5s — skipping backend registration.');
+            return token;
+        }
 
         await api.post('/auth/fcm-token', { fcmToken: token }).then(() => {
             console.log('[FCM] Successfully registered token with backend.');

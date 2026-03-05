@@ -149,7 +149,54 @@ export default function DashboardHome() {
     })();
   }, [user]);
 
-  if (!user || loading) return null;
+  if (!user || loading) return (
+    <>
+      <style>{`
+        @keyframes shimmer { 0% { background-position: -600px 0 } 100% { background-position: 600px 0 } }
+        .sk { background: linear-gradient(90deg, #f0f2f5 25%, #e4e7ec 50%, #f0f2f5 75%); background-size: 600px 100%; animation: shimmer 1.4s infinite linear; border-radius: 12px; }
+      `}</style>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 28, maxWidth: 1200, margin: '0 auto' }}>
+
+        {/* Header skeleton */}
+        <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <div className="sk" style={{ width: 220, height: 38 }} />
+            <div className="sk" style={{ width: 140, height: 14 }} />
+          </div>
+          <div className="sk" style={{ width: 120, height: 36, borderRadius: 40 }} />
+        </div>
+
+        {/* Stat cards skeleton — 4 columns */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 16 }}>
+          {[...Array(4)].map((_, i) => (
+            <div key={i} style={{ background: 'white', borderRadius: 18, padding: '22px 24px', border: '1px solid #e5e7eb' }}>
+              <div className="sk" style={{ width: 44, height: 44, borderRadius: 14, marginBottom: 14 }} />
+              <div className="sk" style={{ width: '55%', height: 12, marginBottom: 10 }} />
+              <div className="sk" style={{ width: '70%', height: 32 }} />
+            </div>
+          ))}
+        </div>
+
+        {/* Quick actions skeleton */}
+        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+          {[...Array(4)].map((_, i) => (
+            <div key={i} className="sk" style={{ width: 130, height: 38, borderRadius: 40 }} />
+          ))}
+        </div>
+
+        {/* Charts skeleton */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 16 }}>
+          {[...Array(2)].map((_, i) => (
+            <div key={i} style={{ background: 'white', borderRadius: 18, padding: 24, border: '1px solid #e5e7eb' }}>
+              <div className="sk" style={{ width: '45%', height: 14, marginBottom: 20 }} />
+              <div className="sk" style={{ width: '100%', height: 160 }} />
+            </div>
+          ))}
+        </div>
+
+      </div>
+    </>
+  );
 
   const theme = ROLE_THEME[user.role] || ROLE_THEME.tenant;
   const activeLeases = agreements.filter(a => a.status === 'active');

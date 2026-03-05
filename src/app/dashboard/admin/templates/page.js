@@ -3,15 +3,45 @@
 import { useEffect, useState } from 'react';
 import api from '@/utils/api';
 import { useUser } from '@/context/UserContext';
+import { useToast } from '@/context/ToastContext';
 import {
   Plus, CheckCircle, XCircle, Archive, Loader2,
-  Scale, Filter, ChevronDown, ChevronUp,
+  Scale, Filter, ChevronDown, ChevronUp, AlertTriangle, X,
 } from 'lucide-react';
 
 const CATEGORIES = ['general','rent','deposit','maintenance','utilities','pets','termination','renewal','late_fee','subletting','noise'];
 
+// ─── Reusable confirm modal ───────────────────────────────────────────────────
+function ConfirmModal({ title, message, confirmLabel = 'Confirm', danger = false, onConfirm, onClose, children }) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40" onClick={e => e.target === e.currentTarget && onClose()}>
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6">
+        <div className="flex items-start gap-3 mb-4">
+          <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${danger ? 'bg-red-100' : 'bg-yellow-100'}`}>
+            <AlertTriangle className={`w-5 h-5 ${danger ? 'text-red-600' : 'text-yellow-600'}`} />
+          </div>
+          <div>
+            <h3 className="font-black text-gray-900">{title}</h3>
+            {message && <p className="text-sm text-gray-500 mt-1">{message}</p>}
+          </div>
+        </div>
+        {children}
+        <div className="flex gap-3 mt-5">
+          <button onClick={onClose} className="flex-1 px-4 py-2 rounded-xl border border-gray-200 text-sm font-bold text-gray-600 hover:bg-gray-50 transition">
+            Cancel
+          </button>
+          <button onClick={onConfirm} className={`flex-1 px-4 py-2 rounded-xl text-sm font-bold text-white transition ${danger ? 'bg-red-600 hover:bg-red-700' : 'bg-blue-600 hover:bg-blue-700'}`}>
+            {confirmLabel}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function TemplatesPage() {
   const { user } = useUser();
+  const { toast } = useToast();
   const [clauses, setClauses]   = useState([]);
   const [loading, setLoading]   = useState(true);
   const [actionId, setActionId] = useState(null);
@@ -23,6 +53,11 @@ export default function TemplatesPage() {
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ title: '', body: '', category: 'general', jurisdiction: 'Pakistan', isDefault: false });
   const [saving, setSaving] = useState(false);
+
+  // Modal state — archive confirm + rejection reason
+  const [archiveTarget, setArchiveTarget]   = useState(null); // clause id
+  const [rejectTarget, setRejectTarget]     = useState(null); // clause id
+  const [rejectionReason, setRejectionReason] = useState('');
 
   useEffect(() => {
     fetchClauses();
@@ -40,24 +75,35 @@ export default function TemplatesPage() {
     finally { setLoading(false); }
   };
 
-  const handleApprove = async (id, approved) => {
-    const reason = approved ? '' : prompt('Rejection reason:');
-    if (!approved && reason === null) return;
+  const handleApprove = async (id) => {
     setActionId(id);
     try {
-      await api.put(`/admin/clauses/${id}/approve`, { approved, rejectionReason: reason });
+      await api.put(`/admin/clauses/${id}/approve`, { approved: true, rejectionReason: '' });
       fetchClauses();
-    } catch (err) { alert(err.response?.data?.message || 'Error'); }
+    } catch (err) { toast(err.response?.data?.message || 'Failed to approve clause', 'error'); }
     finally { setActionId(null); }
   };
 
-  const handleArchive = async (id) => {
-    if (!confirm('Archive this clause?')) return;
+  const handleRejectConfirm = async () => {
+    const id = rejectTarget;
+    setRejectTarget(null);
+    setActionId(id);
+    try {
+      await api.put(`/admin/clauses/${id}/approve`, { approved: false, rejectionReason });
+      setRejectionReason('');
+      fetchClauses();
+    } catch (err) { toast(err.response?.data?.message || 'Failed to reject clause', 'error'); }
+    finally { setActionId(null); }
+  };
+
+  const handleArchiveConfirm = async () => {
+    const id = archiveTarget;
+    setArchiveTarget(null);
     setActionId(id + '-archive');
     try {
       await api.put(`/admin/clauses/${id}/archive`);
       fetchClauses();
-    } catch (err) { alert(err.response?.data?.message || 'Error'); }
+    } catch (err) { toast(err.response?.data?.message || 'Failed to archive clause', 'error'); }
     finally { setActionId(null); }
   };
 
@@ -69,7 +115,7 @@ export default function TemplatesPage() {
       setShowForm(false);
       setForm({ title: '', body: '', category: 'general', jurisdiction: 'Pakistan', isDefault: false });
       fetchClauses();
-    } catch (err) { alert(err.response?.data?.message || 'Error'); }
+    } catch (err) { toast(err.response?.data?.message || 'Failed to create clause', 'error'); }
     finally { setSaving(false); }
   };
 
@@ -187,7 +233,7 @@ export default function TemplatesPage() {
                   </button>
                   {(isAdmin || isReviewer) && !c.isApproved && (
                     <button
-                      onClick={() => handleApprove(c._id, true)}
+                      onClick={() => handleApprove(c._id)}
                       disabled={actionId === c._id}
                       className="flex items-center gap-1 text-xs bg-green-50 text-green-700 px-3 py-1.5 rounded-lg hover:bg-green-100 transition"
                     >
@@ -196,7 +242,7 @@ export default function TemplatesPage() {
                   )}
                   {(isAdmin || isReviewer) && c.isApproved && (
                     <button
-                      onClick={() => handleApprove(c._id, false)}
+                      onClick={() => { setRejectTarget(c._id); setRejectionReason(''); }}
                       disabled={actionId === c._id}
                       className="flex items-center gap-1 text-xs bg-red-50 text-red-600 px-3 py-1.5 rounded-lg hover:bg-red-100 transition"
                     >
@@ -205,7 +251,7 @@ export default function TemplatesPage() {
                   )}
                   {isAdmin && (
                     <button
-                      onClick={() => handleArchive(c._id)}
+                      onClick={() => setArchiveTarget(c._id)}
                       disabled={actionId === c._id + '-archive'}
                       className="flex items-center gap-1 text-xs bg-gray-100 text-gray-500 px-3 py-1.5 rounded-lg hover:bg-gray-200 transition"
                     >
@@ -232,6 +278,38 @@ export default function TemplatesPage() {
             </div>
           ))}
         </div>
+      )}
+
+      {/* Archive confirmation modal */}
+      {archiveTarget && (
+        <ConfirmModal
+          title="Archive this clause?"
+          message="It will be hidden from landlords but not deleted. You can restore it later."
+          confirmLabel="Archive"
+          danger
+          onConfirm={handleArchiveConfirm}
+          onClose={() => setArchiveTarget(null)}
+        />
+      )}
+
+      {/* Reject with reason modal */}
+      {rejectTarget && (
+        <ConfirmModal
+          title="Reject this clause?"
+          message="Optionally provide a reason so the author knows what to fix."
+          confirmLabel="Reject"
+          danger
+          onConfirm={handleRejectConfirm}
+          onClose={() => { setRejectTarget(null); setRejectionReason(''); }}
+        >
+          <textarea
+            rows={3}
+            placeholder="Rejection reason (optional)"
+            value={rejectionReason}
+            onChange={e => setRejectionReason(e.target.value)}
+            className="w-full mt-2 rounded-xl border border-gray-200 px-3 py-2 text-sm focus:ring-2 focus:ring-red-300 focus:border-red-400 outline-none resize-none"
+          />
+        </ConfirmModal>
       )}
     </div>
   );
