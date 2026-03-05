@@ -92,7 +92,7 @@ describe('Browse — Listings Page', () => {
     it('shows bedroom count on listings with specs', () => {
         cy.contains('Sunny Studio Downtown')
             .closest('a')
-            .find('span')
+            .find('.text-neutral-500')
             .contains('1')
             .should('exist');
     });
@@ -142,13 +142,13 @@ describe('Browse — Listings Page', () => {
         cy.intercept('GET', '/api/listings*city=XYZ*', { statusCode: 200, body: [] }).as('noResults');
         cy.intercept('GET', '/api/listings*', { statusCode: 200, body: mockListings }).as('reloaded');
 
-        cy.get('input[placeholder*="City"]').type('XYZ');
-        cy.get('input[placeholder*="City"]').type('{enter}');
+        // Target the correct form input
+        cy.get('input[placeholder*="City or address"]').clear().type('XYZ{enter}');
         cy.wait('@noResults');
 
         cy.contains('button', /clear filters/i).click();
         cy.wait('@reloaded');
-        cy.get('input[placeholder*="City"]').should('have.value', '');
+        cy.get('input[placeholder*="City or address"]').should('have.value', '');
     });
 
     it('shows "Discover more" promo card when 4+ listings returned', () => {
@@ -198,7 +198,7 @@ describe('Browse — Beds Filter', () => {
     });
 
     it('filtering by 4 beds hides 1-bedroom listings', () => {
-        cy.contains('button', /^beds$/i).click();
+        cy.contains('button', 'Beds').click();
         cy.get('button').contains('4 beds').click();
         cy.contains('Sunny Studio Downtown').should('not.exist');
         cy.contains('Spacious Family House').should('exist');
