@@ -437,7 +437,7 @@ export default function DashboardHome() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, delay: 0.28, ease: [0.21, 0.6, 0.35, 1] }}
           >
-            <PaymentCalendar theme={theme} />
+            <PaymentCalendar theme={theme} agreements={agreements} payments={payments} />
           </motion.div>
         )}
 

@@ -287,7 +287,6 @@ export default function LoginPage() {
                         onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                         placeholder="••••••••"
                         leadingIcon={Lock}
-                        trailingIcon={showPwd ? EyeOff : Eye}
                       />
                       <button
                         type="button"

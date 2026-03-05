@@ -5,24 +5,8 @@ import { motion } from 'framer-motion';
 import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, CheckCircle, Clock } from 'lucide-react';
 import api from '@/utils/api';
 
-const PaymentCalendar = ({ theme }) => {
+const PaymentCalendar = ({ theme, agreements = [], payments = [] }) => {
     const [currentDate, setCurrentDate] = useState(new Date());
-    const [payments, setPayments] = useState([]);
-    const [loading, setLoading] = useState(true);
-
-    useEffect(() => {
-        const fetchPayments = async () => {
-            try {
-                const { data } = await api.get('/payments');
-                setPayments(data?.payments || []);
-            } catch (err) {
-                console.error('Failed to fetch calendar payments:', err);
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchPayments();
-    }, []);
 
     // Simple calendar logic
     const year = currentDate.getFullYear();
@@ -40,12 +24,22 @@ const PaymentCalendar = ({ theme }) => {
     };
 
     const getDayPayments = (day) => {
-        return payments.filter(p => {
-            const dateStr = p.dueDate || p.createdAt;
+        const paidMatches = payments.filter(p => {
+            const dateStr = p.paidAt || p.createdAt;
+            if (!dateStr || p.status !== 'paid') return false;
+            const d = new Date(dateStr);
+            return d.getDate() === day && d.getMonth() === month && d.getFullYear() === year;
+        });
+
+        const pendingMatches = agreements.flatMap(a => a.rentSchedule || []).filter(s => {
+            if (s.status === 'paid') return false; // Paid ones are handled via actual Payments
+            const dateStr = s.dueDate;
             if (!dateStr) return false;
             const d = new Date(dateStr);
             return d.getDate() === day && d.getMonth() === month && d.getFullYear() === year;
         });
+
+        return [...paidMatches, ...pendingMatches];
     };
 
     return (
@@ -78,83 +72,83 @@ const PaymentCalendar = ({ theme }) => {
                 </span>
             </div>
 
-            {loading ? (
-                <div style={{ height: 240, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <p style={{ fontSize: '0.85rem', color: '#9CA3AF', fontWeight: 600 }}>Loading calendar...</p>
+            <div style={{ textAlign: 'center', marginBottom: 16 }}>
+                <span style={{ fontSize: '0.9rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: theme.accent }}>
+                    {currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                </span>
+            </div>
+
+            <>
+                {/* Days of week header */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 8, marginBottom: 8 }}>
+                    {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(d => (
+                        <div key={d} style={{ textAlign: 'center', fontSize: '0.7rem', fontWeight: 800, color: '#9CA3AF', textTransform: 'uppercase' }}>{d}</div>
+                    ))}
                 </div>
-            ) : (
-                <>
-                    {/* Days of week header */}
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 8, marginBottom: 8 }}>
-                        {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(d => (
-                            <div key={d} style={{ textAlign: 'center', fontSize: '0.7rem', fontWeight: 800, color: '#9CA3AF', textTransform: 'uppercase' }}>{d}</div>
-                        ))}
+
+                {/* Calendar Grid */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 8 }}>
+                    {Array.from({ length: firstDayOfMonth }).map((_, i) => (
+                        <div key={`empty-${i}`} style={{ aspectRatio: '1/1' }} />
+                    ))}
+
+                    {Array.from({ length: daysInMonth }).map((_, i) => {
+                        const day = i + 1;
+                        const dayPayments = getDayPayments(day);
+                        const hasPaid = dayPayments.some(p => p.status === 'paid');
+                        const hasPending = dayPayments.some(p => p.status !== 'paid');
+
+                        const isToday = day === new Date().getDate() && month === new Date().getMonth() && year === new Date().getFullYear();
+
+                        return (
+                            <motion.div
+                                key={day}
+                                initial={{ opacity: 0, scale: 0.9 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                transition={{ duration: 0.2, delay: i * 0.01 }}
+                                style={{
+                                    aspectRatio: '1/1',
+                                    borderRadius: 12,
+                                    border: isToday ? `2px solid ${theme.accent}` : '1px solid #F3F4F6',
+                                    background: dayPayments.length > 0 ? (hasPaid ? '#F0FDF4' : '#FFFBEB') : 'white',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    position: 'relative',
+                                    cursor: dayPayments.length > 0 ? 'pointer' : 'default',
+                                    transition: 'all 0.2s ease',
+                                }}
+                                title={dayPayments.length > 0 ? `${dayPayments.length} payment(s)` : ''}
+                            >
+                                <span style={{ fontSize: '0.85rem', fontWeight: isToday ? 800 : 600, color: isToday ? theme.accent : '#4B5563' }}>
+                                    {day}
+                                </span>
+
+                                {/* Indicators */}
+                                {dayPayments.length > 0 && (
+                                    <div style={{ position: 'absolute', bottom: 6, display: 'flex', gap: 2 }}>
+                                        {hasPaid && <CheckCircle size={10} color="#10B981" />}
+                                        {hasPending && <Clock size={10} color="#F59E0B" />}
+                                    </div>
+                                )}
+                            </motion.div>
+                        );
+                    })}
+                </div>
+
+                {/* Legend */}
+                <div style={{ display: 'flex', gap: 16, marginTop: 20, justifyContent: 'center' }}>
+                    <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                        <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#F0FDF4', border: '1px solid #10B981' }} />
+                        <span style={{ fontSize: '0.7rem', fontWeight: 600, color: '#6B7280' }}>Paid</span>
                     </div>
-
-                    {/* Calendar Grid */}
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 8 }}>
-                        {Array.from({ length: firstDayOfMonth }).map((_, i) => (
-                            <div key={`empty-${i}`} style={{ aspectRatio: '1/1' }} />
-                        ))}
-
-                        {Array.from({ length: daysInMonth }).map((_, i) => {
-                            const day = i + 1;
-                            const dayPayments = getDayPayments(day);
-                            const hasPaid = dayPayments.some(p => p.status === 'paid');
-                            const hasPending = dayPayments.some(p => p.status !== 'paid');
-
-                            const isToday = day === new Date().getDate() && month === new Date().getMonth() && year === new Date().getFullYear();
-
-                            return (
-                                <motion.div
-                                    key={day}
-                                    initial={{ opacity: 0, scale: 0.9 }}
-                                    animate={{ opacity: 1, scale: 1 }}
-                                    transition={{ duration: 0.2, delay: i * 0.01 }}
-                                    style={{
-                                        aspectRatio: '1/1',
-                                        borderRadius: 12,
-                                        border: isToday ? `2px solid ${theme.accent}` : '1px solid #F3F4F6',
-                                        background: dayPayments.length > 0 ? (hasPaid ? '#F0FDF4' : '#FFFBEB') : 'white',
-                                        display: 'flex',
-                                        flexDirection: 'column',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        position: 'relative',
-                                        cursor: dayPayments.length > 0 ? 'pointer' : 'default',
-                                        transition: 'all 0.2s ease',
-                                    }}
-                                    title={dayPayments.length > 0 ? `${dayPayments.length} payment(s)` : ''}
-                                >
-                                    <span style={{ fontSize: '0.85rem', fontWeight: isToday ? 800 : 600, color: isToday ? theme.accent : '#4B5563' }}>
-                                        {day}
-                                    </span>
-
-                                    {/* Indicators */}
-                                    {dayPayments.length > 0 && (
-                                        <div style={{ position: 'absolute', bottom: 6, display: 'flex', gap: 2 }}>
-                                            {hasPaid && <CheckCircle size={10} color="#10B981" />}
-                                            {hasPending && <Clock size={10} color="#F59E0B" />}
-                                        </div>
-                                    )}
-                                </motion.div>
-                            );
-                        })}
+                    <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                        <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#FFFBEB', border: '1px solid #F59E0B' }} />
+                        <span style={{ fontSize: '0.7rem', fontWeight: 600, color: '#6B7280' }}>Pending</span>
                     </div>
-
-                    {/* Legend */}
-                    <div style={{ display: 'flex', gap: 16, marginTop: 20, justifyContent: 'center' }}>
-                        <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-                            <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#F0FDF4', border: '1px solid #10B981' }} />
-                            <span style={{ fontSize: '0.7rem', fontWeight: 600, color: '#6B7280' }}>Paid</span>
-                        </div>
-                        <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-                            <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#FFFBEB', border: '1px solid #F59E0B' }} />
-                            <span style={{ fontSize: '0.7rem', fontWeight: 600, color: '#6B7280' }}>Pending</span>
-                        </div>
-                    </div>
-                </>
-            )}
+                </div>
+            </>
         </div>
     );
 };
