@@ -9,15 +9,12 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recha
 
 export default function PMTenantsPage() {
   const router = useRouter();
-  // ── Role guard ────────────────────────────────────────────────────────────
+  const { user } = useUser();
+
   useEffect(() => {
-    const { user: parsed } = useUser();
-    if (!['property_manager','admin'].includes(parsed.role)) {
-      router.push('/dashboard');
-      return;
-    }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
-  // ─────────────────────────────────────────────────────────────────────────
+    if (!user) return;
+    if (!['property_manager','admin'].includes(user.role)) router.push('/dashboard');
+  }, [user]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const [agreements, setAgreements] = useState([]);
   const [loading, setLoading]       = useState(true);

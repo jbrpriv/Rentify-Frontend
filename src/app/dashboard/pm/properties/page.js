@@ -14,15 +14,12 @@ const STATUS_COLORS = {
 
 export default function PMPropertiesPage() {
   const router = useRouter();
-  // ── Role guard ────────────────────────────────────────────────────────────
+  const { user } = useUser();
+
   useEffect(() => {
-    const { user: parsed } = useUser();
-    if (!['property_manager','admin'].includes(parsed.role)) {
-      router.push('/dashboard');
-      return;
-    }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
-  // ─────────────────────────────────────────────────────────────────────────
+    if (!user) return;
+    if (!['property_manager','admin'].includes(user.role)) router.push('/dashboard');
+  }, [user]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const [properties,   setProperties]   = useState([]);
   const [invitations,  setInvitations]  = useState([]);

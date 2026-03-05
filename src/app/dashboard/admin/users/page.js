@@ -20,15 +20,12 @@ const ROLE_COLORS = {
 
 export default function AdminUsersPage() {
   const router = useRouter();
-  // ── Role guard ────────────────────────────────────────────────────────────
+  const { user } = useUser();
+
   useEffect(() => {
-    const { user: parsed } = useUser();
-    if (parsed.role !== 'admin') {
-      router.push('/dashboard');
-      return;
-    }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
-  // ─────────────────────────────────────────────────────────────────────────
+    if (!user) return;
+    if (user.role !== 'admin') router.push('/dashboard');
+  }, [user]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const [users, setUsers]       = useState([]);
   const [pagination, setPagination] = useState({ total: 0, page: 1, pages: 1 });

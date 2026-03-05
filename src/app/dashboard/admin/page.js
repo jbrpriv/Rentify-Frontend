@@ -23,11 +23,12 @@ const PIE_FALLBACK = ['#3b82f6','#6366f1','#f59e0b','#10b981','#8b5cf6'];
 
 export default function AdminStatsPage() {
   const router = useRouter();
+  const { user } = useUser();
 
   useEffect(() => {
-    if (!user) { router.push('/login'); return; }
+    if (!user) return;
     if (user.role !== 'admin') router.push('/dashboard');
-  }, []); // eslint-disable-line
+  }, [user]);
 
   const [stats, setStats]     = useState(null);
   const [loading, setLoading] = useState(true);

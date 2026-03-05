@@ -31,15 +31,12 @@ function StatusBadge({ status }) {
 
 export default function AdminAgreementsPage() {
   const router = useRouter();
-  // ── Role guard ────────────────────────────────────────────────────────────
+  const { user } = useUser();
+
   useEffect(() => {
-    const { user: parsed } = useUser();
-    if (parsed.role !== 'admin') {
-      router.push('/dashboard');
-      return;
-    }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
-  // ─────────────────────────────────────────────────────────────────────────
+    if (!user) return;
+    if (user.role !== 'admin') router.push('/dashboard');
+  }, [user]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const [agreements, setAgreements] = useState([]);
   const [loading, setLoading]       = useState(true);

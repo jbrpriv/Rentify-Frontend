@@ -18,15 +18,12 @@ const STATUS_STYLES = {
 
 export default function AdminPropertiesPage() {
   const router = useRouter();
-  // ── Role guard ────────────────────────────────────────────────────────────
+  const { user } = useUser();
+
   useEffect(() => {
-    const { user: parsed } = useUser();
-    if (parsed.role !== 'admin') {
-      router.push('/dashboard');
-      return;
-    }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
-  // ─────────────────────────────────────────────────────────────────────────
+    if (!user) return;
+    if (user.role !== 'admin') router.push('/dashboard');
+  }, [user]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const [properties, setProperties] = useState([]);
   const [loading, setLoading]       = useState(true);

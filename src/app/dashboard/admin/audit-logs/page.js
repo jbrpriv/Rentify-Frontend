@@ -18,15 +18,12 @@ const ACTION_COLORS = {
 
 export default function AuditLogsPage() {
   const router = useRouter();
-  // ── Role guard ────────────────────────────────────────────────────────────
+  const { user } = useUser();
+
   useEffect(() => {
-    const { user: parsed } = useUser();
-    if (parsed.role !== 'admin') {
-      router.push('/dashboard');
-      return;
-    }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
-  // ─────────────────────────────────────────────────────────────────────────
+    if (!user) return;
+    if (user.role !== 'admin') router.push('/dashboard');
+  }, [user]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const [logs, setLogs]         = useState([]);
   const [loading, setLoading]   = useState(true);
