@@ -16,56 +16,56 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 const NAV_BY_ROLE = {
   landlord: [
-    { name: 'Overview',       href: '/dashboard',                       icon: LayoutDashboard },
-    { name: 'Properties',     href: '/dashboard/properties',            icon: Building2 },
-    { name: 'Offers',         href: '/dashboard/offers',                icon: Tag,           badgeKey: 'offers' },
-    { name: 'Agreements',     href: '/dashboard/agreements',            icon: FileText,      badgeKey: 'agreements' },
-    { name: 'Agr. Templates', href: '/dashboard/agreement-templates',   icon: BookOpen },
-    { name: 'Tenants',        href: '/dashboard/landlord/tenants',      icon: Users },
-    { name: 'Maintenance',    href: '/dashboard/maintenance',           icon: Wrench,        badgeKey: 'maintenance' },
-    { name: 'Messages',       href: '/dashboard/messages',              icon: MessageSquare, badgeKey: 'messages' },
-    { name: 'Disputes',       href: '/dashboard/disputes',              icon: Scale },
-    { name: 'Billing',        href: '/dashboard/billing',               icon: Zap },
-    { name: 'Profile',        href: '/dashboard/profile',               icon: User },
+    { name: 'Overview', href: '/dashboard', icon: LayoutDashboard },
+    { name: 'Properties', href: '/dashboard/properties', icon: Building2 },
+    { name: 'Offers', href: '/dashboard/offers', icon: Tag, badgeKey: 'offers' },
+    { name: 'Agreements', href: '/dashboard/agreements', icon: FileText, badgeKey: 'agreements' },
+    { name: 'Agr. Templates', href: '/dashboard/agreement-templates', icon: BookOpen },
+    { name: 'Tenants', href: '/dashboard/landlord/tenants', icon: Users },
+    { name: 'Maintenance', href: '/dashboard/maintenance', icon: Wrench, badgeKey: 'maintenance' },
+    { name: 'Messages', href: '/dashboard/messages', icon: MessageSquare, badgeKey: 'messages' },
+    { name: 'Disputes', href: '/dashboard/disputes', icon: Scale },
+    { name: 'Billing', href: '/dashboard/billing', icon: Zap },
+    { name: 'Profile', href: '/dashboard/profile', icon: User },
   ],
   tenant: [
-    { name: 'Overview',    href: '/dashboard',             icon: LayoutDashboard },
-    { name: 'My Lease',    href: '/dashboard/my-lease',    icon: Key },
-    { name: 'Offers',      href: '/dashboard/offers',      icon: Tag,           badgeKey: 'offers' },
-    { name: 'Payments',    href: '/dashboard/payments',    icon: CreditCard },
-    { name: 'Maintenance', href: '/dashboard/maintenance', icon: Wrench,        badgeKey: 'maintenance' },
-    { name: 'Documents',   href: '/dashboard/documents',   icon: FolderOpen },
-    { name: 'Disputes',    href: '/dashboard/disputes',    icon: Scale },
-    { name: 'Messages',    href: '/dashboard/messages',    icon: MessageSquare, badgeKey: 'messages' },
-    { name: 'Profile',     href: '/dashboard/profile',     icon: User },
+    { name: 'Overview', href: '/dashboard', icon: LayoutDashboard },
+    { name: 'My Lease', href: '/dashboard/my-lease', icon: Key },
+    { name: 'Offers', href: '/dashboard/offers', icon: Tag, badgeKey: 'offers' },
+    { name: 'Payments', href: '/dashboard/payments', icon: CreditCard },
+    { name: 'Maintenance', href: '/dashboard/maintenance', icon: Wrench, badgeKey: 'maintenance' },
+    { name: 'Documents', href: '/dashboard/documents', icon: FolderOpen },
+    { name: 'Disputes', href: '/dashboard/disputes', icon: Scale },
+    { name: 'Messages', href: '/dashboard/messages', icon: MessageSquare, badgeKey: 'messages' },
+    { name: 'Profile', href: '/dashboard/profile', icon: User },
   ],
   admin: [
-    { name: 'Overview',       href: '/dashboard',                           icon: LayoutDashboard },
-    { name: 'Stats',          href: '/dashboard/admin',                     icon: BarChart2 },
-    { name: 'Users',          href: '/dashboard/admin/users',               icon: Users },
-    { name: 'Agreements',     href: '/dashboard/admin/agreements',          icon: FileText },
-    { name: 'Properties',     href: '/dashboard/admin/properties',          icon: Building2 },
-    { name: 'Templates',      href: '/dashboard/admin/templates',           icon: ClipboardList },
+    { name: 'Overview', href: '/dashboard', icon: LayoutDashboard },
+    { name: 'Stats', href: '/dashboard/admin', icon: BarChart2 },
+    { name: 'Users', href: '/dashboard/admin/users', icon: Users },
+    { name: 'Agreements', href: '/dashboard/admin/agreements', icon: FileText },
+    { name: 'Properties', href: '/dashboard/admin/properties', icon: Building2 },
+    { name: 'Templates', href: '/dashboard/admin/templates', icon: ClipboardList },
     { name: 'Agr. Templates', href: '/dashboard/admin/agreement-templates', icon: BookOpen },
-    { name: 'Disputes',       href: '/dashboard/disputes',                  icon: Scale },
-    { name: 'Messages',       href: '/dashboard/messages',                  icon: MessageSquare, badgeKey: 'messages' },
-    { name: 'Audit Logs',     href: '/dashboard/admin/audit-logs',          icon: ShieldCheck },
-    { name: 'Profile',        href: '/dashboard/profile',                   icon: User },
+    { name: 'Disputes', href: '/dashboard/disputes', icon: Scale },
+    { name: 'Messages', href: '/dashboard/messages', icon: MessageSquare, badgeKey: 'messages' },
+    { name: 'Audit Logs', href: '/dashboard/admin/audit-logs', icon: ShieldCheck },
+    { name: 'Profile', href: '/dashboard/profile', icon: User },
   ],
   property_manager: [
-    { name: 'Overview',    href: '/dashboard',                icon: LayoutDashboard },
-    { name: 'Properties',  href: '/dashboard/pm/properties',  icon: Building2 },
-    { name: 'Tenants',     href: '/dashboard/pm/tenants',     icon: Users },
+    { name: 'Overview', href: '/dashboard', icon: LayoutDashboard },
+    { name: 'Properties', href: '/dashboard/pm/properties', icon: Building2 },
+    { name: 'Tenants', href: '/dashboard/pm/tenants', icon: Users },
     { name: 'Maintenance', href: '/dashboard/pm/maintenance', icon: Wrench, badgeKey: 'maintenance' },
-    { name: 'Messages',    href: '/dashboard/messages',       icon: MessageSquare, badgeKey: 'messages' },
-    { name: 'Profile',     href: '/dashboard/profile',        icon: User },
+    { name: 'Messages', href: '/dashboard/messages', icon: MessageSquare, badgeKey: 'messages' },
+    { name: 'Profile', href: '/dashboard/profile', icon: User },
   ],
   law_reviewer: [
-    { name: 'Overview',   href: '/dashboard',                 icon: LayoutDashboard },
-    { name: 'Templates',  href: '/dashboard/admin/templates', icon: Scale },
-    { name: 'Agreements', href: '/dashboard/agreements',      icon: FileText, badgeKey: 'agreements' },
-    { name: 'Messages',   href: '/dashboard/messages',        icon: MessageSquare, badgeKey: 'messages' },
-    { name: 'Profile',    href: '/dashboard/profile',         icon: User },
+    { name: 'Overview', href: '/dashboard', icon: LayoutDashboard },
+    { name: 'Templates', href: '/dashboard/admin/templates', icon: Scale },
+    { name: 'Agreements', href: '/dashboard/agreements', icon: FileText, badgeKey: 'agreements' },
+    { name: 'Messages', href: '/dashboard/messages', icon: MessageSquare, badgeKey: 'messages' },
+    { name: 'Profile', href: '/dashboard/profile', icon: User },
   ],
 };
 
@@ -173,18 +173,16 @@ function SidebarContent({ user, role, currentNav, pathname, badgeCounts, pulseCo
               initial={{ opacity: 0, y: 6 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.35, delay: 0.04 * index, ease: [0.21, 0.6, 0.35, 1] }}
-              className={`group mb-0.5 flex w-full items-center justify-between rounded-2xl px-3 py-2.5 text-[0.8rem] font-semibold transition-all ${
-                isActive
+              className={`group mb-0.5 flex w-full items-center justify-between rounded-2xl px-3 py-2.5 text-[0.8rem] font-semibold transition-all ${isActive
                   ? 'bg-[#E6F4F8] text-neutral-900 shadow-sm shadow-[#0992C2]/25'
                   : 'text-neutral-500 hover:bg-[#F0F8FA] hover:text-neutral-900'
-              }`}
+                }`}
             >
               <span className="flex items-center gap-2">
-                <span className={`flex h-8 w-8 items-center justify-center rounded-2xl border ${
-                  isActive
+                <span className={`flex h-8 w-8 items-center justify-center rounded-2xl border ${isActive
                     ? 'border-[#0992C2] bg-white'
                     : 'border-transparent bg-white/70 group-hover:border-[#99E0F2]'
-                }`}>
+                  }`}>
                   <Icon className={`h-3.5 w-3.5 ${isActive ? 'text-[#0992C2]' : 'text-neutral-500'}`} />
                 </span>
                 {item.name}
@@ -203,15 +201,23 @@ function SidebarContent({ user, role, currentNav, pathname, badgeCounts, pulseCo
 }
 
 export default function DashboardLayout({ children }) {
-  const router   = useRouter();
+  const router = useRouter();
   const pathname = usePathname();
   const { user, logout } = useUser();
-  const [badgeCounts, setBadgeCounts]     = useState({});
-  const [notification, setNotification]   = useState(null);
-  const [mobileOpen, setMobileOpen]       = useState(false);
+  const [badgeCounts, setBadgeCounts] = useState({});
+  const [notification, setNotification] = useState(null);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const socketRef = useRef(null);
 
   // Close mobile menu on route change
+  useEffect(() => {
+    // Lock body scroll when mobile drawer is open
+    if (mobileOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+  }, [mobileOpen]);
   useEffect(() => { setMobileOpen(false); }, [pathname]);
 
   const fetchCounts = useCallback(async () => {
@@ -226,7 +232,7 @@ export default function DashboardLayout({ children }) {
 
     if (user.isPhoneVerified === false && user.provider) {
       logout();
-      api.post('/auth/oauth/abandon').catch(() => {});
+      api.post('/auth/oauth/abandon').catch(() => { });
       return;
     }
 
@@ -280,15 +286,15 @@ export default function DashboardLayout({ children }) {
     );
   }
 
-  const role       = user.role || 'tenant';
+  const role = user.role || 'tenant';
   const currentNav = NAV_BY_ROLE[role] || NAV_BY_ROLE.tenant;
-  const pulseColor = ROLE_PULSE[role]  || 'bg-gray-400';
-  const badgeColor = ROLE_BADGE[role]  || 'bg-gray-100 text-gray-600 border-gray-200';
+  const pulseColor = ROLE_PULSE[role] || 'bg-gray-400';
+  const badgeColor = ROLE_BADGE[role] || 'bg-gray-100 text-gray-600 border-gray-200';
 
   const sidebarProps = { user, role, currentNav, pathname, badgeCounts, pulseColor, badgeColor };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#F8FBFC]">
+    <div className={`min-h-screen flex flex-col bg-[#F8FBFC] ${mobileOpen ? 'overflow-hidden' : ''}`}>
       <Navbar />
       <NotificationToast notification={notification} onDismiss={() => setNotification(null)} />
 
@@ -366,7 +372,7 @@ export default function DashboardLayout({ children }) {
                 >
                   <span className="flex h-8 w-8 items-center justify-center rounded-2xl border border-transparent bg-red-50">
                     <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-                      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" strokeLinecap="round" strokeLinejoin="round"/>
+                      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
                   </span>
                   Log Out

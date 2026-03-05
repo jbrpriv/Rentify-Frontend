@@ -20,15 +20,28 @@ const GATEWAY_META = {
   paypal: { label: 'PayPal', desc: 'PayPal balance or linked card', icon: '🌐', color: '#0070ba' },
 };
 
+const ALL_GATEWAYS = [
+  { id: 'stripe', name: 'Stripe' },
+  { id: 'razorpay', name: 'Razorpay' },
+];
+
 // ─── Gateway Picker Modal (toast-style, slides up from bottom on mobile) ──────
 function GatewayModal({ gateways, amount, onSelect, onClose, loading }) {
+  const enabledIds = gateways.map(g => g.id);
+  const displayGateways = ALL_GATEWAYS.map(gw => ({ ...gw, enabled: enabledIds.includes(gw.id) }));
+
   return (
     <div
       className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4"
-      style={{ background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(4px)' }}
+      style={{ background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(4px)', animation: 'gwFadeIn 0.2s ease' }}
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
-      <div className="bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl w-full sm:max-w-sm overflow-hidden animate-in slide-in-from-bottom duration-300">
+      <style>{`
+        @keyframes gwFadeIn { from { opacity: 0 } to { opacity: 1 } }
+        @keyframes gwSlideUp { from { transform: translateY(40px); opacity: 0 } to { transform: translateY(0); opacity: 1 } }
+        .gw-sheet { animation: gwSlideUp 0.28s cubic-bezier(0.3,1,0.4,1) both; }
+      `}</style>
+      <div className="gw-sheet bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl w-full sm:max-w-sm overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100">
           <div>
@@ -48,14 +61,18 @@ function GatewayModal({ gateways, amount, onSelect, onClose, loading }) {
 
         {/* Gateway list */}
         <div className="p-4 space-y-3">
-          {gateways.map((gw) => {
+          {displayGateways.map((gw) => {
             const meta = GATEWAY_META[gw.id] || { label: gw.name, desc: '', icon: '💰', color: '#374151' };
+            const isDisabled = loading || !gw.enabled;
             return (
               <button
                 key={gw.id}
-                onClick={() => onSelect(gw.id)}
-                disabled={loading}
-                className="w-full flex items-center gap-4 p-4 rounded-2xl border-2 border-gray-100 hover:border-blue-200 hover:bg-blue-50/40 transition-all text-left group disabled:opacity-60"
+                onClick={() => !isDisabled && onSelect(gw.id)}
+                disabled={isDisabled}
+                className={`w-full flex items-center gap-4 p-4 rounded-2xl border-2 transition-all text-left group ${!gw.enabled
+                    ? 'border-gray-100 bg-gray-50 opacity-60 cursor-not-allowed'
+                    : 'border-gray-100 hover:border-blue-200 hover:bg-blue-50/40 disabled:opacity-60'
+                  }`}
               >
                 <div
                   className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl flex-shrink-0"
@@ -65,12 +82,16 @@ function GatewayModal({ gateways, amount, onSelect, onClose, loading }) {
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="font-bold text-gray-900 text-sm">{meta.label}</p>
-                  <p className="text-xs text-gray-400 mt-0.5">{meta.desc}</p>
+                  <p className="text-xs text-gray-400 mt-0.5">
+                    {!gw.enabled ? 'Not configured by admin' : meta.desc}
+                  </p>
                 </div>
                 {loading ? (
                   <Loader2 className="w-4 h-4 animate-spin text-gray-400 flex-shrink-0" />
-                ) : (
+                ) : gw.enabled ? (
                   <div className="w-5 h-5 rounded-full border-2 border-gray-200 group-hover:border-blue-400 transition flex-shrink-0" />
+                ) : (
+                  <span className="text-[10px] font-semibold text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full flex-shrink-0">Unavailable</span>
                 )}
               </button>
             );

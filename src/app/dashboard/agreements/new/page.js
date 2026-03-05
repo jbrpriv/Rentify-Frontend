@@ -420,49 +420,12 @@ function AgreementForm() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!offerId && (!foundTenant || !propertyId)) return;
 
-    // ── When accepting an offer: call PUT /offers/:id/accept ─────────────────
-    if (offerId) {
-      if (!foundTenant) return;
-      setLoading(true);
-      try {
-        const { data } = await api.put(`/offers/${offerId}/accept`, {
-          startDate: formData.startDate,
-          // templateId omitted here — landlord picks clauses individually in step 3
-        });
-        setCreatedAgreementId(data.agreement._id);
-        setStep(3);
-      } catch (error) {
-        alert(error.response?.data?.message || 'Failed to accept offer');
-      } finally {
-        setLoading(false);
-      }
-      return;
-    }
-
-    // ── Normal flow: create agreement directly ────────────────────────────────
-    if (!foundTenant || !propertyId) return;
-    setLoading(true);
-    try {
-      const { data: agreement } = await api.post('/agreements', {
-        tenantId: foundTenant._id,
-        propertyId,
-        startDate: formData.startDate,
-        endDate: formData.endDate,
-        rentAmount: Number(formData.rentAmount),
-        depositAmount: Number(formData.depositAmount),
-        lateFeeAmount: Number(formData.lateFeeAmount) || 0,
-        lateFeeGracePeriodDays: Number(formData.lateFeeGracePeriodDays) || 5,
-        rentEscalationEnabled: formData.rentEscalationEnabled,
-        rentEscalationPercentage: Number(formData.rentEscalationPercentage) || 0,
-      });
-      setCreatedAgreementId(agreement._id);
-      setStep(3);
-    } catch (error) {
-      alert(error.response?.data?.message || 'Failed to create agreement');
-    } finally {
-      setLoading(false);
-    }
+    // We defer the actual creation API call until Step 3 (handleSaveClauses), 
+    // so if the landlord navigates away in the middle of drafting, 
+    // the offer doesn't get prematurely "accepted" before clauses are done.
+    setStep(3);
   };
 
   const handleToggleClause = (clauseId) => {
@@ -484,12 +447,39 @@ function AgreementForm() {
   const handleSaveClauses = async () => {
     setSavingClauses(true);
     try {
+      let createdId = createdAgreementId;
+
+      // If we deferred creation to the end:
+      if (!createdId) {
+        if (offerId) {
+          const { data } = await api.put(`/offers/${offerId}/accept`, {
+            startDate: formData.startDate,
+          });
+          createdId = data.agreement._id;
+        } else {
+          const { data: agreement } = await api.post('/agreements', {
+            tenantId: foundTenant._id,
+            propertyId,
+            startDate: formData.startDate,
+            endDate: formData.endDate,
+            rentAmount: Number(formData.rentAmount),
+            depositAmount: Number(formData.depositAmount),
+            lateFeeAmount: Number(formData.lateFeeAmount) || 0,
+            lateFeeGracePeriodDays: Number(formData.lateFeeGracePeriodDays) || 5,
+            rentEscalationEnabled: formData.rentEscalationEnabled,
+            rentEscalationPercentage: Number(formData.rentEscalationPercentage) || 0,
+          });
+          createdId = agreement._id;
+        }
+        setCreatedAgreementId(createdId);
+      }
+
       if (selectedClauseIds.length > 0) {
-        await api.put(`/agreements/${createdAgreementId}/clauses`, { clauseIds: selectedClauseIds });
+        await api.put(`/agreements/${createdId}/clauses`, { clauseIds: selectedClauseIds });
       }
       router.push('/dashboard/agreements');
     } catch (error) {
-      alert(error.response?.data?.message || 'Failed to save clauses');
+      alert(error.response?.data?.message || 'Failed to save agreement');
     } finally {
       setSavingClauses(false);
     }
@@ -768,7 +758,7 @@ function AgreementForm() {
                 onClick={() => router.push('/dashboard/agreements')}
                 className="text-sm text-gray-500 hover:text-gray-700 underline"
               >
-                Skip clauses
+                Cancel Draft
               </button>
               <button
                 type="button"
