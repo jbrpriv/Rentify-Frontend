@@ -35,17 +35,24 @@ export default function MaintenancePage() {
   // Update form per request
   const [updateForm, setUpdateForm] = useState({});
 
+  // Fetch requests once on mount — NOT inside [user] effect because
+  // UserContext.refreshUser() updates the user object on mount, which would
+  // trigger a second fetchRequests() call and a mid-test setLoading(true).
   useEffect(() => {
-    if (user) {
-      if (user.role === 'tenant') {
-        // Load tenant's active agreements for property selection
-        api.get('/agreements').then(({ data }) => {
-          const active = data.filter(a => a.status === 'active');
-          setProperties(active.map(a => ({ _id: a.property?._id, title: a.property?.title })));
-        }).catch(console.error);
-      }
-    }
     fetchRequests();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Load tenant's property list for the submission form.
+  // User is read synchronously from localStorage so this fires on first render,
+  // ensuring the property dropdown is populated before the form is opened.
+  useEffect(() => {
+    if (!user) return;
+    if (user.role === 'tenant') {
+      api.get('/agreements').then(({ data }) => {
+        const active = data.filter(a => a.status === 'active');
+        setProperties(active.map(a => ({ _id: a.property?._id, title: a.property?.title })));
+      }).catch(console.error);
+    }
   }, [user]);
 
   const fetchRequests = async () => {
@@ -71,8 +78,11 @@ export default function MaintenancePage() {
   };
 
   const handleUpdate = async (id) => {
-    const data = updateForm[id];
-    if (!data?.status) return;
+    // Merge the current request's status with any edits so the PUT always fires.
+    // Without this, if the landlord hasn't changed the dropdown the guard would
+    // silently return and cy.wait('@updateReq') would time out.
+    const req = requests.find(r => r._id === id);
+    const data = { status: req?.status, ...updateForm[id] };
     setActionId(id);
     try {
       await api.put(`/maintenance/${id}`, data);
