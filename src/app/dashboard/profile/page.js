@@ -408,8 +408,7 @@ function NotificationsTab({ prefs, setPrefs, prefSaving, onSave }) {
         {channels.map(({ key, icon: Icon, label, desc, color, bg }) => (
           <div
             key={key}
-            onClick={() => setPrefs(p => ({ ...p, [key]: !p[key] }))}
-            className="flex items-center gap-4 p-4 rounded-2xl border border-gray-100 hover:border-gray-200 cursor-pointer transition-colors select-none"
+            className="flex items-center gap-4 p-4 rounded-2xl border border-gray-100 hover:border-gray-200 transition-colors select-none"
           >
             <div className="w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0" style={{ background: bg }}>
               <Icon className="w-5 h-5" style={{ color }} />
@@ -747,8 +746,8 @@ export default function ProfilePage() {
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all focus:outline-none ${active
-                  ? 'bg-white text-[#0B2D72] shadow-sm shadow-black/5'
-                  : 'text-gray-400 hover:text-gray-700'
+                ? 'bg-white text-[#0B2D72] shadow-sm shadow-black/5'
+                : 'text-gray-400 hover:text-gray-700'
                 }`}
             >
               <Icon className="w-4 h-4 flex-shrink-0" />
