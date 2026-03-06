@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useUser } from '@/context/UserContext';
 import {
   Building2, Globe, LayoutDashboard, Tag, User, LogOut,
-  Settings, Menu, X, Home, DollarSign, Bell
+  Settings, Menu, X, Home, DollarSign, Bell, Search
 } from 'lucide-react';
 import { useEffect, useState, useRef } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
