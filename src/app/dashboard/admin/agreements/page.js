@@ -269,7 +269,7 @@ export default function AgreementsPage() {
                         className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-600 bg-white hover:bg-gray-50"
                         title="View agreement detail"
                       >
-                        <Eye className="h-4 w-4 mr-2" /> View
+                        <Eye className="h-4 w-4 mr-2" /> View Agreement
                       </button>
 
                       {/* Version history */}
