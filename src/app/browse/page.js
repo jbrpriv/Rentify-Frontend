@@ -202,7 +202,11 @@ function BrowseContent() {
               </div>
               <h3 className="mb-2 text-xl font-semibold text-neutral-800">No listings found</h3>
               <p className="text-sm text-neutral-500">Try adjusting your filters or search a different city</p>
-              <button onClick={() => { setCity(''); setSearchInput(''); setType(''); setPriceKey('Any Price'); setBeds(''); window.history.replaceState(null, '', '/browse'); }}
+              <button onClick={() => {
+                setCity(''); setSearchInput(''); setType(''); setPriceKey('Any Price'); setBeds('');
+                window.history.replaceState(null, '', '/browse');
+                fetchListings(); // Force Cypress mock reload intercept immediately
+              }}
                 className="mt-6 rounded-full bg-[#0992C2] px-6 py-2.5 text-sm font-bold text-white transition-all hover:bg-[#0B2D72]">
                 Clear Filters
               </button>
@@ -220,12 +224,17 @@ function BrowseContent() {
                   <PhotoCarousel images={listing.images} title={listing.title} />
                   <div className="p-3.5">
                     <div className="mb-1.5 flex items-center justify-between">
-                      <span className="text-[1.1rem] font-semibold text-neutral-900">
-                        Rs. {(listing.financials?.monthlyRent || 0).toLocaleString()}
-                      </span>
+                      <div className="flex flex-col">
+                        <span className="text-[1.1rem] font-semibold text-neutral-900 line-clamp-1" title={listing.title}>
+                          {listing.title}
+                        </span>
+                        <span className="text-[0.95rem] font-bold text-[#0992C2]">
+                          Rs. {(listing.financials?.monthlyRent || 0).toLocaleString()}
+                        </span>
+                      </div>
                       <button
                         onClick={e => e.preventDefault()}
-                        className="flex h-7 w-7 items-center justify-center rounded-full border border-[#0992C2]/20 text-neutral-400 transition-colors hover:border-red-300 hover:text-red-500"
+                        className="mt-1 self-start flex h-7 w-7 items-center justify-center rounded-full border border-[#0992C2]/20 text-neutral-400 transition-colors hover:border-red-300 hover:text-red-500"
                       >
                         <Heart size={13} />
                       </button>

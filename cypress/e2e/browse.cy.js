@@ -199,7 +199,7 @@ describe('Browse — Beds Filter', () => {
 
     it('filtering by 4 beds hides 1-bedroom listings', () => {
         cy.contains('button', 'Beds').click();
-        cy.get('button').contains('4 beds').click();
+        cy.contains('button', /4 beds/i).click();
         cy.contains('Sunny Studio Downtown').should('not.exist');
         cy.contains('Spacious Family House').should('exist');
     });

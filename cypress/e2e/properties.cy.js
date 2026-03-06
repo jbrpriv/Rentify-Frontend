@@ -13,7 +13,7 @@ const mockLandlordUser = { _id: 'lnd_001', name: 'Test Landlord', email: 'landlo
 const mockTenantUser = { _id: 'ten_001', name: 'Ali Hassan', email: 'tenant@test.com', role: 'tenant' };
 
 const mockVacantProperty = {
-    _id: 'prop_001',
+    _id: '507f1f77bcf86cd799439011',
     title: 'Sunset Apartments',
     status: 'vacant',
     isListed: false,
@@ -179,12 +179,12 @@ describe('Properties — Landlord View', () => {
 
     it('confirms Publish calls PUT /api/listings/:id/publish', () => {
         cy.intercept('GET', '/api/properties', { statusCode: 200, body: [mockVacantProperty] }).as('getProps');
-        cy.intercept('PUT', '/api/listings/prop_001/publish', { statusCode: 200, body: {} }).as('publish');
-        cy.intercept('GET', '/api/properties', { statusCode: 200, body: [{ ...mockVacantProperty, isListed: true }] }).as('refresh');
+        cy.intercept('PUT', '/api/listings/507f1f77bcf86cd799439011/publish', { statusCode: 200, body: {} }).as('publish');
         cy.visit('/dashboard/properties');
         cy.wait('@getProps');
-        cy.contains('button', /publish/i).first().click();
-        cy.contains('button', /yes, publish/i).click();
+        cy.intercept('GET', '/api/properties', { statusCode: 200, body: [{ ...mockVacantProperty, isListed: true }] }).as('refresh');
+        cy.get('.prop-card').first().contains('button', /publish/i).click();
+        cy.contains('button', /yes, publish/i).click({ force: true });
         cy.wait('@publish');
     });
 
@@ -209,12 +209,12 @@ describe('Properties — Landlord View', () => {
 
     it('confirms Delete calls DELETE /api/properties/:id', () => {
         cy.intercept('GET', '/api/properties', { statusCode: 200, body: [mockVacantProperty] }).as('getProps');
-        cy.intercept('DELETE', '/api/properties/prop_001', { statusCode: 200, body: {} }).as('doDelete');
-        cy.intercept('GET', '/api/properties', { statusCode: 200, body: [] }).as('refresh');
+        cy.intercept('DELETE', '/api/properties/507f1f77bcf86cd799439011', { statusCode: 200, body: {} }).as('doDelete');
         cy.visit('/dashboard/properties');
         cy.wait('@getProps');
-        cy.contains('button', /delete/i).first().click();
-        cy.contains('button', /yes, delete/i).click();
+        cy.intercept('GET', '/api/properties', { statusCode: 200, body: [] }).as('refresh');
+        cy.get('.prop-card').first().contains('button', /delete/i).click();
+        cy.contains('button', /yes, delete/i).click({ force: true });
         cy.wait('@doDelete');
         cy.contains(/deleted successfully/i).should('exist');
     });
@@ -229,12 +229,12 @@ describe('Properties — Landlord View', () => {
 
     it('confirms Archive calls PUT /api/properties/:id/archive', () => {
         cy.intercept('GET', '/api/properties', { statusCode: 200, body: [mockVacantProperty] }).as('getProps');
-        cy.intercept('PUT', '/api/properties/prop_001/archive', { statusCode: 200, body: {} }).as('doArchive');
-        cy.intercept('GET', '/api/properties', { statusCode: 200, body: [{ ...mockVacantProperty, isArchived: true }] }).as('refresh');
+        cy.intercept('PUT', '/api/properties/507f1f77bcf86cd799439011/archive', { statusCode: 200, body: {} }).as('doArchive');
         cy.visit('/dashboard/properties');
         cy.wait('@getProps');
-        cy.contains('button', /archive/i).first().click();
-        cy.contains('button', /yes, archive/i).click();
+        cy.intercept('GET', '/api/properties', { statusCode: 200, body: [{ ...mockVacantProperty, isArchived: true }] }).as('refresh');
+        cy.get('.prop-card').first().contains('button', /archive/i).click();
+        cy.contains('button', /yes, archive/i).click({ force: true });
         cy.wait('@doArchive');
         cy.contains(/archived successfully/i).should('exist');
     });
@@ -242,12 +242,12 @@ describe('Properties — Landlord View', () => {
     it('Restore button appears on archived property and calls /restore', () => {
         const archivedProp = { ...mockVacantProperty, isArchived: true };
         cy.intercept('GET', '/api/properties', { statusCode: 200, body: [archivedProp] }).as('getProps');
-        cy.intercept('PUT', '/api/properties/prop_001/restore', { statusCode: 200, body: {} }).as('doRestore');
-        cy.intercept('GET', '/api/properties', { statusCode: 200, body: [mockVacantProperty] }).as('refresh');
+        cy.intercept('PUT', '/api/properties/507f1f77bcf86cd799439011/restore', { statusCode: 200, body: {} }).as('doRestore');
         cy.visit('/dashboard/properties');
         cy.wait('@getProps');
-        cy.contains('button', /restore/i).first().click();
-        cy.contains('button', /yes, restore/i).click();
+        cy.intercept('GET', '/api/properties', { statusCode: 200, body: [mockVacantProperty] }).as('refresh');
+        cy.get('.prop-card').first().contains('button', /restore/i).click();
+        cy.contains('button', /yes, restore/i).click({ force: true });
         cy.wait('@doRestore');
         cy.contains(/restored successfully/i).should('exist');
     });
