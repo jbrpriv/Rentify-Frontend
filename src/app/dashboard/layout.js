@@ -42,7 +42,7 @@ const NAV_BY_ROLE = {
   ],
   admin: [
     { name: 'Overview', href: '/dashboard', icon: LayoutDashboard },
-    { name: 'Stats', href: '/dashboard/admin', icon: BarChart2 },
+    { name: 'Stats', href: '/dashboard/admin', icon: BarChart2, exact: true }, // FIX: exact match for parent route
     { name: 'Analytics', href: '/dashboard/analytics', icon: TrendingUp },
     { name: 'Users', href: '/dashboard/admin/users', icon: Users },
     { name: 'Agreements', href: '/dashboard/admin/agreements', icon: FileText },
@@ -164,9 +164,12 @@ function SidebarContent({ user, role, currentNav, pathname, badgeCounts, pulseCo
       <nav className="flex flex-1 flex-col gap-1 pt-1">
         {currentNav.map((item, index) => {
           const Icon = item.icon;
-          const isActive =
-            pathname === item.href ||
-            (item.href !== '/dashboard' && pathname.startsWith(item.href));
+
+          // FIX: Updated strict active state logic
+          const isActive = item.exact
+            ? pathname === item.href
+            : pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href + '/'));
+
           const count = item.badgeKey ? (badgeCounts[item.badgeKey] || 0) : 0;
           return (
             <motion.button
@@ -348,9 +351,11 @@ export default function DashboardLayout({ children }) {
           <Menu className="h-4 w-4" />
         </button>
         <p className="text-sm font-semibold text-neutral-700 truncate">
+          {/* FIX: Updated strict active state logic for Mobile Title */}
           {currentNav.find(n =>
-            pathname === n.href ||
-            (n.href !== '/dashboard' && pathname.startsWith(n.href))
+            n.exact
+              ? pathname === n.href
+              : pathname === n.href || (n.href !== '/dashboard' && pathname.startsWith(n.href + '/'))
           )?.name || 'Dashboard'}
         </p>
         <div className="ml-auto flex items-center gap-1.5">

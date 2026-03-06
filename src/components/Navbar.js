@@ -84,9 +84,8 @@ function AvatarDropdown({ user, logout, isTransparent }) {
 }
 
 // ─── Mobile Side-Panel Drawer ────────────────────────────────────────────────
-function MobileDrawer({ user, logout, isOpen, onClose, navLinks, pathname }) {
+function MobileDrawer({ user, logout, isOpen, onClose, navLinks, publicNavLinks, pathname }) {
   const router = useRouter();
-  const initial = user.name?.charAt(0).toUpperCase() || '?';
 
   useEffect(() => {
     if (isOpen) {
@@ -98,6 +97,9 @@ function MobileDrawer({ user, logout, isOpen, onClose, navLinks, pathname }) {
   }, [isOpen]);
 
   const go = (href) => { onClose(); router.push(href); };
+
+  // Decide which links to show based on auth state
+  const linksToRender = user ? navLinks : publicNavLinks;
 
   return (
     <AnimatePresence>
@@ -139,30 +141,46 @@ function MobileDrawer({ user, logout, isOpen, onClose, navLinks, pathname }) {
               </button>
             </div>
 
-            {/* User profile header */}
-            <div className="px-5 py-4 border-b border-gray-100 bg-gradient-to-br from-[#F0F8FA] to-[#E6F4F8]">
-              <div className="flex items-center gap-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-[#0992C2] to-[#0B2D72] text-white font-black text-lg overflow-hidden flex-shrink-0 shadow-md shadow-[#0992C2]/25">
-                  {user.profilePhoto ? (
-                    <img src={user.profilePhoto} alt={user.name} className="w-full h-full object-cover" />
-                  ) : initial}
-                </div>
-                <div className="min-w-0">
-                  <p className="text-sm font-bold text-neutral-900 truncate">{user.name}</p>
-                  <p className="text-[11px] text-neutral-500 truncate">{user.email}</p>
-                  {user.role && (
-                    <span className="mt-1 inline-block rounded-full bg-[#0992C2]/10 border border-[#0992C2]/30 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-[#0B2D72]">
-                      {user.role.replace('_', ' ')}
-                    </span>
-                  )}
+            {/* Conditional Profile Header */}
+            {user ? (
+              <div className="px-5 py-4 border-b border-gray-100 bg-gradient-to-br from-[#F0F8FA] to-[#E6F4F8]">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-[#0992C2] to-[#0B2D72] text-white font-black text-lg overflow-hidden flex-shrink-0 shadow-md shadow-[#0992C2]/25">
+                    {user.profilePhoto ? (
+                      <img src={user.profilePhoto} alt={user.name} className="w-full h-full object-cover" />
+                    ) : (user.name?.charAt(0).toUpperCase() || '?')}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm font-bold text-neutral-900 truncate">{user.name}</p>
+                    <p className="text-[11px] text-neutral-500 truncate">{user.email}</p>
+                    {user.role && (
+                      <span className="mt-1 inline-block rounded-full bg-[#0992C2]/10 border border-[#0992C2]/30 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-[#0B2D72]">
+                        {user.role.replace('_', ' ')}
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
+            ) : (
+              <div className="px-5 py-6 border-b border-gray-100 bg-gradient-to-br from-[#F0F8FA] to-[#E6F4F8]">
+                <p className="text-lg font-bold text-neutral-900">Welcome to RentifyPro</p>
+                <p className="text-[0.8rem] text-neutral-500 mt-1">Sign in to manage your rentals.</p>
+                <div className="mt-4 flex gap-3">
+                  <button onClick={() => go('/login')} className="flex-1 rounded-xl bg-white px-3 py-2.5 text-[0.8rem] font-bold text-[#0992C2] shadow-sm border border-[#0992C2]/20 hover:bg-gray-50 transition-colors">
+                    Log In
+                  </button>
+                  <button onClick={() => go('/register')} className="flex-1 rounded-xl bg-gradient-to-r from-[#0B2D72] to-[#0992C2] px-3 py-2.5 text-[0.8rem] font-bold text-white shadow-md hover:opacity-90 transition-opacity">
+                    Sign Up
+                  </button>
+                </div>
+              </div>
+            )}
 
             {/* Nav links */}
             <nav className="flex-1 px-4 py-4 space-y-1">
-              {navLinks.map(({ href, label, icon: Icon }) => {
-                const isActive = pathname === href;
+              {linksToRender.map(({ href, label, icon: Icon }) => {
+                // Ensure exact match for root '/' or startsWith for deeper links
+                const isActive = href === '/' ? pathname === '/' : pathname?.startsWith(href);
                 return (
                   <button
                     key={label}
@@ -174,51 +192,61 @@ function MobileDrawer({ user, logout, isOpen, onClose, navLinks, pathname }) {
                   >
                     <span className={`flex h-8 w-8 items-center justify-center rounded-xl border ${isActive ? 'border-[#0992C2] bg-white' : 'border-transparent bg-white/70'
                       }`}>
-                      <Icon className={`h-3.5 w-3.5 ${isActive ? 'text-[#0992C2]' : 'text-neutral-400'}`} />
+                      {Icon ? <Icon className={`h-3.5 w-3.5 ${isActive ? 'text-[#0992C2]' : 'text-neutral-400'}`} /> : <div className="h-3.5 w-3.5 rounded-full bg-neutral-200" />}
                     </span>
                     {label}
                   </button>
                 );
               })}
 
-              {/* Dashboard link for logged-in users */}
-              <button
-                onClick={() => go('/dashboard')}
-                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-2xl text-sm font-semibold transition-all ${pathname?.startsWith('/dashboard')
-                  ? 'bg-[#E6F4F8] text-[#0992C2] shadow-sm'
-                  : 'text-neutral-600 hover:bg-[#F0F8FA] hover:text-neutral-900'
-                  }`}
-              >
-                <span className={`flex h-8 w-8 items-center justify-center rounded-xl border ${pathname?.startsWith('/dashboard') ? 'border-[#0992C2] bg-white' : 'border-transparent bg-white/70'
-                  }`}>
-                  <LayoutDashboard className={`h-3.5 w-3.5 ${pathname?.startsWith('/dashboard') ? 'text-[#0992C2]' : 'text-neutral-400'}`} />
-                </span>
-                Dashboard
-              </button>
+              {/* Logged in exclusive links */}
+              {user && (
+                <>
+                  <button
+                    onClick={() => go('/dashboard')}
+                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-2xl text-sm font-semibold transition-all ${pathname?.startsWith('/dashboard') && !pathname?.includes('/profile')
+                      ? 'bg-[#E6F4F8] text-[#0992C2] shadow-sm'
+                      : 'text-neutral-600 hover:bg-[#F0F8FA] hover:text-neutral-900'
+                      }`}
+                  >
+                    <span className={`flex h-8 w-8 items-center justify-center rounded-xl border ${pathname?.startsWith('/dashboard') && !pathname?.includes('/profile') ? 'border-[#0992C2] bg-white' : 'border-transparent bg-white/70'
+                      }`}>
+                      <LayoutDashboard className={`h-3.5 w-3.5 ${pathname?.startsWith('/dashboard') && !pathname?.includes('/profile') ? 'text-[#0992C2]' : 'text-neutral-400'}`} />
+                    </span>
+                    Dashboard
+                  </button>
 
-              <button
-                onClick={() => go('/dashboard/profile')}
-                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-2xl text-sm font-semibold text-neutral-600 hover:bg-[#F0F8FA] hover:text-neutral-900 transition-all"
-              >
-                <span className="flex h-8 w-8 items-center justify-center rounded-xl border border-transparent bg-white/70">
-                  <Settings className="h-3.5 w-3.5 text-neutral-400" />
-                </span>
-                Profile Settings
-              </button>
+                  <button
+                    onClick={() => go('/dashboard/profile')}
+                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-2xl text-sm font-semibold transition-all ${pathname?.includes('/profile')
+                      ? 'bg-[#E6F4F8] text-[#0992C2] shadow-sm'
+                      : 'text-neutral-600 hover:bg-[#F0F8FA] hover:text-neutral-900'
+                      }`}
+                  >
+                    <span className={`flex h-8 w-8 items-center justify-center rounded-xl border ${pathname?.includes('/profile') ? 'border-[#0992C2] bg-white' : 'border-transparent bg-white/70'
+                      }`}>
+                      <Settings className={`h-3.5 w-3.5 ${pathname?.includes('/profile') ? 'text-[#0992C2]' : 'text-neutral-400'}`} />
+                    </span>
+                    Profile Settings
+                  </button>
+                </>
+              )}
             </nav>
 
-            {/* Footer — logout */}
-            <div className="px-4 pb-6 pt-2 border-t border-gray-100">
-              <button
-                onClick={() => { onClose(); logout(); }}
-                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-2xl text-sm font-semibold text-red-500 hover:bg-red-50 transition-colors"
-              >
-                <span className="flex h-8 w-8 items-center justify-center rounded-xl border border-transparent bg-red-50">
-                  <LogOut className="h-3.5 w-3.5 text-red-400" />
-                </span>
-                Log Out
-              </button>
-            </div>
+            {/* Footer — logout (Only for logged in users) */}
+            {user && (
+              <div className="px-4 pb-6 pt-2 border-t border-gray-100">
+                <button
+                  onClick={() => { onClose(); logout(); }}
+                  className="w-full flex items-center gap-3 px-3 py-2.5 rounded-2xl text-sm font-semibold text-red-500 hover:bg-red-50 transition-colors"
+                >
+                  <span className="flex h-8 w-8 items-center justify-center rounded-xl border border-transparent bg-red-50">
+                    <LogOut className="h-3.5 w-3.5 text-red-400" />
+                  </span>
+                  Log Out
+                </button>
+              </div>
+            )}
           </motion.aside>
         </>
       )}
@@ -253,9 +281,10 @@ export default function Navbar() {
   ];
 
   const publicNavLinks = [
-    { href: '/browse', label: 'Browse' },
-    { href: '/#features', label: 'Features' },
-    { href: '/pricing', label: 'Pricing', icon: Tag },
+    { href: '/', label: 'Home', icon: Home },
+    { href: '/browse', label: 'Browse', icon: Search },
+    { href: '/#features', label: 'Features', icon: Tag },
+    { href: '/pricing', label: 'Pricing', icon: DollarSign },
   ];
 
   return (
@@ -284,7 +313,7 @@ export default function Navbar() {
 
             {/* Desktop nav links */}
             <div className="hidden items-center gap-6 md:flex">
-              {publicNavLinks.map(({ href, label, icon: Icon }) => (
+              {(user ? navLinks : publicNavLinks).map(({ href, label, icon: Icon }) => (
                 <Link
                   key={label}
                   href={href}
@@ -326,7 +355,7 @@ export default function Navbar() {
               <>
                 {/* Desktop: notifications bell */}
                 <Link
-                  href="/dashboard/notifications"
+                  href="/dashboard/messages"
                   className={`hidden md:flex h-9 w-9 items-center justify-center rounded-full transition-all hover:scale-105 ${isTransparent ? 'bg-white/10 text-white hover:bg-white/20' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
                   aria-label="Notifications"
                 >
@@ -335,20 +364,6 @@ export default function Navbar() {
 
                 {/* Desktop: avatar dropdown */}
                 <AvatarDropdown user={user} logout={logout} isTransparent={isTransparent} />
-
-                {/* Mobile: hamburger button (replaces DP button, hidden on dashboard) */}
-                {!isDashboard && (
-                  <button
-                    onClick={() => setMobileOpen(true)}
-                    className={`flex h-9 w-9 items-center justify-center rounded-full transition-all md:hidden ${isTransparent
-                      ? 'bg-white/15 text-white hover:bg-white/25'
-                      : 'bg-[#E6F4F8] text-[#0992C2] hover:bg-[#d0eaf4]'
-                      }`}
-                    aria-label="Open menu"
-                  >
-                    <Menu className="h-4.5 w-4.5" />
-                  </button>
-                )}
               </>
             ) : (
               <>
@@ -361,7 +376,7 @@ export default function Navbar() {
                 </Link>
                 <Link
                   href="/register"
-                  className={`rounded-full border px-4 py-1.5 text-[0.75rem] font-semibold transition-all hover:scale-[1.02] ${isTransparent
+                  className={`hidden sm:inline-flex rounded-full border px-4 py-1.5 text-[0.75rem] font-semibold transition-all hover:scale-[1.02] ${isTransparent
                     ? 'border-white text-white hover:bg-white/10'
                     : 'border-[#0992C2] text-[#0992C2] hover:bg-[#0992C2]/5'
                     }`}
@@ -370,21 +385,34 @@ export default function Navbar() {
                 </Link>
               </>
             )}
+
+            {/* Mobile: hamburger button (shows for BOTH guests and users, hidden on dashboard) */}
+            {!isDashboard && (
+              <button
+                onClick={() => setMobileOpen(true)}
+                className={`flex h-9 w-9 items-center justify-center rounded-full transition-all md:hidden ${isTransparent
+                  ? 'bg-white/15 text-white hover:bg-white/25'
+                  : 'bg-[#E6F4F8] text-[#0992C2] hover:bg-[#d0eaf4]'
+                  }`}
+                aria-label="Open menu"
+              >
+                <Menu className="h-4.5 w-4.5" />
+              </button>
+            )}
           </div>
         </div>
       </nav>
 
-      {/* Mobile side-panel drawer — only rendered when user is logged in */}
-      {user && (
-        <MobileDrawer
-          user={user}
-          logout={logout}
-          isOpen={mobileOpen}
-          onClose={() => setMobileOpen(false)}
-          navLinks={navLinks}
-          pathname={pathname}
-        />
-      )}
+      {/* Mobile side-panel drawer — Render unconditionally to support guests */}
+      <MobileDrawer
+        user={user}
+        logout={logout}
+        isOpen={mobileOpen}
+        onClose={() => setMobileOpen(false)}
+        navLinks={navLinks}
+        publicNavLinks={publicNavLinks}
+        pathname={pathname}
+      />
     </>
   );
 }
