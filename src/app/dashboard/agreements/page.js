@@ -263,6 +263,15 @@ export default function AgreementsPage() {
                         <Download className="h-4 w-4 mr-2" /> PDF
                       </button>
 
+                      {/* View detail */}
+                      <button
+                        onClick={() => router.push(`/dashboard/agreements/${ag._id}`)}
+                        className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-600 bg-white hover:bg-gray-50"
+                        title="View agreement detail"
+                      >
+                        <Eye className="h-4 w-4 mr-2" /> View
+                      </button>
+
                       {/* Version history */}
                       <button
                         onClick={() => router.push(`/dashboard/agreements/${ag._id}/history`)}
