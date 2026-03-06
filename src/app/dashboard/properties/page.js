@@ -16,10 +16,8 @@ function ConfirmModal({ title, description, icon: Icon, iconBg, iconColor, confi
   return (
     <>
       <style>{`
-        .cm-overlay { position:fixed;inset:0;background:rgba(15,23,42,0.55);backdrop-filter:blur(4px);z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px;animation:cmFI .18s ease; }
-        @keyframes cmFI { from{opacity:0}to{opacity:1} }
-        .cm-card { background:white;border-radius:24px;padding:36px 32px;max-width:420px;width:100%;box-shadow:0 24px 80px rgba(15,23,42,.2);animation:cmSU .22s cubic-bezier(.34,1.2,.64,1); }
-        @keyframes cmSU { from{opacity:0;transform:translateY(28px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)} }
+        .cm-overlay { position:fixed;inset:0;background:rgba(15,23,42,0.55);backdrop-filter:blur(4px);z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px; }
+        .cm-card { background:white;border-radius:24px;padding:36px 32px;max-width:420px;width:100%;box-shadow:0 24px 80px rgba(15,23,42,.2); }
       `}</style>
       <div className="cm-overlay" onClick={onCancel}>
         <div className="cm-card" onClick={e => e.stopPropagation()}>
@@ -29,10 +27,10 @@ function ConfirmModal({ title, description, icon: Icon, iconBg, iconColor, confi
           <h2 style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 800, fontSize: '1.3rem', color: '#0F172A', textAlign: 'center', marginBottom: 8, letterSpacing: '-0.02em' }}>{title}</h2>
           <p style={{ textAlign: 'center', color: '#64748B', fontSize: '0.85rem', marginBottom: 24, lineHeight: 1.6 }}>{description}</p>
           <div style={{ display: 'flex', gap: 10 }}>
-            <button onClick={onCancel} disabled={loading} style={{ flex: 1, padding: '12px', border: '1.5px solid #E2E8F0', borderRadius: 12, fontSize: '0.875rem', fontWeight: 700, color: '#64748B', background: 'white', cursor: 'pointer' }}>
+            <button type="button" onClick={onCancel} disabled={loading} style={{ flex: 1, padding: '12px', border: '1.5px solid #E2E8F0', borderRadius: 12, fontSize: '0.875rem', fontWeight: 700, color: '#64748B', background: 'white', cursor: 'pointer' }}>
               Cancel
             </button>
-            <button onClick={onConfirm} disabled={loading} style={{ flex: 1.5, padding: '12px', border: 'none', borderRadius: 12, fontSize: '0.875rem', fontWeight: 700, color: 'white', cursor: loading ? 'not-allowed' : 'pointer', background: confirmBg, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7 }}>
+            <button type="button" onClick={onConfirm} disabled={loading} style={{ flex: 1.5, padding: '12px', border: 'none', borderRadius: 12, fontSize: '0.875rem', fontWeight: 700, color: 'white', cursor: loading ? 'not-allowed' : 'pointer', background: confirmBg, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7 }}>
               {loading ? <Loader2 size={15} className="animate-spin" /> : confirmLabel}
             </button>
           </div>
