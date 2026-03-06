@@ -132,7 +132,7 @@ describe('Profile — Security Tab (2FA)', () => {
         cy.wait('@setup2FA');
 
         cy.get('input[type="text"]').last().type('123456');
-        cy.contains('button', /verify/i).click();
+        cy.contains('button', /confirm & enable/i).click();
         cy.wait('@verify2FA');
         cy.contains(/2fa enabled successfully/i).should('exist');
     });
@@ -179,7 +179,7 @@ describe('Profile — Security Tab (2FA)', () => {
         cy.contains('button', /enable 2fa/i).click();
         cy.wait('@setup2FA');
         cy.get('input[type="text"]').last().type('000000');
-        cy.contains('button', /verify/i).click();
+        cy.contains('button', /confirm & enable/i).click();
         cy.wait('@badVerify');
         cy.contains(/invalid code/i).should('exist');
     });

@@ -142,7 +142,18 @@ function BrowseContent() {
       <div className="sticky top-20 z-40 border-b border-[#0992C2]/15 bg-white/90 backdrop-blur">
         <div className="mx-auto flex max-w-[1600px] flex-wrap items-center gap-3 px-4 py-3 sm:px-6">
           <form
-            onSubmit={e => { e.preventDefault(); setCity(searchInput.trim()); }}
+            onSubmit={e => {
+              e.preventDefault();
+              const term = searchInput.trim();
+              setCity(term);
+              if (term) {
+                const url = new URL(window.location);
+                url.searchParams.set('city', term);
+                window.history.replaceState(null, '', url.pathname + url.search);
+              } else {
+                window.history.replaceState(null, '', '/browse');
+              }
+            }}
             className="flex max-w-xs flex-1 items-center gap-2 rounded-2xl border border-transparent bg-[#0AC4E0]/10 px-3 py-2.5 transition-colors focus-within:border-[#0992C2] focus-within:bg-white"
           >
             <Search size={15} className="flex-shrink-0 text-[#0992C2]" />
@@ -153,9 +164,6 @@ function BrowseContent() {
           <Dropdown label={priceKey === 'Any Price' ? 'Price' : priceKey} value={priceKey} onChange={setPriceKey} wide options={PRICE_RANGES.map(r => ({ label: r.label, value: r.label }))} />
           <Dropdown label={type ? type[0].toUpperCase() + type.slice(1) : 'Type'} value={type} onChange={setType} options={[{ label: 'All Types', value: '' }, ...TYPES.map(t => ({ label: t[0].toUpperCase() + t.slice(1), value: t }))]} />
           <Dropdown label={beds ? `${beds} Beds` : 'Beds'} value={beds} onChange={setBeds} options={[{ label: 'Any Beds', value: '' }, ...BEDS.map(b => ({ label: `${b} bed${b === '1' ? '' : 's'}`, value: b }))]} />
-          <button className="flex items-center gap-2 rounded-2xl border border-[#0992C2]/20 bg-white px-4 py-2 text-sm font-semibold text-neutral-700 transition-all hover:border-[#0992C2]/40 hover:bg-[#F0F8FA]">
-            <SlidersHorizontal size={14} /> Filters
-          </button>
           <div className="ml-auto flex items-center gap-4 flex-shrink-0">
             {!loading && <p className="whitespace-nowrap text-sm font-medium text-neutral-500"><span className="font-bold text-neutral-900">{total.toLocaleString()}</span> listings</p>}
             <Dropdown label={<span className="flex items-center gap-1.5"><ArrowUpDown size={13} /> {sort}</span>} value={sort} onChange={setSort} wide options={SORTS.map(s => ({ label: s, value: s }))} />
