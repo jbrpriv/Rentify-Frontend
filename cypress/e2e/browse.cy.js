@@ -139,8 +139,8 @@ describe('Browse — Listings Page', () => {
     });
 
     it('clicking Clear Filters resets the city input', () => {
-        cy.intercept('GET', '/api/listings*city=XYZ*', { statusCode: 200, body: [] }).as('noResults');
         cy.intercept('GET', '/api/listings*', { statusCode: 200, body: mockListings }).as('reloaded');
+        cy.intercept('GET', '/api/listings*city=XYZ*', { statusCode: 200, body: [] }).as('noResults');
 
         // Target the correct form input
         cy.get('input[placeholder*="City or address"]').clear().type('XYZ{enter}');

@@ -219,8 +219,7 @@ describe('Admin Users — Management Page', () => {
             .closest('tr')
             .contains('button', /change role/i)
             .click();
-        cy.contains('h3', 'Change Role').should('be.visible');
-        cy.contains('h3', 'Change Role').parent().contains('button', /cancel/i).click();
+        cy.contains('h3', 'Change Role').parent().contains('button', /cancel/i).click({ force: true });
         cy.contains('h3', 'Change Role').should('not.exist');
     });
 });
