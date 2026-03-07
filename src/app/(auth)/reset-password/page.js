@@ -4,40 +4,43 @@ import { useState, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import api from '@/utils/api';
 import Link from 'next/link';
-import { Lock, Eye, EyeOff, Loader2, CheckCircle, XCircle, ShieldCheck } from 'lucide-react';
-
-// ─── Password strength helper ──────────────────────────────────────────────────
-function getStrength(pwd) {
-  if (pwd.length >= 8 && /[A-Z]/.test(pwd) && /[0-9]/.test(pwd)) return 'strong';
-  if (pwd.length >= 6) return 'medium';
-  return 'weak';
-}
-
-const STRENGTH_META = {
-  weak:   { label: 'Weak',   bar: 'w-1/3',  color: 'bg-red-400',    text: 'text-red-500'   },
-  medium: { label: 'Medium', bar: 'w-2/3',  color: 'bg-amber-400',  text: 'text-amber-600' },
-  strong: { label: 'Strong', bar: 'w-full', color: 'bg-green-500',  text: 'text-green-600' },
-};
+import { Lock, Eye, EyeOff, Loader2, CheckCircle, XCircle, ArrowLeft, ShieldCheck } from 'lucide-react';
+import Button from '@/components/ui/Button';
+import TextField from '@/components/ui/TextField';
 
 function ResetPasswordContent() {
   const searchParams = useSearchParams();
-  const router       = useRouter();
-  const token        = searchParams.get('token');
+  const router = useRouter();
+  const token = searchParams.get('token');
 
-  const [password,  setPassword]  = useState('');
-  const [confirm,   setConfirm]   = useState('');
-  const [showPwd,   setShowPwd]   = useState(false);
-  const [loading,   setLoading]   = useState(false);
-  const [success,   setSuccess]   = useState(false);
-  const [error,     setError]     = useState('');
+  const [password, setPassword] = useState('');
+  const [confirm, setConfirm] = useState('');
+  const [showPwd, setShowPwd] = useState(false);
+  const [showCfm, setShowCfm] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [error, setError] = useState('');
 
-  const strength = getStrength(password);
-  const sm       = STRENGTH_META[strength];
+  const strength = password.length >= 8 && /[A-Z]/.test(password) && /[0-9]/.test(password)
+    ? 'strong' : password.length >= 6 ? 'medium' : 'weak';
+
+  const strengthConfig = {
+    weak: { width: 'w-1/3', color: 'bg-red-500', text: 'text-red-400', label: 'Weak' },
+    medium: { width: 'w-2/3', color: 'bg-amber-400', text: 'text-amber-400', label: 'Medium' },
+    strong: { width: 'w-full', color: 'bg-emerald-500', text: 'text-emerald-400', label: 'Strong' },
+  };
+  const sc = strengthConfig[strength];
+
+  const requirements = [
+    { label: 'At least 8 characters', met: password.length >= 8 },
+    { label: 'One uppercase letter', met: /[A-Z]/.test(password) },
+    { label: 'One number', met: /[0-9]/.test(password) },
+  ];
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (password !== confirm) return setError('Passwords do not match.');
-    if (password.length < 8)  return setError('Password must be at least 8 characters.');
+    if (password !== confirm) return setError('Passwords do not match');
+    if (password.length < 8) return setError('Password must be at least 8 characters');
     setLoading(true);
     setError('');
     try {
@@ -45,179 +48,246 @@ function ResetPasswordContent() {
       setSuccess(true);
       setTimeout(() => router.push('/login'), 3000);
     } catch (err) {
-      setError(err.response?.data?.message || 'Reset failed. The link may have expired.');
+      setError(err.response?.data?.message || 'Reset failed. Link may have expired.');
     } finally {
       setLoading(false);
     }
   };
 
-  // ── Shared card wrapper ────────────────────────────────────────────────────
-  const Card = ({ children }) => (
-    <div
-      className="min-h-screen flex items-center justify-center p-4"
-      style={{
-        background: 'linear-gradient(135deg, #0B2D72 0%, #0992C2 60%, #0AC4E0 100%)',
-      }}
-    >
-      <div className="w-full max-w-md">
-        {/* Brand header */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-white/15 backdrop-blur mb-4">
-            <ShieldCheck className="w-7 h-7 text-white" />
+  // ── Invalid / missing token state ────────────────────────────────────────────
+  if (!token) return (
+    <div className="flex min-h-screen flex-col bg-transparent">
+      <div className="flex flex-1 items-center justify-center px-4 py-16">
+        <div className="rf-glass-dark rf-fade-in-up w-full max-w-md px-8 py-10 text-center">
+          <div className="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-red-900/40 border border-red-700/40">
+            <XCircle className="h-7 w-7 text-red-400" />
           </div>
-          <h1 className="text-2xl font-black text-white tracking-tight">RentifyPro</h1>
-          <p className="text-blue-200/80 text-sm mt-1">Secure password reset</p>
-        </div>
-
-        {/* Main card */}
-        <div className="bg-white rounded-3xl shadow-2xl p-8">
-          {children}
+          <h1 className="text-h2 bg-gradient-to-r from-slate-50 via-red-200 to-slate-300 bg-clip-text text-transparent mb-3">
+            Invalid Link
+          </h1>
+          <p className="text-sm text-slate-400 mb-8">
+            This password reset link is missing or malformed. Request a new one below.
+          </p>
+          <Button
+            as={Link}
+            href="/forgot-password"
+            variant="primary"
+            className="w-full justify-center rounded-2xl py-3.5"
+          >
+            Request New Link
+          </Button>
+          <Link href="/login" className="mt-4 inline-flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-300 transition-colors">
+            <ArrowLeft className="h-3 w-3" /> Back to login
+          </Link>
         </div>
       </div>
     </div>
   );
 
-  // ── Invalid token ──────────────────────────────────────────────────────────
-  if (!token) return (
-    <Card>
-      <div className="text-center">
-        <div className="w-14 h-14 rounded-2xl bg-red-50 flex items-center justify-center mx-auto mb-5">
-          <XCircle className="w-7 h-7 text-red-600" />
-        </div>
-        <h2 className="text-2xl font-black text-gray-900 tracking-tighter mb-2">Invalid Link</h2>
-        <p className="text-gray-500 text-sm mb-6">
-          This reset link is missing or malformed. Please request a new one.
-        </p>
-        <Link
-          href="/forgot-password"
-          className="block w-full text-center py-3.5 rounded-2xl bg-[#0992C2] hover:bg-[#0B2D72] text-white text-sm font-black transition-colors"
-        >
-          Request New Link
-        </Link>
-      </div>
-    </Card>
-  );
-
   return (
-    <Card>
-      {!success ? (
-        <>
-          <div className="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center mb-5">
-            <Lock className="w-6 h-6 text-[#0992C2]" />
-          </div>
-          <h2 className="text-2xl font-black text-gray-900 tracking-tighter mb-1">Set New Password</h2>
-          <p className="text-gray-400 text-sm mb-7">
-            Choose a strong password — at least 8 characters, one uppercase letter, and one number.
-          </p>
+    <div className="flex min-h-screen flex-col bg-transparent">
+      <div className="flex flex-1 items-center justify-center px-4 py-16 sm:px-8">
+        <div className="mx-auto grid w-full max-w-6xl items-center gap-10 md:grid-cols-2 lg:gap-16">
 
-          <form onSubmit={handleSubmit} className="space-y-5">
-            {/* New password */}
-            <div>
-              <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">
-                New Password
-              </label>
-              <div className="relative">
-                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-300" />
-                <input
-                  type={showPwd ? 'text' : 'password'}
-                  required
-                  value={password}
-                  onChange={e => setPassword(e.target.value)}
-                  placeholder="Min. 8 characters"
-                  className="w-full pl-10 pr-11 py-3 border border-gray-200 rounded-2xl text-sm font-medium bg-gray-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#0992C2]/20 focus:border-[#0992C2] transition-all placeholder:text-gray-300"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPwd(v => !v)}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                >
-                  {showPwd ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </button>
-              </div>
+          {/* ── Left: brand story ──────────────────────────────────────────── */}
+          <div className="hidden md:block">
+            <Link href="/login" className="inline-flex items-center gap-1.5 text-[0.75rem] font-semibold text-neutral-500 hover:text-neutral-700 transition-colors mb-8">
+              <ArrowLeft className="h-3.5 w-3.5" /> Back to login
+            </Link>
+            <div className="inline-flex items-center gap-2 rounded-full border border-[#0992C2]/30 bg-white/80 px-3 py-1 text-[0.7rem] font-semibold uppercase tracking-[0.25em] text-neutral-500 shadow-sm shadow-[#0992C2]/20 backdrop-blur-sm">
+              <span className="h-1.5 w-1.5 rounded-full bg-[#0992C2]" />
+              Account security
+            </div>
+            <h1 className="mt-6 text-hero text-left text-neutral-900">
+              Set a new<br />
+              <span className="bg-gradient-to-r from-[#0B2D72] via-[#0992C2] to-[#0AC4E0] bg-clip-text text-transparent">
+                secure password.
+              </span>
+            </h1>
+            <p className="mt-4 max-w-md text-[0.98rem] leading-relaxed text-neutral-600">
+              Choose a strong password to keep your RentifyPro account safe.
+              You'll be signed in automatically after resetting.
+            </p>
 
-              {/* Strength bar */}
-              {password && (
-                <div className="mt-2.5">
-                  <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                    <div className={`h-full rounded-full transition-all ${sm.color} ${sm.bar}`} />
-                  </div>
-                  <p className={`text-xs mt-1 font-semibold ${sm.text}`}>{sm.label} password</p>
+            {/* Password tips */}
+            <div className="mt-8 max-w-md space-y-3">
+              <p className="text-[0.7rem] font-semibold uppercase tracking-[0.2em] text-neutral-500">Password tips</p>
+              {[
+                'Use a mix of uppercase letters, numbers, and symbols',
+                'Avoid reusing passwords from other accounts',
+                'A passphrase of 3+ random words works great too',
+              ].map((tip) => (
+                <div key={tip} className="rf-card-soft flex items-start gap-3 p-3.5">
+                  <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-[#0992C2]" />
+                  <p className="text-[0.8rem] text-neutral-600">{tip}</p>
                 </div>
-              )}
+              ))}
             </div>
+          </div>
 
-            {/* Confirm password */}
-            <div>
-              <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">
-                Confirm Password
-              </label>
-              <div className="relative">
-                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-300" />
-                <input
-                  type="password"
-                  required
-                  value={confirm}
-                  onChange={e => setConfirm(e.target.value)}
-                  placeholder="Repeat password"
-                  className={`w-full pl-10 pr-4 py-3 border rounded-2xl text-sm font-medium bg-gray-50/50 focus:bg-white focus:outline-none focus:ring-2 transition-all placeholder:text-gray-300 ${
-                    confirm && confirm !== password
-                      ? 'border-red-300 focus:ring-red-200 focus:border-red-400'
-                      : 'border-gray-200 focus:ring-[#0992C2]/20 focus:border-[#0992C2]'
-                  }`}
-                />
-              </div>
-              {confirm && confirm !== password && (
-                <p className="text-red-500 text-xs mt-1 font-medium">Passwords don&apos;t match</p>
-              )}
-            </div>
+          {/* ── Right: reset card ─────────────────────────────────────────── */}
+          <div className="rf-glass-dark rf-fade-in-up w-full max-w-md md:justify-self-end px-8 py-9">
 
-            {error && (
-              <div className="flex items-center gap-2 bg-red-50 border border-red-100 rounded-2xl px-4 py-3">
-                <XCircle className="w-4 h-4 text-red-500 shrink-0" />
-                <p className="text-red-600 text-sm font-medium">{error}</p>
+            {/* Mobile back link */}
+            <Link href="/login" className="inline-flex items-center gap-1.5 text-[0.72rem] font-semibold text-slate-500 hover:text-slate-300 transition-colors mb-6 md:hidden">
+              <ArrowLeft className="h-3 w-3" /> Back to login
+            </Link>
+
+            {!success ? (
+              <>
+                {/* Header */}
+                <div className="mb-8">
+                  <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-2xl bg-sky-900/40 border border-sky-700/40">
+                    <Lock className="h-6 w-6 text-sky-300" />
+                  </div>
+                  <p className="text-micro text-slate-400">Password reset</p>
+                  <h2 className="text-h2 mt-1 bg-gradient-to-r from-slate-50 via-sky-100 to-slate-200 bg-clip-text text-transparent">
+                    Set new password
+                  </h2>
+                  <p className="mt-2 text-xs text-slate-400">
+                    Must be at least 8 characters with one uppercase letter and one number.
+                  </p>
+                </div>
+
+                {/* Error */}
+                {error && (
+                  <div className="mb-6 rounded-xl border border-red-500/50 bg-red-950/60 px-4 py-3 text-xs text-red-100">
+                    {error}
+                  </div>
+                )}
+
+                <form onSubmit={handleSubmit} className="space-y-5">
+                  {/* New Password */}
+                  <div className="space-y-1.5">
+                    <label className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">
+                      New Password
+                    </label>
+                    <div className="relative">
+                      <TextField
+                        type={showPwd ? 'text' : 'password'}
+                        required
+                        value={password}
+                        onChange={e => setPassword(e.target.value)}
+                        placeholder="Min. 8 characters"
+                        leadingIcon={Lock}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPwd(v => !v)}
+                        className="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-500 hover:text-slate-200 transition"
+                      >
+                        {showPwd ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
+
+                    {/* Strength bar */}
+                    {password && (
+                      <div className="pt-1 space-y-2">
+                        <div className="h-1.5 w-full rounded-full bg-slate-800 overflow-hidden">
+                          <div className={`h-full rounded-full transition-all duration-300 ${sc.color} ${sc.width}`} />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <p className={`text-[10px] font-semibold uppercase tracking-wider ${sc.text}`}>
+                            {sc.label} password
+                          </p>
+                          <div className="flex items-center gap-3">
+                            {requirements.map(r => (
+                              <span key={r.label} className={`text-[9px] flex items-center gap-1 ${r.met ? 'text-emerald-400' : 'text-slate-600'}`}>
+                                <span className={`inline-block h-1.5 w-1.5 rounded-full ${r.met ? 'bg-emerald-400' : 'bg-slate-700'}`} />
+                                {r.label}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Confirm Password */}
+                  <div className="space-y-1.5">
+                    <label className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">
+                      Confirm Password
+                    </label>
+                    <div className="relative">
+                      <TextField
+                        type={showCfm ? 'text' : 'password'}
+                        required
+                        value={confirm}
+                        onChange={e => setConfirm(e.target.value)}
+                        placeholder="Repeat your password"
+                        leadingIcon={Lock}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowCfm(v => !v)}
+                        className="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-500 hover:text-slate-200 transition"
+                      >
+                        {showCfm ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
+                    {confirm && confirm !== password && (
+                      <p className="text-[11px] text-red-400 font-medium">Passwords don't match</p>
+                    )}
+                    {confirm && confirm === password && password.length >= 8 && (
+                      <p className="text-[11px] text-emerald-400 font-medium flex items-center gap-1">
+                        <CheckCircle className="h-3 w-3" /> Passwords match
+                      </p>
+                    )}
+                  </div>
+
+                  <Button
+                    type="submit"
+                    variant="primary"
+                    disabled={loading || (confirm.length > 0 && confirm !== password)}
+                    className="mt-2 w-full justify-center rounded-2xl py-3.5"
+                  >
+                    {loading
+                      ? <><Loader2 className="h-4 w-4 animate-spin" />Resetting…</>
+                      : 'Reset Password'}
+                  </Button>
+                </form>
+
+                <p className="mt-6 text-center text-xs text-slate-500">
+                  Remembered it?{' '}
+                  <Link href="/login" className="font-semibold text-sky-300 hover:text-sky-200">
+                    Sign in
+                  </Link>
+                </p>
+              </>
+            ) : (
+              /* ── Success state ─────────────────────────────────────────── */
+              <div className="rf-fade-in-up py-4 text-center">
+                <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-900/40 border border-emerald-700/40">
+                  <CheckCircle className="h-8 w-8 text-emerald-400" />
+                </div>
+                <h2 className="text-h2 bg-gradient-to-r from-emerald-200 via-slate-50 to-slate-200 bg-clip-text text-transparent mb-3">
+                  Password reset!
+                </h2>
+                <p className="text-sm text-slate-400 mb-2">
+                  Your password has been updated successfully.
+                </p>
+                <p className="text-xs text-slate-500">
+                  Redirecting you to login in 3 seconds…
+                </p>
+                <div className="mt-6 h-1 w-full rounded-full bg-slate-800 overflow-hidden">
+                  <div className="h-full bg-gradient-to-r from-[#0992C2] to-[#0AC4E0] animate-[progress_3s_linear_forwards]" />
+                </div>
               </div>
             )}
-
-            <button
-              type="submit"
-              disabled={loading || !!(confirm && confirm !== password)}
-              className="w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-[#0992C2] hover:bg-[#0B2D72] disabled:bg-gray-300 text-white text-sm font-black transition-colors"
-            >
-              {loading ? <Loader2 className="animate-spin w-4 h-4" /> : <Lock className="w-4 h-4" />}
-              {loading ? 'Resetting…' : 'Reset Password'}
-            </button>
-          </form>
-
-          <p className="text-center text-xs text-gray-400 mt-6">
-            Remember it?{' '}
-            <Link href="/login" className="text-[#0992C2] font-semibold hover:underline">
-              Sign in
-            </Link>
-          </p>
-        </>
-      ) : (
-        <div className="text-center py-4">
-          <div className="w-14 h-14 rounded-2xl bg-green-50 flex items-center justify-center mx-auto mb-5">
-            <CheckCircle className="w-7 h-7 text-green-600" />
           </div>
-          <h2 className="text-2xl font-black text-gray-900 tracking-tighter mb-2">Password Reset!</h2>
-          <p className="text-gray-500 text-sm mb-1">Your password has been updated successfully.</p>
-          <p className="text-xs text-gray-400">Redirecting to login in 3 seconds…</p>
         </div>
-      )}
-    </Card>
+      </div>
+    </div>
   );
 }
 
 export default function ResetPasswordPage() {
   return (
-    <Suspense
-      fallback={
-        <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #0B2D72 0%, #0992C2 60%, #0AC4E0 100%)' }}>
-          <Loader2 className="w-7 h-7 animate-spin text-white" />
-        </div>
-      }
-    >
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="w-6 h-6 animate-spin text-sky-400" />
+      </div>
+    }>
       <ResetPasswordContent />
     </Suspense>
   );
