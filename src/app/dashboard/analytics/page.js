@@ -1,13 +1,14 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import api from '@/utils/api';
 import { useUser } from '@/context/UserContext';
+import { useToast } from '@/context/ToastContext';
 import {
   TrendingUp, Building2, CreditCard, AlertCircle, CheckCircle,
   Clock, Users, FileText, Wrench, Scale, Zap, BarChart2,
-  ArrowUpRight, ArrowDownRight, Calendar, Loader2,
+  ArrowUpRight, ArrowDownRight, Calendar, Loader2, Download,
 } from 'lucide-react';
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
@@ -16,7 +17,7 @@ import {
 
 // ─── Palette ──────────────────────────────────────────────────────────────────
 const COLORS = ['#0B2D72', '#0992C2', '#0AC4E0', '#F59E0B', '#10B981', '#EF4444'];
-const MONTH_NAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 function fmtMonth({ year, month }) {
@@ -66,29 +67,79 @@ function Skeleton() {
       <div className="space-y-6">
         <div className="sk h-9 w-64" />
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          {[...Array(4)].map((_,i) => <div key={i} className="bg-white rounded-2xl border border-gray-100 p-5"><div className="sk h-10 w-10 rounded-xl mb-3" /><div className="sk h-3 w-20 mb-2" /><div className="sk h-8 w-28" /></div>)}
+          {[...Array(4)].map((_, i) => <div key={i} className="bg-white rounded-2xl border border-gray-100 p-5"><div className="sk h-10 w-10 rounded-xl mb-3" /><div className="sk h-3 w-20 mb-2" /><div className="sk h-8 w-28" /></div>)}
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          {[...Array(2)].map((_,i) => <div key={i} className="bg-white rounded-2xl border border-gray-100 p-6"><div className="sk h-4 w-32 mb-5" /><div className="sk h-48 w-full" /></div>)}
+          {[...Array(2)].map((_, i) => <div key={i} className="bg-white rounded-2xl border border-gray-100 p-6"><div className="sk h-4 w-32 mb-5" /><div className="sk h-48 w-full" /></div>)}
         </div>
       </div>
     </>
   );
 }
 
+const PAYMENT_STATUS = {
+  paid: { label: 'Paid', color: 'bg-green-100 text-green-700' },
+  pending: { label: 'Pending', color: 'bg-blue-100 text-blue-700' },
+  failed: { label: 'Failed', color: 'bg-red-100 text-red-700' },
+  retry_scheduled: { label: 'Retrying', color: 'bg-orange-100 text-orange-700' },
+};
+
 // ─── LANDLORD VIEW ────────────────────────────────────────────────────────────
 function LandlordAnalytics({ data }) {
+  const { toast } = useToast();
   const { monthlyRevenue, paymentHealth, lateFeeCollected, occupancy,
-          expiringLeases, agreementStatus, lifetimeRevenue, activeTenantsCount } = data;
+    expiringLeases, agreementStatus, lifetimeRevenue, activeTenantsCount } = data;
+
+  const [recentPayments, setRecentPayments] = useState([]);
+  const [paymentsLoading, setPaymentsLoading] = useState(true);
+  const [tenantFilter, setTenantFilter] = useState('');
+  const [downloading, setDownloading] = useState(null);
+
+  useEffect(() => {
+    api.get('/payments/history?limit=20&status=paid')
+      .then(({ data: d }) => setRecentPayments(d.payments || []))
+      .catch(() => { })
+      .finally(() => setPaymentsLoading(false));
+  }, []);
+
+  const handleDownloadReceipt = useCallback(async (paymentId) => {
+    setDownloading(paymentId);
+    try {
+      const { data: d } = await api.get(`/payments/${paymentId}/receipt`);
+      if (d.url) {
+        window.open(d.url, '_blank', 'noopener,noreferrer');
+      }
+    } catch {
+      // Fallback: blob download
+      try {
+        const response = await api.get(`/payments/${paymentId}/receipt`, { responseType: 'blob' });
+        const url = URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }));
+        const a = document.createElement('a');
+        a.href = url; a.download = `receipt-${paymentId}.pdf`; a.click();
+        URL.revokeObjectURL(url);
+      } catch {
+        toast('Failed to download receipt', 'error');
+      }
+    } finally {
+      setDownloading(null);
+    }
+  }, [toast]);
+
+  const filteredPayments = tenantFilter.trim()
+    ? recentPayments.filter(p =>
+      p.tenant?.name?.toLowerCase().includes(tenantFilter.toLowerCase()) ||
+      p.tenant?.email?.toLowerCase().includes(tenantFilter.toLowerCase())
+    )
+    : recentPayments;
 
   const revenueChartData = monthlyRevenue.map(m => ({
-    name:  fmtMonth(m._id),
+    name: fmtMonth(m._id),
     Revenue: m.total,
     'Late Fees': m.lateFeeTotal,
   }));
 
   const healthData = [
-    { name: 'Paid',    value: paymentHealth.paid,    color: '#10B981' },
+    { name: 'Paid', value: paymentHealth.paid, color: '#10B981' },
     { name: 'Pending', value: paymentHealth.pending, color: '#0992C2' },
     { name: 'Overdue', value: paymentHealth.overdue, color: '#EF4444' },
   ].filter(d => d.value > 0);
@@ -107,15 +158,15 @@ function LandlordAnalytics({ data }) {
       <div>
         <SectionTitle>Portfolio Overview</SectionTitle>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <KpiCard label="Lifetime Revenue"   value={`Rs. ${lifetimeRevenue.toLocaleString()}`}   icon={TrendingUp}  color="text-blue-600"   bg="bg-blue-50" />
-          <KpiCard label="Active Tenants"      value={activeTenantsCount}                           icon={Users}       color="text-cyan-600"   bg="bg-cyan-50" />
-          <KpiCard label="Occupancy Rate"      value={`${occupancyPct}%`}
+          <KpiCard label="Lifetime Revenue" value={`Rs. ${lifetimeRevenue.toLocaleString()}`} icon={TrendingUp} color="text-blue-600" bg="bg-blue-50" />
+          <KpiCard label="Active Tenants" value={activeTenantsCount} icon={Users} color="text-cyan-600" bg="bg-cyan-50" />
+          <KpiCard label="Occupancy Rate" value={`${occupancyPct}%`}
             sub={`${occupancy.leased} / ${occupancy.total} units`}
             icon={Building2}
             color={occupancyPct >= 75 ? 'text-green-600' : 'text-orange-500'}
             bg={occupancyPct >= 75 ? 'bg-green-50' : 'bg-orange-50'}
           />
-          <KpiCard label="Late Fees Collected" value={`Rs. ${lateFeeCollected.toLocaleString()}`} icon={AlertCircle}  color="text-orange-600" bg="bg-orange-50" />
+          <KpiCard label="Late Fees Collected" value={`Rs. ${lateFeeCollected.toLocaleString()}`} icon={AlertCircle} color="text-orange-600" bg="bg-orange-50" />
         </div>
       </div>
 
@@ -126,11 +177,11 @@ function LandlordAnalytics({ data }) {
             <BarChart data={revenueChartData} barSize={20}>
               <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
               <XAxis dataKey="name" tick={{ fontSize: 11 }} />
-              <YAxis tick={{ fontSize: 11 }} tickFormatter={v => `${(v/1000).toFixed(0)}k`} />
+              <YAxis tick={{ fontSize: 11 }} tickFormatter={v => `${(v / 1000).toFixed(0)}k`} />
               <Tooltip formatter={v => `Rs. ${v.toLocaleString()}`} />
               <Legend wrapperStyle={{ fontSize: 11 }} />
-              <Bar dataKey="Revenue"    fill="#0B2D72" radius={[4,4,0,0]} />
-              <Bar dataKey="Late Fees"  fill="#F59E0B" radius={[4,4,0,0]} />
+              <Bar dataKey="Revenue" fill="#0B2D72" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="Late Fees" fill="#F59E0B" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </ChartCard>
@@ -178,7 +229,7 @@ function LandlordAnalytics({ data }) {
               <XAxis type="number" tick={{ fontSize: 11 }} />
               <YAxis type="category" dataKey="name" tick={{ fontSize: 11 }} width={80} />
               <Tooltip />
-              <Bar dataKey="value" radius={[0,4,4,0]}>
+              <Bar dataKey="value" radius={[0, 4, 4, 0]}>
                 {statusData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
               </Bar>
             </BarChart>
@@ -213,6 +264,93 @@ function LandlordAnalytics({ data }) {
           )}
         </ChartCard>
       </div>
+
+      {/* ── Recent Payments ─────────────────────────────────────────────── */}
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+        <div className="flex items-center justify-between mb-5">
+          <p className="text-sm font-black text-gray-800 uppercase tracking-wider">Recent Payments</p>
+          <input
+            type="text"
+            placeholder="Filter by tenant name or email…"
+            value={tenantFilter}
+            onChange={e => setTenantFilter(e.target.value)}
+            className="text-xs border border-gray-200 rounded-xl px-3 py-2 w-56 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+
+        {paymentsLoading ? (
+          <div className="flex justify-center py-8">
+            <Loader2 className="animate-spin w-6 h-6 text-blue-500" />
+          </div>
+        ) : filteredPayments.length === 0 ? (
+          <p className="text-sm text-gray-400 text-center py-8">No payments found</p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-gray-100">
+                  {['Tenant', 'Property', 'Type', 'Amount', 'Date', 'Status', 'Receipt'].map(h => (
+                    <th key={h} className="text-left text-[10px] font-black uppercase tracking-widest text-gray-400 pb-3 pr-4">{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {filteredPayments.map((p, i) => {
+                  const st = PAYMENT_STATUS[p.status] || PAYMENT_STATUS.pending;
+                  return (
+                    <tr key={p._id} className={`border-b border-gray-50 hover:bg-gray-50 transition ${i % 2 === 0 ? '' : 'bg-gray-50/50'}`}>
+                      <td className="py-3 pr-4">
+                        <p className="font-semibold text-gray-900 text-xs">{p.tenant?.name || '—'}</p>
+                        <p className="text-[10px] text-gray-400">{p.tenant?.email || '—'}</p>
+                      </td>
+                      <td className="py-3 pr-4 text-xs text-gray-600 max-w-[140px] truncate">
+                        {p.property?.title || '—'}
+                      </td>
+                      <td className="py-3 pr-4">
+                        <span className="text-[10px] font-bold uppercase px-2 py-1 rounded-full bg-gray-100 text-gray-600">
+                          {(p.type || '—').replace('_', ' ')}
+                        </span>
+                      </td>
+                      <td className="py-3 pr-4 font-black text-gray-900 text-xs whitespace-nowrap">
+                        Rs. {Number(p.amount).toLocaleString()}
+                        {p.lateFeeIncluded && p.lateFeeAmount > 0 && (
+                          <span className="block text-[10px] font-normal text-orange-500">
+                            +Rs. {Number(p.lateFeeAmount).toLocaleString()} late fee
+                          </span>
+                        )}
+                      </td>
+                      <td className="py-3 pr-4 text-xs text-gray-500 whitespace-nowrap">
+                        {p.paidAt ? new Date(p.paidAt).toLocaleDateString('en-PK') : '—'}
+                      </td>
+                      <td className="py-3 pr-4">
+                        <span className={`text-[10px] font-black uppercase px-2 py-1 rounded-full ${st.color}`}>
+                          {st.label}
+                        </span>
+                      </td>
+                      <td className="py-3">
+                        {p.status === 'paid' ? (
+                          <button
+                            onClick={() => handleDownloadReceipt(p._id)}
+                            disabled={downloading === p._id}
+                            className="flex items-center gap-1 text-[10px] font-black uppercase px-2.5 py-1.5 rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 disabled:opacity-50 transition whitespace-nowrap"
+                          >
+                            {downloading === p._id
+                              ? <Loader2 className="w-3 h-3 animate-spin" />
+                              : <Download className="w-3 h-3" />}
+                            {downloading === p._id ? 'Downloading…' : 'Receipt'}
+                          </button>
+                        ) : (
+                          <span className="text-[10px] text-gray-300">—</span>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
@@ -220,22 +358,22 @@ function LandlordAnalytics({ data }) {
 // ─── ADMIN VIEW ───────────────────────────────────────────────────────────────
 function AdminAnalytics({ data, templateData }) {
   const { monthlyRentRevenue, totalRentRevenue, revenueByGateway,
-          churnRate, expiredLast6, createdLast6, userGrowth,
-          disputeStats, maintenanceStats } = data;
+    churnRate, expiredLast6, createdLast6, userGrowth,
+    disputeStats, maintenanceStats } = data;
 
   const revenueChartData = monthlyRentRevenue.map(m => ({
-    name:  fmtMonth(m._id),
+    name: fmtMonth(m._id),
     Revenue: m.total,
     Payments: m.count,
   }));
 
   const userGrowthData = userGrowth.map(m => ({
-    name:  fmtMonth(m._id),
+    name: fmtMonth(m._id),
     Users: m.count,
   }));
 
   const gatewayData = revenueByGateway.map(g => ({
-    name:  (g._id || 'unknown').charAt(0).toUpperCase() + (g._id || 'unknown').slice(1),
+    name: (g._id || 'unknown').charAt(0).toUpperCase() + (g._id || 'unknown').slice(1),
     value: g.total,
     count: g.count,
   }));
@@ -298,9 +436,9 @@ function AdminAnalytics({ data, templateData }) {
             <BarChart data={revenueChartData} barSize={20}>
               <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
               <XAxis dataKey="name" tick={{ fontSize: 11 }} />
-              <YAxis tick={{ fontSize: 11 }} tickFormatter={v => `${(v/1000).toFixed(0)}k`} />
+              <YAxis tick={{ fontSize: 11 }} tickFormatter={v => `${(v / 1000).toFixed(0)}k`} />
               <Tooltip formatter={(v, n) => n === 'Revenue' ? `Rs. ${v.toLocaleString()}` : v} />
-              <Bar dataKey="Revenue" fill="#0B2D72" radius={[4,4,0,0]} />
+              <Bar dataKey="Revenue" fill="#0B2D72" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </ChartCard>
@@ -346,7 +484,7 @@ function AdminAnalytics({ data, templateData }) {
                         <span className="font-black text-gray-900">{d.value}</span>
                       </div>
                       <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                        <div className="h-full rounded-full" style={{ width: `${Math.min(100, d.value / Math.max(...disputeData.map(x=>x.value)) * 100)}%`, background: COLORS[i % COLORS.length] }} />
+                        <div className="h-full rounded-full" style={{ width: `${Math.min(100, d.value / Math.max(...disputeData.map(x => x.value)) * 100)}%`, background: COLORS[i % COLORS.length] }} />
                       </div>
                     </div>
                   </div>
@@ -370,7 +508,7 @@ function AdminAnalytics({ data, templateData }) {
                         <span className="font-black text-gray-900">{d.value}</span>
                       </div>
                       <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                        <div className="h-full rounded-full" style={{ width: `${Math.min(100, d.value / Math.max(...maintenanceData.map(x=>x.value)) * 100)}%`, background: COLORS[i % COLORS.length] }} />
+                        <div className="h-full rounded-full" style={{ width: `${Math.min(100, d.value / Math.max(...maintenanceData.map(x => x.value)) * 100)}%`, background: COLORS[i % COLORS.length] }} />
                       </div>
                     </div>
                   </div>
@@ -413,12 +551,12 @@ function AdminAnalytics({ data, templateData }) {
 
 // ─── PAGE ─────────────────────────────────────────────────────────────────────
 export default function AnalyticsPage() {
-  const router     = useRouter();
-  const { user }   = useUser();
-  const [data, setData]             = useState(null);
+  const router = useRouter();
+  const { user } = useUser();
+  const [data, setData] = useState(null);
   const [templateData, setTemplate] = useState(null);
-  const [loading, setLoading]       = useState(true);
-  const [error, setError]           = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     if (!user) { router.push('/login'); return; }
@@ -457,7 +595,7 @@ export default function AnalyticsPage() {
     </div>
   );
 
-  const isAdmin    = user?.role === 'admin';
+  const isAdmin = user?.role === 'admin';
   const isLandlord = user?.role === 'landlord';
 
   return (
@@ -468,7 +606,7 @@ export default function AnalyticsPage() {
         <div>
           <h1 className="text-3xl font-black text-gray-900 tracking-tighter">Analytics</h1>
           <p className="text-gray-400 text-sm mt-1">
-            {isAdmin    && 'Platform-wide metrics and health indicators'}
+            {isAdmin && 'Platform-wide metrics and health indicators'}
             {isLandlord && 'Your portfolio performance and lease insights'}
           </p>
         </div>
@@ -479,7 +617,7 @@ export default function AnalyticsPage() {
       </div>
 
       {isLandlord && data && <LandlordAnalytics data={data} />}
-      {isAdmin    && data && <AdminAnalytics data={data} templateData={templateData} />}
+      {isAdmin && data && <AdminAnalytics data={data} templateData={templateData} />}
     </div>
   );
 }

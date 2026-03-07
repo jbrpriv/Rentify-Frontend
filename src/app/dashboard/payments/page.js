@@ -1,13 +1,13 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import api from '@/utils/api';
 import { useUser } from '@/context/UserContext';
 import { useToast } from '@/context/ToastContext';
 import {
   CreditCard, CheckCircle, Clock, AlertCircle, Loader2,
-  Calendar, X,
+  Calendar, Download,
 } from 'lucide-react';
 
 const STATUS_CONFIG = {
@@ -19,8 +19,7 @@ const STATUS_CONFIG = {
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
-
-// ─── Page// ─── Page ─────────────────────────────────────────────────────────────────────
+// ─── Page ─────────────────────────────────────────────────────────────────────
 export default function PaymentsPage() {
   const router = useRouter();
   const { user } = useUser();
@@ -36,15 +35,40 @@ export default function PaymentsPage() {
   const [loading, setLoading] = useState(true);
   const [paying, setPaying] = useState(null);
 
+  // payment history for the selected agreement — keyed by stripePaymentIntent
+  const [paymentMap, setPaymentMap] = useState({});   // dueMonth key → paymentId
+  const [downloading, setDownloading] = useState(null); // paymentId being downloaded
+
   useEffect(() => {
     api.get('/agreements')
       .then((agrRes) => {
         const active = agrRes.data.filter(a => a.status === 'active' && a.rentSchedule?.length > 0);
         setAgreements(active);
         if (active.length > 0) setSelected(active[0]);
-      }).catch(() => toast('Failed to load payment data', 'error'))
+      })
+      .catch(() => toast('Failed to load payment data', 'error'))
       .finally(() => setLoading(false));
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // When selected agreement changes, load its payment history and build a lookup map
+  // key: "YYYY-MM" (from dueDate) → Payment._id
+  useEffect(() => {
+    if (!selected) return;
+    setPaymentMap({});
+    api.get(`/payments/history?agreementId=${selected._id}&status=paid&limit=100`)
+      .then(({ data }) => {
+        const map = {};
+        (data.payments || []).forEach(p => {
+          if (p.dueDate) {
+            const d = new Date(p.dueDate);
+            const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+            map[key] = p._id;
+          }
+        });
+        setPaymentMap(map);
+      })
+      .catch(() => { }); // non-fatal — receipt buttons just won't appear
+  }, [selected?._id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (loading)
     return <div className="flex justify-center py-20"><Loader2 className="animate-spin h-8 w-8 text-blue-600" /></div>;
@@ -55,15 +79,43 @@ export default function PaymentsPage() {
     if (!entry) return;
     setPaying(scheduleIndex);
     try {
-      if (entry.checkoutUrl) {
-        window.location.href = entry.checkoutUrl;
-        return;
-      }
+      if (entry.checkoutUrl) { window.location.href = entry.checkoutUrl; return; }
       const { data } = await api.get(`/payments/active-checkout/${selected._id}`);
       window.location.href = data.url;
     } catch (err) {
       toast(err.response?.data?.message || 'Failed to initiate payment', 'error');
       setPaying(null);
+    }
+  };
+
+  const handleDownloadReceipt = async (paymentId) => {
+    if (!paymentId) return;
+    setDownloading(paymentId);
+    try {
+      const { data } = await api.get(`/payments/${paymentId}/receipt`);
+      if (data.url) {
+        // S3 signed URL — open in new tab
+        window.open(data.url, '_blank', 'noopener,noreferrer');
+      } else {
+        // Shouldn't happen but handle gracefully
+        toast('Receipt URL unavailable', 'error');
+      }
+    } catch (err) {
+      // Fallback: try streaming download directly
+      try {
+        const response = await api.get(`/payments/${paymentId}/receipt`, { responseType: 'blob' });
+        const blob = new Blob([response.data], { type: 'application/pdf' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `receipt-${paymentId}.pdf`;
+        a.click();
+        URL.revokeObjectURL(url);
+      } catch {
+        toast(err.response?.data?.message || 'Failed to download receipt', 'error');
+      }
+    } finally {
+      setDownloading(null);
     }
   };
 
@@ -126,7 +178,6 @@ export default function PaymentsPage() {
                   <span>Late fee: <strong className="text-gray-900">Rs. {selected.financials?.lateFeeAmount}</strong></span>
                   <span>Lease ends: <strong className="text-gray-900">{new Date(selected.term?.endDate).toLocaleDateString()}</strong></span>
                 </div>
-
               </div>
 
               {/* Calendar Grid */}
@@ -137,8 +188,9 @@ export default function PaymentsPage() {
                     const cfg = STATUS_CONFIG[entry.status] || STATUS_CONFIG.pending;
                     const Icon = cfg.icon;
                     const date = new Date(entry.dueDate);
-                    const isThisMonth =
-                      date.getMonth() === new Date().getMonth() &&
+                    const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+                    const paymentId = paymentMap[monthKey];
+                    const isThisMonth = date.getMonth() === new Date().getMonth() &&
                       date.getFullYear() === new Date().getFullYear();
 
                     return (
@@ -185,6 +237,7 @@ export default function PaymentsPage() {
                           Due: {date.toLocaleDateString()}
                         </p>
 
+                        {/* Pay Now — unpaid entries */}
                         {['pending', 'overdue', 'late_fee_applied'].includes(entry.status) && (
                           <button
                             type="button"
@@ -196,6 +249,21 @@ export default function PaymentsPage() {
                               ? <Loader2 className="w-3 h-3 animate-spin" />
                               : <CreditCard className="w-3 h-3" />}
                             {paying === i ? 'Processing…' : 'Pay Now'}
+                          </button>
+                        )}
+
+                        {/* Download Receipt — paid entries with a matched payment record */}
+                        {entry.status === 'paid' && paymentId && (
+                          <button
+                            type="button"
+                            onClick={() => handleDownloadReceipt(paymentId)}
+                            disabled={downloading === paymentId}
+                            className="mt-3 w-full flex items-center justify-center gap-1 py-1.5 px-2 bg-green-50 hover:bg-green-100 text-green-700 text-[10px] font-black uppercase rounded-lg disabled:opacity-60 transition-colors border border-green-200"
+                          >
+                            {downloading === paymentId
+                              ? <Loader2 className="w-3 h-3 animate-spin" />
+                              : <Download className="w-3 h-3" />}
+                            {downloading === paymentId ? 'Downloading…' : 'Receipt'}
                           </button>
                         )}
                       </div>
