@@ -355,7 +355,7 @@ export default function Navbar() {
               <>
                 {/* Desktop: notifications bell */}
                 <Link
-                  href="/dashboard/messages"
+                  href="/dashboard/notifications"
                   className={`hidden md:flex h-9 w-9 items-center justify-center rounded-full transition-all hover:scale-105 ${isTransparent ? 'bg-white/10 text-white hover:bg-white/20' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
                   aria-label="Notifications"
                 >
