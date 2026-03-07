@@ -106,15 +106,8 @@ function LandlordAnalytics({ data }) {
     setDownloading(paymentId);
     try {
       const { data: d } = await api.get(`/payments/${paymentId}/receipt`);
-      if (d.url) {
-        // Use anchor click instead of window.open — never blocked by popup blockers
-        const a = document.createElement('a');
-        a.href = d.url;
-        a.target = '_blank';
-        a.rel = 'noopener noreferrer';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
+      if (d?.url) {
+        window.open(d.url, '_blank', 'noopener,noreferrer');
       }
     } catch {
       toast('Failed to download receipt', 'error');

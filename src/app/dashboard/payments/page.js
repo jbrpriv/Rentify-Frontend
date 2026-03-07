@@ -93,14 +93,8 @@ export default function PaymentsPage() {
     setDownloading(paymentId);
     try {
       const { data } = await api.get(`/payments/${paymentId}/receipt`);
-      if (data.url) {
-        const a = document.createElement('a');
-        a.href = data.url;
-        a.target = '_blank';
-        a.rel = 'noopener noreferrer';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
+      if (data?.url) {
+        window.open(data.url, '_blank', 'noopener,noreferrer');
       }
     } catch (err) {
       toast(err.response?.data?.message || 'Failed to download receipt', 'error');
