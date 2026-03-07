@@ -804,16 +804,46 @@ function AgreementForm() {
                   formData={formData}
                 />
 
-                {createdAgreementId && (
-                  <button
-                    type="button"
-                    onClick={() => setShowPDFPreview(true)}
-                    className="mt-4 w-full flex items-center justify-center gap-2 px-4 py-2.5 border border-blue-300 text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-lg text-sm font-medium transition"
-                  >
-                    <Eye className="w-4 h-4" />
-                    Preview Agreement PDF
-                  </button>
-                )}
+                {/* Preview button: always visible in step 2.
+                    If the agreement hasn't been saved yet (no createdAgreementId),
+                    we first save a draft via the accept-offer flow, then open the preview. */}
+                <button
+                  type="button"
+                  onClick={async () => {
+                    if (createdAgreementId) {
+                      setShowPDFPreview(true);
+                      return;
+                    }
+                    // No draft saved yet — create one silently so we have an ID to preview
+                    if (!offerId) {
+                      toast('Please save the agreement first.', 'error');
+                      return;
+                    }
+                    setSavingClauses(true);
+                    try {
+                      const { data } = await api.put(`/offers/${offerId}/accept`, {
+                        startDate: formData.startDate,
+                      });
+                      const newId = data.agreement._id;
+                      setCreatedAgreementId(newId);
+                      if (selectedClauseIds.length > 0) {
+                        await api.put(`/agreements/${newId}/clauses`, { clauseIds: selectedClauseIds });
+                      }
+                      setShowPDFPreview(true);
+                    } catch (err) {
+                      toast(err.response?.data?.message || 'Could not generate preview', 'error');
+                    } finally {
+                      setSavingClauses(false);
+                    }
+                  }}
+                  disabled={savingClauses}
+                  className="mt-4 w-full flex items-center justify-center gap-2 px-4 py-2.5 border border-blue-300 text-blue-700 bg-blue-50 hover:bg-blue-100 disabled:opacity-60 rounded-lg text-sm font-medium transition"
+                >
+                  {savingClauses
+                    ? <><Loader2 className="w-4 h-4 animate-spin" /> Generating Preview…</>
+                    : <><Eye className="w-4 h-4" /> Preview Agreement PDF</>
+                  }
+                </button>
 
                 <div className="mt-6 flex justify-between items-center">
                   <button
@@ -846,7 +876,7 @@ function AgreementForm() {
               />
             )}
 
-            {/* PDF Preview Modal */}
+            {/* PDF Preview Modal — only rendered once we have a saved agreement ID */}
             {showPDFPreview && createdAgreementId && (
               <InlinePDFPreview
                 agreementId={createdAgreementId}

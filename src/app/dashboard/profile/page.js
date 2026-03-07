@@ -19,11 +19,11 @@ const TABS = [
 ];
 
 const ROLE_CONFIG = {
-  admin: { label: 'Administrator', color: '#DC2626', bg: 'rgba(220,38,38,0.12)', icon: '⚡' },
-  landlord: { label: 'Landlord', color: '#ffffff', bg: 'rgba(255,255,255,0.2)', icon: '🏠' },
-  property_manager: { label: 'Prop. Manager', color: '#ffffff', bg: 'rgba(255,255,255,0.2)', icon: '🔑' },
-  tenant: { label: 'Tenant', color: '#ffffff', bg: 'rgba(255,255,255,0.2)', icon: '🏡' },
-  law_reviewer: { label: 'Law Reviewer', color: '#ffffff', bg: 'rgba(255,255,255,0.2)', icon: '⚖️' },
+  admin:           { label: 'Administrator',  color: '#DC2626', bg: 'rgba(220,38,38,0.12)'    },
+  landlord:        { label: 'Landlord',        color: '#ffffff', bg: 'rgba(255,255,255,0.2)'   },
+  property_manager:{ label: 'Prop. Manager',  color: '#ffffff', bg: 'rgba(255,255,255,0.2)'   },
+  tenant:          { label: 'Tenant',          color: '#ffffff', bg: 'rgba(255,255,255,0.2)'   },
+  law_reviewer:    { label: 'Law Reviewer',    color: '#ffffff', bg: 'rgba(255,255,255,0.2)'   },
 };
 
 /* ─── Small helpers ───────────────────────────────────────────────────────── */
@@ -119,7 +119,6 @@ function ProfileTab({ user, form, setForm, saving, onSubmit, photoFile, photoPre
             <div>
               <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Account Role</label>
               <div className="flex items-center gap-2.5 pl-3.5 pr-4 py-3 border border-gray-100 rounded-2xl bg-gray-50">
-                <span className="text-base leading-none">{roleConfig.icon}</span>
                 <span className="text-sm font-semibold text-gray-500 capitalize">{displayRoleLabel}</span>
                 <span className="ml-auto text-xs text-gray-400">Read-only</span>
               </div>
@@ -663,7 +662,6 @@ export default function ProfilePage() {
                 className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold mb-3"
                 style={{ background: roleConfig.bg, color: roleConfig.color }}
               >
-                <span className="text-xs leading-none">{roleConfig.icon}</span>
                 {roleConfig.label}
               </span>
               <div className="space-y-1 mt-1">

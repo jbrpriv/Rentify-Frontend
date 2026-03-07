@@ -142,7 +142,7 @@ export default function LandlordTenantsPage() {
                       </span>
                     </td>
                     <td className="px-6 py-4">
-                      <div className="flex justify-end gap-2">
+                      <div className="flex justify-end gap-2 items-center">
                         {a.tenant?.email && (
                           <a href={`mailto:${a.tenant.email}`} className="text-blue-400 hover:text-blue-600">
                             <Mail className="w-4 h-4" />
@@ -152,6 +152,15 @@ export default function LandlordTenantsPage() {
                           <a href={`tel:${a.tenant.phoneNumber}`} className="text-green-400 hover:text-green-600">
                             <Phone className="w-4 h-4" />
                           </a>
+                        )}
+                        {a.tenant?._id && (
+                          <Link
+                            href={`/dashboard/landlord/tenant-documents?tenantId=${a.tenant._id}&name=${encodeURIComponent(a.tenant.name || 'Tenant')}`}
+                            className="text-[10px] font-bold uppercase tracking-widest text-indigo-600 hover:text-indigo-800 border border-indigo-200 px-2.5 py-1 rounded-lg hover:bg-indigo-50 transition"
+                            title="View tenant documents (secure, view-only)"
+                          >
+                            Docs
+                          </Link>
                         )}
                       </div>
                     </td>

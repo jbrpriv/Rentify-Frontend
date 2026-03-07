@@ -2,28 +2,23 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, CheckCircle, Clock, X, Bell, Loader2, AlertCircle } from 'lucide-react';
+import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, CheckCircle, Clock, X, Bell, Loader2, AlertCircle, Download } from 'lucide-react';
 import api from '@/utils/api';
 
 const PaymentCalendar = ({ theme, agreements = [], payments = [] }) => {
     const [currentDate, setCurrentDate] = useState(new Date());
     const [selectedDayInfo, setSelectedDayInfo] = useState(null);
     const [sendingReminder, setSendingReminder] = useState(null);
+    const [downloadingReceipt, setDownloadingReceipt] = useState(null);
 
-    // Simple calendar logic
-    const year = currentDate.getFullYear();
+    const year  = currentDate.getFullYear();
     const month = currentDate.getMonth();
 
-    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const daysInMonth    = new Date(year, month + 1, 0).getDate();
     const firstDayOfMonth = new Date(year, month, 1).getDay();
 
-    const handlePrevMonth = () => {
-        setCurrentDate(new Date(year, month - 1, 1));
-    };
-
-    const handleNextMonth = () => {
-        setCurrentDate(new Date(year, month + 1, 1));
-    };
+    const handlePrevMonth = () => setCurrentDate(new Date(year, month - 1, 1));
+    const handleNextMonth = () => setCurrentDate(new Date(year, month + 1, 1));
 
     const getDayPayments = (day) => {
         const paidMatches = payments.filter(p => {
@@ -34,7 +29,7 @@ const PaymentCalendar = ({ theme, agreements = [], payments = [] }) => {
         });
 
         const pendingMatches = agreements.flatMap(a => a.rentSchedule || []).filter(s => {
-            if (s.status === 'paid') return false; // Paid ones are handled via actual Payments
+            if (s.status === 'paid') return false;
             const dateStr = s.dueDate;
             if (!dateStr) return false;
             const d = new Date(dateStr);
@@ -48,14 +43,32 @@ const PaymentCalendar = ({ theme, agreements = [], payments = [] }) => {
         e.stopPropagation();
         setSendingReminder(paymentId);
         try {
-            // Mock API call to explicitly trigger missed-payment notification
-            await new Promise(r => setTimeout(r, 600));
-            // await api.post(`/notifications/remind/${paymentId}`);
+            await api.post(`/notifications/remind/${paymentId}`);
             alert('Reminder sent to tenant successfully!');
-        } catch (err) {
+        } catch {
             alert('Failed to send reminder.');
         } finally {
             setSendingReminder(null);
+        }
+    };
+
+    // Download receipt for a paid payment — opens the PDF in a new tab
+    const handleDownloadReceipt = async (paymentId, e) => {
+        e.stopPropagation();
+        if (!paymentId || paymentId.startsWith('temp_')) {
+            alert('Receipt not available for this payment.');
+            return;
+        }
+        setDownloadingReceipt(paymentId);
+        try {
+            const { data } = await api.get(`/payments/${paymentId}/receipt`);
+            if (data?.url) {
+                window.open(data.url, '_blank', 'noopener,noreferrer');
+            }
+        } catch {
+            alert('Receipt is not available yet. Please try again later.');
+        } finally {
+            setDownloadingReceipt(null);
         }
     };
 
@@ -202,16 +215,28 @@ const PaymentCalendar = ({ theme, agreements = [], payments = [] }) => {
                                                         </span>
                                                     </p>
                                                 </div>
-                                                {isOverdue && !isPaid && (
-                                                    <button
-                                                        onClick={(e) => handleRemindTenant(pid, e)}
-                                                        disabled={sendingReminder === pid}
-                                                        className="flex items-center gap-1 px-2.5 py-1.5 bg-red-600 hover:bg-red-700 disabled:opacity-70 text-white text-[10px] font-bold uppercase rounded-lg transition"
-                                                    >
-                                                        {sendingReminder === pid ? <Loader2 className="w-3 h-3 animate-spin" /> : <Bell className="w-3 h-3" />}
-                                                        Remind
-                                                    </button>
-                                                )}
+                                                <div className="flex flex-col gap-1.5 items-end">
+                                                    {isPaid && (
+                                                        <button
+                                                            onClick={(e) => handleDownloadReceipt(pid, e)}
+                                                            disabled={downloadingReceipt === pid}
+                                                            className="flex items-center gap-1 px-2.5 py-1.5 bg-green-600 hover:bg-green-700 disabled:opacity-70 text-white text-[10px] font-bold uppercase rounded-lg transition"
+                                                        >
+                                                            {downloadingReceipt === pid ? <Loader2 className="w-3 h-3 animate-spin" /> : <Download className="w-3 h-3" />}
+                                                            Receipt
+                                                        </button>
+                                                    )}
+                                                    {isOverdue && !isPaid && (
+                                                        <button
+                                                            onClick={(e) => handleRemindTenant(pid, e)}
+                                                            disabled={sendingReminder === pid}
+                                                            className="flex items-center gap-1 px-2.5 py-1.5 bg-red-600 hover:bg-red-700 disabled:opacity-70 text-white text-[10px] font-bold uppercase rounded-lg transition"
+                                                        >
+                                                            {sendingReminder === pid ? <Loader2 className="w-3 h-3 animate-spin" /> : <Bell className="w-3 h-3" />}
+                                                            Remind
+                                                        </button>
+                                                    )}
+                                                </div>
                                             </div>
                                         </div>
                                     );

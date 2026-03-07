@@ -275,7 +275,7 @@ export default function DashboardHome() {
         >
           <div>
             <h1 style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 900, fontSize: '2.4rem', color: '#1F2933', letterSpacing: '-0.04em', lineHeight: 1, marginBottom: 6 }}>
-              Hi, {user.name?.split(' ')[0]} 👋
+              Hi, {user.name?.split(' ')[0]}
             </h1>
             <p style={{ fontSize: '0.8rem', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.12em' }}>
               {user.role === 'landlord' ? 'Landlord Dashboard'
@@ -360,7 +360,7 @@ export default function DashboardHome() {
 
         {/* ── Charts ── */}
         <motion.div
-          style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 20 }}
+          style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 20 }}
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.18, ease: [0.21, 0.6, 0.35, 1] }}

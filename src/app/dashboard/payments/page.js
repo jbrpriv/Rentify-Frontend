@@ -92,28 +92,34 @@ export default function PaymentsPage() {
     if (!paymentId) return;
     setDownloading(paymentId);
     try {
-      const { data } = await api.get(`/payments/${paymentId}/receipt`);
-      if (data.url) {
-        // S3 signed URL — open in new tab
-        window.open(data.url, '_blank', 'noopener,noreferrer');
+      // First try: request as blob so we handle BOTH a JSON {url} response
+      // and a direct PDF binary stream without separate error branches.
+      const response = await api.get(`/payments/${paymentId}/receipt`, {
+        responseType: 'blob',
+      });
+
+      const contentType = response.headers['content-type'] || '';
+
+      if (contentType.includes('application/json')) {
+        // Server returned a JSON body (S3 signed URL case)
+        const text = await response.data.text();
+        const json = JSON.parse(text);
+        if (json?.url) {
+          window.open(json.url, '_blank', 'noopener,noreferrer');
+        } else {
+          toast('Receipt URL is unavailable. Please try again later.', 'error');
+        }
       } else {
-        // Shouldn't happen but handle gracefully
-        toast('Receipt URL unavailable', 'error');
-      }
-    } catch (err) {
-      // Fallback: try streaming download directly
-      try {
-        const response = await api.get(`/payments/${paymentId}/receipt`, { responseType: 'blob' });
-        const blob = new Blob([response.data], { type: 'application/pdf' });
-        const url = URL.createObjectURL(blob);
+        // Server streamed the PDF directly — trigger a browser download
+        const url = URL.createObjectURL(response.data);
         const a = document.createElement('a');
-        a.href = url;
+        a.href     = url;
         a.download = `receipt-${paymentId}.pdf`;
         a.click();
         URL.revokeObjectURL(url);
-      } catch {
-        toast(err.response?.data?.message || 'Failed to download receipt', 'error');
       }
+    } catch (err) {
+      toast(err.response?.data?.message || 'Failed to download receipt. Please try again.', 'error');
     } finally {
       setDownloading(null);
     }

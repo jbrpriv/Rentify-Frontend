@@ -187,20 +187,27 @@ export default function AdminAgreementsPage() {
                     </td>
                     <td className="px-4 py-3">
                       <button
-                        onClick={() => {
-                          const token = localStorage.getItem('token') || '';
-                          const url = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/agreements/${a._id}/pdf`;
-                          fetch(url, { headers: { Authorization: `Bearer ${token}` } })
-                            .then(r => r.blob())
-                            .then(blob => {
-                              const bUrl = URL.createObjectURL(blob);
-                              const link = document.createElement('a');
-                              link.href = bUrl;
-                              link.download = `agreement-${a._id}.pdf`;
-                              link.click();
-                              URL.revokeObjectURL(bUrl);
-                            })
-                            .catch(() => alert('Failed to download PDF'));
+                        onClick={async () => {
+                          try {
+                            const res = await fetch(
+                              `${process.env.NEXT_PUBLIC_API_URL || ''}/api/agreements/${a._id}/pdf`,
+                              {
+                                headers: {
+                                  Authorization: `Bearer ${localStorage.getItem('token') || ''}`,
+                                },
+                              }
+                            );
+                            if (!res.ok) throw new Error('Download failed');
+                            const blob = await res.blob();
+                            const bUrl = URL.createObjectURL(blob);
+                            const link = document.createElement('a');
+                            link.href     = bUrl;
+                            link.download = `agreement-${a._id}.pdf`;
+                            link.click();
+                            URL.revokeObjectURL(bUrl);
+                          } catch {
+                            alert('Failed to download PDF. Please try again.');
+                          }
                         }}
                         className="inline-flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 font-semibold"
                       >
