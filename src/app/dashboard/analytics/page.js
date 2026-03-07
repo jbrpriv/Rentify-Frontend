@@ -84,6 +84,35 @@ const PAYMENT_STATUS = {
   retry_scheduled: { label: 'Retrying', color: 'bg-orange-100 text-orange-700' },
 };
 
+// ─── Shared receipt download helper ──────────────────────────────────────────
+// Use responseType:'blob' so Axios never tries to JSON-parse a binary PDF stream.
+// Branch on content-type: JSON means S3 signed URL, otherwise trigger inline download.
+async function downloadReceipt(paymentId, setDownloading, toast) {
+  setDownloading(paymentId);
+  try {
+    const response = await api.get(`/payments/${paymentId}/receipt`, {
+      responseType: 'blob',
+    });
+    const contentType = response.headers['content-type'] || '';
+    if (contentType.includes('application/json')) {
+      const text = await response.data.text();
+      const { url } = JSON.parse(text);
+      if (url) window.open(url, '_blank', 'noopener,noreferrer');
+    } else {
+      const url = URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }));
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `receipt-${paymentId}.pdf`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+  } catch {
+    toast('Failed to download receipt', 'error');
+  } finally {
+    setDownloading(null);
+  }
+}
+
 // ─── LANDLORD VIEW ────────────────────────────────────────────────────────────
 function LandlordAnalytics({ data }) {
   const { toast } = useToast();
@@ -103,17 +132,7 @@ function LandlordAnalytics({ data }) {
   }, []);
 
   const handleDownloadReceipt = useCallback(async (paymentId) => {
-    setDownloading(paymentId);
-    try {
-      const { data: d } = await api.get(`/payments/${paymentId}/receipt`);
-      if (d?.url) {
-        window.open(d.url, '_blank', 'noopener,noreferrer');
-      }
-    } catch {
-      toast('Failed to download receipt', 'error');
-    } finally {
-      setDownloading(null);
-    }
+    await downloadReceipt(paymentId, setDownloading, toast);
   }, [toast]);
 
   const filteredPayments = tenantFilter.trim()

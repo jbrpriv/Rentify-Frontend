@@ -35,8 +35,8 @@ export default function PaymentsPage() {
   const [loading, setLoading] = useState(true);
   const [paying, setPaying] = useState(null);
 
-  // payment history for the selected agreement — keyed by stripePaymentIntent
-  const [paymentMap, setPaymentMap] = useState({});   // dueMonth key → paymentId
+  // payment history for the selected agreement
+  const [paymentMap, setPaymentMap] = useState({});   // "YYYY-MM" (UTC) → paymentId
   const [downloading, setDownloading] = useState(null); // paymentId being downloaded
 
   useEffect(() => {
@@ -50,8 +50,8 @@ export default function PaymentsPage() {
       .finally(() => setLoading(false));
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // When selected agreement changes, load its payment history and build a lookup map
-  // key: "YYYY-MM" (from dueDate) → Payment._id
+  // When selected agreement changes, load its payment history and build a lookup map.
+  // Use UTC month/year to avoid timezone off-by-one flipping the month key.
   useEffect(() => {
     if (!selected) return;
     setPaymentMap({});
@@ -61,7 +61,7 @@ export default function PaymentsPage() {
         (data.payments || []).forEach(p => {
           if (p.dueDate) {
             const d = new Date(p.dueDate);
-            const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+            const key = `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}`;
             map[key] = p._id;
           }
         });
@@ -88,13 +88,29 @@ export default function PaymentsPage() {
     }
   };
 
+  // Use responseType:'blob' so Axios never tries to JSON-parse a binary PDF stream.
+  // Branch on content-type: JSON means S3 signed URL, otherwise stream the PDF inline.
   const handleDownloadReceipt = async (paymentId) => {
     if (!paymentId) return;
     setDownloading(paymentId);
     try {
-      const { data } = await api.get(`/payments/${paymentId}/receipt`);
-      if (data?.url) {
-        window.open(data.url, '_blank', 'noopener,noreferrer');
+      const response = await api.get(`/payments/${paymentId}/receipt`, {
+        responseType: 'blob',
+      });
+      const contentType = response.headers['content-type'] || '';
+      if (contentType.includes('application/json')) {
+        // S3 path — parse blob back to JSON to get the signed URL
+        const text = await response.data.text();
+        const { url } = JSON.parse(text);
+        if (url) window.open(url, '_blank', 'noopener,noreferrer');
+      } else {
+        // Binary PDF fallback — trigger browser download
+        const url = URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }));
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `receipt-${paymentId}.pdf`;
+        a.click();
+        URL.revokeObjectURL(url);
       }
     } catch (err) {
       toast(err.response?.data?.message || 'Failed to download receipt', 'error');
@@ -172,10 +188,11 @@ export default function PaymentsPage() {
                     const cfg = STATUS_CONFIG[entry.status] || STATUS_CONFIG.pending;
                     const Icon = cfg.icon;
                     const date = new Date(entry.dueDate);
-                    const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+                    // Use UTC parts to match the paymentMap keys built above
+                    const monthKey = `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, '0')}`;
                     const paymentId = paymentMap[monthKey];
-                    const isThisMonth = date.getMonth() === new Date().getMonth() &&
-                      date.getFullYear() === new Date().getFullYear();
+                    const isThisMonth = date.getUTCMonth() === new Date().getUTCMonth() &&
+                      date.getUTCFullYear() === new Date().getUTCFullYear();
 
                     return (
                       <div
@@ -185,7 +202,7 @@ export default function PaymentsPage() {
                       >
                         <div className="flex items-center justify-between mb-2">
                           <p className="text-xs font-black uppercase text-gray-400">
-                            {MONTHS[date.getMonth()]} {date.getFullYear()}
+                            {MONTHS[date.getUTCMonth()]} {date.getUTCFullYear()}
                           </p>
                           {isThisMonth && (
                             <span className="text-[9px] bg-blue-100 text-blue-700 font-black uppercase px-1.5 py-0.5 rounded-full">
