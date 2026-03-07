@@ -7,40 +7,40 @@ import { useUser } from '@/context/UserContext';
 import { User, Phone, Building2, Mail, Loader2, CheckCircle, Lock } from 'lucide-react';
 
 function CompleteProfileContent() {
-  const router       = useRouter();
+  const router = useRouter();
   const { setUser } = useUser();
   const searchParams = useSearchParams();
 
-  const providerEmail  = searchParams.get('email')       || '';
-  const providerName   = searchParams.get('name')        || '';
-  const provider       = searchParams.get('provider')    || 'google';
-  const needsEmail     = searchParams.get('needsEmail')  === 'true';
-  const facebookId     = searchParams.get('facebookId')  || '';
-  const urlToken       = searchParams.get('token')       || '';
-  const existingPhone  = searchParams.get('phoneNumber') || '';
-  const providerRole   = searchParams.get('role')        || 'tenant';
+  const providerEmail = searchParams.get('email') || '';
+  const providerName = searchParams.get('name') || '';
+  const provider = searchParams.get('provider') || 'google';
+  const needsEmail = searchParams.get('needsEmail') === 'true';
+  const facebookId = searchParams.get('facebookId') || '';
+  const urlToken = searchParams.get('token') || '';
+  const existingPhone = searchParams.get('phoneNumber') || '';
+  const providerRole = searchParams.get('role') || 'tenant';
   // skipToOTP=true: the user already set name/role/phone in a prior session
   // but closed before verifying. Show the profile form with name+role locked
   // (they cannot be changed here) and phone pre-filled but editable so the
   // user can correct it if they made a mistake last time.
-  const skipToOTP      = searchParams.get('skipToOTP')   === 'true';
+  const skipToOTP = searchParams.get('skipToOTP') === 'true';
 
   // Email is locked when the provider supplied it; editable only for FB no-email case
   const emailLocked = !!providerEmail && !needsEmail;
 
   // Always start at the profile step — even for skipToOTP users we show the
   // form so they can correct their phone number before we send the OTP.
-  const [step, setStep]     = useState('profile');
+  const [step, setStep] = useState('profile');
   const [formData, setFormData] = useState({
-    name:        providerName,
-    email:       providerEmail,
-    role:        providerRole,
+    name: providerName,
+    email: providerEmail,
+    role: providerRole,
     phoneNumber: existingPhone,
   });
-  const [otp, setOtp]         = useState('');
+  const [otp, setOtp] = useState('');
   const [loading, setLoading] = useState(false);
   const [sending, setSending] = useState(false);
-  const [error, setError]     = useState('');
+  const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
   // Set token in api header (NOT localStorage) so API calls work during this flow.
@@ -51,11 +51,11 @@ function CompleteProfileContent() {
     }
     setFormData(f => ({
       ...f,
-      name:        f.name        || providerName,
-      email:       f.email       || providerEmail,
+      name: f.name || providerName,
+      email: f.email || providerEmail,
       phoneNumber: f.phoneNumber || existingPhone,
     }));
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // run once on mount only
 
   // ── Abandon: delete the incomplete Mongo account and go back to login ───────
@@ -82,7 +82,7 @@ function CompleteProfileContent() {
     };
     window.addEventListener('beforeunload', onUnload);
     return () => window.removeEventListener('beforeunload', onUnload);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // ── Step 1: save profile ──────────────────────────────────────────────────
@@ -105,9 +105,9 @@ function CompleteProfileContent() {
         // Facebook no-email: create account first, get token back
         const { data } = await api.post('/auth/facebook/complete', {
           facebookId,
-          email:       formData.email,
-          name:        formData.name,
-          role:        formData.role,
+          email: formData.email,
+          name: formData.name,
+          role: formData.role,
           phoneNumber: formData.phoneNumber,
         });
 
@@ -121,8 +121,8 @@ function CompleteProfileContent() {
       } else {
         // Standard case: account exists, just update profile fields
         await api.put('/users/profile', {
-          name:        formData.name,
-          role:        formData.role,
+          name: formData.name,
+          role: formData.role,
           phoneNumber: formData.phoneNumber,
         });
       }
@@ -131,7 +131,7 @@ function CompleteProfileContent() {
       const { data: freshUser } = await api.get('/users/me');
       setFormData(f => ({ ...f, phoneNumber: freshUser.phoneNumber || f.phoneNumber }));
 
-      await api.post('/auth/send-otp');
+      await api.post('/auth/send-otp', { email: formData.email });
       setStep('verify-phone');
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to save profile. Please try again.');
@@ -146,18 +146,18 @@ function CompleteProfileContent() {
     setLoading(true);
     setError('');
     try {
-      await api.post('/auth/verify-otp', { code: otp });
+      await api.post('/auth/verify-otp', { code: otp, email: formData.email });
       // OTP verified — NOW it is safe to write the session to localStorage.
       const { data: freshUser } = await api.get('/users/me');
       localStorage.setItem('token', urlToken);
       setUser({
-        _id:             freshUser._id,
-        name:            freshUser.name,
-        role:            freshUser.role,
-        email:           freshUser.email,
-        phoneNumber:     freshUser.phoneNumber,
+        _id: freshUser._id,
+        name: freshUser.name,
+        role: freshUser.role,
+        email: freshUser.email,
+        phoneNumber: freshUser.phoneNumber,
         isPhoneVerified: true,
-        isVerified:      freshUser.isVerified,
+        isVerified: freshUser.isVerified,
         provider,
       });
       router.replace('/dashboard');
@@ -209,11 +209,10 @@ function CompleteProfileContent() {
         {/* Progress */}
         <div className="flex gap-2 mb-8">
           {['profile', 'verify-phone'].map((s, i) => (
-            <div key={s} className={`flex-1 h-1.5 rounded-full transition-all ${
-              step === s ? 'bg-blue-600'
-              : i < ['profile', 'verify-phone'].indexOf(step) ? 'bg-green-500'
-              : 'bg-gray-200'
-            }`} />
+            <div key={s} className={`flex-1 h-1.5 rounded-full transition-all ${step === s ? 'bg-blue-600'
+                : i < ['profile', 'verify-phone'].indexOf(step) ? 'bg-green-500'
+                  : 'bg-gray-200'
+              }`} />
           ))}
         </div>
 
@@ -245,11 +244,10 @@ function CompleteProfileContent() {
                   onChange={e => !emailLocked && setFormData(f => ({ ...f, email: e.target.value }))}
                   readOnly={emailLocked}
                   placeholder="you@example.com"
-                  className={`w-full pl-9 pr-4 py-2.5 border rounded-xl text-sm focus:outline-none transition ${
-                    emailLocked
+                  className={`w-full pl-9 pr-4 py-2.5 border rounded-xl text-sm focus:outline-none transition ${emailLocked
                       ? 'border-gray-100 bg-gray-50 text-gray-400 cursor-not-allowed'
                       : 'border-gray-200 focus:ring-2 focus:ring-blue-500'
-                  }`}
+                    }`}
                 />
               </div>
               {emailLocked && (
@@ -273,11 +271,10 @@ function CompleteProfileContent() {
                   onChange={e => !skipToOTP && setFormData(f => ({ ...f, name: e.target.value }))}
                   readOnly={skipToOTP}
                   placeholder="Your full name"
-                  className={`w-full pl-9 pr-4 py-2.5 border rounded-xl text-sm focus:outline-none transition ${
-                    skipToOTP
+                  className={`w-full pl-9 pr-4 py-2.5 border rounded-xl text-sm focus:outline-none transition ${skipToOTP
                       ? 'border-gray-100 bg-gray-50 text-gray-400 cursor-not-allowed'
                       : 'border-gray-200 focus:ring-2 focus:ring-blue-500'
-                  }`}
+                    }`}
                 />
               </div>
               {skipToOTP && (
@@ -294,11 +291,10 @@ function CompleteProfileContent() {
                   value={formData.role}
                   onChange={e => !skipToOTP && setFormData(f => ({ ...f, role: e.target.value }))}
                   disabled={skipToOTP}
-                  className={`w-full pl-9 pr-4 py-2.5 border rounded-xl text-sm focus:outline-none transition ${
-                    skipToOTP
+                  className={`w-full pl-9 pr-4 py-2.5 border rounded-xl text-sm focus:outline-none transition ${skipToOTP
                       ? 'border-gray-100 bg-gray-50 text-gray-400 cursor-not-allowed'
                       : 'border-gray-200 focus:ring-2 focus:ring-blue-500 bg-white'
-                  }`}
+                    }`}
                 >
                   <option value="tenant">I am a Tenant</option>
                   <option value="landlord">I am a Landlord</option>
