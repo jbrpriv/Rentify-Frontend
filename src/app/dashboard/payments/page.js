@@ -92,34 +92,18 @@ export default function PaymentsPage() {
     if (!paymentId) return;
     setDownloading(paymentId);
     try {
-      // First try: request as blob so we handle BOTH a JSON {url} response
-      // and a direct PDF binary stream without separate error branches.
-      const response = await api.get(`/payments/${paymentId}/receipt`, {
-        responseType: 'blob',
-      });
-
-      const contentType = response.headers['content-type'] || '';
-
-      if (contentType.includes('application/json')) {
-        // Server returned a JSON body (S3 signed URL case)
-        const text = await response.data.text();
-        const json = JSON.parse(text);
-        if (json?.url) {
-          window.open(json.url, '_blank', 'noopener,noreferrer');
-        } else {
-          toast('Receipt URL is unavailable. Please try again later.', 'error');
-        }
-      } else {
-        // Server streamed the PDF directly — trigger a browser download
-        const url = URL.createObjectURL(response.data);
+      const { data } = await api.get(`/payments/${paymentId}/receipt`);
+      if (data.url) {
         const a = document.createElement('a');
-        a.href     = url;
-        a.download = `receipt-${paymentId}.pdf`;
+        a.href = data.url;
+        a.target = '_blank';
+        a.rel = 'noopener noreferrer';
+        document.body.appendChild(a);
         a.click();
-        URL.revokeObjectURL(url);
+        document.body.removeChild(a);
       }
     } catch (err) {
-      toast(err.response?.data?.message || 'Failed to download receipt. Please try again.', 'error');
+      toast(err.response?.data?.message || 'Failed to download receipt', 'error');
     } finally {
       setDownloading(null);
     }

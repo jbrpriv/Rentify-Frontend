@@ -107,19 +107,17 @@ function LandlordAnalytics({ data }) {
     try {
       const { data: d } = await api.get(`/payments/${paymentId}/receipt`);
       if (d.url) {
-        window.open(d.url, '_blank', 'noopener,noreferrer');
+        // Use anchor click instead of window.open — never blocked by popup blockers
+        const a = document.createElement('a');
+        a.href = d.url;
+        a.target = '_blank';
+        a.rel = 'noopener noreferrer';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
       }
     } catch {
-      // Fallback: blob download
-      try {
-        const response = await api.get(`/payments/${paymentId}/receipt`, { responseType: 'blob' });
-        const url = URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }));
-        const a = document.createElement('a');
-        a.href = url; a.download = `receipt-${paymentId}.pdf`; a.click();
-        URL.revokeObjectURL(url);
-      } catch {
-        toast('Failed to download receipt', 'error');
-      }
+      toast('Failed to download receipt', 'error');
     } finally {
       setDownloading(null);
     }

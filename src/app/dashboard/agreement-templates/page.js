@@ -27,7 +27,7 @@ function ClausePickerModal({ selected, onSave, onClose }) {
 
   useEffect(() => {
     api.get('/agreements/clauses')
-      .then(({ data }) => setClauses(data.filter(c => c.isApproved)))
+      .then(({ data }) => setClauses(data))
       .catch(() => { })
       .finally(() => setLoading(false));
   }, []);
