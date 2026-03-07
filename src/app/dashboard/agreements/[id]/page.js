@@ -9,7 +9,6 @@ import {
     ArrowLeft, FileText, User, Building2, Calendar, DollarSign,
     CheckCircle, Clock, AlertCircle, PenLine, Download, GitBranch,
     TrendingUp, Shield, Loader2, Home, Mail, Phone, FolderOpen,
-    X, ExternalLink, FileCheck, File,
 } from 'lucide-react';
 
 // ─── Status config ─────────────────────────────────────────────────────────────
@@ -80,132 +79,6 @@ function SignatureBadge({ signed, label }) {
     );
 }
 
-// ─── Tenant Documents Modal ────────────────────────────────────────────────────
-function TenantDocumentsModal({ tenantId, tenantName, onClose }) {
-    const [docs, setDocs] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState('');
-
-    useEffect(() => {
-        api.get(`/upload/landlord/tenant-documents/${tenantId}`)
-            .then(({ data }) => setDocs(data.documents || []))
-            .catch((err) => setError(err.response?.data?.message || 'Failed to load documents'))
-            .finally(() => setLoading(false));
-    }, [tenantId]);
-
-    // Friendly label map for document types
-    const DOC_LABELS = {
-        cnic: 'CNIC / National ID',
-        salary_slip: 'Salary Slip',
-        bank_statement: 'Bank Statement',
-        employment_letter: 'Employment Letter',
-        reference_letter: 'Reference Letter',
-        other: 'Other',
-    };
-
-    return (
-        // Backdrop
-        <div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
-            onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
-        >
-            <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg max-h-[80vh] flex flex-col animate-in fade-in zoom-in-95 duration-200">
-
-                {/* Header */}
-                <div className="flex items-center justify-between p-6 border-b border-gray-100">
-                    <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center">
-                            <FolderOpen className="w-5 h-5 text-blue-600" />
-                        </div>
-                        <div>
-                            <h2 className="text-base font-black text-gray-900">Tenant Documents</h2>
-                            <p className="text-xs text-gray-400">{tenantName}</p>
-                        </div>
-                    </div>
-                    <button
-                        onClick={onClose}
-                        className="p-2 rounded-xl hover:bg-gray-100 transition text-gray-400 hover:text-gray-600"
-                    >
-                        <X className="w-5 h-5" />
-                    </button>
-                </div>
-
-                {/* Body */}
-                <div className="flex-1 overflow-y-auto p-6">
-                    {loading ? (
-                        <div className="flex justify-center py-12">
-                            <Loader2 className="animate-spin h-7 w-7 text-blue-500" />
-                        </div>
-                    ) : error ? (
-                        <div className="flex flex-col items-center py-12 text-center gap-3">
-                            <AlertCircle className="w-8 h-8 text-red-400" />
-                            <p className="text-sm font-semibold text-gray-700">{error}</p>
-                        </div>
-                    ) : docs.length === 0 ? (
-                        <div className="flex flex-col items-center py-12 text-center gap-3">
-                            <FolderOpen className="w-10 h-10 text-gray-300" />
-                            <p className="font-bold text-gray-500">No documents uploaded</p>
-                            <p className="text-xs text-gray-400">This tenant hasn't uploaded any verification documents yet.</p>
-                        </div>
-                    ) : (
-                        <div className="space-y-3">
-                            <p className="text-xs text-gray-400 font-medium mb-4">
-                                {docs.length} document{docs.length !== 1 ? 's' : ''} on file
-                            </p>
-                            {docs.map((doc, i) => (
-                                <div
-                                    key={doc._id || i}
-                                    className="flex items-center gap-4 p-4 bg-gray-50 rounded-2xl border border-gray-100 hover:border-blue-200 transition group"
-                                >
-                                    <div className="w-10 h-10 rounded-xl bg-white border border-gray-200 flex items-center justify-center flex-shrink-0 shadow-sm">
-                                        {doc.url
-                                            ? <FileCheck className="w-5 h-5 text-green-600" />
-                                            : <File className="w-5 h-5 text-gray-400" />
-                                        }
-                                    </div>
-                                    <div className="flex-1 min-w-0">
-                                        <p className="text-sm font-semibold text-gray-800 truncate">
-                                            {DOC_LABELS[doc.documentType] || doc.documentType || 'Document'}
-                                        </p>
-                                        <p className="text-xs text-gray-400 truncate">
-                                            {doc.originalName || 'Uploaded file'}
-                                        </p>
-                                        {doc.uploadedAt && (
-                                            <p className="text-[10px] text-gray-400 mt-0.5">
-                                                {new Date(doc.uploadedAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
-                                            </p>
-                                        )}
-                                    </div>
-                                    {doc.url ? (
-                                        <a
-                                            href={doc.url}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 text-white text-xs font-semibold rounded-lg hover:bg-blue-700 transition opacity-0 group-hover:opacity-100 flex-shrink-0"
-                                        >
-                                            <ExternalLink className="w-3 h-3" />
-                                            View
-                                        </a>
-                                    ) : (
-                                        <span className="text-[10px] text-gray-400 flex-shrink-0">No URL</span>
-                                    )}
-                                </div>
-                            ))}
-                        </div>
-                    )}
-                </div>
-
-                {/* Footer */}
-                <div className="p-4 border-t border-gray-100">
-                    <p className="text-[10px] text-center text-gray-400">
-                        View-only access · Documents are provided by the tenant for verification purposes
-                    </p>
-                </div>
-            </div>
-        </div>
-    );
-}
-
 // ─── Main Page ─────────────────────────────────────────────────────────────────
 export default function AgreementDetailPage() {
     const { id } = useParams();
@@ -216,7 +89,6 @@ export default function AgreementDetailPage() {
     const [agreement, setAgreement] = useState(null);
     const [loading, setLoading] = useState(true);
     const [downloading, setDownloading] = useState(false);
-    const [showDocs, setShowDocs] = useState(false);
 
     const isLandlordOrAdmin = user && ['landlord', 'property_manager', 'admin'].includes(user.role);
 
@@ -309,7 +181,7 @@ export default function AgreementDetailPage() {
                     {/* Tenant Documents — landlord / PM / admin only */}
                     {isLandlordOrAdmin && tenant && (
                         <button
-                            onClick={() => setShowDocs(true)}
+                            onClick={() => router.push(`/dashboard/agreements/${id}/tenant-documents`)}
                             className="inline-flex items-center gap-2 px-4 py-2 border border-blue-200 bg-blue-50 text-sm font-semibold rounded-xl text-blue-700 hover:bg-blue-100 transition"
                         >
                             <FolderOpen className="w-4 h-4" />
@@ -426,15 +298,6 @@ export default function AgreementDetailPage() {
                     </div>
                 </div>
             </div>
-
-            {/* Tenant Documents Modal */}
-            {showDocs && tenant && (
-                <TenantDocumentsModal
-                    tenantId={tenant._id}
-                    tenantName={tenant.name}
-                    onClose={() => setShowDocs(false)}
-                />
-            )}
         </>
     );
 }

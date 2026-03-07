@@ -140,14 +140,12 @@ export default function ForgotPasswordPage() {
                 <p className="text-xs text-slate-500 mb-8">
                   Don't see it? Check your spam folder.
                 </p>
-                <Button
-                  as={Link}
+                <Link
                   href="/login"
-                  variant="primary"
-                  className="w-full justify-center rounded-2xl py-3.5"
+                  className="w-full flex items-center justify-center py-3.5 px-4 rounded-2xl text-sm font-semibold bg-gradient-to-r from-[#0B2D72] to-[#0992C2] text-white hover:opacity-90 transition rf-btn-primary"
                 >
                   Return to Login
-                </Button>
+                </Link>
               </div>
             )}
           </div>
