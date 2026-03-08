@@ -1,84 +1,118 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useUser } from '@/context/UserContext';
 import api from '@/utils/api';
 import {
-    BadgeCheck, Upload, FileText, CheckCircle, Clock,
-    AlertCircle, Loader2, X, Plus,
+    BadgeCheck, Clock, CheckCircle, XCircle, Loader2,
+    Eye, FileText, ExternalLink, FileImage,
 } from 'lucide-react';
 
-const DOC_TYPES = [
-    { value: 'cnic', label: 'CNIC (National ID Card)' },
-    { value: 'passport', label: 'Passport' },
-    { value: 'business_registration', label: 'Business Registration' },
-    { value: 'ownership_deed', label: 'Property Ownership Deed' },
-    { value: 'utility_bill', label: 'Utility Bill' },
-    { value: 'other', label: 'Other' },
-];
+function Toast({ msg, type }) {
+    if (!msg) return null;
+    const colors = {
+        success: 'bg-green-50 border-green-200 text-green-800',
+        error: 'bg-red-50 border-red-200 text-red-800',
+    };
+    return (
+        <div className={`fixed top-6 right-6 z-50 border rounded-2xl px-5 py-3 shadow-xl text-sm font-medium ${colors[type] || colors.success} animate-in fade-in slide-in-from-top-2`}>
+            {msg}
+        </div>
+    );
+}
 
-export default function VerificationPage() {
+function FileIcon({ name }) {
+    const ext = name?.split('.').pop()?.toLowerCase();
+    if (['jpg', 'jpeg', 'png', 'webp'].includes(ext))
+        return <FileImage className="h-3.5 w-3.5 text-purple-500" />;
+    return <FileText className="h-3.5 w-3.5 text-blue-500" />;
+}
+
+export default function AdminVerificationsPage() {
     const { user } = useUser();
     const router = useRouter();
-    const [status, setStatus] = useState(null); // 'none' | 'pending' | 'approved' | 'rejected'
+    const [tab, setTab] = useState('pending');
+    const [pending, setPending] = useState([]);
+    const [approved, setApproved] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [submitting, setSubmitting] = useState(false);
-    const [toast, setToast] = useState('');
-    const [documents, setDocuments] = useState([
-        { url: '', documentType: 'cnic', originalName: '' },
-    ]);
+    const [actionLoading, setActionLoading] = useState('');
+    const [viewingDocs, setViewingDocs] = useState({}); // userId -> loading state
+    const [toast, setToast] = useState({ msg: '', type: 'success' });
 
-    const showToast = (msg) => {
-        setToast(msg);
-        setTimeout(() => setToast(''), 4000);
+    const showToast = (msg, type = 'success') => {
+        setToast({ msg, type });
+        setTimeout(() => setToast({ msg: '', type: 'success' }), 4000);
     };
 
     useEffect(() => {
         if (!user) return;
-        if (!['landlord', 'property_manager'].includes(user.role)) {
-            router.push('/dashboard');
-            return;
-        }
-        // Fetch current verification status from profile
-        api.get('/users/me')
-            .then(({ data }) => {
-                setStatus(data.verificationStatus || 'none');
-            })
-            .catch(() => setStatus('none'))
-            .finally(() => setLoading(false));
+        if (!['admin', 'law_reviewer'].includes(user.role)) { router.push('/dashboard'); return; }
+        fetchAll();
     }, [user]); // eslint-disable-line
 
-    const addDocument = () => {
-        setDocuments(prev => [...prev, { url: '', documentType: 'cnic', originalName: '' }]);
-    };
-
-    const removeDocument = (idx) => {
-        setDocuments(prev => prev.filter((_, i) => i !== idx));
-    };
-
-    const updateDocument = (idx, field, value) => {
-        setDocuments(prev => prev.map((d, i) => i === idx ? { ...d, [field]: value } : d));
-    };
-
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        const valid = documents.filter(d => d.url.trim());
-        if (valid.length === 0) {
-            showToast('Please provide at least one document URL.');
-            return;
-        }
-        setSubmitting(true);
+    const fetchAll = async () => {
+        setLoading(true);
         try {
-            await api.post('/users/verification/submit', { documents: valid });
-            setStatus('pending');
-            showToast('Documents submitted! Awaiting admin review.');
-        } catch (err) {
-            showToast(err.response?.data?.message || 'Submission failed. Please try again.');
+            const [p, a] = await Promise.all([
+                api.get('/admin/verifications/pending'),
+                api.get('/admin/verifications/approved'),
+            ]);
+            setPending(Array.isArray(p.data) ? p.data : []);
+            setApproved(Array.isArray(a.data) ? a.data : []);
+        } catch {
+            showToast('Failed to load verifications.', 'error');
         } finally {
-            setSubmitting(false);
+            setLoading(false);
         }
     };
+
+    const handleApprove = async (userId) => {
+        setActionLoading(userId + '_approve');
+        try {
+            await api.put(`/admin/verifications/${userId}/approve`);
+            showToast('User documents approved!');
+            fetchAll();
+        } catch {
+            showToast('Failed to approve.', 'error');
+        } finally {
+            setActionLoading('');
+        }
+    };
+
+    const handleReject = async (userId) => {
+        setActionLoading(userId + '_reject');
+        try {
+            await api.put(`/admin/verifications/${userId}/reject`);
+            showToast('Documents rejected.');
+            fetchAll();
+        } catch {
+            showToast('Failed to reject.', 'error');
+        } finally {
+            setActionLoading('');
+        }
+    };
+
+    // Fetch a signed URL for one document and open it in a new tab
+    const handleViewDoc = async (userId, docIndex) => {
+        const key = `${userId}_${docIndex}`;
+        setViewingDocs(prev => ({ ...prev, [key]: true }));
+        try {
+            const { data } = await api.get(`/upload/verification-documents/${userId}`);
+            const doc = data.documents?.[docIndex];
+            if (doc?.url) {
+                window.open(doc.url, '_blank', 'noopener,noreferrer');
+            } else {
+                showToast('Document URL not available.', 'error');
+            }
+        } catch {
+            showToast('Failed to load document. Please try again.', 'error');
+        } finally {
+            setViewingDocs(prev => ({ ...prev, [key]: false }));
+        }
+    };
+
+    const list = tab === 'pending' ? pending : approved;
 
     if (loading) {
         return (
@@ -89,138 +123,142 @@ export default function VerificationPage() {
     }
 
     return (
-        <div className="max-w-2xl mx-auto space-y-6">
-            {/* Toast */}
-            {toast && (
-                <div className="fixed top-6 right-6 z-50 bg-white border border-blue-200 rounded-2xl px-5 py-3 shadow-xl text-sm font-medium text-blue-800 animate-in fade-in slide-in-from-top-2">
-                    {toast}
-                </div>
-            )}
+        <div className="max-w-5xl mx-auto space-y-6">
+            <Toast msg={toast.msg} type={toast.type} />
 
             {/* Header */}
-            <div>
-                <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-                    <BadgeCheck className="h-6 w-6 text-blue-600" />
-                    Document Verification
-                </h1>
-                <p className="text-sm text-gray-500 mt-1">
-                    Submit your identity and ownership documents to get verified.
-                </p>
+            <div className="flex items-center justify-between">
+                <div>
+                    <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+                        <BadgeCheck className="h-6 w-6 text-blue-600" />
+                        Document Verifications
+                    </h1>
+                    <p className="text-sm text-gray-500 mt-1">Review and approve landlord & property manager documents</p>
+                </div>
+                <div className="flex gap-2">
+                    <span className="bg-amber-100 text-amber-700 text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1">
+                        <Clock className="h-3 w-3" /> {pending.length} pending
+                    </span>
+                    <span className="bg-green-100 text-green-700 text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1">
+                        <CheckCircle className="h-3 w-3" /> {approved.length} approved
+                    </span>
+                </div>
             </div>
 
-            {/* Status Card */}
-            {status === 'approved' && (
-                <div className="flex items-center gap-3 bg-green-50 border border-green-200 rounded-2xl px-5 py-4">
-                    <CheckCircle className="h-8 w-8 text-green-600 shrink-0" />
-                    <div>
-                        <p className="font-bold text-green-800">Documents Verified ✓</p>
-                        <p className="text-sm text-green-700 mt-0.5">Your documents have been reviewed and approved by the admin. Your profile now shows as a verified landlord.</p>
-                    </div>
+            {/* Tabs */}
+            <div className="flex gap-2 border-b border-gray-100">
+                {['pending', 'approved'].map(t => (
+                    <button
+                        key={t}
+                        onClick={() => setTab(t)}
+                        className={`px-4 py-2.5 text-sm font-semibold rounded-t-xl transition-colors capitalize ${tab === t
+                                ? 'bg-white border border-b-white border-gray-100 text-blue-600 -mb-px'
+                                : 'text-gray-500 hover:text-gray-700'
+                            }`}
+                    >
+                        {t} ({t === 'pending' ? pending.length : approved.length})
+                    </button>
+                ))}
+            </div>
+
+            {/* List */}
+            {list.length === 0 ? (
+                <div className="text-center py-16 bg-white rounded-2xl border-2 border-dashed border-gray-200">
+                    <BadgeCheck className="mx-auto h-12 w-12 text-gray-300 mb-3" />
+                    <p className="font-semibold text-gray-500">No {tab} verifications</p>
                 </div>
-            )}
+            ) : (
+                <div className="space-y-4">
+                    {list.map((u) => (
+                        <div key={u._id} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+                            <div className="flex items-start justify-between gap-4">
+                                {/* User info */}
+                                <div className="flex items-center gap-3">
+                                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center text-white font-bold text-lg shrink-0">
+                                        {u.name?.charAt(0)?.toUpperCase() || '?'}
+                                    </div>
+                                    <div>
+                                        <p className="font-bold text-gray-900">{u.name}</p>
+                                        <p className="text-xs text-gray-500">{u.email}</p>
+                                        <span className="mt-1 inline-block bg-blue-50 border border-blue-200 text-blue-700 text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full">
+                                            {u.role?.replace('_', ' ')}
+                                        </span>
+                                    </div>
+                                </div>
 
-            {status === 'pending' && (
-                <div className="flex items-center gap-3 bg-amber-50 border border-amber-200 rounded-2xl px-5 py-4">
-                    <Clock className="h-8 w-8 text-amber-600 shrink-0" />
-                    <div>
-                        <p className="font-bold text-amber-800">Under Review</p>
-                        <p className="text-sm text-amber-700 mt-0.5">Your documents have been submitted and are awaiting admin review. This usually takes 1–2 business days.</p>
-                    </div>
-                </div>
-            )}
+                                {/* Actions */}
+                                {tab === 'pending' && (
+                                    <div className="flex gap-2 shrink-0">
+                                        <button
+                                            onClick={() => handleApprove(u._id)}
+                                            disabled={!!actionLoading}
+                                            className="flex items-center gap-1.5 bg-green-600 hover:bg-green-700 text-white text-xs font-bold px-4 py-2 rounded-xl transition-colors disabled:opacity-50"
+                                        >
+                                            {actionLoading === u._id + '_approve' ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <CheckCircle className="h-3.5 w-3.5" />}
+                                            Approve
+                                        </button>
+                                        <button
+                                            onClick={() => handleReject(u._id)}
+                                            disabled={!!actionLoading}
+                                            className="flex items-center gap-1.5 bg-red-100 hover:bg-red-200 text-red-700 text-xs font-bold px-4 py-2 rounded-xl transition-colors disabled:opacity-50"
+                                        >
+                                            {actionLoading === u._id + '_reject' ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <XCircle className="h-3.5 w-3.5" />}
+                                            Reject
+                                        </button>
+                                    </div>
+                                )}
 
-            {status === 'rejected' && (
-                <div className="flex items-center gap-3 bg-red-50 border border-red-200 rounded-2xl px-5 py-4">
-                    <AlertCircle className="h-8 w-8 text-red-600 shrink-0" />
-                    <div>
-                        <p className="font-bold text-red-800">Documents Rejected</p>
-                        <p className="text-sm text-red-700 mt-0.5">Your documents were not accepted. Please re-submit clearer or correct documents below.</p>
-                    </div>
-                </div>
-            )}
+                                {tab === 'approved' && (
+                                    <span className="flex items-center gap-1.5 bg-green-50 text-green-700 text-xs font-bold px-4 py-2 rounded-xl border border-green-200">
+                                        <CheckCircle className="h-3.5 w-3.5" /> Approved
+                                    </span>
+                                )}
+                            </div>
 
-            {/* Submission Form */}
-            {(status === 'none' || status === 'rejected') && (
-                <form onSubmit={handleSubmit} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-5">
-                    <div>
-                        <h2 className="font-bold text-gray-900 mb-1">Submit Verification Documents</h2>
-                        <p className="text-xs text-gray-500">Upload links to your documents from S3, Cloudinary, or any accessible URL. Accepted: CNIC, Passport, Business Registration, etc.</p>
-                    </div>
-
-                    {documents.map((doc, idx) => (
-                        <div key={idx} className="rounded-xl border border-gray-200 p-4 space-y-3 relative">
-                            {documents.length > 1 && (
-                                <button
-                                    type="button"
-                                    onClick={() => removeDocument(idx)}
-                                    className="absolute top-3 right-3 text-gray-400 hover:text-red-500"
-                                >
-                                    <X className="h-4 w-4" />
-                                </button>
+                            {/* Documents */}
+                            {u.verificationDocuments?.length > 0 && (
+                                <div className="mt-4 border-t border-gray-50 pt-4">
+                                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3 flex items-center gap-1.5">
+                                        <FileText className="h-3.5 w-3.5" /> Submitted Documents ({u.verificationDocuments.length})
+                                    </p>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                        {u.verificationDocuments.map((doc, i) => {
+                                            const key = `${u._id}_${i}`;
+                                            const isLoading = viewingDocs[key];
+                                            return (
+                                                <div key={i} className="flex items-center justify-between gap-2 bg-gray-50 rounded-xl px-3 py-2.5">
+                                                    <div className="flex items-center gap-2 min-w-0">
+                                                        <FileIcon name={doc.originalName} />
+                                                        <div className="min-w-0">
+                                                            <p className="text-xs font-semibold text-gray-700 capitalize">{doc.documentType?.replace(/_/g, ' ')}</p>
+                                                            {doc.originalName && <p className="text-[10px] text-gray-400 truncate">{doc.originalName}</p>}
+                                                        </div>
+                                                    </div>
+                                                    <button
+                                                        onClick={() => handleViewDoc(u._id, i)}
+                                                        disabled={isLoading}
+                                                        className="flex items-center gap-1 text-blue-600 hover:text-blue-700 text-xs font-semibold shrink-0 disabled:opacity-50"
+                                                    >
+                                                        {isLoading
+                                                            ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                                            : <><Eye className="h-3.5 w-3.5" /> View <ExternalLink className="h-3 w-3" /></>
+                                                        }
+                                                    </button>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
                             )}
-                            <div>
-                                <label className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Document Type</label>
-                                <select
-                                    value={doc.documentType}
-                                    onChange={e => updateDocument(idx, 'documentType', e.target.value)}
-                                    className="mt-1 w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                >
-                                    {DOC_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
-                                </select>
-                            </div>
-                            <div>
-                                <label className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Document URL</label>
-                                <input
-                                    type="url"
-                                    placeholder="https://..."
-                                    value={doc.url}
-                                    onChange={e => updateDocument(idx, 'url', e.target.value)}
-                                    className="mt-1 w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                />
-                            </div>
-                            <div>
-                                <label className="text-xs font-semibold text-gray-600 uppercase tracking-wide">File Name (optional)</label>
-                                <input
-                                    type="text"
-                                    placeholder="e.g. cnic-front.jpg"
-                                    value={doc.originalName}
-                                    onChange={e => updateDocument(idx, 'originalName', e.target.value)}
-                                    className="mt-1 w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                />
-                            </div>
+
+                            {/* No documents fallback */}
+                            {(!u.verificationDocuments || u.verificationDocuments.length === 0) && (
+                                <p className="mt-4 text-xs text-gray-400 italic border-t border-gray-50 pt-4">No documents submitted yet.</p>
+                            )}
                         </div>
                     ))}
-
-                    <button
-                        type="button"
-                        onClick={addDocument}
-                        className="flex items-center gap-2 text-sm font-semibold text-blue-600 hover:text-blue-700"
-                    >
-                        <Plus className="h-4 w-4" /> Add another document
-                    </button>
-
-                    <button
-                        type="submit"
-                        disabled={submitting}
-                        className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-2xl transition-colors disabled:opacity-50"
-                    >
-                        {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
-                        {submitting ? 'Submitting…' : 'Submit Documents'}
-                    </button>
-                </form>
+                </div>
             )}
-
-            {/* Info box */}
-            <div className="bg-blue-50 border border-blue-100 rounded-2xl px-5 py-4">
-                <p className="text-xs font-semibold text-blue-700 mb-2 flex items-center gap-1.5">
-                    <FileText className="h-3.5 w-3.5" /> What happens after submission?
-                </p>
-                <ul className="text-xs text-blue-700 space-y-1 list-disc list-inside">
-                    <li>The admin will review your submitted documents</li>
-                    <li>Once approved, your profile will show a <strong>Verified Landlord</strong> badge</li>
-                    <li>Verified listings build trust with tenants and rank higher</li>
-                </ul>
-            </div>
         </div>
     );
 }

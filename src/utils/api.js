@@ -27,11 +27,7 @@ api.interceptors.response.use(
       originalRequest._retry = true; // Prevent infinite loop
 
       try {
-        const { data } = await axios.post(
-          `${process.env.NEXT_PUBLIC_API_URL || '/api'}/auth/refresh`,
-          {},
-          { withCredentials: true }
-        );
+        const { data } = await api.post('/auth/refresh', {}, { withCredentials: true });
         localStorage.setItem('token', data.token);
         originalRequest.headers.Authorization = `Bearer ${data.token}`;
         return api(originalRequest); // Retry the original request

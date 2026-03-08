@@ -14,27 +14,27 @@ import { useState, useEffect, useCallback } from 'react';
 import api from '@/utils/api';
 
 const TIER_BADGE = {
-  free:       'bg-gray-100 text-gray-700',
-  pro:        'bg-blue-100 text-blue-700',
+  free: 'bg-gray-100 text-gray-700',
+  pro: 'bg-blue-100 text-blue-700',
   enterprise: 'bg-purple-100 text-purple-700',
 };
 
 const STATUS_BADGE = {
-  active:   'bg-green-100 text-green-700',
+  active: 'bg-green-100 text-green-700',
   trialing: 'bg-yellow-100 text-yellow-700',
   past_due: 'bg-red-100 text-red-700',
   canceled: 'bg-gray-100 text-gray-500',
 };
 
 export default function AdminBillingPage() {
-  const [data,     setData]     = useState(null);
-  const [loading,  setLoading]  = useState(true);
-  const [error,    setError]    = useState(null);
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   // Filters + pagination
-  const [page,     setPage]     = useState(1);
-  const [tier,     setTier]     = useState('');
-  const [search,   setSearch]   = useState('');
+  const [page, setPage] = useState(1);
+  const [tier, setTier] = useState('');
+  const [search, setSearch] = useState('');
   const [searchInput, setSearchInput] = useState('');
 
   const fetchData = useCallback(async () => {
@@ -42,10 +42,10 @@ export default function AdminBillingPage() {
     setError(null);
     try {
       const params = new URLSearchParams({ page, limit: 25 });
-      if (tier)   params.set('tier',   tier);
+      if (tier) params.set('tier', tier);
       if (search) params.set('search', search);
 
-      const res = await api.get(`/api/admin/billing/users?${params}`);
+      const res = await api.get(`/admin/billing/users?${params}`);
       setData(res.data);
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to load billing data');
@@ -78,10 +78,10 @@ export default function AdminBillingPage() {
       {data?.summary && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
           {[
-            { label: 'Free',       value: data.summary.free,       color: 'bg-gray-50  border-gray-200',   badge: 'text-gray-700'  },
-            { label: 'Pro',        value: data.summary.pro,        color: 'bg-blue-50  border-blue-200',   badge: 'text-blue-700'  },
+            { label: 'Free', value: data.summary.free, color: 'bg-gray-50  border-gray-200', badge: 'text-gray-700' },
+            { label: 'Pro', value: data.summary.pro, color: 'bg-blue-50  border-blue-200', badge: 'text-blue-700' },
             { label: 'Enterprise', value: data.summary.enterprise, color: 'bg-purple-50 border-purple-200', badge: 'text-purple-700' },
-            { label: 'Monthly MRR',value: fmt(data.summary.totalMRR), color: 'bg-green-50 border-green-200', badge: 'text-green-700' },
+            { label: 'Monthly MRR', value: fmt(data.summary.totalMRR), color: 'bg-green-50 border-green-200', badge: 'text-green-700' },
           ].map(({ label, value, color, badge }) => (
             <div key={label} className={`rounded-xl border p-4 ${color}`}>
               <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">{label}</p>
@@ -174,14 +174,14 @@ export default function AdminBillingPage() {
                 ) : (
                   data?.users?.map((user) => {
                     const effectiveTier = user.subscriptionTier || 'free';
-                    const status        = user.subscriptionStatus || (effectiveTier === 'free' ? 'free' : 'active');
+                    const status = effectiveTier === 'free' ? 'free' : 'active';
                     return (
                       <tr key={user._id} className="hover:bg-gray-50 transition-colors">
                         {/* User */}
                         <td className="px-4 py-3">
                           <p className="font-medium text-gray-900">{user.name}</p>
                           <p className="text-gray-400 text-xs">{user.email}</p>
-                          {user.isBanned && (
+                          {!user.isActive && (
                             <span className="text-xs bg-red-100 text-red-600 px-1.5 py-0.5 rounded">Banned</span>
                           )}
                         </td>
@@ -220,7 +220,7 @@ export default function AdminBillingPage() {
                         </td>
 
                         {/* Plan Changed */}
-                        <td className="px-4 py-3 text-gray-500">{fmtDate(user.subscriptionUpdatedAt)}</td>
+                        <td className="px-4 py-3 text-gray-500">{fmtDate(user.subscriptionStartDate)}</td>
 
                         {/* Joined */}
                         <td className="px-4 py-3 text-gray-500">{fmtDate(user.createdAt)}</td>

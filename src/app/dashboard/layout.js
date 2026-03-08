@@ -236,7 +236,10 @@ export default function DashboardLayout({ children }) {
 
     // Admin routes
     if (pathname.startsWith('/dashboard/admin')) {
-      if (role === 'law_reviewer' && pathname.startsWith('/dashboard/admin/templates')) return;
+      if (role === 'law_reviewer' && (
+        pathname.startsWith('/dashboard/admin/templates') ||
+        pathname.startsWith('/dashboard/admin/verifications')
+      )) return;
       if (role !== 'admin') router.push('/dashboard');
     }
     // Landlord specific routes
