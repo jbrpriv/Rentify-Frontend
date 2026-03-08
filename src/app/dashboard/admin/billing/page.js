@@ -145,20 +145,16 @@ export default function AdminBillingPage() {
             <table className="min-w-full divide-y divide-gray-100 text-sm">
               <thead className="bg-gray-50 text-gray-500 text-xs uppercase tracking-wide">
                 <tr>
-                  <th className="px-4 py-3 text-left">User</th>
-                  <th className="px-4 py-3 text-left">Role</th>
+                  <th className="px-4 py-3 text-left">Landlord</th>
                   <th className="px-4 py-3 text-left">Plan</th>
-                  <th className="px-4 py-3 text-left">Status</th>
-                  <th className="px-4 py-3 text-left">Stripe Customer</th>
-                  <th className="px-4 py-3 text-left">Plan Changed</th>
                   <th className="px-4 py-3 text-left">Joined</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
                 {loading ? (
-                  Array.from({ length: 8 }).map((_, i) => (
+                  Array.from({ length: 3 }).map((_, i) => (
                     <tr key={i} className="animate-pulse">
-                      {Array.from({ length: 7 }).map((__, j) => (
+                      {Array.from({ length: 3 }).map((__, j) => (
                         <td key={j} className="px-4 py-3">
                           <div className="h-4 bg-gray-200 rounded w-24" />
                         </td>
@@ -167,17 +163,16 @@ export default function AdminBillingPage() {
                   ))
                 ) : data?.users?.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="px-4 py-10 text-center text-gray-400">
-                      No users found.
+                    <td colSpan={3} className="px-4 py-10 text-center text-gray-400">
+                      No landlords found.
                     </td>
                   </tr>
                 ) : (
                   data?.users?.map((user) => {
                     const effectiveTier = user.subscriptionTier || 'free';
-                    const status = effectiveTier === 'free' ? 'free' : 'active';
                     return (
                       <tr key={user._id} className="hover:bg-gray-50 transition-colors">
-                        {/* User */}
+                        {/* Landlord */}
                         <td className="px-4 py-3">
                           <p className="font-medium text-gray-900">{user.name}</p>
                           <p className="text-gray-400 text-xs">{user.email}</p>
@@ -186,41 +181,12 @@ export default function AdminBillingPage() {
                           )}
                         </td>
 
-                        {/* Role */}
-                        <td className="px-4 py-3 capitalize text-gray-600">{user.role}</td>
-
                         {/* Plan */}
                         <td className="px-4 py-3">
                           <span className={`px-2 py-0.5 rounded-full text-xs font-semibold capitalize ${TIER_BADGE[effectiveTier] || TIER_BADGE.free}`}>
                             {effectiveTier}
                           </span>
                         </td>
-
-                        {/* Status */}
-                        <td className="px-4 py-3">
-                          <span className={`px-2 py-0.5 rounded-full text-xs font-medium capitalize ${STATUS_BADGE[status] || STATUS_BADGE.canceled}`}>
-                            {status}
-                          </span>
-                        </td>
-
-                        {/* Stripe Customer */}
-                        <td className="px-4 py-3">
-                          {user.stripeCustomerId ? (
-                            <a
-                              href={`https://dashboard.stripe.com/customers/${user.stripeCustomerId}`}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="text-indigo-600 hover:underline text-xs font-mono"
-                            >
-                              {user.stripeCustomerId}
-                            </a>
-                          ) : (
-                            <span className="text-gray-300">—</span>
-                          )}
-                        </td>
-
-                        {/* Plan Changed */}
-                        <td className="px-4 py-3 text-gray-500">{fmtDate(user.subscriptionStartDate)}</td>
 
                         {/* Joined */}
                         <td className="px-4 py-3 text-gray-500">{fmtDate(user.createdAt)}</td>

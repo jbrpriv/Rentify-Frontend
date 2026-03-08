@@ -37,7 +37,6 @@ export default function AdminVerificationsPage() {
     const [approved, setApproved] = useState([]);
     const [loading, setLoading] = useState(true);
     const [actionLoading, setActionLoading] = useState('');
-    const [viewingDocs, setViewingDocs] = useState({}); // userId -> loading state
     const [toast, setToast] = useState({ msg: '', type: 'success' });
 
     const showToast = (msg, type = 'success') => {
@@ -93,22 +92,15 @@ export default function AdminVerificationsPage() {
         }
     };
 
-    // Fetch a signed URL for one document and open it in a new tab
-    const handleViewDoc = async (userId, docIndex) => {
-        const key = `${userId}_${docIndex}`;
-        setViewingDocs(prev => ({ ...prev, [key]: true }));
-        try {
-            const { data } = await api.get(`/upload/verification-documents/${userId}`);
-            const doc = data.documents?.[docIndex];
-            if (doc?.url) {
-                window.open(doc.url, '_blank', 'noopener,noreferrer');
-            } else {
-                showToast('Document URL not available.', 'error');
-            }
-        } catch {
-            showToast('Failed to load document. Please try again.', 'error');
-        } finally {
-            setViewingDocs(prev => ({ ...prev, [key]: false }));
+    // Open a verification document — URLs are already signed and loaded in state
+    const handleViewDoc = (userId, docIndex) => {
+        const allUsers = [...pending, ...approved];
+        const u = allUsers.find(u => u._id === userId);
+        const doc = u?.verificationDocuments?.[docIndex];
+        if (doc?.url) {
+            window.open(doc.url, '_blank', 'noopener,noreferrer');
+        } else {
+            showToast('Document URL not available.', 'error');
         }
     };
 
@@ -223,8 +215,6 @@ export default function AdminVerificationsPage() {
                                     </p>
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                                         {u.verificationDocuments.map((doc, i) => {
-                                            const key = `${u._id}_${i}`;
-                                            const isLoading = viewingDocs[key];
                                             return (
                                                 <div key={i} className="flex items-center justify-between gap-2 bg-gray-50 rounded-xl px-3 py-2.5">
                                                     <div className="flex items-center gap-2 min-w-0">
@@ -236,13 +226,9 @@ export default function AdminVerificationsPage() {
                                                     </div>
                                                     <button
                                                         onClick={() => handleViewDoc(u._id, i)}
-                                                        disabled={isLoading}
-                                                        className="flex items-center gap-1 text-blue-600 hover:text-blue-700 text-xs font-semibold shrink-0 disabled:opacity-50"
+                                                        className="flex items-center gap-1 text-blue-600 hover:text-blue-700 text-xs font-semibold shrink-0"
                                                     >
-                                                        {isLoading
-                                                            ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                                                            : <><Eye className="h-3.5 w-3.5" /> View <ExternalLink className="h-3 w-3" /></>
-                                                        }
+                                                        <Eye className="h-3.5 w-3.5" /> View <ExternalLink className="h-3 w-3" />
                                                     </button>
                                                 </div>
                                             );
