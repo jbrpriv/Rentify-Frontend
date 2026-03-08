@@ -93,7 +93,7 @@ export default function SuperLoginPage() {
         setStep('email');
       } else {
         const recaptchaToken = await getRecaptchaToken('login');
-        const { data } = await api.post('/auth/login', { email: formData.email, password: formData.password, recaptchaToken });
+        const { data } = await api.post('/auth/super-login', { email: formData.email, password: formData.password, recaptchaToken });
         if (!['admin', 'law_reviewer'].includes(data.role)) {
           setError('Access denied. This portal is for admins and law reviewers only.');
           return;
@@ -132,7 +132,7 @@ export default function SuperLoginPage() {
       await api.post('/auth/verify-email', { email: formData.email, code: emailCode });
       try {
         const recaptchaToken = await getRecaptchaToken('login');
-        const { data } = await api.post('/auth/login', { email: formData.email, password: formData.password, recaptchaToken });
+        const { data } = await api.post('/auth/super-login', { email: formData.email, password: formData.password, recaptchaToken });
         if (!['admin', 'law_reviewer'].includes(data.role)) {
           setError('Access denied. This portal is for admins and law reviewers only.');
           setStep('main');

@@ -1,12 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useUser } from '@/context/UserContext';
 import api from '@/utils/api';
 import {
     BadgeCheck, Upload, FileText, CheckCircle, Clock,
-    AlertCircle, Loader2, X, Plus,
+    AlertCircle, Loader2, X, FileImage, Plus,
 } from 'lucide-react';
 
 const DOC_TYPES = [
@@ -18,20 +18,29 @@ const DOC_TYPES = [
     { value: 'other', label: 'Other' },
 ];
 
+function FileIcon({ name }) {
+    const ext = name?.split('.').pop()?.toLowerCase();
+    if (['jpg', 'jpeg', 'png', 'webp'].includes(ext))
+        return <FileImage className="w-5 h-5 text-purple-500" />;
+    return <FileText className="w-5 h-5 text-blue-500" />;
+}
+
 export default function VerificationPage() {
     const { user } = useUser();
     const router = useRouter();
-    const [status, setStatus] = useState(null); // 'none' | 'pending' | 'approved' | 'rejected'
-    const [loading, setLoading] = useState(true);
-    const [submitting, setSubmitting] = useState(false);
-    const [toast, setToast] = useState('');
-    const [documents, setDocuments] = useState([
-        { url: '', documentType: 'cnic', originalName: '' },
-    ]);
 
-    const showToast = (msg) => {
-        setToast(msg);
-        setTimeout(() => setToast(''), 4000);
+    const [status, setStatus] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [uploading, setUploading] = useState(false);
+    const [toast, setToast] = useState({ msg: '', type: 'success' });
+    const [docType, setDocType] = useState('cnic');
+    const [files, setFiles] = useState([]);
+
+    const inputRef = useRef(null);
+
+    const showToast = (msg, type = 'success') => {
+        setToast({ msg, type });
+        setTimeout(() => setToast({ msg: '', type: 'success' }), 4000);
     };
 
     useEffect(() => {
@@ -40,60 +49,66 @@ export default function VerificationPage() {
             router.push('/dashboard');
             return;
         }
-        // Fetch current verification status from profile
         api.get('/users/me')
-            .then(({ data }) => {
-                setStatus(data.verificationStatus || 'none');
-            })
+            .then(({ data }) => setStatus(data.verificationStatus || 'none'))
             .catch(() => setStatus('none'))
             .finally(() => setLoading(false));
     }, [user]); // eslint-disable-line
 
-    const addDocument = () => {
-        setDocuments(prev => [...prev, { url: '', documentType: 'cnic', originalName: '' }]);
+    const handleFileChange = (e) => {
+        const selected = Array.from(e.target.files);
+        if (selected.some(f => f.size > 10 * 1024 * 1024)) {
+            showToast('Each file must be under 10 MB.', 'error');
+            return;
+        }
+        setFiles(prev => {
+            const combined = [...prev, ...selected];
+            if (combined.length > 5) {
+                showToast('Maximum 5 files allowed.', 'error');
+                return prev;
+            }
+            return combined;
+        });
+        e.target.value = '';
     };
 
-    const removeDocument = (idx) => {
-        setDocuments(prev => prev.filter((_, i) => i !== idx));
-    };
-
-    const updateDocument = (idx, field, value) => {
-        setDocuments(prev => prev.map((d, i) => i === idx ? { ...d, [field]: value } : d));
-    };
+    const removeFile = (idx) => setFiles(prev => prev.filter((_, i) => i !== idx));
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        const valid = documents.filter(d => d.url.trim());
-        if (valid.length === 0) {
-            showToast('Please provide at least one document URL.');
-            return;
-        }
-        setSubmitting(true);
+        if (files.length === 0) { showToast('Please select at least one file.', 'error'); return; }
+        setUploading(true);
         try {
-            await api.post('/users/verification/submit', { documents: valid });
+            const formData = new FormData();
+            files.forEach(f => formData.append('documents', f));
+            formData.append('documentType', docType);
+            await api.post('/upload/verification-documents', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' },
+            });
+            setFiles([]);
             setStatus('pending');
-            showToast('Documents submitted! Awaiting admin review.');
+            showToast('Documents uploaded! Awaiting admin review.');
         } catch (err) {
-            showToast(err.response?.data?.message || 'Submission failed. Please try again.');
+            showToast(err.response?.data?.message || 'Upload failed. Please try again.', 'error');
         } finally {
-            setSubmitting(false);
+            setUploading(false);
         }
     };
 
-    if (loading) {
-        return (
-            <div className="flex justify-center items-center py-20">
-                <Loader2 className="animate-spin h-10 w-10 text-blue-600" />
-            </div>
-        );
-    }
+    if (loading) return (
+        <div className="flex justify-center items-center py-20">
+            <Loader2 className="animate-spin h-10 w-10 text-blue-600" />
+        </div>
+    );
 
     return (
         <div className="max-w-2xl mx-auto space-y-6">
+
             {/* Toast */}
-            {toast && (
-                <div className="fixed top-6 right-6 z-50 bg-white border border-blue-200 rounded-2xl px-5 py-3 shadow-xl text-sm font-medium text-blue-800 animate-in fade-in slide-in-from-top-2">
-                    {toast}
+            {toast.msg && (
+                <div className={`fixed top-6 right-6 z-50 border rounded-2xl px-5 py-3 shadow-xl text-sm font-medium animate-in fade-in slide-in-from-top-2 ${toast.type === 'error' ? 'bg-red-50 border-red-200 text-red-800' : 'bg-white border-blue-200 text-blue-800'
+                    }`}>
+                    {toast.msg}
                 </div>
             )}
 
@@ -103,18 +118,16 @@ export default function VerificationPage() {
                     <BadgeCheck className="h-6 w-6 text-blue-600" />
                     Document Verification
                 </h1>
-                <p className="text-sm text-gray-500 mt-1">
-                    Submit your identity and ownership documents to get verified.
-                </p>
+                <p className="text-sm text-gray-500 mt-1">Submit your identity or ownership documents to get verified.</p>
             </div>
 
-            {/* Status Card */}
+            {/* Status banners */}
             {status === 'approved' && (
                 <div className="flex items-center gap-3 bg-green-50 border border-green-200 rounded-2xl px-5 py-4">
                     <CheckCircle className="h-8 w-8 text-green-600 shrink-0" />
                     <div>
                         <p className="font-bold text-green-800">Documents Verified ✓</p>
-                        <p className="text-sm text-green-700 mt-0.5">Your documents have been reviewed and approved by the admin. Your profile now shows as a verified landlord.</p>
+                        <p className="text-sm text-green-700 mt-0.5">Your documents have been approved. Your profile now shows as a verified landlord.</p>
                     </div>
                 </div>
             )}
@@ -139,86 +152,91 @@ export default function VerificationPage() {
                 </div>
             )}
 
-            {/* Submission Form */}
-            {(status === 'none' || status === 'rejected') && (
+            {/* Upload form — shown when not yet approved */}
+            {status !== 'approved' && (
                 <form onSubmit={handleSubmit} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-5">
                     <div>
-                        <h2 className="font-bold text-gray-900 mb-1">Submit Verification Documents</h2>
-                        <p className="text-xs text-gray-500">Upload links to your documents from S3, Cloudinary, or any accessible URL. Accepted: CNIC, Passport, Business Registration, etc.</p>
+                        <h2 className="font-bold text-gray-900 mb-0.5">
+                            {status === 'pending' ? 'Re-submit Documents' : 'Submit Verification Documents'}
+                        </h2>
+                        <p className="text-xs text-gray-500">Accepted: PDF, JPG, PNG, WEBP · Max 5 files · 10 MB each · Stored securely in S3</p>
                     </div>
 
-                    {documents.map((doc, idx) => (
-                        <div key={idx} className="rounded-xl border border-gray-200 p-4 space-y-3 relative">
-                            {documents.length > 1 && (
-                                <button
-                                    type="button"
-                                    onClick={() => removeDocument(idx)}
-                                    className="absolute top-3 right-3 text-gray-400 hover:text-red-500"
-                                >
-                                    <X className="h-4 w-4" />
-                                </button>
-                            )}
-                            <div>
-                                <label className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Document Type</label>
-                                <select
-                                    value={doc.documentType}
-                                    onChange={e => updateDocument(idx, 'documentType', e.target.value)}
-                                    className="mt-1 w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                >
-                                    {DOC_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
-                                </select>
-                            </div>
-                            <div>
-                                <label className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Document URL</label>
-                                <input
-                                    type="url"
-                                    placeholder="https://..."
-                                    value={doc.url}
-                                    onChange={e => updateDocument(idx, 'url', e.target.value)}
-                                    className="mt-1 w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                />
-                            </div>
-                            <div>
-                                <label className="text-xs font-semibold text-gray-600 uppercase tracking-wide">File Name (optional)</label>
-                                <input
-                                    type="text"
-                                    placeholder="e.g. cnic-front.jpg"
-                                    value={doc.originalName}
-                                    onChange={e => updateDocument(idx, 'originalName', e.target.value)}
-                                    className="mt-1 w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                />
-                            </div>
-                        </div>
-                    ))}
+                    {/* Document type */}
+                    <div>
+                        <label className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Document Type</label>
+                        <select
+                            value={docType}
+                            onChange={e => setDocType(e.target.value)}
+                            className="mt-1.5 w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        >
+                            {DOC_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
+                        </select>
+                    </div>
 
-                    <button
-                        type="button"
-                        onClick={addDocument}
-                        className="flex items-center gap-2 text-sm font-semibold text-blue-600 hover:text-blue-700"
-                    >
-                        <Plus className="h-4 w-4" /> Add another document
-                    </button>
+                    {/* Drop zone */}
+                    <div>
+                        <label className="text-xs font-semibold text-gray-600 uppercase tracking-wide mb-1.5 block">Files</label>
+                        <button
+                            type="button"
+                            onClick={() => inputRef.current?.click()}
+                            className="w-full flex flex-col items-center justify-center gap-2 border-2 border-dashed border-gray-200 hover:border-blue-400 hover:bg-blue-50/40 rounded-2xl py-8 transition-colors cursor-pointer"
+                        >
+                            <Upload className="h-7 w-7 text-gray-400" />
+                            <p className="text-sm font-semibold text-gray-600">Click to select files</p>
+                            <p className="text-xs text-gray-400">PDF, JPG, PNG, WEBP — up to 5 files</p>
+                        </button>
+                        <input
+                            ref={inputRef}
+                            type="file"
+                            multiple
+                            accept=".pdf,.jpg,.jpeg,.png,.webp"
+                            className="hidden"
+                            onChange={handleFileChange}
+                        />
+                    </div>
+
+                    {/* Selected files list */}
+                    {files.length > 0 && (
+                        <div className="space-y-2">
+                            {files.map((f, i) => (
+                                <div key={i} className="flex items-center gap-3 bg-gray-50 rounded-xl px-3 py-2.5">
+                                    <FileIcon name={f.name} />
+                                    <div className="flex-1 min-w-0">
+                                        <p className="text-sm font-medium text-gray-700 truncate">{f.name}</p>
+                                        <p className="text-xs text-gray-400">{(f.size / 1024).toFixed(0)} KB</p>
+                                    </div>
+                                    <button type="button" onClick={() => removeFile(i)} className="text-gray-400 hover:text-red-500 transition-colors">
+                                        <X className="h-4 w-4" />
+                                    </button>
+                                </div>
+                            ))}
+                            <button type="button" onClick={() => inputRef.current?.click()} className="flex items-center gap-1.5 text-sm font-semibold text-blue-600 hover:text-blue-700 mt-1">
+                                <Plus className="h-4 w-4" /> Add more files
+                            </button>
+                        </div>
+                    )}
 
                     <button
                         type="submit"
-                        disabled={submitting}
+                        disabled={uploading || files.length === 0}
                         className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-2xl transition-colors disabled:opacity-50"
                     >
-                        {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
-                        {submitting ? 'Submitting…' : 'Submit Documents'}
+                        {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+                        {uploading ? 'Uploading…' : 'Submit Documents'}
                     </button>
                 </form>
             )}
 
-            {/* Info box */}
+            {/* Info */}
             <div className="bg-blue-50 border border-blue-100 rounded-2xl px-5 py-4">
                 <p className="text-xs font-semibold text-blue-700 mb-2 flex items-center gap-1.5">
                     <FileText className="h-3.5 w-3.5" /> What happens after submission?
                 </p>
                 <ul className="text-xs text-blue-700 space-y-1 list-disc list-inside">
-                    <li>The admin will review your submitted documents</li>
-                    <li>Once approved, your profile will show a <strong>Verified Landlord</strong> badge</li>
-                    <li>Verified listings build trust with tenants and rank higher</li>
+                    <li>The admin will review your documents from the S3 vault</li>
+                    <li>Once approved, your profile shows a <strong>Verified Landlord</strong> badge</li>
+                    <li>Verified listings build trust with tenants</li>
                 </ul>
             </div>
         </div>
