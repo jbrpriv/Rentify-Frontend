@@ -10,7 +10,7 @@ import { useUser } from '@/context/UserContext';
 import {
   LayoutDashboard, Building2, FileText, Users, Key, User, Loader2, FolderOpen, Zap,
   ShieldCheck, Wrench, MessageSquare, CreditCard, BarChart2, Scale, TrendingUp,
-  ClipboardList, X, Tag, BookOpen, Menu,
+  ClipboardList, X, Tag, BookOpen, Menu, BadgeCheck,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -26,6 +26,7 @@ const NAV_BY_ROLE = {
     { name: 'Maintenance', href: '/dashboard/maintenance', icon: Wrench, badgeKey: 'maintenance' },
     { name: 'Messages', href: '/dashboard/messages', icon: MessageSquare, badgeKey: 'messages' },
     { name: 'Disputes', href: '/dashboard/disputes', icon: Scale },
+    { name: 'Verification', href: '/dashboard/verification', icon: BadgeCheck },
     { name: 'Billing', href: '/dashboard/billing', icon: Zap },
     { name: 'Profile', href: '/dashboard/profile', icon: User },
   ],
@@ -49,6 +50,8 @@ const NAV_BY_ROLE = {
     { name: 'Properties', href: '/dashboard/admin/properties', icon: Building2 },
     { name: 'Templates', href: '/dashboard/admin/templates', icon: ClipboardList },
     { name: 'Agr. Templates', href: '/dashboard/admin/agreement-templates', icon: BookOpen },
+    { name: 'Verifications', href: '/dashboard/admin/verifications', icon: BadgeCheck },
+    { name: 'Billing', href: '/dashboard/admin/billing', icon: CreditCard },
     { name: 'Disputes', href: '/dashboard/disputes', icon: Scale },
     { name: 'Messages', href: '/dashboard/messages', icon: MessageSquare, badgeKey: 'messages' },
     { name: 'Audit Logs', href: '/dashboard/admin/audit-logs', icon: ShieldCheck },
@@ -60,6 +63,7 @@ const NAV_BY_ROLE = {
     { name: 'Tenants', href: '/dashboard/pm/tenants', icon: Users },
     { name: 'Maintenance', href: '/dashboard/pm/maintenance', icon: Wrench, badgeKey: 'maintenance' },
     { name: 'Messages', href: '/dashboard/messages', icon: MessageSquare, badgeKey: 'messages' },
+    { name: 'Verification', href: '/dashboard/verification', icon: BadgeCheck },
     { name: 'Profile', href: '/dashboard/profile', icon: User },
   ],
   law_reviewer: [
@@ -330,7 +334,16 @@ export default function DashboardLayout({ children }) {
   }
 
   const role = user.role || 'tenant';
-  const currentNav = NAV_BY_ROLE[role] || NAV_BY_ROLE.tenant;
+  const tier = user.subscriptionTier || 'free';
+  let currentNav = NAV_BY_ROLE[role] || NAV_BY_ROLE.tenant;
+  // Filter sidebar items based on subscription tier for landlords
+  if (role === 'landlord') {
+    currentNav = currentNav.filter(item => {
+      if (item.href === '/dashboard/analytics' && tier === 'free') return false;
+      if (item.href === '/dashboard/agreement-templates' && tier !== 'enterprise') return false;
+      return true;
+    });
+  }
   const pulseColor = ROLE_PULSE[role] || 'bg-gray-400';
   const badgeColor = ROLE_BADGE[role] || 'bg-gray-100 text-gray-600 border-gray-200';
 

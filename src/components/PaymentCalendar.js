@@ -10,11 +10,17 @@ const PaymentCalendar = ({ theme, agreements = [], payments = [] }) => {
     const [selectedDayInfo, setSelectedDayInfo] = useState(null);
     const [sendingReminder, setSendingReminder] = useState(null);
     const [downloadingReceipt, setDownloadingReceipt] = useState(null);
+    const [calToast, setCalToast] = useState('');
 
-    const year  = currentDate.getFullYear();
+    const showCalToast = (msg) => {
+        setCalToast(msg);
+        setTimeout(() => setCalToast(''), 3500);
+    };
+
+    const year = currentDate.getFullYear();
     const month = currentDate.getMonth();
 
-    const daysInMonth    = new Date(year, month + 1, 0).getDate();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
     const firstDayOfMonth = new Date(year, month, 1).getDay();
 
     const handlePrevMonth = () => setCurrentDate(new Date(year, month - 1, 1));
@@ -73,7 +79,22 @@ const PaymentCalendar = ({ theme, agreements = [], payments = [] }) => {
     };
 
     return (
-        <div style={{ background: 'white', borderRadius: 20, border: '1px solid rgba(11, 45, 114, 0.12)', padding: '24px', overflow: 'hidden' }}>
+        <div style={{ background: 'white', borderRadius: 20, border: '1px solid rgba(11, 45, 114, 0.12)', padding: '24px', overflow: 'hidden', position: 'relative' }}>
+            {/* Receipt Toast */}
+            {calToast && (
+                <div style={{
+                    position: 'absolute', top: 16, right: 16, zIndex: 50,
+                    background: '#ECFDF5', border: '1px solid #6EE7B7',
+                    borderRadius: 12, padding: '10px 16px',
+                    fontSize: '0.8rem', fontWeight: 600, color: '#065F46',
+                    display: 'flex', alignItems: 'center', gap: 8,
+                    boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
+                    animation: 'fadeInDown 0.25s ease',
+                }}>
+                    <Download size={14} color="#059669" />
+                    {calToast}
+                </div>
+            )}
             {/* Header */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -153,7 +174,36 @@ const PaymentCalendar = ({ theme, agreements = [], payments = [] }) => {
                                 {/* Indicators */}
                                 {dayPayments.length > 0 && (
                                     <div style={{ position: 'absolute', bottom: 6, display: 'flex', gap: 2 }}>
-                                        {hasPaid && <CheckCircle size={10} color="#10B981" />}
+                                        {hasPaid && (
+                                            <button
+                                                onClick={async (e) => {
+                                                    e.stopPropagation();
+                                                    const paidPayment = dayPayments.find(p => p.status === 'paid');
+                                                    if (!paidPayment) return;
+                                                    const pid = paidPayment._id;
+                                                    if (!pid || pid.startsWith('temp_')) {
+                                                        showCalToast('Receipt not available for this payment.');
+                                                        return;
+                                                    }
+                                                    setDownloadingReceipt(pid);
+                                                    try {
+                                                        const { data } = await api.get(`/payments/${pid}/receipt`);
+                                                        if (data?.url) {
+                                                            window.open(data.url, '_blank', 'noopener,noreferrer');
+                                                            showCalToast('Receipt opened — check your new tab!');
+                                                        }
+                                                    } catch {
+                                                        showCalToast('Receipt not available yet. Try again later.');
+                                                    } finally {
+                                                        setDownloadingReceipt(null);
+                                                    }
+                                                }}
+                                                title="Download Receipt"
+                                                style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+                                            >
+                                                {downloadingReceipt ? <Loader2 size={10} color="#10B981" style={{ animation: 'spin 1s linear infinite' }} /> : <CheckCircle size={10} color="#10B981" />}
+                                            </button>
+                                        )}
                                         {hasPending && <Clock size={10} color="#F59E0B" />}
                                     </div>
                                 )}

@@ -19,11 +19,11 @@ const TABS = [
 ];
 
 const ROLE_CONFIG = {
-  admin:           { label: 'Administrator',  color: '#DC2626', bg: 'rgba(220,38,38,0.12)'    },
-  landlord:        { label: 'Landlord',        color: '#ffffff', bg: 'rgba(255,255,255,0.2)'   },
-  property_manager:{ label: 'Prop. Manager',  color: '#ffffff', bg: 'rgba(255,255,255,0.2)'   },
-  tenant:          { label: 'Tenant',          color: '#ffffff', bg: 'rgba(255,255,255,0.2)'   },
-  law_reviewer:    { label: 'Law Reviewer',    color: '#ffffff', bg: 'rgba(255,255,255,0.2)'   },
+  admin: { label: 'Administrator', color: '#DC2626', bg: 'rgba(220,38,38,0.12)' },
+  landlord: { label: 'Landlord', color: '#ffffff', bg: 'rgba(255,255,255,0.2)' },
+  property_manager: { label: 'Prop. Manager', color: '#ffffff', bg: 'rgba(255,255,255,0.2)' },
+  tenant: { label: 'Tenant', color: '#ffffff', bg: 'rgba(255,255,255,0.2)' },
+  law_reviewer: { label: 'Law Reviewer', color: '#ffffff', bg: 'rgba(255,255,255,0.2)' },
 };
 
 /* ─── Small helpers ───────────────────────────────────────────────────────── */
@@ -603,9 +603,24 @@ export default function ProfilePage() {
     ? new Date(user.createdAt).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
     : null;
   const displayPhoto = photoPreview || user.profilePhoto;
+  const showDocWarning = ['landlord', 'property_manager'].includes(user.role) && !user.documentsVerified;
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
+
+      {/* ── Documents Not Verified Banner ── */}
+      {showDocWarning && (
+        <div className="flex items-center gap-3 bg-amber-50 border-2 border-amber-300 rounded-2xl px-5 py-4">
+          <span className="text-2xl">⚠️</span>
+          <div>
+            <p className="font-black text-amber-900 text-base">DOCUMENTS NOT VERIFIED</p>
+            <p className="text-sm text-amber-700 mt-0.5">
+              Your identity documents have not been verified yet.{' '}
+              <a href="/dashboard/verification" className="underline font-bold hover:text-amber-900">Submit your documents →</a>
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* ── Page header ── */}
       <div>

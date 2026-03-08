@@ -571,6 +571,11 @@ export default function AnalyticsPage() {
   useEffect(() => {
     if (!user) { router.push('/login'); return; }
     if (!['landlord', 'admin'].includes(user.role)) { router.push('/dashboard'); return; }
+    // Free plan landlords don't have access to analytics
+    if (user.role === 'landlord' && (!user.subscriptionTier || user.subscriptionTier === 'free')) {
+      router.push('/dashboard/billing');
+      return;
+    }
 
     const fetchAll = async () => {
       try {

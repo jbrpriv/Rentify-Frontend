@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
   Search, FileText, CreditCard, Users, ShieldCheck,
-  CheckCircle2, ArrowRight, Building2, MapPin, Globe,
+  CheckCircle2, ArrowRight, Building2, MapPin,
   LayoutDashboard, Bell, MessageSquare, Wrench, ClipboardList,
   TrendingUp, Star, Key, BarChart2, UserCheck, Home,
   Bed, Bath, Square
@@ -142,7 +142,6 @@ function CityscapeSVG() {
 
 export default function LandingPage() {
   const [user, setUser] = useState(null);
-  const [tab, setTab] = useState('rent');
   const [roleTab, setRoleTab] = useState('tenant');
   const [query, setQuery] = useState('');
   const [indicatorStyle, setIndicatorStyle] = useState({ left: 0, width: 0 });
@@ -200,31 +199,12 @@ export default function LandingPage() {
               Renting Done Right. Finally.
             </h1>
 
-            {/* Rent / Buy tabs + Search bar */}
+            {/* Search bar */}
             <div className="mt-10 w-full max-w-2xl">
-              {/* Tab row */}
-              <div className="flex justify-center mb-0">
-                <div className="inline-flex rounded-t-2xl overflow-hidden border border-white/30 border-b-0">
-                  {['Rent', 'Buy'].map((t) => (
-                    <button
-                      key={t}
-                      type="button"
-                      onClick={() => setTab(t.toLowerCase())}
-                      className={`px-8 py-2.5 text-[0.85rem] font-semibold transition-all ${tab === t.toLowerCase()
-                        ? 'bg-white text-[#0992C2]'
-                        : 'bg-white/15 text-white hover:bg-white/25'
-                        }`}
-                    >
-                      {t}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
               {/* Search bar */}
               <form
                 onSubmit={handleSearch}
-                className="flex items-center gap-3 rounded-b-3xl rounded-tr-3xl bg-white/95 px-5 py-3.5 shadow-2xl shadow-[#0B2D72]/30 backdrop-blur"
+                className="flex items-center gap-3 rounded-3xl bg-white/95 px-5 py-3.5 shadow-2xl shadow-[#0B2D72]/30 backdrop-blur mt-0"
               >
                 <Search className="h-5 w-5 shrink-0 text-neutral-400" />
                 <input
@@ -354,31 +334,29 @@ export default function LandingPage() {
                 </div>
 
                 {/* Role toggle */}
-                <div className={`inline-flex rounded-full p-1 shadow-sm ${roleTab === 'tenant' ? 'bg-white/20' : 'bg-white/10'
-                  }`}>
-                  <div className="relative flex gap-1 overflow-hidden rounded-full">
-                    <div
-                      className={`absolute inset-y-1 rounded-full transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${roleTab === 'tenant' ? 'bg-white/30' : 'bg-white/20'
-                        }`}
-                      style={{ left: indicatorStyle.left, width: indicatorStyle.width }}
-                    />
-                    <button
-                      ref={tenantBtnRef}
-                      type="button"
-                      onClick={() => setRoleTab('tenant')}
-                      className="relative z-10 flex items-center gap-1 rounded-full px-4 py-2 text-[0.75rem] font-semibold text-white transition-colors"
-                    >
-                      🏠 Tenant
-                    </button>
-                    <button
-                      ref={landlordBtnRef}
-                      type="button"
-                      onClick={() => setRoleTab('landlord')}
-                      className="relative z-10 flex items-center gap-1 rounded-full px-4 py-2 text-[0.75rem] font-semibold text-white/80 hover:text-white transition-colors"
-                    >
-                      🏢 Landlord
-                    </button>
-                  </div>
+                <div className="flex gap-3">
+                  <button
+                    ref={tenantBtnRef}
+                    type="button"
+                    onClick={() => setRoleTab('tenant')}
+                    className={`flex items-center gap-2 rounded-2xl px-6 py-3 text-sm font-bold transition-all duration-200 shadow-lg ${roleTab === 'tenant'
+                        ? 'bg-white text-[#F8843F] scale-105 shadow-white/30'
+                        : 'bg-white/15 text-white hover:bg-white/25 border border-white/30'
+                      }`}
+                  >
+                    🏠 <span>Tenant View</span>
+                  </button>
+                  <button
+                    ref={landlordBtnRef}
+                    type="button"
+                    onClick={() => setRoleTab('landlord')}
+                    className={`flex items-center gap-2 rounded-2xl px-6 py-3 text-sm font-bold transition-all duration-200 shadow-lg ${roleTab === 'landlord'
+                        ? 'bg-white text-[#0B2D72] scale-105 shadow-white/30'
+                        : 'bg-white/15 text-white hover:bg-white/25 border border-white/30'
+                      }`}
+                  >
+                    🏢 <span>Landlord View</span>
+                  </button>
                 </div>
 
                 <div className="flex flex-wrap gap-3 pt-2">

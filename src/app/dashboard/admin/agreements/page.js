@@ -10,12 +10,12 @@ import {
 } from 'lucide-react';
 
 const STATUS_STYLES = {
-  draft:      { bg: 'bg-gray-100',   text: 'text-gray-700',   icon: Clock,         label: 'Draft' },
-  sent:       { bg: 'bg-blue-100',   text: 'text-blue-700',   icon: Clock,         label: 'Sent' },
-  signed:     { bg: 'bg-indigo-100', text: 'text-indigo-700', icon: CheckCircle,   label: 'Signed' },
-  active:     { bg: 'bg-green-100',  text: 'text-green-700',  icon: CheckCircle,   label: 'Active' },
-  expired:    { bg: 'bg-amber-100',  text: 'text-amber-700',  icon: AlertCircle,   label: 'Expired' },
-  terminated: { bg: 'bg-red-100',    text: 'text-red-700',    icon: XCircle,       label: 'Terminated' },
+  draft: { bg: 'bg-gray-100', text: 'text-gray-700', icon: Clock, label: 'Draft' },
+  sent: { bg: 'bg-blue-100', text: 'text-blue-700', icon: Clock, label: 'Sent' },
+  signed: { bg: 'bg-indigo-100', text: 'text-indigo-700', icon: CheckCircle, label: 'Signed' },
+  active: { bg: 'bg-green-100', text: 'text-green-700', icon: CheckCircle, label: 'Active' },
+  expired: { bg: 'bg-amber-100', text: 'text-amber-700', icon: AlertCircle, label: 'Expired' },
+  terminated: { bg: 'bg-red-100', text: 'text-red-700', icon: XCircle, label: 'Terminated' },
 };
 
 function StatusBadge({ status }) {
@@ -39,8 +39,8 @@ export default function AdminAgreementsPage() {
   }, [user]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const [agreements, setAgreements] = useState([]);
-  const [loading, setLoading]       = useState(true);
-  const [search, setSearch]         = useState('');
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
 
   useEffect(() => {
@@ -98,11 +98,10 @@ export default function AdminAgreementsPage() {
             <button
               key={status}
               onClick={() => setStatusFilter(statusFilter === status ? '' : status)}
-              className={`p-3 rounded-xl border-2 text-left transition-all ${
-                statusFilter === status
+              className={`p-3 rounded-xl border-2 text-left transition-all ${statusFilter === status
                   ? 'border-blue-500 ring-2 ring-blue-200'
                   : 'border-transparent bg-white hover:border-gray-200'
-              } shadow-sm`}
+                } shadow-sm`}
             >
               <div className={`inline-flex p-1.5 rounded-lg mb-1.5 ${s.bg}`}>
                 <Icon className={`h-4 w-4 ${s.text}`} />
@@ -190,7 +189,7 @@ export default function AdminAgreementsPage() {
                         onClick={async () => {
                           try {
                             const res = await fetch(
-                              `${process.env.NEXT_PUBLIC_API_URL || ''}/api/agreements/${a._id}/pdf`,
+                              `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/agreements/${a._id}/pdf`,
                               {
                                 headers: {
                                   Authorization: `Bearer ${localStorage.getItem('token') || ''}`,
@@ -201,7 +200,7 @@ export default function AdminAgreementsPage() {
                             const blob = await res.blob();
                             const bUrl = URL.createObjectURL(blob);
                             const link = document.createElement('a');
-                            link.href     = bUrl;
+                            link.href = bUrl;
                             link.download = `agreement-${a._id}.pdf`;
                             link.click();
                             URL.revokeObjectURL(bUrl);

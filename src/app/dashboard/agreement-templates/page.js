@@ -276,6 +276,11 @@ export default function AgreementTemplatesPage() {
 
   useEffect(() => {
     if (!['landlord', 'property_manager'].includes(parsed?.role)) { router.push('/dashboard'); return; }
+    // Landlords need enterprise plan for agreement templates
+    if (parsed?.role === 'landlord' && parsed?.subscriptionTier !== 'enterprise') {
+      router.push('/dashboard/billing');
+      return;
+    }
     fetchTemplates();
   }, []); // eslint-disable-line
 

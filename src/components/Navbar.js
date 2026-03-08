@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useUser } from '@/context/UserContext';
 import {
-  Building2, Globe, LayoutDashboard, Tag, User, LogOut,
+  Building2, LayoutDashboard, Tag, User, LogOut,
   Settings, Menu, X, Home, DollarSign, Bell, Search
 } from 'lucide-react';
 import { useEffect, useState, useRef } from 'react';
@@ -342,15 +342,6 @@ export default function Navbar() {
 
           {/* ── Right: actions ── */}
           <div className="flex items-center gap-3">
-            {/* Globe — desktop only */}
-            <button
-              type="button"
-              className={`hidden items-center justify-center rounded-full p-2 transition-colors md:flex ${isTransparent ? 'text-white/70 hover:text-white hover:bg-white/10' : 'text-neutral-500 hover:bg-neutral-100'
-                }`}
-            >
-              <Globe className="h-4 w-4" />
-            </button>
-
             {user ? (
               <>
                 {/* Desktop: notifications bell */}
