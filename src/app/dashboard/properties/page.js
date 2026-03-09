@@ -168,6 +168,8 @@ export default function PropertiesPage() {
         .prop-img { width:100%;height:145px;object-fit:cover; }
         .prop-img-ph { width:100%;height:145px;background:linear-gradient(135deg,#EDE9FE,#DDD6FE);display:flex;align-items:center;justify-content:center; }
         .act-btn { display:inline-flex;align-items:center;justify-content:center;gap:5px;padding:7px 13px;border-radius:9px;font-size:.78rem;font-weight:700;cursor:pointer;border:none;transition:all .15s;font-family:'Plus Jakarta Sans',sans-serif; }
+        .cm-overlay { position:fixed;inset:0;background:rgba(15,23,42,0.55);backdrop-filter:blur(4px);z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px; }
+        .cm-card { background:white;border-radius:24px;padding:36px 32px;max-width:420px;width:100%;box-shadow:0 24px 80px rgba(15,23,42,.2); }
       `}</style>
 
       {/* Modals */}
@@ -205,8 +207,8 @@ export default function PropertiesPage() {
       {inviteModal && (
         <div className="cm-overlay" onClick={() => setInviteModal(null)}>
           <div className="cm-card" onClick={e => e.stopPropagation()}>
-            <div style={{ width: 60, height: 60, borderRadius: 18, margin: '0 auto 20px', background: 'linear-gradient(135deg,#EDE9FE,#DDD6FE)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <UserPlus size={26} style={{ color: '#7C3AED' }} />
+            <div style={{ width: 60, height: 60, borderRadius: 18, margin: '0 auto 20px', background: 'linear-gradient(135deg,#DBEAFE,#BAE6FD)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <UserPlus size={26} style={{ color: '#0B2D72' }} />
             </div>
             <h2 style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 800, fontSize: '1.3rem', color: '#0F172A', textAlign: 'center', marginBottom: 8, letterSpacing: '-0.02em' }}>Invite Property Manager</h2>
             <p style={{ textAlign: 'center', color: '#64748B', fontSize: '0.85rem', marginBottom: 20, lineHeight: 1.6 }}>Enter the email address of the property manager you'd like to invite.</p>
@@ -217,13 +219,13 @@ export default function PropertiesPage() {
               onChange={e => setInviteEmail(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && handleInviteManager()}
               autoFocus
-              style={{ width: '100%', padding: '11px 14px', borderRadius: 12, border: '1.5px solid #E2E8F0', fontSize: '0.875rem', marginBottom: 18, outline: 'none', boxSizing: 'border-box' }}
+              style={{ width: '100%', padding: '11px 14px', borderRadius: 12, border: '1.5px solid #BFDBFE', fontSize: '0.875rem', marginBottom: 18, outline: 'none', boxSizing: 'border-box', fontFamily: "'Plus Jakarta Sans',sans-serif", color: '#0F172A' }}
             />
             <div style={{ display: 'flex', gap: 10 }}>
-              <button type="button" onClick={() => setInviteModal(null)} style={{ flex: 1, padding: '12px', border: '1.5px solid #E2E8F0', borderRadius: 12, fontSize: '0.875rem', fontWeight: 700, color: '#64748B', background: 'white', cursor: 'pointer' }}>
+              <button type="button" onClick={() => setInviteModal(null)} style={{ flex: 1, padding: '12px', border: '1.5px solid #E2E8F0', borderRadius: 12, fontSize: '0.875rem', fontWeight: 700, color: '#64748B', background: 'white', cursor: 'pointer', fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
                 Cancel
               </button>
-              <button type="button" onClick={handleInviteManager} disabled={!inviteEmail.trim()} style={{ flex: 1.5, padding: '12px', border: 'none', borderRadius: 12, fontSize: '0.875rem', fontWeight: 700, color: 'white', cursor: inviteEmail.trim() ? 'pointer' : 'not-allowed', background: 'linear-gradient(135deg,#7C3AED,#4F46E5)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, opacity: inviteEmail.trim() ? 1 : 0.6 }}>
+              <button type="button" onClick={handleInviteManager} disabled={!inviteEmail.trim()} style={{ flex: 1.5, padding: '12px', border: 'none', borderRadius: 12, fontSize: '0.875rem', fontWeight: 700, color: 'white', cursor: inviteEmail.trim() ? 'pointer' : 'not-allowed', background: 'linear-gradient(135deg,#0B2D72,#0992C2)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, opacity: inviteEmail.trim() ? 1 : 0.6, fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
                 <UserPlus size={15} /> Send Invitation
               </button>
             </div>
