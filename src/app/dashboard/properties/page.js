@@ -5,9 +5,10 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import api from '@/utils/api';
 import { useUser } from '@/context/UserContext';
+import { useToast } from '@/context/ToastContext';
 import {
   Building2, MapPin, Plus, FileText, Loader2, UserPlus,
-  CheckCircle, Clock, Eye, EyeOff, X, AlertTriangle, Trash2, Archive, ArchiveRestore,
+  CheckCircle, Clock, Eye, EyeOff, Trash2, Archive, ArchiveRestore,
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -43,6 +44,7 @@ function ConfirmModal({ title, description, icon: Icon, iconBg, iconColor, confi
 export default function PropertiesPage() {
   const router = useRouter();
   const { user: parsed } = useUser();
+  const { toast } = useToast();
   useEffect(() => {
     if (!parsed) return;
     if (!['landlord', 'admin'].includes(parsed.role)) { router.push('/dashboard'); return; }
@@ -51,15 +53,12 @@ export default function PropertiesPage() {
   const [properties, setProperties] = useState([]);
   const [loading, setLoading] = useState(true);
   const [inviting, setInviting] = useState('');
-  const [msg, setMsg] = useState('');
   const [publishModal, setPublishModal] = useState(null);
   const [deleteModal, setDeleteModal] = useState(null);
   const [archiveModal, setArchiveModal] = useState(null);
   const [publishLoading, setPublishLoading] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [archiveLoading, setArchiveLoading] = useState(false);
-
-  const flashMsg = (m) => { setMsg(m); setTimeout(() => setMsg(''), 5000); };
 
   const fetchProperties = async () => {
     try { const { data } = await api.get('/properties'); setProperties(data); }
@@ -78,7 +77,7 @@ export default function PropertiesPage() {
       fetchProperties();
       setPublishModal(null);
     } catch (err) {
-      flashMsg('❌ ' + (err.response?.data?.message || 'Failed to update listing'));
+      toast(err.response?.data?.message || 'Failed to update listing', 'error');
       setPublishModal(null);
     } finally { setPublishLoading(false); }
   };
@@ -91,11 +90,11 @@ export default function PropertiesPage() {
     const endpoint = isArchived ? 'restore' : 'archive';
     try {
       await api.put(`/properties/${archiveModal.property._id}/${endpoint}`, { reason: 'Archived by landlord' });
-      flashMsg(`✅ Property ${isArchived ? 'restored' : 'archived'} successfully`);
+      toast(`Property ${isArchived ? 'restored' : 'archived'} successfully`, 'success');
       fetchProperties();
       setArchiveModal(null);
     } catch (err) {
-      flashMsg('❌ ' + (err.response?.data?.message || 'Failed to update property'));
+      toast(err.response?.data?.message || 'Failed to update property', 'error');
       setArchiveModal(null);
     } finally { setArchiveLoading(false); }
   };
@@ -106,31 +105,37 @@ export default function PropertiesPage() {
     setDeleteLoading(true);
     try {
       await api.delete(`/properties/${deleteModal.property._id}`);
-      flashMsg('✅ Property deleted successfully');
+      toast('Property deleted successfully', 'success');
       fetchProperties();
       setDeleteModal(null);
     } catch (err) {
-      flashMsg('❌ ' + (err.response?.data?.message || 'Failed to delete property'));
+      toast(err.response?.data?.message || 'Failed to delete property', 'error');
       setDeleteModal(null);
     } finally { setDeleteLoading(false); }
   };
 
+  const [inviteModal, setInviteModal] = useState(null); // { propertyId }
+  const [inviteEmail, setInviteEmail] = useState('');
+
+  const openInviteModal = (propertyId) => { setInviteEmail(''); setInviteModal({ propertyId }); };
+
   /* Invite PM */
-  const handleInviteManager = async (propertyId) => {
-    const email = window.prompt('Enter the property manager\'s email address:');
-    if (!email) return;
+  const handleInviteManager = async () => {
+    const propertyId = inviteModal?.propertyId;
+    if (!propertyId || !inviteEmail.trim()) return;
     setInviting(propertyId);
+    setInviteModal(null);
     try {
-      const { data: pmUser } = await api.post('/users/lookup', { email });
+      const { data: pmUser } = await api.post('/users/lookup', { email: inviteEmail.trim() });
       if (pmUser.role !== 'property_manager') {
-        flashMsg(`❌ ${pmUser.name} is a ${pmUser.role}, not a property manager.`);
+        toast(`${pmUser.name} is a ${pmUser.role}, not a property manager.`, 'error');
         return;
       }
       await api.post(`/properties/${propertyId}/invite-manager`, { managerId: pmUser._id });
-      flashMsg('✅ Invitation sent! The property manager will be notified by email.');
+      toast('Invitation sent! The property manager will be notified by email.', 'success');
       fetchProperties();
     } catch (err) {
-      flashMsg('❌ ' + (err.response?.data?.message || 'Failed to send invitation'));
+      toast(err.response?.data?.message || 'Failed to send invitation', 'error');
     } finally { setInviting(''); }
   };
 
@@ -197,22 +202,50 @@ export default function PropertiesPage() {
         />
       )}
 
-      {archiveModal && (
-        <ConfirmModal
-          title={archiveModal.property.isArchived ? 'Restore Property?' : 'Archive Property?'}
-          description={archiveModal.property.isArchived
-            ? `"${archiveModal.property.title}" will be restored and available for listing again.`
-            : `"${archiveModal.property.title}" will be archived and hidden from listings. All history is preserved and it can be restored at any time.`
-          }
-          icon={archiveModal.property.isArchived ? ArchiveRestore : Archive}
-          iconBg={archiveModal.property.isArchived ? 'linear-gradient(135deg,#F0FDF4,#BBF7D0)' : 'linear-gradient(135deg,#FFFBEB,#FDE68A)'}
-          iconColor={archiveModal.property.isArchived ? '#16A34A' : '#D97706'}
-          confirmLabel={archiveModal.property.isArchived ? 'Yes, Restore' : 'Yes, Archive'}
-          confirmBg={archiveModal.property.isArchived ? 'linear-gradient(135deg,#16A34A,#22C55E)' : 'linear-gradient(135deg,#D97706,#F59E0B)'}
-          onConfirm={confirmArchive}
-          onCancel={() => setArchiveModal(null)}
-          loading={archiveLoading}
-        />
+      {inviteModal && (
+        <div className="cm-overlay" onClick={() => setInviteModal(null)}>
+          <div className="cm-card" onClick={e => e.stopPropagation()}>
+            <div style={{ width: 60, height: 60, borderRadius: 18, margin: '0 auto 20px', background: 'linear-gradient(135deg,#EDE9FE,#DDD6FE)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <UserPlus size={26} style={{ color: '#7C3AED' }} />
+            </div>
+            <h2 style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 800, fontSize: '1.3rem', color: '#0F172A', textAlign: 'center', marginBottom: 8, letterSpacing: '-0.02em' }}>Invite Property Manager</h2>
+            <p style={{ textAlign: 'center', color: '#64748B', fontSize: '0.85rem', marginBottom: 20, lineHeight: 1.6 }}>Enter the email address of the property manager you'd like to invite.</p>
+            <input
+              type="email"
+              placeholder="manager@example.com"
+              value={inviteEmail}
+              onChange={e => setInviteEmail(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && handleInviteManager()}
+              autoFocus
+              style={{ width: '100%', padding: '11px 14px', borderRadius: 12, border: '1.5px solid #E2E8F0', fontSize: '0.875rem', marginBottom: 18, outline: 'none', boxSizing: 'border-box' }}
+            />
+            <div style={{ display: 'flex', gap: 10 }}>
+              <button type="button" onClick={() => setInviteModal(null)} style={{ flex: 1, padding: '12px', border: '1.5px solid #E2E8F0', borderRadius: 12, fontSize: '0.875rem', fontWeight: 700, color: '#64748B', background: 'white', cursor: 'pointer' }}>
+                Cancel
+              </button>
+              <button type="button" onClick={handleInviteManager} disabled={!inviteEmail.trim()} style={{ flex: 1.5, padding: '12px', border: 'none', borderRadius: 12, fontSize: '0.875rem', fontWeight: 700, color: 'white', cursor: inviteEmail.trim() ? 'pointer' : 'not-allowed', background: 'linear-gradient(135deg,#7C3AED,#4F46E5)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, opacity: inviteEmail.trim() ? 1 : 0.6 }}>
+                <UserPlus size={15} /> Send Invitation
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {archiveModal && (<ConfirmModal
+        title={archiveModal.property.isArchived ? 'Restore Property?' : 'Archive Property?'}
+        description={archiveModal.property.isArchived
+          ? `"${archiveModal.property.title}" will be restored and available for listing again.`
+          : `"${archiveModal.property.title}" will be archived and hidden from listings. All history is preserved and it can be restored at any time.`
+        }
+        icon={archiveModal.property.isArchived ? ArchiveRestore : Archive}
+        iconBg={archiveModal.property.isArchived ? 'linear-gradient(135deg,#F0FDF4,#BBF7D0)' : 'linear-gradient(135deg,#FFFBEB,#FDE68A)'}
+        iconColor={archiveModal.property.isArchived ? '#16A34A' : '#D97706'}
+        confirmLabel={archiveModal.property.isArchived ? 'Yes, Restore' : 'Yes, Archive'}
+        confirmBg={archiveModal.property.isArchived ? 'linear-gradient(135deg,#16A34A,#22C55E)' : 'linear-gradient(135deg,#D97706,#F59E0B)'}
+        onConfirm={confirmArchive}
+        onCancel={() => setArchiveModal(null)}
+        loading={archiveLoading}
+      />
       )}
 
       <motion.div
@@ -237,23 +270,6 @@ export default function PropertiesPage() {
             <Plus size={16} /> Add Property
           </Link>
         </motion.div>
-
-        {/* Toast */}
-        {msg && (
-          <motion.div
-            initial={{ opacity: 0, y: 4 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.25, ease: [0.21, 0.6, 0.35, 1] }}
-            style={{
-              borderRadius: 12, padding: '12px 18px', fontSize: '0.875rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 10,
-              background: msg.startsWith('✅') ? '#F0FDF4' : '#FFF7F7',
-              color: msg.startsWith('✅') ? '#16A34A' : '#DC2626',
-              border: `1px solid ${msg.startsWith('✅') ? '#BBF7D0' : '#FECACA'}`,
-            }}
-          >
-            {msg.startsWith('✅') ? <CheckCircle size={16} /> : <X size={16} />} {msg.slice(2)}
-          </motion.div>
-        )}
 
         {properties.length === 0 ? (
           <motion.div
@@ -349,7 +365,7 @@ export default function PropertiesPage() {
                       </Link>
 
                       {!hasManager && !hasPendingInvite && (
-                        <button onClick={() => handleInviteManager(property._id)} disabled={inviting === property._id} className="act-btn"
+                        <button onClick={() => openInviteModal(property._id)} disabled={inviting === property._id} className="act-btn"
                           style={{ background: '#F5F3FF', color: '#7C3AED', border: '1.5px solid #DDD6FE' }}>
                           {inviting === property._id ? <Loader2 size={13} className="animate-spin" /> : <UserPlus size={13} />} Invite PM
                         </button>
