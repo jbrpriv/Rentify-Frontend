@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { useUser } from '@/context/UserContext';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -14,6 +14,7 @@ import {
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { MotionRevealSection } from '@/components/ui/Motion';
+import { useReveal } from '@/hooks/useReveal';
 
 const CITIES = [
   { name: 'New York', country: 'USA', count: '12,400+ listings', img: 'https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?w=700&q=80' },
@@ -140,13 +141,33 @@ function CityscapeSVG() {
   );
 }
 
+// Reusable scroll-reveal card wrapper
+function RevealCard({ children, delay = 0, className = '' }) {
+  const [ref, revealed] = useReveal();
+  return (
+    <div
+      ref={ref}
+      className={`reveal-on-scroll ${revealed ? 'revealed' : ''} ${className}`}
+      style={{ transitionDelay: `${delay}ms` }}
+    >
+      {children}
+    </div>
+  );
+}
+
 export default function LandingPage() {
   const [user, setUser] = useState(null);
   const [roleTab, setRoleTab] = useState('tenant');
   const [query, setQuery] = useState('');
   const [indicatorStyle, setIndicatorStyle] = useState({ left: 0, width: 0 });
+
+  // Mouse-tracking state for cityscape parallax
+  const [cityscapeOffset, setCityscapeOffset] = useState({ x: 0, y: 0 });
+
   const tenantBtnRef = useRef(null);
   const landlordBtnRef = useRef(null);
+  const heroRef = useRef(null);
+  const cityscapeRef = useRef(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -161,6 +182,36 @@ export default function LandingPage() {
     const btnRect = btn.getBoundingClientRect();
     setIndicatorStyle({ left: btnRect.left - parentRect.left, width: btnRect.width });
   }, [roleTab]);
+
+  // Mouse tracking for cityscape — desktop only
+  const handleHeroMouseMove = useCallback((e) => {
+    // Skip on mobile
+    if (window.innerWidth < 768) return;
+    // Skip if user prefers reduced motion
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    const hero = heroRef.current;
+    if (!hero) return;
+
+    const rect = hero.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+
+    // Normalize mouse position relative to center (-1 to 1)
+    const normX = (e.clientX - centerX) / (rect.width / 2);
+    const normY = (e.clientY - centerY) / (rect.height / 2);
+
+    // Max shift: ±10px horizontal, ±5px vertical
+    setCityscapeOffset({
+      x: normX * 10,
+      y: normY * 5,
+    });
+  }, []);
+
+  const handleHeroMouseLeave = useCallback(() => {
+    // Smoothly return to center on mouse leave
+    setCityscapeOffset({ x: 0, y: 0 });
+  }, []);
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -177,10 +228,14 @@ export default function LandingPage() {
       <main className="flex-grow">
 
         {/* ── HERO – FULL VIEWPORT GRADIENT + CITYSCAPE ─────────────── */}
-        <section className="relative min-h-[90vh] overflow-hidden flex flex-col"
+        <section
+          ref={heroRef}
+          className="relative min-h-[90vh] overflow-hidden flex flex-col"
           style={{
             background: 'linear-gradient(135deg, #F6C87A 0%, #0AC4E0 38%, #0992C2 60%, #0B2D72 100%)',
           }}
+          onMouseMove={handleHeroMouseMove}
+          onMouseLeave={handleHeroMouseLeave}
         >
           {/* Subtle radial overlays for depth */}
           <div className="pointer-events-none absolute inset-0"
@@ -201,7 +256,6 @@ export default function LandingPage() {
 
             {/* Search bar */}
             <div className="mt-10 w-full max-w-2xl">
-              {/* Search bar */}
               <form
                 onSubmit={handleSearch}
                 className="flex items-center gap-3 rounded-3xl bg-white/95 px-5 py-3.5 shadow-2xl shadow-[#0B2D72]/30 backdrop-blur mt-0"
@@ -223,8 +277,15 @@ export default function LandingPage() {
             </div>
           </div>
 
-          {/* SVG Cityscape */}
-          <div className="absolute inset-x-0 bottom-0 h-80 pointer-events-none">
+          {/* SVG Cityscape — floats on its own + reacts to mouse on desktop */}
+          <div
+            ref={cityscapeRef}
+            className="absolute inset-x-0 bottom-0 h-80 pointer-events-none cityscape-float"
+            style={{
+              transform: `translateX(${cityscapeOffset.x}px) translateY(${cityscapeOffset.y}px)`,
+              transition: 'transform 0.3s ease-out',
+            }}
+          >
             <CityscapeSVG />
           </div>
         </section>
@@ -238,48 +299,51 @@ export default function LandingPage() {
               find your next home in minutes with our intelligent search.
             </p>
 
-            {/* Stats row */}
+            {/* Stats row — with scroll reveal + glass */}
             <div className="grid grid-cols-2 gap-4 md:grid-cols-4 mb-14">
-              {STATS.map((s) => (
-                <div key={s.label} className="rounded-2xl border border-[#0992C2]/15 bg-[#F8FBFC] px-4 py-5">
-                  <p className="text-3xl font-extrabold text-[#0B2D72] tracking-tight">{s.value}</p>
-                  <p className="mt-1 text-[0.78rem] font-semibold uppercase tracking-[0.18em] text-neutral-500">{s.label}</p>
-                </div>
+              {STATS.map((s, i) => (
+                <RevealCard key={s.label} delay={i * 80}>
+                  <div className="rounded-2xl border border-[#0992C2]/15 bg-[#F8FBFC] px-4 py-5 rf-glass-stat">
+                    <p className="text-3xl font-extrabold text-[#0B2D72] tracking-tight">{s.value}</p>
+                    <p className="mt-1 text-[0.78rem] font-semibold uppercase tracking-[0.18em] text-neutral-500">{s.label}</p>
+                  </div>
+                </RevealCard>
               ))}
             </div>
 
-            {/* City cards */}
+            {/* City cards — with scroll reveal */}
             <div className="grid gap-5 md:grid-cols-3">
               {CITIES.map((city, idx) => (
-                <Link
-                  key={city.name}
-                  href={`/browse?city=${city.name}`}
-                  className={`group relative block overflow-hidden rounded-3xl shadow-sm transition-transform duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] hover:-translate-y-2 hover:shadow-xl ${idx === 1 ? 'md:-mt-6' : idx === 2 ? 'md:mt-6' : ''
-                    }`}
-                >
-                  <div className="relative h-56 overflow-hidden">
-                    <img
-                      src={city.img}
-                      alt={city.name}
-                      loading="lazy"
-                      className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
-                    />
-                    <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
-                    <div className="absolute inset-x-0 bottom-0 p-4">
-                      <div className="flex items-end justify-between gap-2">
-                        <div>
-                          <p className="text-sm font-bold text-white">{city.name}</p>
-                          <p className="mt-0.5 flex items-center gap-1 text-[0.7rem] font-medium text-white/80">
-                            <MapPin size={11} />{city.count}
-                          </p>
+                <RevealCard key={city.name} delay={idx * 80}>
+                  <Link
+                    href={`/browse?city=${city.name}`}
+                    className={`group relative block overflow-hidden rounded-3xl shadow-sm transition-transform duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] hover:-translate-y-2 hover:shadow-xl ${idx === 1 ? 'md:-mt-6' : idx === 2 ? 'md:mt-6' : ''
+                      }`}
+                  >
+                    <div className="relative h-56 overflow-hidden">
+                      <img
+                        src={city.img}
+                        alt={city.name}
+                        loading="lazy"
+                        className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+                      />
+                      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
+                      <div className="absolute inset-x-0 bottom-0 p-4">
+                        <div className="flex items-end justify-between gap-2">
+                          <div>
+                            <p className="text-sm font-bold text-white">{city.name}</p>
+                            <p className="mt-0.5 flex items-center gap-1 text-[0.7rem] font-medium text-white/80">
+                              <MapPin size={11} />{city.count}
+                            </p>
+                          </div>
+                          <span className="rounded-full bg-white/15 px-2 py-0.5 text-[0.65rem] font-semibold text-white backdrop-blur-sm ring-1 ring-white/30">
+                            {city.country}
+                          </span>
                         </div>
-                        <span className="rounded-full bg-white/15 px-2 py-0.5 text-[0.65rem] font-semibold text-white backdrop-blur-sm ring-1 ring-white/30">
-                          {city.country}
-                        </span>
                       </div>
                     </div>
-                  </div>
-                </Link>
+                  </Link>
+                </RevealCard>
               ))}
             </div>
 
@@ -340,8 +404,8 @@ export default function LandingPage() {
                     type="button"
                     onClick={() => setRoleTab('tenant')}
                     className={`flex items-center gap-2 rounded-2xl px-6 py-3 text-sm font-bold transition-all duration-200 shadow-lg ${roleTab === 'tenant'
-                        ? 'bg-white text-[#F8843F] scale-105 shadow-white/30'
-                        : 'bg-white/15 text-white hover:bg-white/25 border border-white/30'
+                      ? 'bg-white text-[#F8843F] scale-105 shadow-white/30'
+                      : 'bg-white/15 text-white hover:bg-white/25 border border-white/30'
                       }`}
                   >
                     🏠 <span>Tenant View</span>
@@ -351,8 +415,8 @@ export default function LandingPage() {
                     type="button"
                     onClick={() => setRoleTab('landlord')}
                     className={`flex items-center gap-2 rounded-2xl px-6 py-3 text-sm font-bold transition-all duration-200 shadow-lg ${roleTab === 'landlord'
-                        ? 'bg-white text-[#0B2D72] scale-105 shadow-white/30'
-                        : 'bg-white/15 text-white hover:bg-white/25 border border-white/30'
+                      ? 'bg-white text-[#0B2D72] scale-105 shadow-white/30'
+                      : 'bg-white/15 text-white hover:bg-white/25 border border-white/30'
                       }`}
                   >
                     🏢 <span>Landlord View</span>
@@ -389,7 +453,7 @@ export default function LandingPage() {
                 </div>
               </div>
 
-              {/* Right: feature cards */}
+              {/* Right: feature cards — with scroll reveal + glass */}
               <div className="flex-1">
                 <div
                   key={roleTab}
@@ -399,25 +463,26 @@ export default function LandingPage() {
                     const Icon = f.icon;
                     const isTenant = roleTab === 'tenant';
                     return (
-                      <div
-                        key={f.title}
-                        style={{ animationDelay: `${i * 70}ms` }}
-                        className={`rf-fade-in-stagger rounded-2xl p-4 transition-transform duration-200 hover:-translate-y-1 ${isTenant
-                          ? 'bg-white/20 ring-1 ring-white/25 hover:bg-white/25'
-                          : 'bg-white/10 ring-1 ring-white/15 hover:bg-white/15'
-                          }`}
-                      >
-                        <div className={`mb-3 flex h-10 w-10 items-center justify-center rounded-2xl ${isTenant ? 'bg-white/30' : 'bg-[#0AC4E0]/30'
-                          }`}>
-                          <Icon size={18} className="text-white" />
+                      <RevealCard key={f.title} delay={i * 70}>
+                        <div
+                          className={`rf-fade-in-stagger rf-glass-card rounded-2xl p-4 transition-transform duration-200 hover:-translate-y-1 h-full ${isTenant
+                            ? 'bg-white/20 ring-1 ring-white/25 hover:bg-white/25'
+                            : 'bg-white/10 ring-1 ring-white/15 hover:bg-white/15'
+                            }`}
+                          style={{ animationDelay: `${i * 70}ms` }}
+                        >
+                          <div className={`mb-3 flex h-10 w-10 items-center justify-center rounded-2xl ${isTenant ? 'bg-white/30' : 'bg-[#0AC4E0]/30'
+                            }`}>
+                            <Icon size={18} className="text-white" />
+                          </div>
+                          <h3 className="mb-1 text-[0.9rem] font-semibold text-white">
+                            {f.title}
+                          </h3>
+                          <p className={`text-[0.75rem] leading-relaxed ${isTenant ? 'text-white/70' : 'text-white/60'}`}>
+                            {f.desc}
+                          </p>
                         </div>
-                        <h3 className="mb-1 text-[0.9rem] font-semibold text-white">
-                          {f.title}
-                        </h3>
-                        <p className={`text-[0.75rem] leading-relaxed ${isTenant ? 'text-white/70' : 'text-white/60'}`}>
-                          {f.desc}
-                        </p>
-                      </div>
+                      </RevealCard>
                     );
                   })}
                 </div>
@@ -452,7 +517,6 @@ export default function LandingPage() {
             </section>
           )}
 
-
           {user && (
             <section
               className="relative overflow-hidden px-6 py-24 text-center"
@@ -460,14 +524,12 @@ export default function LandingPage() {
                 background: 'linear-gradient(135deg, #F8FBFC 0%, #0AC4E0 35%, #0992C2 65%, #0B2D72 100%)',
               }}
             >
-              {/* Radial overlays for depth, removed the plain blurry circles */}
               <div
                 className="pointer-events-none absolute inset-0"
                 style={{
                   background: 'radial-gradient(circle at 15% 25%, rgba(255,255,255,0.45) 0%, transparent 45%), radial-gradient(circle at 85% 75%, rgba(246,231,188,0.2) 0%, transparent 40%)',
                 }}
               />
-
               <div className="relative mx-auto max-w-2xl space-y-6">
                 <h2 className="text-h2 text-white">
                   Welcome back, {user.name?.split(' ')[0]}.
@@ -475,7 +537,6 @@ export default function LandingPage() {
                 <p className="mx-auto max-w-md text-[1.05rem] leading-relaxed text-white/85">
                   Continue where you left off — your applications, leases, and payments are already synced.
                 </p>
-
                 <div className="mt-8 flex justify-center">
                   <Link
                     href="/dashboard"

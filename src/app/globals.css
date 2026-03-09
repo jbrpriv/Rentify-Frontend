@@ -8,20 +8,25 @@
 
 :root {
   /* Brand colors */
-  --rf-color-primary: #0992C2; /* Mid Blue */
-  --rf-color-primary-strong: #0B2D72; /* Deep Blue / hover */
-  --rf-color-primary-soft: #0AC4E0; /* Cyan / secondary */
+  --rf-color-primary: #0992C2;
+  /* Mid Blue */
+  --rf-color-primary-strong: #0B2D72;
+  /* Deep Blue / hover */
+  --rf-color-primary-soft: #0AC4E0;
+  /* Cyan / secondary */
 
   /* Supporting tones from palette */
   --rf-color-soft: #0AC4E0;
-  --rf-color-soft-alt: #F6E7BC; /* Warm Cream */
+  --rf-color-soft-alt: #F6E7BC;
+  /* Warm Cream */
 
   /* Neutrals tuned for light, premium look */
   --rf-color-bg: #F8FBFC;
   --rf-color-bg-elevated: #FFFFFF;
   --rf-color-surface: #FFFFFF;
   --rf-color-surface-soft: #F0F8FA;
-  --rf-color-border-subtle: rgba(11, 45, 114, 0.12); /* Deep Blue base */
+  --rf-color-border-subtle: rgba(11, 45, 114, 0.12);
+  /* Deep Blue base */
   --rf-color-border-strong: rgba(11, 45, 114, 0.35);
   --rf-color-text-main: #1F2933;
   --rf-color-text-soft: #4B5563;
@@ -180,11 +185,9 @@
   /* Glassmorphism utility for frosted panels */
   .rf-glass {
     background:
-      linear-gradient(
-        135deg,
+      linear-gradient(135deg,
         rgba(255, 255, 255, 0.82),
-        rgba(240, 248, 250, 0.9)
-      );
+        rgba(240, 248, 250, 0.9));
     box-shadow: 0 24px 80px rgba(11, 45, 114, 0.16);
     border-radius: var(--rf-radius-2xl);
     border: 1px solid rgba(255, 255, 255, 0.75);
@@ -195,11 +198,9 @@
   /* Dark glass for auth / overlays */
   .rf-glass-dark {
     background:
-      linear-gradient(
-        135deg,
+      linear-gradient(135deg,
         rgba(15, 23, 42, 0.94),
-        rgba(15, 23, 42, 0.88)
-      );
+        rgba(15, 23, 42, 0.88));
     box-shadow: 0 26px 80px rgba(15, 23, 42, 0.75);
     border-radius: var(--rf-radius-2xl);
     border: 1px solid rgba(148, 163, 184, 0.5);
@@ -213,6 +214,7 @@
    ──────────────────────────────────────────────────────────── */
 
 @layer utilities {
+
   /* Base shape & motion */
   .rf-btn {
     display: inline-flex;
@@ -247,13 +249,15 @@
       background-color var(--rf-duration-normal) var(--rf-ease-standard),
       color var(--rf-duration-normal) var(--rf-ease-standard);
     background: linear-gradient(135deg, var(--rf-color-primary-strong), var(--rf-color-primary));
-    color: #FFFFFF; /* Deep blue needs white text for contrast */
+    color: #FFFFFF;
     box-shadow: 0 18px 40px rgba(11, 45, 114, 0.25);
   }
+
   .rf-btn-primary:hover {
     transform: translateY(-1px) scale(1.03);
     box-shadow: 0 22px 60px rgba(11, 45, 114, 0.35);
   }
+
   .rf-btn-primary:active {
     transform: translateY(0) scale(0.97);
     box-shadow: 0 12px 32px rgba(11, 45, 114, 0.2);
@@ -275,9 +279,10 @@
       background-color var(--rf-duration-normal) var(--rf-ease-standard),
       color var(--rf-duration-normal) var(--rf-ease-standard);
     border: 1px solid var(--rf-color-border-subtle);
-    background: rgba(246, 231, 188, 0.25); /* Subtle tint of the cream */
+    background: rgba(246, 231, 188, 0.25);
     color: var(--rf-color-text-main);
   }
+
   .rf-btn-secondary:hover {
     background: rgba(10, 196, 224, 0.1);
     border-color: var(--rf-color-border-strong);
@@ -302,6 +307,7 @@
     background: transparent;
     color: var(--rf-color-text-soft);
   }
+
   .rf-btn-ghost:hover {
     background: rgba(9, 146, 194, 0.08);
     color: #1F2933;
@@ -326,6 +332,7 @@
     color: white;
     box-shadow: 0 18px 40px rgba(248, 113, 113, 0.35);
   }
+
   .rf-btn-danger:hover {
     transform: translateY(-1px) scale(1.03);
     box-shadow: 0 24px 60px rgba(239, 68, 68, 0.5);
@@ -344,6 +351,7 @@
       border-color var(--rf-duration-normal) var(--rf-ease-standard),
       background-color var(--rf-duration-normal) var(--rf-ease-standard);
   }
+
   .rf-hover-card:hover {
     transform: translateY(-6px) translateZ(0) scale(1.01);
     box-shadow: var(--rf-shadow-elevated);
@@ -357,6 +365,7 @@
       color var(--rf-duration-normal) var(--rf-ease-standard),
       transform var(--rf-duration-fast) var(--rf-ease-bouncy);
   }
+
   .rf-link::after {
     content: "";
     position: absolute;
@@ -368,9 +377,11 @@
     background: linear-gradient(90deg, #0992C2, #0AC4E0);
     transition: width var(--rf-duration-normal) var(--rf-ease-standard);
   }
+
   .rf-link:hover {
     transform: translateY(-1px);
   }
+
   .rf-link:hover::after {
     width: 100%;
   }
@@ -381,11 +392,13 @@
     transform: translateY(16px);
     animation: rf-fade-in-up 520ms var(--rf-ease-standard) forwards;
   }
+
   .rf-fade-in-delayed {
     opacity: 0;
     transform: translateY(18px);
     animation: rf-fade-in-up 620ms var(--rf-ease-standard) 80ms forwards;
   }
+
   .rf-fade-in-stagger {
     opacity: 0;
     transform: translateY(20px);
@@ -398,8 +411,86 @@
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+/* ──────────────────────────────────────────────────────────────
+   LANDING PAGE ANIMATIONS
+   ──────────────────────────────────────────────────────────── */
+
+/* Cityscape floating animation — gentle up/down loop */
+@keyframes cityscapeFloat {
+  0% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-8px);
+  }
+
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+.cityscape-float {
+  animation: cityscapeFloat 6s ease-in-out infinite;
+  will-change: transform;
+}
+
+/* Disable all landing animations for users who prefer reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .cityscape-float {
+    animation: none !important;
+  }
+
+  .reveal-on-scroll {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+}
+
+/* Scroll reveal — initial hidden state */
+.reveal-on-scroll {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.45s ease-out, transform 0.45s ease-out;
+}
+
+/* Scroll reveal — visible state (added by IntersectionObserver) */
+.reveal-on-scroll.revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Glass effect for feature cards and stat cards */
+/* Only apply backdrop-filter on larger screens to avoid mobile GPU strain */
+.rf-glass-card {
+  box-shadow:
+    0 4px 24px rgba(0, 0, 0, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+@media (min-width: 480px) {
+  .rf-glass-card {
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+}
+
+/* Glass for stat cards specifically (light background) */
+.rf-glass-stat {
+  box-shadow: 0 2px 12px rgba(9, 146, 194, 0.08);
+}
+
+@media (min-width: 480px) {
+  .rf-glass-stat {
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
   }
 }
