@@ -118,13 +118,15 @@ function BrowseContent() {
       if (type) params.append('type', type);
       if (selectedPrice.min) params.append('minRent', selectedPrice.min);
       if (selectedPrice.max) params.append('maxRent', selectedPrice.max);
+      if (beds) params.append('minBeds', parseInt(beds));
+      if (sort === 'Price: Low to High') params.append('sort', 'price_asc');
+      else if (sort === 'Price: High to Low') params.append('sort', 'price_desc');
+      else if (sort === 'Newest') params.append('sort', 'newest');
+
       const res = await fetch(`/api/listings?${params.toString()}`);
       const data = await res.json();
       let arr = Array.isArray(data) ? data : [];
-      if (sort === 'Price: Low to High') arr.sort((a, b) => (a.financials?.monthlyRent || 0) - (b.financials?.monthlyRent || 0));
-      if (sort === 'Price: High to Low') arr.sort((a, b) => (b.financials?.monthlyRent || 0) - (a.financials?.monthlyRent || 0));
-      if (sort === 'Newest') arr.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-      if (beds) { const min = parseInt(beds); arr = arr.filter(l => (l.specs?.bedrooms || 0) >= min); }
+
       setListings(arr);
       setTotal(arr.length);
     } catch { setListings([]); }
