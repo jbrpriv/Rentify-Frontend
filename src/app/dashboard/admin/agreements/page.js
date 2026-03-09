@@ -1,9 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import api from '@/utils/api';
 import { useUser } from '@/context/UserContext';
+import { useToast } from '@/context/ToastContext';
 import {
   FileText, Search, Filter, Loader2, AlertCircle,
   CheckCircle, Clock, XCircle, Eye,
@@ -32,6 +33,7 @@ function StatusBadge({ status }) {
 export default function AdminAgreementsPage() {
   const router = useRouter();
   const { user } = useUser();
+  const { toast } = useToast();
 
   useEffect(() => {
     if (!user) return;
@@ -42,24 +44,40 @@ export default function AdminAgreementsPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
+  const debounceRef = useRef(null);
 
-  useEffect(() => {
-    api.get('/admin/agreements')
-      .then(({ data }) => setAgreements(Array.isArray(data) ? data : data.agreements || []))
-      .catch(console.error)
-      .finally(() => setLoading(false));
+  const fetchAgreements = useCallback(async (searchVal, statusVal) => {
+    setLoading(true);
+    try {
+      const params = {};
+      if (searchVal) params.search = searchVal;
+      if (statusVal) params.status = statusVal;
+      const { data } = await api.get('/admin/agreements', { params });
+      setAgreements(Array.isArray(data) ? data : data.agreements || []);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
-  const filtered = agreements.filter((a) => {
-    const matchesSearch =
-      !search ||
-      a.landlord?.name?.toLowerCase().includes(search.toLowerCase()) ||
-      a.tenant?.name?.toLowerCase().includes(search.toLowerCase()) ||
-      a.property?.title?.toLowerCase().includes(search.toLowerCase());
-    const matchesStatus = !statusFilter || a.status === statusFilter;
-    return matchesSearch && matchesStatus;
-  });
+  // Initial load
+  useEffect(() => { fetchAgreements('', ''); }, [fetchAgreements]);
 
+  // Debounce search input — fire after 350 ms of no typing
+  const handleSearchChange = (val) => {
+    setSearch(val);
+    clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => fetchAgreements(val, statusFilter), 350);
+  };
+
+  // Status filter fires immediately
+  const handleStatusChange = (val) => {
+    setStatusFilter(val);
+    fetchAgreements(search, val);
+  };
+
+  // Status counts derived from current fetched set (accurate for current filter)
   const counts = agreements.reduce((acc, a) => {
     acc[a.status] = (acc[a.status] || 0) + 1;
     return acc;
@@ -99,8 +117,8 @@ export default function AdminAgreementsPage() {
               key={status}
               onClick={() => setStatusFilter(statusFilter === status ? '' : status)}
               className={`p-3 rounded-xl border-2 text-left transition-all ${statusFilter === status
-                  ? 'border-blue-500 ring-2 ring-blue-200'
-                  : 'border-transparent bg-white hover:border-gray-200'
+                ? 'border-blue-500 ring-2 ring-blue-200'
+                : 'border-transparent bg-white hover:border-gray-200'
                 } shadow-sm`}
             >
               <div className={`inline-flex p-1.5 rounded-lg mb-1.5 ${s.bg}`}>
@@ -121,7 +139,7 @@ export default function AdminAgreementsPage() {
             type="text"
             placeholder="Search by landlord, tenant or property..."
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => handleSearchChange(e.target.value)}
             className="w-full pl-9 pr-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
@@ -129,7 +147,7 @@ export default function AdminAgreementsPage() {
           <Filter className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
           <select
             value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
+            onChange={(e) => handleStatusChange(e.target.value)}
             className="pl-9 pr-8 py-2.5 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none"
           >
             <option value="">All statuses</option>
@@ -141,7 +159,11 @@ export default function AdminAgreementsPage() {
       </div>
 
       {/* Table */}
-      {filtered.length === 0 ? (
+      {loading ? (
+        <div className="flex justify-center items-center py-20">
+          <Loader2 className="animate-spin h-10 w-10 text-blue-600" />
+        </div>
+      ) : agreements.length === 0 ? (
         <div className="text-center py-16 bg-white rounded-xl border-2 border-dashed border-gray-200">
           <FileText className="mx-auto h-12 w-12 text-gray-300 mb-3" />
           <p className="font-semibold text-gray-600">No agreements found</p>
@@ -160,7 +182,7 @@ export default function AdminAgreementsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
-                {filtered.map((a) => (
+                {agreements.map((a) => (
                   <tr key={a._id} className="hover:bg-gray-50 transition-colors">
                     <td className="px-4 py-3 font-medium text-gray-900 max-w-[180px] truncate">
                       {a.property?.title || '—'}
@@ -188,24 +210,19 @@ export default function AdminAgreementsPage() {
                       <button
                         onClick={async () => {
                           try {
-                            const res = await fetch(
-                              `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/agreements/${a._id}/pdf`,
-                              {
-                                headers: {
-                                  Authorization: `Bearer ${localStorage.getItem('token') || ''}`,
-                                },
-                              }
+                            // Use api instance with blob responseType — token handled by interceptor
+                            const response = await api.get(
+                              `/agreements/${a._id}/pdf`,
+                              { responseType: 'blob' }
                             );
-                            if (!res.ok) throw new Error('Download failed');
-                            const blob = await res.blob();
-                            const bUrl = URL.createObjectURL(blob);
+                            const bUrl = URL.createObjectURL(response.data);
                             const link = document.createElement('a');
                             link.href = bUrl;
                             link.download = `agreement-${a._id}.pdf`;
                             link.click();
                             URL.revokeObjectURL(bUrl);
                           } catch {
-                            alert('Failed to download PDF. Please try again.');
+                            toast('Failed to download PDF. Please try again.', 'error');
                           }
                         }}
                         className="inline-flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 font-semibold"

@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import api from '@/utils/api';
 import { useUser } from '@/context/UserContext';
+import { useToast } from '@/context/ToastContext';
 import { Wrench, Plus, Loader2, ChevronDown, ChevronUp, CheckCircle, Clock, AlertCircle, X } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -21,6 +22,7 @@ const CATEGORIES = ['plumbing', 'electrical', 'hvac', 'appliance', 'structural',
 
 export default function MaintenancePage() {
   const { user } = useUser();
+  const { toast } = useToast();
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -73,7 +75,7 @@ export default function MaintenancePage() {
       setForm({ propertyId: '', title: '', description: '', priority: 'medium', category: 'other' });
       fetchRequests();
     } catch (err) {
-      alert(err.response?.data?.message || 'Error submitting request');
+      toast(err.response?.data?.message || 'Error submitting request', 'error');
     } finally { setSubmitting(false); }
   };
 
@@ -87,7 +89,7 @@ export default function MaintenancePage() {
     try {
       await api.put(`/maintenance/${id}`, data);
       fetchRequests();
-    } catch (err) { alert(err.response?.data?.message || 'Error'); }
+    } catch (err) { toast(err.response?.data?.message || 'Error', 'error'); }
     finally { setActionId(null); }
   };
 
@@ -96,7 +98,7 @@ export default function MaintenancePage() {
     try {
       await api.delete(`/maintenance/${id}`);
       fetchRequests();
-    } catch (err) { alert(err.response?.data?.message || 'Error'); }
+    } catch (err) { toast(err.response?.data?.message || 'Error', 'error'); }
   };
 
   const isTenant = user?.role === 'tenant';

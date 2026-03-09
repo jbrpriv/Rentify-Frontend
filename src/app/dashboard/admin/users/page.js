@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import api from '@/utils/api';
 import { useUser } from '@/context/UserContext';
+import { useToast } from '@/context/ToastContext';
 import {
   Search, Shield, ShieldOff, ChevronLeft, ChevronRight,
   Loader2, UserCheck, UserX, RefreshCw,
@@ -21,28 +22,29 @@ const ROLE_COLORS = {
 export default function AdminUsersPage() {
   const router = useRouter();
   const { user } = useUser();
+  const { toast } = useToast();
 
   useEffect(() => {
     if (!user) return;
     if (user.role !== 'admin') router.push('/dashboard');
   }, [user]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const [users, setUsers]       = useState([]);
+  const [users, setUsers] = useState([]);
   const [pagination, setPagination] = useState({ total: 0, page: 1, pages: 1 });
-  const [loading, setLoading]   = useState(true);
-  const [search, setSearch]     = useState('');
-  const [roleFilter, setRole]   = useState('');
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
+  const [roleFilter, setRole] = useState('');
   const [activeFilter, setActive] = useState('');
   const [actionLoading, setActionLoading] = useState(null);
-  const [selectedUser, setSelectedUser]   = useState(null);
-  const [newRole, setNewRole]   = useState('');
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [newRole, setNewRole] = useState('');
 
   const fetchUsers = async (page = 1) => {
     setLoading(true);
     try {
       const params = new URLSearchParams({ page, limit: 15 });
-      if (search)       params.set('search', search);
-      if (roleFilter)   params.set('role', roleFilter);
+      if (search) params.set('search', search);
+      if (roleFilter) params.set('role', roleFilter);
       if (activeFilter !== '') params.set('isActive', activeFilter);
       const { data } = await api.get(`/admin/users?${params}`);
       setUsers(data.users);
@@ -61,10 +63,10 @@ export default function AdminUsersPage() {
     setActionLoading(userId + '-ban');
     try {
       const { data } = await api.put(`/admin/users/${userId}/ban`);
-      alert(data.message);
+      toast(data.message, 'success');
       fetchUsers(pagination.page);
     } catch (err) {
-      alert(err.response?.data?.message || 'Error');
+      toast(err.response?.data?.message || 'Error', 'error');
     } finally {
       setActionLoading(null);
     }
@@ -75,11 +77,11 @@ export default function AdminUsersPage() {
     setActionLoading(selectedUser._id + '-role');
     try {
       const { data } = await api.put(`/admin/users/${selectedUser._id}/role`, { role: newRole });
-      alert(data.message);
+      toast(data.message, 'success');
       setSelectedUser(null);
       fetchUsers(pagination.page);
     } catch (err) {
-      alert(err.response?.data?.message || 'Error');
+      toast(err.response?.data?.message || 'Error', 'error');
     } finally {
       setActionLoading(null);
     }
@@ -115,7 +117,7 @@ export default function AdminUsersPage() {
         >
           <option value="">All Roles</option>
           {ROLES.filter(Boolean).map(r => (
-            <option key={r} value={r}>{r.replace('_',' ')}</option>
+            <option key={r} value={r}>{r.replace('_', ' ')}</option>
           ))}
         </select>
         <select
@@ -153,7 +155,7 @@ export default function AdminUsersPage() {
                   </td>
                   <td className="px-4 py-4">
                     <span className={`text-[10px] font-black uppercase px-2 py-1 rounded-full ${ROLE_COLORS[u.role] || 'bg-gray-100 text-gray-500'}`}>
-                      {u.role.replace('_',' ')}
+                      {u.role.replace('_', ' ')}
                     </span>
                   </td>
                   <td className="px-4 py-4">
@@ -175,11 +177,10 @@ export default function AdminUsersPage() {
                       <button
                         onClick={() => handleBan(u._id, u.name)}
                         disabled={actionLoading === u._id + '-ban'}
-                        className={`text-xs px-3 py-1.5 rounded-lg transition flex items-center gap-1 ${
-                          u.isActive
+                        className={`text-xs px-3 py-1.5 rounded-lg transition flex items-center gap-1 ${u.isActive
                             ? 'bg-red-50 text-red-600 hover:bg-red-100'
                             : 'bg-green-50 text-green-600 hover:bg-green-100'
-                        }`}
+                          }`}
                       >
                         {actionLoading === u._id + '-ban' ? (
                           <Loader2 className="w-3 h-3 animate-spin" />
@@ -235,7 +236,7 @@ export default function AdminUsersPage() {
               className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 mb-6"
             >
               {ROLES.filter(Boolean).map(r => (
-                <option key={r} value={r}>{r.replace('_',' ')}</option>
+                <option key={r} value={r}>{r.replace('_', ' ')}</option>
               ))}
             </select>
             <div className="flex gap-3">

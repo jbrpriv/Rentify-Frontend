@@ -10,10 +10,10 @@ import {
 } from 'lucide-react';
 
 const STATUS_STYLES = {
-  available:  { bg: 'bg-green-100',  text: 'text-green-700',  label: 'Available' },
-  occupied:   { bg: 'bg-blue-100',   text: 'text-blue-700',   label: 'Occupied' },
-  maintenance:{ bg: 'bg-amber-100',  text: 'text-amber-700',  label: 'Maintenance' },
-  inactive:   { bg: 'bg-gray-100',   text: 'text-gray-500',   label: 'Inactive' },
+  available: { bg: 'bg-green-100', text: 'text-green-700', label: 'Available' },
+  occupied: { bg: 'bg-blue-100', text: 'text-blue-700', label: 'Occupied' },
+  maintenance: { bg: 'bg-amber-100', text: 'text-amber-700', label: 'Maintenance' },
+  inactive: { bg: 'bg-gray-100', text: 'text-gray-500', label: 'Inactive' },
 };
 
 export default function AdminPropertiesPage() {
@@ -26,24 +26,32 @@ export default function AdminPropertiesPage() {
   }, [user]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const [properties, setProperties] = useState([]);
-  const [loading, setLoading]       = useState(true);
-  const [search, setSearch]         = useState('');
-  const [kicking, setKicking]       = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
+  const [kicking, setKicking] = useState(null);
   const [kickReason, setKickReason] = useState('');
   const [confirmProp, setConfirmProp] = useState(null);
-  const [msg, setMsg]               = useState(null);
+  const [msg, setMsg] = useState(null);
+  const debounceRef = useRef(null);
 
-  useEffect(() => {
-    fetchProperties();
-  }, []);
-
-  const fetchProperties = async () => {
+  const fetchProperties = async (searchVal = '') => {
     setLoading(true);
     try {
-      const { data } = await api.get('/admin/properties');
+      const params = searchVal ? { search: searchVal } : {};
+      const { data } = await api.get('/admin/properties', { params });
       setProperties(Array.isArray(data) ? data : []);
     } catch (err) { console.error(err); }
     finally { setLoading(false); }
+  };
+
+  useEffect(() => {
+    fetchProperties('');
+  }, []);
+
+  const handleSearchChange = (val) => {
+    setSearch(val);
+    clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => fetchProperties(val), 350);
   };
 
   const handleKickTenant = async () => {
@@ -61,13 +69,6 @@ export default function AdminPropertiesPage() {
       setKicking(null);
     }
   };
-
-  const filtered = properties.filter(p =>
-    !search ||
-    p.title?.toLowerCase().includes(search.toLowerCase()) ||
-    p.landlord?.name?.toLowerCase().includes(search.toLowerCase()) ||
-    p.activeAgreement?.tenant?.name?.toLowerCase().includes(search.toLowerCase())
-  );
 
   const occupied = properties.filter(p => p.activeAgreement).length;
 
@@ -108,7 +109,7 @@ export default function AdminPropertiesPage() {
           type="text"
           placeholder="Search by property, landlord or tenant name..."
           value={search}
-          onChange={e => setSearch(e.target.value)}
+          onChange={e => handleSearchChange(e.target.value)}
           className="w-full pl-9 pr-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
       </div>
@@ -154,7 +155,7 @@ export default function AdminPropertiesPage() {
         <div className="flex justify-center items-center py-20">
           <Loader2 className="animate-spin h-10 w-10 text-blue-600" />
         </div>
-      ) : filtered.length === 0 ? (
+      ) : properties.length === 0 ? (
         <div className="text-center py-16 bg-white rounded-xl border-2 border-dashed border-gray-200">
           <Building2 className="mx-auto h-12 w-12 text-gray-300 mb-3" />
           <p className="font-semibold text-gray-600">No properties found</p>
@@ -173,7 +174,7 @@ export default function AdminPropertiesPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
-                {filtered.map(p => {
+                {properties.map(p => {
                   const st = STATUS_STYLES[p.status] || STATUS_STYLES.available;
                   const tenant = p.activeAgreement?.tenant;
                   return (

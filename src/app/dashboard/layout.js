@@ -293,6 +293,7 @@ export default function DashboardLayout({ children }) {
       const socket = io(SOCKET_URL, { transports: ['websocket', 'polling'] });
       socketRef.current = socket;
       socket.on('connect', () => socket.emit('register', user._id));
+      socket.on('reconnect', () => socket.emit('register', user._id));
       socket.on('new_message', (msg) => {
         fetchCounts();
         window.dispatchEvent(new CustomEvent('dashboard:new_message', { detail: msg }));

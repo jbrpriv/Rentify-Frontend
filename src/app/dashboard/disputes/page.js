@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import api from '@/utils/api';
 import { useUser } from '@/context/UserContext';
+import { useToast } from '@/context/ToastContext';
 import {
   Scale, Plus, Loader2, ChevronDown, ChevronUp, Send,
   CheckCircle, Clock, AlertCircle, X
@@ -20,6 +21,7 @@ const CATEGORIES = ['rent', 'deposit', 'maintenance', 'noise', 'damage', 'lease_
 
 export default function DisputesPage() {
   const { user } = useUser();
+  const { toast } = useToast();
   const [disputes, setDisputes] = useState([]);
   const [agreements, setAgreements] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -60,7 +62,7 @@ export default function DisputesPage() {
       setForm({ agreementId: '', title: '', description: '', category: 'other' });
       fetchDisputes();
     } catch (err) {
-      alert(err.response?.data?.message || 'Failed to file dispute');
+      toast(err.response?.data?.message || 'Failed to file dispute', 'error');
     } finally { setSubmitting(false); }
   };
 
@@ -72,7 +74,7 @@ export default function DisputesPage() {
       await api.post(`/disputes/${disputeId}/comments`, { content });
       setComment(c => ({ ...c, [disputeId]: '' }));
       fetchDisputes();
-    } catch (err) { alert(err.response?.data?.message || 'Error'); }
+    } catch (err) { toast(err.response?.data?.message || 'Error', 'error'); }
     finally { setPosting(null); }
   };
 
@@ -80,7 +82,7 @@ export default function DisputesPage() {
     try {
       await api.put(`/disputes/${disputeId}`, { status, resolutionNote });
       fetchDisputes();
-    } catch (err) { alert(err.response?.data?.message || 'Error'); }
+    } catch (err) { toast(err.response?.data?.message || 'Error', 'error'); }
   };
 
   const canFile = ['tenant', 'landlord'].includes(user?.role);

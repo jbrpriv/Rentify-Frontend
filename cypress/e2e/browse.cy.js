@@ -172,15 +172,19 @@ describe('Browse — Sort Order', () => {
     });
 
     it('sort "Price: Low to High" puts cheapest listing first', () => {
+        cy.intercept('GET', '/api/listings*sort=price_asc*', { statusCode: 200, body: [mockListings[0], mockListings[2], mockListings[1], mockListings[3]] }).as('sortAsc');
         cy.contains('button', /best match/i).click();
         cy.contains('Price: Low to High').click();
+        cy.wait('@sortAsc');
 
         cy.get('a[href^="/browse/"]').first().should('contain', '18,000');
     });
 
     it('sort "Price: High to Low" puts most expensive listing first', () => {
+        cy.intercept('GET', '/api/listings*sort=price_desc*', { statusCode: 200, body: [mockListings[3], mockListings[1], mockListings[2], mockListings[0]] }).as('sortDesc');
         cy.contains('button', /best match/i).click();
         cy.contains('Price: High to Low').click();
+        cy.wait('@sortDesc');
 
         cy.get('a[href^="/browse/"]').first().should('contain', '120,000');
     });
@@ -197,9 +201,11 @@ describe('Browse — Beds Filter', () => {
         cy.wait('@getListings');
     });
 
-    it('filtering by 4 beds hides 1-bedroom listings', () => {
+    it('filtering by 4 beds updates API call and hides 1-bedroom listings', () => {
+        cy.intercept('GET', '/api/listings*minBeds=4*', { statusCode: 200, body: [mockListings[1]] }).as('beds4');
         cy.contains('button', 'Beds').click();
         cy.contains('button', /4 beds/i).click();
+        cy.wait('@beds4');
         cy.contains('Sunny Studio Downtown').should('not.exist');
         cy.contains('Spacious Family House').should('exist');
     });
