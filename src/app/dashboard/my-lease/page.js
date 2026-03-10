@@ -150,7 +150,8 @@ export default function MyLeasePage() {
             const StatusIcon = style.icon;
             const rent = ag.financials?.rentAmount || 0;
             const deposit = ag.financials?.depositAmount || 0;
-            const totalDueAtSigning = rent + deposit;
+            const petDeposit = ag.petPolicy?.allowed ? (ag.petPolicy?.deposit || 0) : 0;
+            const totalDueAtSigning = rent + deposit + petDeposit;
 
             return (
               <div
@@ -303,7 +304,7 @@ export default function MyLeasePage() {
                     {ag.status === 'signed' && !ag.isPaid && (
                       <div className="w-full sm:w-auto flex flex-col items-end">
                         <p className="text-xs text-blue-600 font-medium mb-1 mr-1">
-                          Includes 1st Month Rent &amp; Deposit
+                          {petDeposit > 0 ? 'Includes 1st Month Rent, Deposit & Pet Deposit' : 'Includes 1st Month Rent & Deposit'}
                         </p>
                         <button
                           onClick={() => handlePaymentClick(ag)}
