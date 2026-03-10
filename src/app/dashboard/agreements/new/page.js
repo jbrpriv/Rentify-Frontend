@@ -549,6 +549,8 @@ function AgreementForm() {
     utilitiesIncluded: formData.utilitiesIncluded,
     utilitiesDetails: formData.utilitiesIncluded ? formData.utilitiesDetails : '',
     terminationPolicy: formData.terminationPolicy,
+    rentEscalationEnabled: formData.rentEscalationEnabled,
+    rentEscalationPercentage: Number(formData.rentEscalationPercentage) || 5,
   });
 
   const handleSubmit = async (e) => {
