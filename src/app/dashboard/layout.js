@@ -48,7 +48,7 @@ const NAV_BY_ROLE = {
     { name: 'Users', href: '/dashboard/admin/users', icon: Users },
     { name: 'Agreements', href: '/dashboard/admin/agreements', icon: FileText },
     { name: 'Properties', href: '/dashboard/admin/properties', icon: Building2 },
-    { name: 'Templates', href: '/dashboard/admin/templates', icon: ClipboardList },
+    { name: 'Clause Management', href: '/dashboard/admin/templates', icon: ClipboardList },
     { name: 'Agr. Templates', href: '/dashboard/admin/agreement-templates', icon: BookOpen },
     { name: 'Verifications', href: '/dashboard/admin/verifications', icon: BadgeCheck },
     { name: 'Billing', href: '/dashboard/admin/billing', icon: CreditCard },
@@ -68,7 +68,7 @@ const NAV_BY_ROLE = {
   ],
   law_reviewer: [
     { name: 'Overview', href: '/dashboard', icon: LayoutDashboard },
-    { name: 'Templates', href: '/dashboard/admin/templates', icon: Scale },
+    { name: 'Clause Managemen', href: '/dashboard/admin/templates', icon: Scale },
     { name: 'Agreements', href: '/dashboard/agreements', icon: FileText, badgeKey: 'agreements' },
     { name: 'Messages', href: '/dashboard/messages', icon: MessageSquare, badgeKey: 'messages' },
     { name: 'Profile', href: '/dashboard/profile', icon: User },
