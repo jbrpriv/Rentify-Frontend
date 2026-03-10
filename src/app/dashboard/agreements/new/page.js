@@ -931,37 +931,6 @@ function AgreementForm() {
                   offerData={offerData}
                   formData={formData}
                 />
-
-                {/* Preview button */}
-                <button
-                  type="button"
-                  onClick={async () => {
-                    if (createdAgreementId) { setShowPDFPreview(true); return; }
-                    if (!offerId) { toast('Please save the agreement first.', 'error'); return; }
-                    setSavingClauses(true);
-                    try {
-                      const { data } = await api.put(`/offers/${offerId}/accept`, buildAcceptPayload());
-                      const newId = data.agreement._id;
-                      setCreatedAgreementId(newId);
-                      if (selectedClauseIds.length > 0) {
-                        await api.put(`/agreements/${newId}/clauses`, { clauseIds: selectedClauseIds });
-                      }
-                      setShowPDFPreview(true);
-                    } catch (err) {
-                      toast(err.response?.data?.message || 'Could not generate preview', 'error');
-                    } finally {
-                      setSavingClauses(false);
-                    }
-                  }}
-                  disabled={savingClauses}
-                  className="mt-4 w-full flex items-center justify-center gap-2 px-4 py-2.5 border border-blue-300 text-blue-700 bg-blue-50 hover:bg-blue-100 disabled:opacity-60 rounded-lg text-sm font-medium transition"
-                >
-                  {savingClauses
-                    ? <><Loader2 className="w-4 h-4 animate-spin" /> Generating Preview…</>
-                    : <><Eye className="w-4 h-4" /> Preview Agreement PDF</>
-                  }
-                </button>
-
                 <div className="mt-6 flex justify-between items-center">
                   <button
                     type="button"
