@@ -8,7 +8,7 @@ import {
   Search, UserCheck, Calendar, FileText, Loader2,
   CheckSquare, Square, ChevronDown, ChevronUp, Tag,
   GripVertical, Eye, EyeOff, AlertTriangle, X, LayoutTemplate,
-  ArrowRight, CheckCircle2,
+  ArrowRight, CheckCircle2, PawPrint, Zap, ScrollText,
 } from 'lucide-react';
 
 // ─── Flow Tracker ─────────────────────────────────────────────────────────────
@@ -230,12 +230,41 @@ function InlinePDFPreview({ agreementId, onClose }) {
   );
 }
 
-// ─── Variable Substitution Helper ───────────────────────────────────────────────
+// ─── Variable Substitution Helper ─────────────────────────────────────────────
+// Used for the inline clause preview only (not the final PDF).
+// Supports both camelCase ({{tenantName}}) and snake_case ({{tenant_name}}) tokens
+// since older clauses may use either convention.
 function substituteVariables(text, offer, form) {
   if (!text) return '';
   let replaced = text;
 
+  const petLabel = form?.petAllowed ? 'Pets allowed' : 'No pets';
+  const petDeposit = form?.petAllowed && form?.petDeposit
+    ? `Rs. ${Number(form.petDeposit).toLocaleString()}`
+    : 'N/A';
+  const utilities = form?.utilitiesIncluded ? 'Utilities included' : 'Utilities not included';
+  const utilDetails = form?.utilitiesDetails || '';
+  const termPolicy = form?.terminationPolicy || '';
+
   const rules = {
+    // camelCase tokens (used by the admin clause builder)
+    '{{tenantName}}': offer?.tenant?.name || '[Tenant Name]',
+    '{{landlordName}}': offer?.property?.landlord?.name || '[Landlord Name]',
+    '{{propertyTitle}}': offer?.property?.title || '[Property Title]',
+    '{{propertyAddress}}': offer?.property?.address ? `${offer.property.address.street}, ${offer.property.address.city}` : '[Property Address]',
+    '{{startDate}}': form?.startDate ? new Date(form.startDate).toLocaleDateString() : '[Start Date]',
+    '{{endDate}}': form?.endDate ? new Date(form.endDate).toLocaleDateString() : '[End Date]',
+    '{{rentAmount}}': form?.rentAmount ? `Rs. ${Number(form.rentAmount).toLocaleString()}` : '[Rent Amount]',
+    '{{depositAmount}}': form?.depositAmount ? `Rs. ${Number(form.depositAmount).toLocaleString()}` : '[Deposit Amount]',
+    '{{lateFeeAmount}}': form?.lateFeeAmount ? `Rs. ${Number(form.lateFeeAmount).toLocaleString()}` : '[Late Fee]',
+    '{{lateFeeGraceDays}}': form?.lateFeeGracePeriodDays ? `${form.lateFeeGracePeriodDays} days` : '[Grace Period]',
+    '{{petPolicy}}': petLabel,
+    '{{petDeposit}}': petDeposit,
+    '{{utilities}}': utilities,
+    '{{utilitiesDetails}}': utilDetails || '[Utilities Details]',
+    '{{terminationPolicy}}': termPolicy || '[Termination Policy]',
+    '{{currentDate}}': new Date().toLocaleDateString(),
+    // snake_case tokens (legacy)
     '{{tenant_name}}': offer?.tenant?.name || '[Tenant Name]',
     '{{landlord_name}}': offer?.property?.landlord?.name || '[Landlord Name]',
     '{{property_address}}': offer?.property?.address ? `${offer.property.address.street}, ${offer.property.address.city}` : '[Property Address]',
@@ -244,13 +273,35 @@ function substituteVariables(text, offer, form) {
     '{{rent_amount}}': form?.rentAmount ? `Rs. ${Number(form.rentAmount).toLocaleString()}` : '[Rent Amount]',
     '{{deposit_amount}}': form?.depositAmount ? `Rs. ${Number(form.depositAmount).toLocaleString()}` : '[Deposit Amount]',
     '{{late_fee_amount}}': form?.lateFeeAmount ? `Rs. ${Number(form.lateFeeAmount).toLocaleString()}` : '[Late Fee]',
-    '{{grace_period}}': form?.lateFeeGracePeriodDays ? `${form.lateFeeGracePeriodDays} days` : '[Grace Period]'
+    '{{grace_period}}': form?.lateFeeGracePeriodDays ? `${form.lateFeeGracePeriodDays} days` : '[Grace Period]',
   };
 
   for (const [key, value] of Object.entries(rules)) {
-    replaced = replaced.replace(new RegExp(key, 'gi'), `<span class="bg-blue-100 text-blue-800 px-1 py-0.5 rounded font-medium">${value}</span>`);
+    replaced = replaced.replace(
+      new RegExp(key.replace(/[{}]/g, '\\$&'), 'gi'),
+      `<span class="bg-blue-100 text-blue-800 px-1 py-0.5 rounded font-medium">${value}</span>`
+    );
   }
   return replaced;
+}
+
+// ─── Toggle Switch ─────────────────────────────────────────────────────────────
+function Toggle({ enabled, onChange, label, description }) {
+  return (
+    <div className="flex items-center justify-between">
+      <div>
+        <label className="text-sm font-medium text-gray-700">{label}</label>
+        {description && <p className="text-xs text-gray-400">{description}</p>}
+      </div>
+      <button
+        type="button"
+        onClick={() => onChange(!enabled)}
+        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 ${enabled ? 'bg-blue-600' : 'bg-gray-200'}`}
+      >
+        <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform ${enabled ? 'translate-x-6' : 'translate-x-1'}`} />
+      </button>
+    </div>
+  );
 }
 
 // ─── Drag-and-Drop Clause Picker ──────────────────────────────────────────────
@@ -454,7 +505,15 @@ function AgreementForm() {
     lateFeeGracePeriodDays: '5',
     rentEscalationEnabled: false,
     rentEscalationPercentage: '5',
+    // ── New fields ────────────────────────────────────────────────────────────
+    petAllowed: false,
+    petDeposit: '',
+    utilitiesIncluded: false,
+    utilitiesDetails: '',
+    terminationPolicy: '',
   });
+
+  const set = (key, value) => setFormData(prev => ({ ...prev, [key]: value }));
 
   // Pre-load offer details
   useEffect(() => {
@@ -467,30 +526,37 @@ function AgreementForm() {
         const end = new Date(start);
         end.setMonth(end.getMonth() + (lastRound?.leaseDurationMonths || 12));
         setOfferData(data);
-        setFormData({
+        setFormData(prev => ({
+          ...prev,
           startDate: start.toISOString().slice(0, 10),
           endDate: end.toISOString().slice(0, 10),
           rentAmount: String(lastRound?.monthlyRent || ''),
           depositAmount: String(lastRound?.securityDeposit || ''),
           lateFeeAmount: String(data.property?.financials?.lateFeeAmount || 0),
           lateFeeGracePeriodDays: String(data.property?.financials?.lateFeeGracePeriodDays || 5),
-        });
+        }));
         setStep(1);
       })
       .catch(() => { })
       .finally(() => setLoading(false));
   }, [offerId]);
 
+  // ── Build the accept-offer payload (single source of truth) ────────────────
+  const buildAcceptPayload = () => ({
+    startDate: formData.startDate,
+    petAllowed: formData.petAllowed,
+    petDeposit: formData.petAllowed ? Number(formData.petDeposit) || 0 : 0,
+    utilitiesIncluded: formData.utilitiesIncluded,
+    utilitiesDetails: formData.utilitiesIncluded ? formData.utilitiesDetails : '',
+    terminationPolicy: formData.terminationPolicy,
+  });
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Read actual DOM values so Cypress .invoke('val', ...).trigger('change') is
-    // respected even when React's synthetic event system doesn't propagate the
-    // programmatic value change into controlled-input state.
     const startDateValue = startDateRef.current?.value ?? formData.startDate;
     const endDateValue = endDateRef.current?.value ?? formData.endDate;
 
-    // Keep React state in sync so the rest of the submit flow uses correct values.
     if (startDateValue !== formData.startDate || endDateValue !== formData.endDate) {
       setFormData(prev => ({ ...prev, startDate: startDateValue, endDate: endDateValue }));
     }
@@ -504,9 +570,8 @@ function AgreementForm() {
     if (start && end && end <= start) errors.endDate = 'End date must be after start date.';
 
     const rent = Number(formData.rentAmount);
-    if (!formData.rentAmount || isNaN(rent) || rent <= 0) errors.rentAmount = 'Rent must be a positive number.';
-
     const deposit = Number(formData.depositAmount);
+    if (!formData.rentAmount || isNaN(rent) || rent <= 0) errors.rentAmount = 'Rent must be a positive number.';
     if (!formData.depositAmount || isNaN(deposit) || deposit < 0) errors.depositAmount = 'Deposit must be 0 or more.';
 
     if (Object.keys(errors).length > 0) { setFormErrors(errors); return; }
@@ -515,19 +580,9 @@ function AgreementForm() {
     setStep(2);
   };
 
-  const handleToggleClause = (clauseId) => {
-    setSelectedClauseIds(prev =>
-      prev.includes(clauseId) ? prev.filter(id => id !== clauseId) : [...prev, clauseId]
-    );
-  };
-
+  const handleToggleClause = (clauseId) => setSelectedClauseIds(prev => prev.includes(clauseId) ? prev.filter(id => id !== clauseId) : [...prev, clauseId]);
   const handleReorderClauses = (reorderedIds) => setSelectedClauseIds(reorderedIds);
-
-  const handleApplyTemplate = (clauseIds, templateName) => {
-    setSelectedClauseIds(clauseIds);
-    setAppliedTemplate(templateName);
-    setShowTemplatePicker(false);
-  };
+  const handleApplyTemplate = (clauseIds, templateName) => { setSelectedClauseIds(clauseIds); setAppliedTemplate(templateName); setShowTemplatePicker(false); };
 
   const handleSaveClauses = async () => {
     setSavingClauses(true);
@@ -535,13 +590,8 @@ function AgreementForm() {
       let createdId = createdAgreementId;
 
       if (!createdId) {
-        if (!offerId) {
-          toast('Offer ID is required to draft an agreement.', 'error');
-          return;
-        }
-        const { data } = await api.put(`/offers/${offerId}/accept`, {
-          startDate: formData.startDate,
-        });
+        if (!offerId) { toast('Offer ID is required to draft an agreement.', 'error'); return; }
+        const { data } = await api.put(`/offers/${offerId}/accept`, buildAcceptPayload());
         createdId = data.agreement._id;
         setCreatedAgreementId(createdId);
       }
@@ -627,7 +677,7 @@ function AgreementForm() {
           </div>
 
           <div className="bg-white shadow rounded-lg overflow-hidden">
-            {/* Step 1: Lease Terms */}
+            {/* ── Step 1: Lease Terms ────────────────────────────────────────── */}
             {step >= 1 && (
               <div className={`p-6 border-t border-gray-100 ${step !== 1 ? 'opacity-50 pointer-events-none' : ''}`}>
                 <h2 className="text-lg font-medium text-gray-900 flex items-center mb-6">
@@ -636,6 +686,8 @@ function AgreementForm() {
                 </h2>
 
                 <form onSubmit={handleSubmit} noValidate className="space-y-6">
+
+                  {/* Dates */}
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700">Start Date</label>
@@ -645,7 +697,7 @@ function AgreementForm() {
                         required
                         className={`mt-1 block w-full rounded-md border px-3 py-2 shadow-sm focus:ring-blue-500 focus:border-blue-500 ${formErrors.startDate ? 'border-red-400 bg-red-50' : 'border-gray-300'}`}
                         value={formData.startDate}
-                        onChange={e => { setFormData({ ...formData, startDate: e.target.value }); setFormErrors(p => ({ ...p, startDate: null })); }}
+                        onChange={e => { set('startDate', e.target.value); setFormErrors(p => ({ ...p, startDate: null })); }}
                       />
                       {formErrors.startDate && <p className="mt-1 text-xs text-red-600 flex items-center gap-1"><AlertTriangle className="w-3 h-3" />{formErrors.startDate}</p>}
                     </div>
@@ -657,19 +709,17 @@ function AgreementForm() {
                         required
                         className={`mt-1 block w-full rounded-md border px-3 py-2 shadow-sm focus:ring-blue-500 focus:border-blue-500 ${formErrors.endDate ? 'border-red-400 bg-red-50' : 'border-gray-300'}`}
                         value={formData.endDate}
-                        onChange={e => { setFormData({ ...formData, endDate: e.target.value }); setFormErrors(p => ({ ...p, endDate: null })); }}
+                        onChange={e => { set('endDate', e.target.value); setFormErrors(p => ({ ...p, endDate: null })); }}
                       />
                       {formErrors.endDate && <p className="mt-1 text-xs text-red-600 flex items-center gap-1"><AlertTriangle className="w-3 h-3" />{formErrors.endDate}</p>}
                     </div>
                   </div>
 
+                  {/* Rent & Deposit (fixed from offer) */}
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700">Monthly Rent (Rs.)</label>
-                      <input
-                        type="number"
-                        required
-                        disabled
+                      <input type="number" required disabled
                         className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm bg-gray-50 text-gray-500 cursor-not-allowed"
                         value={formData.rentAmount}
                       />
@@ -678,10 +728,7 @@ function AgreementForm() {
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700">Security Deposit (Rs.)</label>
-                      <input
-                        type="number"
-                        required
-                        disabled
+                      <input type="number" required disabled
                         className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm bg-gray-50 text-gray-500 cursor-not-allowed"
                         value={formData.depositAmount}
                       />
@@ -694,10 +741,7 @@ function AgreementForm() {
                   <div className="grid grid-cols-2 gap-4 pt-2 border-t border-gray-100">
                     <div>
                       <label className="block text-sm font-medium text-gray-700">Late Fee Amount (Rs.)</label>
-                      <input
-                        type="number"
-                        min="0"
-                        disabled
+                      <input type="number" min="0" disabled
                         className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm bg-gray-50 text-gray-500 cursor-not-allowed"
                         value={formData.lateFeeAmount}
                         placeholder="0"
@@ -706,11 +750,7 @@ function AgreementForm() {
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700">Grace Period (days)</label>
-                      <input
-                        type="number"
-                        min="1"
-                        max="30"
-                        disabled
+                      <input type="number" min="1" max="30" disabled
                         className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm bg-gray-50 text-gray-500 cursor-not-allowed"
                         value={formData.lateFeeGracePeriodDays}
                       />
@@ -720,29 +760,20 @@ function AgreementForm() {
 
                   {/* Rent Escalation */}
                   <div className="pt-2 border-t border-gray-100 space-y-3">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <label className="text-sm font-medium text-gray-700">Annual Rent Escalation</label>
-                        <p className="text-xs text-gray-400">Automatically increase rent on each lease anniversary</p>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => setFormData({ ...formData, rentEscalationEnabled: !formData.rentEscalationEnabled })}
-                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${formData.rentEscalationEnabled ? 'bg-blue-600' : 'bg-gray-200'}`}
-                      >
-                        <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${formData.rentEscalationEnabled ? 'translate-x-6' : 'translate-x-1'}`} />
-                      </button>
-                    </div>
+                    <Toggle
+                      enabled={formData.rentEscalationEnabled}
+                      onChange={v => set('rentEscalationEnabled', v)}
+                      label="Annual Rent Escalation"
+                      description="Automatically increase rent on each lease anniversary"
+                    />
                     {formData.rentEscalationEnabled && (
                       <div className="flex items-center gap-3 bg-blue-50 rounded-lg px-4 py-3">
                         <label className="text-sm font-medium text-gray-700 flex-shrink-0">Increase by</label>
                         <input
-                          type="number"
-                          min="1"
-                          max="50"
+                          type="number" min="1" max="50"
                           className="w-20 rounded-md border border-gray-300 px-3 py-1.5 text-sm shadow-sm focus:ring-blue-500 focus:border-blue-500"
                           value={formData.rentEscalationPercentage}
-                          onChange={e => setFormData({ ...formData, rentEscalationPercentage: e.target.value })}
+                          onChange={e => set('rentEscalationPercentage', e.target.value)}
                         />
                         <span className="text-sm text-gray-700">% per year</span>
                         <span className="text-xs text-blue-600 ml-auto">
@@ -752,6 +783,103 @@ function AgreementForm() {
                     )}
                   </div>
 
+                  {/* ── Pet Policy ──────────────────────────────────────────── */}
+                  <div className="pt-2 border-t border-gray-100 space-y-3">
+                    <div className="flex items-center gap-2 mb-1">
+                      <PawPrint className="w-4 h-4 text-gray-400" />
+                      <span className="text-sm font-semibold text-gray-700">Pet Policy</span>
+                    </div>
+
+                    <Toggle
+                      enabled={formData.petAllowed}
+                      onChange={v => set('petAllowed', v)}
+                      label="Pets allowed on the premises"
+                      description="Tenant may keep domestic pets with conditions"
+                    />
+
+                    {formData.petAllowed && (
+                      <div className="rounded-lg bg-amber-50 border border-amber-100 px-4 py-3 space-y-3">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Pet Deposit (Rs.)
+                            <span className="ml-1 text-xs font-normal text-gray-400">— non-refundable, separate from security deposit</span>
+                          </label>
+                          <input
+                            type="number"
+                            min="0"
+                            placeholder="e.g. 5000"
+                            value={formData.petDeposit}
+                            onChange={e => set('petDeposit', e.target.value)}
+                            className="w-full rounded-md border border-amber-200 bg-white px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-400"
+                          />
+                          <p className="text-xs text-amber-700 mt-1">
+                            This value populates <code className="bg-amber-100 px-1 rounded font-mono">{'{{petDeposit}}'}</code> in pet clauses.
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
+                    {!formData.petAllowed && (
+                      <p className="text-xs text-gray-400 italic">
+                        No pets permitted. Pet-related clause variables will render as "No pets" / "N/A".
+                      </p>
+                    )}
+                  </div>
+
+                  {/* ── Utilities ───────────────────────────────────────────── */}
+                  <div className="pt-2 border-t border-gray-100 space-y-3">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Zap className="w-4 h-4 text-gray-400" />
+                      <span className="text-sm font-semibold text-gray-700">Utilities</span>
+                    </div>
+
+                    <Toggle
+                      enabled={formData.utilitiesIncluded}
+                      onChange={v => set('utilitiesIncluded', v)}
+                      label="Utilities included in rent"
+                      description="Water, gas, electricity, or other services"
+                    />
+
+                    {formData.utilitiesIncluded && (
+                      <div className="rounded-lg bg-emerald-50 border border-emerald-100 px-4 py-3">
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Which utilities are included?
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="e.g. Water, Electricity, Gas"
+                          value={formData.utilitiesDetails}
+                          onChange={e => set('utilitiesDetails', e.target.value)}
+                          className="w-full rounded-md border border-emerald-200 bg-white px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400"
+                        />
+                        <p className="text-xs text-emerald-700 mt-1">
+                          Populates <code className="bg-emerald-100 px-1 rounded font-mono">{'{{utilitiesDetails}}'}</code> in utility clauses.
+                        </p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* ── Termination Policy ──────────────────────────────────── */}
+                  <div className="pt-2 border-t border-gray-100 space-y-3">
+                    <div className="flex items-center gap-2 mb-1">
+                      <ScrollText className="w-4 h-4 text-gray-400" />
+                      <span className="text-sm font-semibold text-gray-700">Termination Policy</span>
+                      <span className="text-xs text-gray-400 font-normal">(optional)</span>
+                    </div>
+                    <div>
+                      <textarea
+                        rows={3}
+                        placeholder="e.g. Either party may terminate this agreement with 30 days written notice. Early termination by the tenant shall incur a penalty of one month's rent."
+                        value={formData.terminationPolicy}
+                        onChange={e => set('terminationPolicy', e.target.value)}
+                        className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
+                      />
+                      <p className="text-xs text-gray-400 mt-1">
+                        Populates <code className="bg-gray-100 px-1 rounded font-mono">{'{{terminationPolicy}}'}</code> in termination clauses. Leave blank if not applicable.
+                      </p>
+                    </div>
+                  </div>
+
                   <div className="pt-4 flex justify-end">
                     <button
                       type="submit"
@@ -759,14 +887,14 @@ function AgreementForm() {
                       className="inline-flex justify-center items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none disabled:opacity-60"
                     >
                       {loading ? <Loader2 className="animate-spin h-5 w-5 mr-2" /> : <FileText className="h-5 w-5 mr-2" />}
-                      Create Agreement Draft
+                      Continue to Clauses
                     </button>
                   </div>
                 </form>
               </div>
             )}
 
-            {/* Step 2: Clauses */}
+            {/* ── Step 2: Clauses ────────────────────────────────────────────── */}
             {step === 2 && (
               <div className="p-6 border-t border-gray-100">
                 <div className="flex items-center justify-between mb-2">
@@ -804,26 +932,15 @@ function AgreementForm() {
                   formData={formData}
                 />
 
-                {/* Preview button: always visible in step 2.
-                    If the agreement hasn't been saved yet (no createdAgreementId),
-                    we first save a draft via the accept-offer flow, then open the preview. */}
+                {/* Preview button */}
                 <button
                   type="button"
                   onClick={async () => {
-                    if (createdAgreementId) {
-                      setShowPDFPreview(true);
-                      return;
-                    }
-                    // No draft saved yet — create one silently so we have an ID to preview
-                    if (!offerId) {
-                      toast('Please save the agreement first.', 'error');
-                      return;
-                    }
+                    if (createdAgreementId) { setShowPDFPreview(true); return; }
+                    if (!offerId) { toast('Please save the agreement first.', 'error'); return; }
                     setSavingClauses(true);
                     try {
-                      const { data } = await api.put(`/offers/${offerId}/accept`, {
-                        startDate: formData.startDate,
-                      });
+                      const { data } = await api.put(`/offers/${offerId}/accept`, buildAcceptPayload());
                       const newId = data.agreement._id;
                       setCreatedAgreementId(newId);
                       if (selectedClauseIds.length > 0) {
@@ -876,7 +993,7 @@ function AgreementForm() {
               />
             )}
 
-            {/* PDF Preview Modal — only rendered once we have a saved agreement ID */}
+            {/* PDF Preview Modal */}
             {showPDFPreview && createdAgreementId && (
               <InlinePDFPreview
                 agreementId={createdAgreementId}

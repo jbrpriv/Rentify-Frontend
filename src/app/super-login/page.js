@@ -5,26 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useUser } from '@/context/UserContext';
 import api from '@/utils/api';
 import { requestFCMToken } from '@/utils/firebase';
-import { Lock, Mail, Loader2, Eye, EyeOff, ShieldCheck, Scale, UserPlus, LogIn, Phone, CheckCircle } from 'lucide-react';
-
-const ROLE_CONFIG = {
-  admin: {
-    label: 'System Administrator',
-    shortLabel: 'Admin',
-    icon: ShieldCheck,
-    color: 'from-[#0B2D72] via-[#0992C2] to-[#0AC4E0]',
-    badge: 'ADMIN PORTAL',
-    description: 'Full platform management & oversight',
-  },
-  law_reviewer: {
-    label: 'Law Reviewer',
-    shortLabel: 'Law',
-    icon: Scale,
-    color: 'from-[#0B2D72] via-[#0992C2] to-[#0AC4E0]',
-    badge: 'LEGAL PORTAL',
-    description: 'Clause review, template management & legal oversight',
-  },
-};
+import { Lock, Mail, Loader2, Eye, EyeOff, ShieldCheck, UserPlus, LogIn, Phone, CheckCircle } from 'lucide-react';
 
 // Reuse the same reCAPTCHA helper as the regular login page
 const getRecaptchaToken = (action) =>
@@ -45,9 +26,8 @@ const getRecaptchaToken = (action) =>
 export default function SuperLoginPage() {
   const router = useRouter();
   const { setUser } = useUser();
-  const [selectedRole, setSelectedRole] = useState('admin');
   const [mode, setMode] = useState('login');
-  const [formData, setFormData] = useState({ name: '', email: '', password: '', phoneNumber: '' });
+  const [formData, setFormData] = useState({ name: '', email: '', password: '', phoneNumber: '', role: 'admin' });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -61,15 +41,7 @@ export default function SuperLoginPage() {
   const [totp, setTotp] = useState('');
   const [totpLoading, setTotpLoading] = useState(false);
 
-  const cfg = ROLE_CONFIG[selectedRole];
-  const Icon = cfg.icon;
-
   const clearAlerts = () => { setError(''); setSuccess(''); };
-
-  const handleRoleSelect = (role) => {
-    setSelectedRole(role);
-    clearAlerts();
-  };
 
   const proceedAfterLogin = (loginData) => {
     localStorage.setItem('token', loginData.token);
@@ -85,10 +57,8 @@ export default function SuperLoginPage() {
     try {
       if (mode === 'register') {
         const recaptchaToken = await getRecaptchaToken('register');
-        const payload = { ...formData, role: selectedRole, recaptchaToken };
+        const payload = { ...formData, recaptchaToken };
         await api.post('/auth/register', payload);
-        // No token in the register response — JWT is only issued after both
-        // email AND phone are verified inside verifyPhoneOTP.
         setSuccess(`A 6-digit verification code was sent to ${formData.email}`);
         setStep('email');
       } else {
@@ -111,8 +81,6 @@ export default function SuperLoginPage() {
         setSuccess(`Check your email ${formData.email} for the verification code.`);
         setStep('email');
       } else if (msg === 'PHONE_NOT_VERIFIED') {
-        // Don't try to store a token — the 403 error response has no token.
-        // Just track the email so send-otp / verify-otp can use it.
         await api.post('/auth/send-otp', { email: formData.email });
         setSuccess('A verification code was sent to your phone number.');
         setStep('phone');
@@ -163,7 +131,6 @@ export default function SuperLoginPage() {
     setLoading(true);
     clearAlerts();
     try {
-      // verify-otp returns the real JWT — no re-login needed.
       const { data } = await api.post('/auth/verify-otp', { email: formData.email, code: phoneOTP });
       if (!['admin', 'law_reviewer'].includes(data.role)) {
         setError('Access denied. This portal is for admins and law reviewers only.');
@@ -245,21 +212,15 @@ export default function SuperLoginPage() {
             <div className="mt-3 grid grid-cols-3 gap-3 text-sm">
               <div>
                 <p className="text-lg font-extrabold leading-none">99.9%</p>
-                <p className="mt-1 text-[11px] text-cyan-100/90">
-                  Uptime
-                </p>
+                <p className="mt-1 text-[11px] text-cyan-100/90">Uptime</p>
               </div>
               <div>
                 <p className="text-lg font-extrabold leading-none">256-bit</p>
-                <p className="mt-1 text-[11px] text-cyan-100/90">
-                  Encryption
-                </p>
+                <p className="mt-1 text-[11px] text-cyan-100/90">Encryption</p>
               </div>
               <div>
                 <p className="text-lg font-extrabold leading-none">24/7</p>
-                <p className="mt-1 text-[11px] text-cyan-100/90">
-                  Monitoring
-                </p>
+                <p className="mt-1 text-[11px] text-cyan-100/90">Monitoring</p>
               </div>
             </div>
           </div>
@@ -293,28 +254,6 @@ export default function SuperLoginPage() {
             </p>
           </div>
 
-          {/* Role selector — only on main step */}
-          {step === 'main' && (
-            <div className="mb-5 flex gap-2">
-              {Object.entries(ROLE_CONFIG).map(([role, config]) => {
-                const RIcon = config.icon;
-                return (
-                  <button
-                    key={role}
-                    onClick={() => handleRoleSelect(role)}
-                    className={`flex-1 rounded-2xl border px-4 py-3 text-sm font-bold transition-all flex items-center justify-center gap-2 ${selectedRole === role
-                      ? 'border-[#0992C2] bg-white text-[#0B2D72] shadow-sm shadow-[#0992C2]/25'
-                      : 'border-transparent bg-white/70 text-[#64748B] hover:border-[#99E0F2] hover:text-[#0B2D72]'
-                      }`}
-                  >
-                    <RIcon className="h-4 w-4" />
-                    {config.shortLabel || config.label.split(' ')[0]}
-                  </button>
-                );
-              })}
-            </div>
-          )}
-
           <div className="rounded-3xl bg-white/90 p-7 shadow-[0_22px_70px_rgba(9,146,194,0.45)] ring-1 ring-[#0992C2]/18">
 
             {/* Alerts */}
@@ -332,18 +271,7 @@ export default function SuperLoginPage() {
             {/* ── MAIN FORM ──────────────────────────────────────────────────────── */}
             {step === 'main' && (
               <>
-                <div className={`mb-6 flex items-center gap-3 rounded-2xl bg-gradient-to-r ${cfg.color} px-4 py-3 text-white`}>
-                  <div className="rounded-xl bg-white/20 p-2">
-                    <Icon className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <p className="text-[10px] font-black uppercase tracking-widest text-white/70">
-                      {cfg.badge}
-                    </p>
-                    <p className="text-sm font-bold">{cfg.description}</p>
-                  </div>
-                </div>
-
+                {/* Login / Register toggle */}
                 <div className="mb-6 flex gap-1 rounded-xl bg-[#F0F8FA] p-1">
                   {['login', 'register'].map((m) => (
                     <button
@@ -366,19 +294,38 @@ export default function SuperLoginPage() {
 
                 <form onSubmit={handleSubmit} className="space-y-4">
                   {mode === 'register' && (
-                    <div className="relative">
-                      <input
-                        type="text"
-                        required
-                        value={formData.name}
-                        onChange={e => setFormData(f => ({ ...f, name: e.target.value }))}
-                        placeholder=" "
-                        className="peer w-full rounded-xl border border-[#D1E7F0] bg-white/70 px-3.5 pt-5 pb-2.5 text-sm text-[#111827] placeholder-transparent outline-none transition-colors focus:border-[#0992C2]"
-                      />
-                      <label className="pointer-events-none absolute left-3.5 top-2.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#9CA3AF] transition-all peer-placeholder-shown:top-3.5 peer-placeholder-shown:text-xs peer-placeholder-shown:text-[#9CA3AF] peer-focus:top-2 peer-focus:text-[10px] peer-focus:text-[#0992C2]">
-                        Full name
-                      </label>
-                    </div>
+                    <>
+                      <div className="relative">
+                        <input
+                          type="text"
+                          required
+                          value={formData.name}
+                          onChange={e => setFormData(f => ({ ...f, name: e.target.value }))}
+                          placeholder=" "
+                          className="peer w-full rounded-xl border border-[#D1E7F0] bg-white/70 px-3.5 pt-5 pb-2.5 text-sm text-[#111827] placeholder-transparent outline-none transition-colors focus:border-[#0992C2]"
+                        />
+                        <label className="pointer-events-none absolute left-3.5 top-2.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#9CA3AF] transition-all peer-placeholder-shown:top-3.5 peer-placeholder-shown:text-xs peer-placeholder-shown:text-[#9CA3AF] peer-focus:top-2 peer-focus:text-[10px] peer-focus:text-[#0992C2]">
+                          Full name
+                        </label>
+                      </div>
+
+                      {/* Role selector — only needed when registering */}
+                      <div className="relative">
+                        <ShieldCheck className="pointer-events-none absolute left-3.5 top-3.5 h-4 w-4 text-[#9CA3AF]" />
+                        <select
+                          required
+                          value={formData.role}
+                          onChange={e => setFormData(f => ({ ...f, role: e.target.value }))}
+                          className="w-full appearance-none rounded-xl border border-[#D1E7F0] bg-white/70 pl-9 pr-3.5 pt-5 pb-2.5 text-sm text-[#111827] outline-none transition-colors focus:border-[#0992C2]"
+                        >
+                          <option value="admin">System Administrator</option>
+                          <option value="law_reviewer">Law Reviewer</option>
+                        </select>
+                        <label className="pointer-events-none absolute left-9 top-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-[#0992C2]">
+                          Role
+                        </label>
+                      </div>
+                    </>
                   )}
 
                   <div className="relative">
@@ -398,15 +345,16 @@ export default function SuperLoginPage() {
 
                   {mode === 'register' && (
                     <div className="relative">
+                      <Phone className="pointer-events-none absolute left-3.5 top-3.5 h-4 w-4 text-[#9CA3AF]" />
                       <input
                         type="tel"
                         required
                         value={formData.phoneNumber}
                         onChange={e => setFormData(f => ({ ...f, phoneNumber: e.target.value }))}
                         placeholder=" "
-                        className="peer w-full rounded-xl border border-[#D1E7F0] bg-white/70 px-3.5 pt-5 pb-2.5 text-sm text-[#111827] placeholder-transparent outline-none transition-colors focus:border-[#0992C2]"
+                        className="peer w-full rounded-xl border border-[#D1E7F0] bg-white/70 pl-9 pr-3.5 pt-5 pb-2.5 text-sm text-[#111827] placeholder-transparent outline-none transition-colors focus:border-[#0992C2]"
                       />
-                      <label className="pointer-events-none absolute left-3.5 top-2.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#9CA3AF] transition-all peer-placeholder-shown:top-3.5 peer-placeholder-shown:text-xs peer-placeholder-shown:text-[#9CA3AF] peer-focus:top-2 peer-focus:text-[10px] peer-focus:text-[#0992C2]">
+                      <label className="pointer-events-none absolute left-9 top-2.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#9CA3AF] transition-all peer-placeholder-shown:top-3.5 peer-placeholder-shown:text-xs peer-placeholder-shown:text-[#9CA3AF] peer-focus:top-2 peer-focus:text-[10px] peer-focus:text-[#0992C2]">
                         Phone number
                       </label>
                     </div>
@@ -437,18 +385,14 @@ export default function SuperLoginPage() {
                   <button
                     type="submit"
                     disabled={loading}
-                    className={`mt-2 flex w-full transform items-center justify-center gap-2 rounded-xl bg-gradient-to-r ${cfg.color} py-3.5 text-sm font-black text-white shadow-md shadow-[#0992C2]/40 transition-transform transition-colors hover:scale-[1.02] hover:shadow-lg hover:shadow-[#0B2D72]/60 active:scale-[0.97] disabled:opacity-60`}
+                    className="mt-2 flex w-full transform items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#0B2D72] via-[#0992C2] to-[#0AC4E0] py-3.5 text-sm font-black text-white shadow-md shadow-[#0992C2]/40 transition-transform transition-colors hover:scale-[1.02] hover:shadow-lg hover:shadow-[#0B2D72]/60 active:scale-[0.97] disabled:opacity-60"
                   >
                     {loading ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
                     ) : mode === 'login' ? (
-                      <>
-                        <LogIn className="h-4 w-4" /> Sign in
-                      </>
+                      <><LogIn className="h-4 w-4" /> Sign in</>
                     ) : (
-                      <>
-                        <UserPlus className="h-4 w-4" /> Create account
-                      </>
+                      <><UserPlus className="h-4 w-4" /> Create account</>
                     )}
                   </button>
                 </form>
