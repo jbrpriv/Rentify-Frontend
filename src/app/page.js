@@ -135,20 +135,26 @@ export default function LandingPage() {
               {/* Search bar */}
               <form
                 onSubmit={handleSearch}
-                className="mt-8 flex items-center gap-3 rounded-2xl bg-white/95 px-5 py-3.5 shadow-2xl backdrop-blur-sm"
-                style={{ boxShadow: '0 8px 48px rgba(0,0,0,0.45)' }}
+                className="mt-8 w-full group flex items-center gap-3 rounded-2xl px-4 py-3.5 transition-all duration-300 focus-within:scale-[1.015]"
+                style={{
+                  background: 'rgba(255,255,255,0.97)',
+                  boxShadow: '0 8px 40px rgba(0,0,0,0.4), 0 1px 0 rgba(255,255,255,0.5) inset',
+                  backdropFilter: 'blur(16px)',
+                }}
               >
-                <Search className="h-4 w-4 shrink-0 text-neutral-400" />
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#0992C2] to-[#0B2D72]">
+                  <Search className="h-4 w-4 text-white" />
+                </div>
                 <input
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   placeholder="City, address, or ZIP code"
-                  className="flex-1 bg-transparent text-[0.9rem] text-neutral-800 placeholder:text-neutral-400 focus:outline-none"
+                  className="flex-1 bg-transparent text-[0.92rem] font-medium text-neutral-800 placeholder:text-neutral-400 focus:outline-none"
                 />
                 <button
                   type="submit"
-                  className="rounded-xl bg-gradient-to-r from-[#0B2D72] to-[#0992C2] px-5 py-2 text-[0.78rem] font-semibold text-white transition-all hover:scale-105"
-                  style={{ boxShadow: '0 2px 12px rgba(9,146,194,0.4)' }}
+                  className="shrink-0 rounded-xl bg-gradient-to-r from-[#0B2D72] to-[#0992C2] px-6 py-2.5 text-[0.82rem] font-bold text-white transition-all hover:scale-105 hover:brightness-110"
+                  style={{ boxShadow: '0 4px 16px rgba(9,146,194,0.55)' }}
                 >
                   Search
                 </button>
