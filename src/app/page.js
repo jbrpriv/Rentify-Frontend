@@ -94,88 +94,90 @@ export default function LandingPage() {
             backgroundAttachment: 'fixed',
           }}
         >
-          <div className="relative z-10 flex flex-col items-center lg:items-start text-center lg:text-left px-6 lg:px-16 mx-auto w-full max-w-7xl pt-24 pb-40">
+          <div className="relative z-10 w-full px-6 lg:px-16 mx-auto max-w-7xl pt-24 pb-40">
+            <div className="flex flex-col items-center lg:items-start text-center lg:text-left lg:max-w-[52%]">
 
-            {/* Eyebrow */}
-            <span className="mb-5 inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-1.5 text-[0.7rem] font-semibold uppercase tracking-[0.22em] text-white/80 ring-1 ring-white/20 backdrop-blur-sm">
-              <span className="h-1.5 w-1.5 rounded-full bg-[#0992C2] animate-pulse" />
-              Property management, reimagined
-            </span>
+              {/* Eyebrow */}
+              <span className="mb-5 inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-1.5 text-[0.7rem] font-semibold uppercase tracking-[0.22em] text-white/80 ring-1 ring-white/20 backdrop-blur-sm">
+                <span className="h-1.5 w-1.5 rounded-full bg-[#0992C2] animate-pulse" />
+                Property management, reimagined
+              </span>
 
-            <h1
-              className="text-white drop-shadow-lg max-w-2xl"
-              style={{ fontWeight: 800, letterSpacing: '-0.03em', lineHeight: 1.05, fontSize: 'clamp(2.6rem, 5.5vw, 4.2rem)' }}
-            >
-              Renting Done Right.{' '}
-              <span className="text-[#0AC4E0]">Finally.</span>
-            </h1>
-
-            <p className="mt-5 max-w-lg text-[1rem] leading-relaxed text-white/70">
-              Find, apply, sign, and pay — all in one place. Built for modern tenants and landlords who expect more.
-            </p>
-
-            {/* Search bar */}
-            <div className="mt-8 w-full max-w-lg">
-              <form
-                onSubmit={handleSearch}
-                className="flex items-center gap-3 rounded-3xl bg-white/95 px-5 py-3.5 shadow-2xl shadow-black/40 backdrop-blur"
+              <h1
+                className="text-white drop-shadow-lg max-w-2xl"
+                style={{ fontWeight: 800, letterSpacing: '-0.03em', lineHeight: 1.05, fontSize: 'clamp(2.6rem, 5.5vw, 4.2rem)' }}
               >
-                <Search className="h-5 w-5 shrink-0 text-neutral-400" />
-                <input
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  placeholder="City, address, or ZIP code"
-                  className="flex-1 bg-transparent text-[0.95rem] text-neutral-800 placeholder:text-neutral-400 focus:outline-none"
-                />
-                <button
-                  type="submit"
-                  className="rounded-full bg-gradient-to-r from-[#0B2D72] to-[#0992C2] px-5 py-2 text-[0.8rem] font-semibold text-white shadow-md shadow-[#0992C2]/30 transition-all hover:scale-105 hover:shadow-lg"
-                >
-                  Search
-                </button>
-              </form>
-            </div>
+                Renting Done Right.{' '}
+                <span className="text-[#0AC4E0]">Finally.</span>
+              </h1>
 
-            {/* CTAs — auth-aware */}
-            <div className="mt-6 flex items-center gap-4">
-              {!user ? (
-                <Link
-                  href="/register"
-                  className="inline-flex items-center gap-2 rounded-full bg-[#0992C2] px-6 py-2.5 text-[0.82rem] font-bold text-white shadow-lg shadow-[#0992C2]/30 transition-all hover:scale-105 hover:shadow-xl"
-                >
-                  Get started free <ArrowRight size={14} />
-                </Link>
-              ) : (
-                <Link
-                  href="/dashboard"
-                  className="inline-flex items-center gap-2 rounded-full bg-[#0992C2] px-6 py-2.5 text-[0.82rem] font-bold text-white shadow-lg shadow-[#0992C2]/30 transition-all hover:scale-105 hover:shadow-xl"
-                >
-                  <LayoutDashboard size={14} /> Go to dashboard
-                </Link>
-              )}
-              <Link
-                href="/browse"
-                className="text-[0.82rem] font-semibold text-white/70 underline-offset-2 hover:text-white hover:underline transition-colors"
-              >
-                Browse listings
-              </Link>
-            </div>
+              <p className="mt-5 max-w-lg text-[1rem] leading-relaxed text-white/70">
+                Find, apply, sign, and pay — all in one place. Built for modern tenants and landlords who expect more.
+              </p>
 
-            {/* Social proof strip */}
-            <div className="mt-10 flex items-center gap-6 text-white/50 text-[0.72rem] font-medium uppercase tracking-widest">
-              <span>2M+ listings</span>
-              <span className="h-3 w-px bg-white/20" />
-              <span>60+ countries</span>
-              <span className="h-3 w-px bg-white/20" />
-              <span>500K+ landlords</span>
+              {/* Search bar */}
+              <div className="mt-8 w-full max-w-lg">
+                <form
+                  onSubmit={handleSearch}
+                  className="flex items-center gap-3 rounded-3xl bg-white/95 px-5 py-3.5 shadow-2xl shadow-black/40 backdrop-blur"
+                >
+                  <Search className="h-5 w-5 shrink-0 text-neutral-400" />
+                  <input
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    placeholder="City, address, or ZIP code"
+                    className="flex-1 bg-transparent text-[0.95rem] text-neutral-800 placeholder:text-neutral-400 focus:outline-none"
+                  />
+                  <button
+                    type="submit"
+                    className="rounded-full bg-gradient-to-r from-[#0B2D72] to-[#0992C2] px-5 py-2 text-[0.8rem] font-semibold text-white shadow-md shadow-[#0992C2]/30 transition-all hover:scale-105 hover:shadow-lg"
+                  >
+                    Search
+                  </button>
+                </form>
+              </div>
+
+              {/* CTAs — auth-aware */}
+              <div className="mt-6 flex items-center gap-4">
+                {!user ? (
+                  <Link
+                    href="/register"
+                    className="inline-flex items-center gap-2 rounded-full bg-[#0992C2] px-6 py-2.5 text-[0.82rem] font-bold text-white shadow-lg shadow-[#0992C2]/30 transition-all hover:scale-105 hover:shadow-xl"
+                  >
+                    Get started free <ArrowRight size={14} />
+                  </Link>
+                ) : (
+                  <Link
+                    href="/dashboard"
+                    className="inline-flex items-center gap-2 rounded-full bg-[#0992C2] px-6 py-2.5 text-[0.82rem] font-bold text-white shadow-lg shadow-[#0992C2]/30 transition-all hover:scale-105 hover:shadow-xl"
+                  >
+                    <LayoutDashboard size={14} /> Go to dashboard
+                  </Link>
+                )}
+                <Link
+                  href="/browse"
+                  className="text-[0.82rem] font-semibold text-white/70 underline-offset-2 hover:text-white hover:underline transition-colors"
+                >
+                  Browse listings
+                </Link>
+              </div>
+
+              {/* Social proof strip */}
+              <div className="mt-10 flex items-center gap-6 text-white/50 text-[0.72rem] font-medium uppercase tracking-widest">
+                <span>2M+ listings</span>
+                <span className="h-3 w-px bg-white/20" />
+                <span>60+ countries</span>
+                <span className="h-3 w-px bg-white/20" />
+                <span>500K+ landlords</span>
+              </div>
             </div>
           </div>
 
           {/* Bottom fade — deep and gradual so white doesn't bleed abruptly */}
           <div
-            className="pointer-events-none absolute inset-x-0 bottom-0 h-64"
+            className="pointer-events-none absolute inset-x-0 bottom-0 h-32"
             style={{
-              background: 'linear-gradient(to top, #ffffff 0%, rgba(255,255,255,0.92) 20%, rgba(255,255,255,0.6) 50%, rgba(255,255,255,0.15) 80%, transparent 100%)',
+              background: 'linear-gradient(to top, #ffffff 0%, rgba(255,255,255,0.7) 40%, transparent 100%)',
             }}
           />
         </section>
