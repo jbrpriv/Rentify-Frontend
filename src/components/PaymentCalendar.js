@@ -26,23 +26,89 @@ const PaymentCalendar = ({ theme, agreements = [], payments = [] }) => {
     const handlePrevMonth = () => setCurrentDate(new Date(year, month - 1, 1));
     const handleNextMonth = () => setCurrentDate(new Date(year, month + 1, 1));
 
+    // ── Calendar logic ──────────────────────────────────────────────────────
+    // For each agreement, rent is due on the SAME day of month as startDate.
+    // We place each agreement's rent entry on that day — paid (green) if a
+    // payment record exists for this agreement in this month/year, pending
+    // (yellow) or overdue (red) if not.
+    //
+    // We intentionally do NOT use rentSchedule because:
+    //   1. JS setMonth() overflows day-29-31 dates into the next month's day 1,
+    //      causing all agreements to pile onto day 1 of some months.
+    //   2. rentSchedule sync with actual payments is eventually-consistent —
+    //      checking the real payments array is the source of truth.
+    //   3. Avoids the double-entry where paidMatches + pendingMatches both
+    //      fire for the same agreement on the same day.
     const getDayPayments = (day) => {
-        const paidMatches = payments.filter(p => {
-            const dateStr = p.paidAt || p.createdAt;
-            if (!dateStr || p.status !== 'paid') return false;
-            const d = new Date(dateStr);
-            return d.getDate() === day && d.getMonth() === month && d.getFullYear() === year;
-        });
+        const now = new Date();
+        const result = [];
 
-        const pendingMatches = agreements.flatMap(a => a.rentSchedule || []).filter(s => {
-            if (s.status === 'paid') return false;
-            const dateStr = s.dueDate;
-            if (!dateStr) return false;
-            const d = new Date(dateStr);
-            return d.getDate() === day && d.getMonth() === month && d.getFullYear() === year;
-        });
+        for (const agreement of agreements) {
+            if (!agreement.term?.startDate) continue;
+            // Include active agreements and also recently activated ones
+            if (!['active', 'expired'].includes(agreement.status)) continue;
 
-        return [...paidMatches, ...pendingMatches];
+            const startDate = new Date(agreement.term.startDate);
+            const endDate = agreement.term?.endDate ? new Date(agreement.term.endDate) : null;
+
+            // Rent falls on the same calendar day as the agreement start day
+            const rentDueDay = startDate.getDate();
+            if (rentDueDay !== day) continue;
+
+            // Skip months before the agreement started
+            const startYM = startDate.getFullYear() * 12 + startDate.getMonth();
+            const viewYM = year * 12 + month;
+            if (viewYM < startYM) continue;
+
+            // Skip months after the agreement ended
+            if (endDate) {
+                const endYM = endDate.getFullYear() * 12 + endDate.getMonth();
+                if (viewYM > endYM) continue;
+            }
+
+            const agreementId = (agreement._id?._id || agreement._id)?.toString();
+
+            // Find the one payment record that covers this agreement + this month/year.
+            // Priority: match by dueDate first (most precise), then fall back to paidAt.
+            const matchingPayment = payments.find(p => {
+                if (p.status !== 'paid') return false;
+                const pAgreementId = (p.agreement?._id || p.agreement)?.toString();
+                if (pAgreementId !== agreementId) return false;
+
+                // Match by dueDate (preferred — aligns with the rent period)
+                if (p.dueDate) {
+                    const d = new Date(p.dueDate);
+                    if (d.getMonth() === month && d.getFullYear() === year) return true;
+                }
+                // Fallback: match by paidAt if dueDate missing
+                if (p.paidAt || p.createdAt) {
+                    const d = new Date(p.paidAt || p.createdAt);
+                    if (d.getMonth() === month && d.getFullYear() === year) return true;
+                }
+                return false;
+            });
+
+            if (matchingPayment) {
+                // Show real paid receipt — guaranteed unique per agreement per month
+                result.push({ ...matchingPayment, _calAgreementId: agreementId });
+            } else {
+                // No payment found — show as pending or overdue
+                const dueDate = new Date(year, month, day);
+                const isOverdue = dueDate < now;
+                result.push({
+                    _id: `pending_${agreementId}_${year}_${month}`,
+                    agreement: agreementId,
+                    amount: agreement.financials?.rentAmount || 0,
+                    status: isOverdue ? 'overdue' : 'pending',
+                    dueDate: dueDate.toISOString(),
+                    property: agreement.property,
+                    tenant: agreement.tenant,
+                    _calAgreementId: agreementId,
+                });
+            }
+        }
+
+        return result;
     };
 
     const handleRemindTenant = async (paymentId, e) => {
@@ -141,7 +207,9 @@ const PaymentCalendar = ({ theme, agreements = [], payments = [] }) => {
                         const day = i + 1;
                         const dayPayments = getDayPayments(day);
                         const hasPaid = dayPayments.some(p => p.status === 'paid');
-                        const hasPending = dayPayments.some(p => p.status !== 'paid');
+                        const hasPending = dayPayments.some(p => p.status === 'pending');
+                        const hasOverdue = dayPayments.some(p => p.status === 'overdue');
+                        const cellBg = dayPayments.length === 0 ? 'white' : hasOverdue ? '#FEF2F2' : hasPending ? '#FFFBEB' : '#F0FDF4';
 
                         const isToday = day === new Date().getDate() && month === new Date().getMonth() && year === new Date().getFullYear();
 
@@ -155,7 +223,7 @@ const PaymentCalendar = ({ theme, agreements = [], payments = [] }) => {
                                     aspectRatio: '1/1',
                                     borderRadius: 12,
                                     border: isToday ? `2px solid ${theme.accent}` : '1px solid #F3F4F6',
-                                    background: dayPayments.length > 0 ? (hasPaid ? '#F0FDF4' : '#FFFBEB') : 'white',
+                                    background: cellBg,
                                     display: 'flex',
                                     flexDirection: 'column',
                                     alignItems: 'center',
@@ -171,40 +239,12 @@ const PaymentCalendar = ({ theme, agreements = [], payments = [] }) => {
                                     {day}
                                 </span>
 
-                                {/* Indicators */}
+                                {/* Indicators — always open the modal, let the modal handle receipts */}
                                 {dayPayments.length > 0 && (
                                     <div style={{ position: 'absolute', bottom: 6, display: 'flex', gap: 2 }}>
-                                        {hasPaid && (
-                                            <button
-                                                onClick={async (e) => {
-                                                    e.stopPropagation();
-                                                    const paidPayment = dayPayments.find(p => p.status === 'paid');
-                                                    if (!paidPayment) return;
-                                                    const pid = paidPayment._id;
-                                                    if (!pid || pid.startsWith('temp_')) {
-                                                        showCalToast('Receipt not available for this payment.');
-                                                        return;
-                                                    }
-                                                    setDownloadingReceipt(pid);
-                                                    try {
-                                                        const { data } = await api.get(`/payments/${pid}/receipt`);
-                                                        if (data?.url) {
-                                                            window.open(data.url, '_blank', 'noopener,noreferrer');
-                                                            showCalToast('Receipt opened — check your new tab!');
-                                                        }
-                                                    } catch {
-                                                        showCalToast('Receipt not available yet. Try again later.');
-                                                    } finally {
-                                                        setDownloadingReceipt(null);
-                                                    }
-                                                }}
-                                                title="Download Receipt"
-                                                style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', display: 'flex', alignItems: 'center' }}
-                                            >
-                                                {downloadingReceipt ? <Loader2 size={10} color="#10B981" style={{ animation: 'spin 1s linear infinite' }} /> : <CheckCircle size={10} color="#10B981" />}
-                                            </button>
-                                        )}
-                                        {hasPending && <Clock size={10} color="#F59E0B" />}
+                                        {hasPaid && <CheckCircle size={10} color="#10B981" />}
+                                        {hasOverdue && <AlertCircle size={10} color="#EF4444" />}
+                                        {hasPending && !hasOverdue && <Clock size={10} color="#F59E0B" />}
                                     </div>
                                 )}
                             </motion.div>
@@ -221,6 +261,10 @@ const PaymentCalendar = ({ theme, agreements = [], payments = [] }) => {
                     <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
                         <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#FFFBEB', border: '1px solid #F59E0B' }} />
                         <span style={{ fontSize: '0.7rem', fontWeight: 600, color: '#6B7280' }}>Pending</span>
+                    </div>
+                    <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                        <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#FEF2F2', border: '1px solid #EF4444' }} />
+                        <span style={{ fontSize: '0.7rem', fontWeight: 600, color: '#6B7280' }}>Overdue</span>
                     </div>
                 </div>
             </>
@@ -250,14 +294,22 @@ const PaymentCalendar = ({ theme, agreements = [], payments = [] }) => {
                             <div className="space-y-3 max-h-64 overflow-y-auto">
                                 {selectedDayInfo.payments.map((p, idx) => {
                                     const isPaid = p.status === 'paid';
-                                    const isOverdue = p.status === 'overdue' || p.status === 'late_fee_applied' || (!isPaid && new Date(p.dueDate || p.createdAt) < new Date());
-                                    const pid = p._id || `temp_${idx}`;
+                                    const isOverdue = p.status === 'overdue' ||
+                                        p.status === 'late_fee_applied' ||
+                                        (!isPaid && p.dueDate && new Date(p.dueDate) < new Date());
+                                    const pid = p._id;
+                                    const isReal = isPaid && pid && !String(pid).startsWith('pending_');
+                                    const displayAmount = p.amount || p.paidAmount || 0;
+                                    const propertyTitle = p.property?.title || p.property || 'Property';
 
                                     return (
-                                        <div key={pid} className={`p-3 rounded-xl border ${isPaid ? 'bg-green-50 border-green-100' : isOverdue ? 'bg-red-50 border-red-100' : 'bg-orange-50 border-orange-100'}`}>
+                                        <div key={pid || idx} className={`p-3 rounded-xl border ${isPaid ? 'bg-green-50 border-green-100' : isOverdue ? 'bg-red-50 border-red-100' : 'bg-orange-50 border-orange-100'}`}>
                                             <div className="flex justify-between items-start">
                                                 <div>
-                                                    <p className="text-sm font-bold text-gray-800">Rs. {(p.amount || p.paidAmount || 0).toLocaleString()}</p>
+                                                    <p className="text-sm font-bold text-gray-800">Rs. {displayAmount.toLocaleString()}</p>
+                                                    {propertyTitle && (
+                                                        <p className="text-xs text-gray-500 mt-0.5 truncate max-w-[150px]">{propertyTitle}</p>
+                                                    )}
                                                     <p className="text-xs font-medium mt-0.5 flex items-center gap-1">
                                                         {isPaid ? <CheckCircle className="w-3 h-3 text-green-600" /> : isOverdue ? <AlertCircle className="w-3 h-3 text-red-600" /> : <Clock className="w-3 h-3 text-orange-600" />}
                                                         <span className={isPaid ? 'text-green-700' : isOverdue ? 'text-red-700' : 'text-orange-700'}>
@@ -266,7 +318,7 @@ const PaymentCalendar = ({ theme, agreements = [], payments = [] }) => {
                                                     </p>
                                                 </div>
                                                 <div className="flex flex-col gap-1.5 items-end">
-                                                    {isPaid && (
+                                                    {isReal && (
                                                         <button
                                                             onClick={(e) => handleDownloadReceipt(pid, e)}
                                                             disabled={downloadingReceipt === pid}
@@ -276,11 +328,11 @@ const PaymentCalendar = ({ theme, agreements = [], payments = [] }) => {
                                                             Receipt
                                                         </button>
                                                     )}
-                                                    {isOverdue && !isPaid && (
+                                                    {(isOverdue || (!isPaid && !isOverdue)) && (
                                                         <button
                                                             onClick={(e) => handleRemindTenant(pid, e)}
                                                             disabled={sendingReminder === pid}
-                                                            className="flex items-center gap-1 px-2.5 py-1.5 bg-red-600 hover:bg-red-700 disabled:opacity-70 text-white text-[10px] font-bold uppercase rounded-lg transition"
+                                                            className={`flex items-center gap-1 px-2.5 py-1.5 ${isOverdue ? 'bg-red-600 hover:bg-red-700' : 'bg-orange-500 hover:bg-orange-600'} disabled:opacity-70 text-white text-[10px] font-bold uppercase rounded-lg transition`}
                                                         >
                                                             {sendingReminder === pid ? <Loader2 className="w-3 h-3 animate-spin" /> : <Bell className="w-3 h-3" />}
                                                             Remind
