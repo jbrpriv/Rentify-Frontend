@@ -394,7 +394,7 @@ export default function SupportPage() {
                       </div>
                       <p className="text-[0.88rem] font-semibold text-white">Have an account?</p>
                       <p className="mt-1 text-[0.78rem]" style={{ color: 'rgba(255,255,255,0.55)' }}>
-                        Sign in for faster, personalised support from your dashboard.
+                        Sign in for faster, personalised support from your dashboard
                       </p>
                       <Link
                         href="/login"
