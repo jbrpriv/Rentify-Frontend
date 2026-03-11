@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
   Search, FileText, CreditCard, Users, ShieldCheck,
-  ArrowRight, Building2, MapPin,
+  ArrowRight, Building2, MapPin, Home,
   LayoutDashboard, MessageSquare, Wrench, ClipboardList,
   TrendingUp, BarChart2, UserCheck,
 } from 'lucide-react';
@@ -223,7 +223,7 @@ export default function LandingPage() {
                 <RevealCard key={city.name} delay={idx * 80}>
                   <Link
                     href={`/browse?city=${city.name}`}
-                    className={`group relative block overflow-hidden rounded-3xl shadow-sm transition-transform duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] hover:-translate-y-2 hover:shadow-xl ${idx === 1 ? 'md:-mt-6' : idx === 2 ? 'md:mt-6' : ''}`}
+                    className="group relative block overflow-hidden rounded-3xl shadow-sm transition-transform duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] hover:-translate-y-2 hover:shadow-xl"
                   >
                     <div className="relative h-56 overflow-hidden">
                       <img
@@ -263,10 +263,10 @@ export default function LandingPage() {
         {/* ── TENANT / LANDLORD FEATURES ─────────────────────────── */}
         <MotionRevealSection id="features" className="scroll-mt-20">
           <div
-            className={`relative overflow-hidden transition-colors duration-500 px-6 py-16 md:px-16 lg:px-24 ${roleTab === 'tenant' ? 'bg-[#F8843F]' : 'bg-[#0B2D72]'}`}
+            className={`relative overflow-hidden transition-colors duration-500 px-6 py-16 md:px-16 lg:px-24 ${roleTab === 'tenant' ? 'bg-[#0992C2]' : 'bg-[#0B2D72]'}`}
           >
-            <div className={`pointer-events-none absolute -left-24 top-0 h-72 w-72 rounded-full blur-3xl opacity-30 transition-colors duration-500 ${roleTab === 'tenant' ? 'bg-white' : 'bg-[#0AC4E0]'}`} />
-            <div className={`pointer-events-none absolute -right-24 bottom-0 h-80 w-80 rounded-full blur-3xl opacity-25 transition-colors duration-500 ${roleTab === 'tenant' ? 'bg-[#0B2D72]' : 'bg-[#F8843F]'}`} />
+            <div className="pointer-events-none absolute -left-24 top-0 h-72 w-72 rounded-full blur-3xl opacity-25 bg-[#0AC4E0]" />
+            <div className="pointer-events-none absolute -right-24 bottom-0 h-80 w-80 rounded-full blur-3xl opacity-20 bg-white" />
 
             <div className="relative flex flex-col gap-12 lg:flex-row mx-auto max-w-7xl">
               <div className="flex-shrink-0 lg:w-72 xl:w-80 space-y-6">
@@ -287,18 +287,18 @@ export default function LandingPage() {
                 </div>
                 <div className="flex gap-3">
                   <button ref={tenantBtnRef} type="button" onClick={() => setRoleTab('tenant')}
-                    className={`flex items-center gap-2 rounded-2xl px-6 py-3 text-sm font-bold transition-all duration-200 shadow-lg ${roleTab === 'tenant' ? 'bg-white text-[#F8843F] scale-105 shadow-white/30' : 'bg-white/15 text-white hover:bg-white/25 border border-white/30'}`}>
-                    🏠 <span>Tenant View</span>
+                    className={`flex items-center gap-2 rounded-2xl px-6 py-3 text-sm font-bold transition-all duration-200 shadow-lg ${roleTab === 'tenant' ? 'bg-white text-[#0992C2] scale-105 shadow-white/30' : 'bg-white/15 text-white hover:bg-white/25 border border-white/30'}`}>
+                    <Home className="h-3.5 w-3.5" /><span>Tenant View</span>
                   </button>
                   <button ref={landlordBtnRef} type="button" onClick={() => setRoleTab('landlord')}
                     className={`flex items-center gap-2 rounded-2xl px-6 py-3 text-sm font-bold transition-all duration-200 shadow-lg ${roleTab === 'landlord' ? 'bg-white text-[#0B2D72] scale-105 shadow-white/30' : 'bg-white/15 text-white hover:bg-white/25 border border-white/30'}`}>
-                    🏢 <span>Landlord View</span>
+                    <Building2 className="h-3.5 w-3.5" /><span>Landlord View</span>
                   </button>
                 </div>
                 <div className="flex flex-wrap gap-3 pt-2">
                   {!user ? (
                     <Link href="/register"
-                      className={`rf-btn text-[0.8rem] font-bold ${roleTab === 'tenant' ? 'bg-white text-[#F8843F] hover:bg-white/90 shadow-lg shadow-black/10' : 'bg-white text-[#0B2D72] hover:bg-white/90 shadow-lg shadow-black/20'}`}>
+                      className={`rf-btn text-[0.8rem] font-bold ${roleTab === 'tenant' ? 'bg-white text-[#0992C2] hover:bg-white/90 shadow-lg shadow-black/10' : 'bg-white text-[#0B2D72] hover:bg-white/90 shadow-lg shadow-black/20'}`}>
                       Get started free <ArrowRight size={15} />
                     </Link>
                   ) : (
@@ -319,7 +319,7 @@ export default function LandingPage() {
                     const isTenant = roleTab === 'tenant';
                     return (
                       <RevealCard key={f.title} delay={i * 70}>
-                        <div className={`rf-glass-card rounded-2xl p-4 transition-transform duration-200 hover:-translate-y-1 h-full ${isTenant ? 'bg-white/20 ring-1 ring-white/25 hover:bg-white/25' : 'bg-white/10 ring-1 ring-white/15 hover:bg-white/15'}`}>
+                        <div className={`rf-glass-card rounded-2xl p-4 transition-transform duration-200 hover:-translate-y-1 h-full ${isTenant ? 'bg-white/15 ring-1 ring-white/20 hover:bg-white/20' : 'bg-white/10 ring-1 ring-white/15 hover:bg-white/15'}`}>
                           <div className={`mb-3 flex h-10 w-10 items-center justify-center rounded-2xl ${isTenant ? 'bg-white/30' : 'bg-[#0AC4E0]/30'}`}>
                             <Icon size={18} className="text-white" />
                           </div>
