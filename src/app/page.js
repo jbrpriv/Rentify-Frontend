@@ -86,7 +86,7 @@ export default function LandingPage() {
         <section
           className="relative min-h-screen overflow-hidden"
           style={{
-            backgroundImage: `url('https://res.cloudinary.com/dj4a5robb/image/upload/v1773217180/dc8b78b92964aa388580d992003fb77f_tf1wm9.jpg')`,
+            backgroundImage: `url('https://res.cloudinary.com/dj4a5robb/image/upload/v1773219846/dc8b78b92964aa388580d992003fb77f_bdwrll.jpg')`,
             backgroundSize: 'cover',
             backgroundPosition: 'center',
             backgroundAttachment: 'fixed',
