@@ -86,100 +86,116 @@ export default function LandingPage() {
 
         {/* ── HERO ───────────────────────────────────────────────── */}
         <section
-          className="relative min-h-screen overflow-hidden flex flex-col justify-center"
+          className="relative min-h-screen overflow-hidden"
           style={{
-            backgroundImage: `linear-gradient(to right, rgba(0,0,0,0.82) 0%, rgba(0,0,0,0.55) 55%, rgba(0,0,0,0.25) 100%), url('https://res.cloudinary.com/dj4a5robb/image/upload/v1773217180/dc8b78b92964aa388580d992003fb77f_tf1wm9.jpg')`,
+            backgroundImage: `url('https://res.cloudinary.com/dj4a5robb/image/upload/v1773219846/dc8b78b92964aa388580d992003fb77f_bdwrll.jpg')`,
             backgroundSize: 'cover',
             backgroundPosition: 'center',
             backgroundAttachment: 'fixed',
           }}
         >
-          <div className="relative z-10 w-full px-6 lg:px-16 mx-auto max-w-7xl pt-24 pb-40">
-            <div className="flex flex-col items-center lg:items-start text-center lg:text-left lg:max-w-[52%]">
+          {/* Directional dark overlay — heavy left where text lives, opens up right */}
+          <div
+            className="absolute inset-0"
+            style={{ background: 'linear-gradient(105deg, rgba(4,12,35,0.94) 0%, rgba(4,12,35,0.80) 35%, rgba(4,12,35,0.45) 60%, rgba(4,12,35,0.12) 100%)' }}
+          />
+          {/* Professional bottom vignette — darkens into the page, no white */}
+          <div
+            className="absolute inset-x-0 bottom-0 h-36"
+            style={{ background: 'linear-gradient(to top, rgba(4,12,35,0.65) 0%, transparent 100%)' }}
+          />
 
-              {/* Eyebrow */}
-              <span className="mb-5 inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-1.5 text-[0.7rem] font-semibold uppercase tracking-[0.22em] text-white/80 ring-1 ring-white/20 backdrop-blur-sm">
+          {/* Content — flush left, no centering container */}
+          <div className="relative z-10 flex min-h-screen items-center">
+            <div
+              className="flex flex-col w-full max-w-[580px] px-8 sm:px-12 lg:pl-20 xl:pl-32 pb-16 pt-32"
+            >
+              {/* Eyebrow pill */}
+              <span className="mb-6 inline-flex w-fit items-center gap-2 rounded-full bg-white/8 px-4 py-1.5 text-[0.67rem] font-semibold uppercase tracking-[0.26em] text-white/70 ring-1 ring-white/12 backdrop-blur-sm">
                 <span className="h-1.5 w-1.5 rounded-full bg-[#0992C2] animate-pulse" />
                 Property management, reimagined
               </span>
 
               <h1
-                className="text-white drop-shadow-lg max-w-2xl"
-                style={{ fontWeight: 800, letterSpacing: '-0.03em', lineHeight: 1.05, fontSize: 'clamp(2.6rem, 5.5vw, 4.2rem)' }}
+                className="text-white"
+                style={{
+                  fontWeight: 800,
+                  letterSpacing: '-0.03em',
+                  lineHeight: 1.04,
+                  fontSize: 'clamp(2.8rem, 4.8vw, 4.4rem)',
+                  textShadow: '0 4px 48px rgba(0,0,0,0.5)',
+                }}
               >
                 Renting Done Right.{' '}
-                <span className="text-[#0AC4E0]">Finally.</span>
+                <span style={{ color: '#0AC4E0' }}>Finally.</span>
               </h1>
 
-              <p className="mt-5 max-w-lg text-[1rem] leading-relaxed text-white/70">
+              <p className="mt-5 text-[0.97rem] leading-relaxed" style={{ color: 'rgba(255,255,255,0.62)', maxWidth: '420px' }}>
                 Find, apply, sign, and pay — all in one place. Built for modern tenants and landlords who expect more.
               </p>
 
               {/* Search bar */}
-              <div className="mt-8 w-full max-w-lg">
-                <form
-                  onSubmit={handleSearch}
-                  className="flex items-center gap-3 rounded-3xl bg-white/95 px-5 py-3.5 shadow-2xl shadow-black/40 backdrop-blur"
+              <form
+                onSubmit={handleSearch}
+                className="mt-8 flex items-center gap-3 rounded-2xl bg-white/95 px-5 py-3.5 shadow-2xl backdrop-blur-sm"
+                style={{ boxShadow: '0 8px 48px rgba(0,0,0,0.45)' }}
+              >
+                <Search className="h-4 w-4 shrink-0 text-neutral-400" />
+                <input
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="City, address, or ZIP code"
+                  className="flex-1 bg-transparent text-[0.9rem] text-neutral-800 placeholder:text-neutral-400 focus:outline-none"
+                />
+                <button
+                  type="submit"
+                  className="rounded-xl bg-gradient-to-r from-[#0B2D72] to-[#0992C2] px-5 py-2 text-[0.78rem] font-semibold text-white transition-all hover:scale-105"
+                  style={{ boxShadow: '0 2px 12px rgba(9,146,194,0.4)' }}
                 >
-                  <Search className="h-5 w-5 shrink-0 text-neutral-400" />
-                  <input
-                    value={query}
-                    onChange={(e) => setQuery(e.target.value)}
-                    placeholder="City, address, or ZIP code"
-                    className="flex-1 bg-transparent text-[0.95rem] text-neutral-800 placeholder:text-neutral-400 focus:outline-none"
-                  />
-                  <button
-                    type="submit"
-                    className="rounded-full bg-gradient-to-r from-[#0B2D72] to-[#0992C2] px-5 py-2 text-[0.8rem] font-semibold text-white shadow-md shadow-[#0992C2]/30 transition-all hover:scale-105 hover:shadow-lg"
-                  >
-                    Search
-                  </button>
-                </form>
-              </div>
+                  Search
+                </button>
+              </form>
 
-              {/* CTAs — auth-aware */}
-              <div className="mt-6 flex items-center gap-4">
+              {/* CTAs */}
+              <div className="mt-5 flex items-center gap-4">
                 {!user ? (
                   <Link
                     href="/register"
-                    className="inline-flex items-center gap-2 rounded-full bg-[#0992C2] px-6 py-2.5 text-[0.82rem] font-bold text-white shadow-lg shadow-[#0992C2]/30 transition-all hover:scale-105 hover:shadow-xl"
+                    className="inline-flex items-center gap-2 rounded-xl bg-[#0992C2] px-6 py-2.5 text-[0.82rem] font-bold text-white transition-all hover:scale-105 hover:brightness-110"
+                    style={{ boxShadow: '0 4px 20px rgba(9,146,194,0.45)' }}
                   >
                     Get started free <ArrowRight size={14} />
                   </Link>
                 ) : (
                   <Link
                     href="/dashboard"
-                    className="inline-flex items-center gap-2 rounded-full bg-[#0992C2] px-6 py-2.5 text-[0.82rem] font-bold text-white shadow-lg shadow-[#0992C2]/30 transition-all hover:scale-105 hover:shadow-xl"
+                    className="inline-flex items-center gap-2 rounded-xl bg-[#0992C2] px-6 py-2.5 text-[0.82rem] font-bold text-white transition-all hover:scale-105 hover:brightness-110"
+                    style={{ boxShadow: '0 4px 20px rgba(9,146,194,0.45)' }}
                   >
                     <LayoutDashboard size={14} /> Go to dashboard
                   </Link>
                 )}
                 <Link
                   href="/browse"
-                  className="text-[0.82rem] font-semibold text-white/70 underline-offset-2 hover:text-white hover:underline transition-colors"
+                  className="text-[0.82rem] font-semibold transition-colors"
+                  style={{ color: 'rgba(255,255,255,0.55)' }}
+                  onMouseEnter={e => e.currentTarget.style.color = 'rgba(255,255,255,0.9)'}
+                  onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.55)'}
                 >
-                  Browse listings
+                  Browse listings →
                 </Link>
               </div>
 
-              {/* Social proof strip */}
-              <div className="mt-10 flex items-center gap-6 text-white/50 text-[0.72rem] font-medium uppercase tracking-widest">
-                <span>2M+ listings</span>
-                <span className="h-3 w-px bg-white/20" />
-                <span>60+ countries</span>
-                <span className="h-3 w-px bg-white/20" />
-                <span>500K+ landlords</span>
+              {/* Social proof */}
+              <div className="mt-10 flex items-center gap-5" style={{ color: 'rgba(255,255,255,0.35)' }}>
+                <span className="text-[0.67rem] font-semibold uppercase tracking-widest">2M+ listings</span>
+                <span className="h-2.5 w-px bg-white/15" />
+                <span className="text-[0.67rem] font-semibold uppercase tracking-widest">60+ countries</span>
+                <span className="h-2.5 w-px bg-white/15" />
+                <span className="text-[0.67rem] font-semibold uppercase tracking-widest">500K+ landlords</span>
               </div>
             </div>
           </div>
-
-          {/* Bottom fade — deep and gradual so white doesn't bleed abruptly */}
-          <div
-            className="pointer-events-none absolute inset-x-0 bottom-0 h-32"
-            style={{
-              background: 'linear-gradient(to top, #ffffff 0%, rgba(255,255,255,0.7) 40%, transparent 100%)',
-            }}
-          />
         </section>
 
         {/* ── RENT AROUND THE WORLD ──────────────────────────────── */}
@@ -279,7 +295,6 @@ export default function LandingPage() {
                     🏢 <span>Landlord View</span>
                   </button>
                 </div>
-                {/* Features section CTA — auth-aware, no "Get started" for logged-in users */}
                 <div className="flex flex-wrap gap-3 pt-2">
                   {!user ? (
                     <Link href="/register"
