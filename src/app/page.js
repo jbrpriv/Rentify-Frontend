@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useRef, useCallback } from 'react';
+import { useEffect, useState, useRef, useCallback, Suspense } from 'react';
 import { useUser } from '@/context/UserContext';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -15,6 +15,11 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { MotionRevealSection } from '@/components/ui/Motion';
 import { useReveal } from '@/hooks/useReveal';
+
+// ─── 3D Model Imports ─────────────────────────────────────────────────────────
+import { Canvas, useFrame } from '@react-three/fiber';
+import { useGLTF, Float, Environment } from '@react-three/drei';
+import * as THREE from 'three';
 
 const CITIES = [
   { name: 'New York', country: 'USA', count: '12,400+ listings', img: 'https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?w=700&q=80' },
@@ -50,281 +55,37 @@ const STATS = [
   { value: '4.7★', label: 'Avg Rating' },
 ];
 
-// ─── Beautiful Cityscape SVG ──────────────────────────────────────────────────
-// Three depth layers: distant haze → mid skyline → foreground
-// Brand palette: #F6C87A (cream/warm), #0AC4E0 (cyan), #0992C2 (mid-blue), #0B2D72 (deep-blue)
-function CityscapeSVG() {
+// ─── 3D Interactive Component ─────────────────────────────────────────────────
+function InteractiveModel() {
+  const { scene } = useGLTF('https://res.cloudinary.com/dj4a5robb/image/upload/v1773217198/base_basic_shaded_dwvr0z.glb');
+  const groupRef = useRef();
+
+  useFrame((state, delta) => {
+    if (groupRef.current) {
+      // state.pointer.x ranges from -1 (left) to 1 (right)
+      // Multiplying by Math.PI gives a full 360-degree range (-180deg to +180deg)
+      const targetRotationY = state.pointer.x * Math.PI;
+      // Slight vertical tilt based on mouse Y position
+      const targetRotationX = (state.pointer.y * Math.PI) / 6;
+
+      // Apply damping for smooth inertia when the mouse stops moving
+      groupRef.current.rotation.y = THREE.MathUtils.damp(groupRef.current.rotation.y, targetRotationY, 3, delta);
+      groupRef.current.rotation.x = THREE.MathUtils.damp(groupRef.current.rotation.x, -targetRotationX, 3, delta);
+    }
+  });
+
   return (
-    <svg
-      viewBox="0 0 1440 380"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      className="absolute inset-x-0 bottom-0 w-full"
-      preserveAspectRatio="xMidYMax slice"
-      aria-hidden="true"
-    >
-      <defs>
-        <radialGradient id="horizonGlow" cx="50%" cy="100%" r="60%">
-          <stop offset="0%" stopColor="rgba(246,231,188,0.5)" />
-          <stop offset="100%" stopColor="rgba(10,196,224,0)" />
-        </radialGradient>
-        <linearGradient id="water" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="rgba(10,196,224,0.4)" />
-          <stop offset="100%" stopColor="rgba(11,45,114,0.12)" />
-        </linearGradient>
-        <linearGradient id="farBldg" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="rgba(10,196,224,0.2)" />
-          <stop offset="100%" stopColor="rgba(11,45,114,0.35)" />
-        </linearGradient>
-        <linearGradient id="midBldg" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="rgba(10,196,224,0.6)" />
-          <stop offset="100%" stopColor="rgba(9,146,194,0.8)" />
-        </linearGradient>
-        <linearGradient id="heroTower" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="rgba(246,231,188,0.95)" />
-          <stop offset="40%" stopColor="rgba(10,196,224,0.9)" />
-          <stop offset="100%" stopColor="rgba(11,45,114,1)" />
-        </linearGradient>
-        <linearGradient id="warmBldg" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="rgba(246,200,130,0.75)" />
-          <stop offset="100%" stopColor="rgba(246,175,100,0.55)" />
-        </linearGradient>
-        <linearGradient id="fgBldg" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="rgba(11,45,114,0.7)" />
-          <stop offset="100%" stopColor="rgba(11,45,114,0.95)" />
-        </linearGradient>
-        <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
-          <feGaussianBlur stdDeviation="2.5" result="blur" />
-          <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
-        </filter>
-        <filter id="moonGlow" x="-100%" y="-100%" width="300%" height="300%">
-          <feGaussianBlur stdDeviation="5" result="blur" />
-          <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
-        </filter>
-      </defs>
-
-      {/* Horizon warm glow */}
-      <rect x="0" y="240" width="1440" height="140" fill="url(#horizonGlow)" />
-
-      {/* Water / reflection */}
-      <rect x="0" y="345" width="1440" height="35" fill="url(#water)" opacity="0.55" />
-      <line x1="80" y1="358" x2="380" y2="358" stroke="rgba(255,255,255,0.1)" strokeWidth="1.5" />
-      <line x1="420" y1="365" x2="820" y2="365" stroke="rgba(255,255,255,0.07)" strokeWidth="1" />
-      <line x1="880" y1="355" x2="1200" y2="355" stroke="rgba(255,255,255,0.09)" strokeWidth="1" />
-      <line x1="1220" y1="362" x2="1420" y2="362" stroke="rgba(255,255,255,0.07)" strokeWidth="1" />
-
-      {/* Moon / light orb — top right */}
-      <circle cx="1080" cy="38" r="22" fill="rgba(246,231,188,0.18)" />
-      <circle cx="1080" cy="38" r="14" fill="rgba(246,231,188,0.38)" />
-      <circle cx="1080" cy="38" r="8" fill="rgba(246,231,188,0.75)" filter="url(#moonGlow)" />
-
-      {/* Birds */}
-      <path d="M310 50 Q315 44 320 50" stroke="rgba(255,255,255,0.6)" strokeWidth="1.5" fill="none" />
-      <path d="M330 38 Q336 32 342 38" stroke="rgba(255,255,255,0.5)" strokeWidth="1.5" fill="none" />
-      <path d="M680 32 Q685 26 690 32" stroke="rgba(255,255,255,0.55)" strokeWidth="1.5" fill="none" />
-      <path d="M702 46 Q707 40 712 46" stroke="rgba(255,255,255,0.45)" strokeWidth="1.5" fill="none" />
-      <path d="M910 40 Q916 34 922 40" stroke="rgba(255,255,255,0.5)" strokeWidth="1.5" fill="none" />
-      <path d="M1140 28 Q1145 22 1150 28" stroke="rgba(255,255,255,0.4)" strokeWidth="1.5" fill="none" />
-
-      {/* ══ LAYER 1: Distant hazy silhouette ══ */}
-      <rect x="0" y="230" width="38" height="150" fill="url(#farBldg)" rx="2" opacity="0.45" />
-      <rect x="42" y="210" width="30" height="170" fill="url(#farBldg)" rx="2" opacity="0.4" />
-      <rect x="76" y="222" width="24" height="158" fill="url(#farBldg)" rx="2" opacity="0.38" />
-      <rect x="104" y="200" width="42" height="180" fill="url(#farBldg)" rx="2" opacity="0.45" />
-      <rect x="150" y="212" width="32" height="168" fill="url(#farBldg)" rx="2" opacity="0.38" />
-      <rect x="186" y="192" width="26" height="188" fill="url(#farBldg)" rx="2" opacity="0.42" />
-      <rect x="216" y="218" width="40" height="162" fill="url(#farBldg)" rx="2" opacity="0.38" />
-
-      <rect x="590" y="196" width="34" height="184" fill="url(#farBldg)" rx="2" opacity="0.38" />
-      <rect x="628" y="180" width="28" height="200" fill="url(#farBldg)" rx="2" opacity="0.42" />
-      <rect x="660" y="205" width="42" height="175" fill="url(#farBldg)" rx="2" opacity="0.35" />
-
-      <rect x="1210" y="208" width="36" height="172" fill="url(#farBldg)" rx="2" opacity="0.38" />
-      <rect x="1250" y="190" width="30" height="190" fill="url(#farBldg)" rx="2" opacity="0.42" />
-      <rect x="1284" y="218" width="46" height="162" fill="url(#farBldg)" rx="2" opacity="0.35" />
-      <rect x="1334" y="198" width="32" height="182" fill="url(#farBldg)" rx="2" opacity="0.4" />
-      <rect x="1370" y="215" width="46" height="165" fill="url(#farBldg)" rx="2" opacity="0.32" />
-      <rect x="1420" y="225" width="20" height="155" fill="url(#farBldg)" rx="2" opacity="0.28" />
-
-      {/* ══ LAYER 2: Mid-ground skyline ══ */}
-
-      {/* Left suspension bridge */}
-      <rect x="34" y="128" width="16" height="252" fill="rgba(246,200,130,0.72)" rx="2" />
-      <rect x="88" y="128" width="16" height="252" fill="rgba(246,200,130,0.72)" rx="2" />
-      <rect x="0" y="270" width="150" height="8" fill="rgba(246,200,130,0.6)" rx="3" />
-      <line x1="42" y1="131" x2="0" y2="270" stroke="rgba(246,200,130,0.5)" strokeWidth="1.5" />
-      <line x1="42" y1="131" x2="150" y2="270" stroke="rgba(246,200,130,0.5)" strokeWidth="1.5" />
-      <line x1="96" y1="131" x2="0" y2="270" stroke="rgba(246,200,130,0.5)" strokeWidth="1.5" />
-      <line x1="96" y1="131" x2="150" y2="270" stroke="rgba(246,200,130,0.5)" strokeWidth="1.5" />
-      {[18, 32, 48, 64, 80, 96, 112, 130].map((x, i) => (
-        <line key={`hl${i}`} x1={x} y1="267" x2={x} y2="270" stroke="rgba(246,200,130,0.3)" strokeWidth="1" />
-      ))}
-
-      {/* Left cluster */}
-      <rect x="158" y="158" width="56" height="222" fill="url(#warmBldg)" rx="4" />
-      <rect x="165" y="138" width="18" height="24" fill="rgba(246,200,130,0.7)" rx="2" />
-      {[0, 1, 2, 3, 4].map(r => [0, 1, 2].map(c => (
-        <rect key={`w1${r}${c}`} x={165 + c * 16} y={166 + r * 24} width="10" height="8"
-          fill="rgba(255,248,200,0.45)" rx="1" filter="url(#glow)" />
-      )))}
-
-      <rect x="220" y="132" width="48" height="248" fill="url(#midBldg)" rx="4" />
-      <rect x="228" y="112" width="14" height="24" fill="rgba(10,196,224,0.85)" rx="2" />
-      {[0, 1, 2, 3, 4, 5].map(r => [0, 1].map(c => (
-        <rect key={`w2${r}${c}`} x={228 + c * 20} y={140 + r * 24} width="11" height="8"
-          fill="rgba(255,255,255,0.28)" rx="1" />
-      )))}
-
-      <rect x="274" y="168" width="40" height="212" fill="url(#midBldg)" rx="3" opacity="0.85" />
-      <rect x="320" y="148" width="52" height="232" fill="url(#warmBldg)" rx="4" />
-      {[0, 1, 2, 3].map(r => [0, 1, 2].map(c => (
-        <rect key={`w3${r}${c}`} x={327 + c * 15} y={156 + r * 26} width="9" height="8"
-          fill="rgba(255,240,180,0.42)" rx="1" />
-      )))}
-
-      {/* ── HERO TOWER LEFT ── */}
-      <rect x="380" y="65" width="54" height="315" fill="url(#heroTower)" rx="5" />
-      {/* Setback crown */}
-      <rect x="388" y="50" width="38" height="18" fill="rgba(246,231,188,0.92)" rx="3" />
-      <rect x="394" y="35" width="26" height="17" fill="rgba(10,196,224,0.95)" rx="2" />
-      <rect x="400" y="22" width="14" height="14" fill="rgba(246,231,188,1)" rx="2" />
-      <line x1="407" y1="22" x2="407" y2="4" stroke="rgba(246,231,188,0.9)" strokeWidth="2" />
-      <circle cx="407" cy="4" r="3.5" fill="rgba(246,231,188,1)" filter="url(#glow)" />
-      {/* Glass facade stripes */}
-      {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map(r => (
-        <rect key={`hf${r}`} x={380} y={72 + r * 20} width="54" height="2"
-          fill="rgba(255,255,255,0.07)" />
-      ))}
-      {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map(r => [0, 1, 2].map(c => (
-        <rect key={`hw${r}${c}`}
-          x={386 + c * 17} y={74 + r * 24} width="11" height="9"
-          fill={r % 4 === 0 ? "rgba(246,231,188,0.65)" : "rgba(255,255,255,0.22)"}
-          rx="1" filter={r % 4 === 0 ? "url(#glow)" : undefined} />
-      )))}
-
-      {/* Stepped adjacent tower */}
-      <rect x="442" y="108" width="50" height="272" fill="url(#midBldg)" rx="4" />
-      <rect x="447" y="92" width="40" height="18" fill="rgba(10,196,224,0.75)" rx="3" />
-      <rect x="452" y="76" width="30" height="18" fill="rgba(10,196,224,0.65)" rx="2" />
-      <rect x="458" y="62" width="20" height="16" fill="rgba(10,196,224,0.55)" rx="2" />
-      {[0, 1, 2, 3, 4, 5, 6].map(r => [0, 1, 2].map(c => (
-        <rect key={`tw${r}${c}`} x={449 + c * 15} y={116 + r * 24} width="10" height="8"
-          fill="rgba(255,255,255,0.26)" rx="1" />
-      )))}
-
-      <rect x="498" y="148" width="44" height="232" fill="url(#warmBldg)" rx="3" />
-      {[0, 1, 2, 3, 4].map(r => [0, 1].map(c => (
-        <rect key={`ww${r}${c}`} x={505 + c * 20} y={156 + r * 26} width="10" height="8"
-          fill="rgba(255,240,180,0.42)" rx="1" />
-      )))}
-
-      <rect x="548" y="122" width="58" height="258" fill="url(#midBldg)" rx="4" opacity="0.92" />
-      <rect x="554" y="104" width="46" height="20" fill="rgba(9,146,194,0.82)" rx="3" />
-      <rect x="560" y="88" width="34" height="18" fill="rgba(9,146,194,0.72)" rx="2" />
-      {[0, 1, 2, 3, 4, 5, 6, 7].map(r => (
-        <rect key={`gs${r}`} x={548} y={130 + r * 19} width="58" height="2"
-          fill="rgba(255,255,255,0.06)" />
-      ))}
-      {[0, 1, 2, 3, 4, 5].map(r => [0, 1, 2, 3].map(c => (
-        <rect key={`mw${r}${c}`} x={555 + c * 13} y={134 + r * 26} width="9" height="9"
-          fill="rgba(255,255,255,0.28)" rx="1" />
-      )))}
-
-      {/* ── HERO TOWER RIGHT ── */}
-      <rect x="714" y="80" width="60" height="300" fill="url(#heroTower)" rx="5" opacity="0.93" />
-      <rect x="722" y="64" width="44" height="18" fill="rgba(10,196,224,0.9)" rx="3" />
-      <rect x="728" y="48" width="32" height="18" fill="rgba(246,231,188,0.95)" rx="2" />
-      <rect x="735" y="34" width="18" height="15" fill="rgba(10,196,224,1)" rx="2" />
-      <line x1="744" y1="34" x2="744" y2="14" stroke="rgba(255,255,255,0.85)" strokeWidth="2" />
-      <circle cx="744" cy="14" r="3.5" fill="rgba(255,255,255,1)" filter="url(#glow)" />
-      {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(r => [0, 1, 2, 3].map(c => (
-        <rect key={`t2${r}${c}`}
-          x={720 + c * 14} y={88 + r * 24} width="10" height="9"
-          fill={c === 1 && r % 4 === 0 ? "rgba(246,231,188,0.62)" : "rgba(255,255,255,0.2)"}
-          rx="1" filter={c === 1 && r % 4 === 0 ? "url(#glow)" : undefined} />
-      )))}
-      {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map(r => (
-        <rect key={`t2f${r}`} x={714} y={88 + r * 20} width="60" height="2"
-          fill="rgba(255,255,255,0.06)" />
-      ))}
-
-      {/* Right mid cluster */}
-      <rect x="780" y="142" width="46" height="238" fill="url(#midBldg)" rx="3" />
-      {[0, 1, 2, 3, 4].map(r => [0, 1].map(c => (
-        <rect key={`rm${r}${c}`} x={787 + c * 20} y={150 + r * 28} width="11" height="9"
-          fill="rgba(255,255,255,0.26)" rx="1" />
-      )))}
-
-      <rect x="832" y="112" width="54" height="268" fill="url(#warmBldg)" rx="4" />
-      <rect x="839" y="94" width="40" height="20" fill="rgba(246,200,130,0.82)" rx="3" />
-      <rect x="845" y="78" width="28" height="18" fill="rgba(246,200,130,0.7)" rx="2" />
-      {[0, 1, 2, 3, 4, 5].map(r => [0, 1, 2].map(c => (
-        <rect key={`wm2${r}${c}`} x={839 + c * 15} y={120 + r * 26} width="10" height="8"
-          fill="rgba(255,240,180,0.4)" rx="1" />
-      )))}
-
-      <rect x="892" y="132" width="50" height="248" fill="url(#midBldg)" rx="3" opacity="0.88" />
-      {[0, 1, 2, 3, 4, 5].map(r => [0, 1, 2].map(c => (
-        <rect key={`mm${r}${c}`} x={899 + c * 14} y={140 + r * 26} width="9" height="8"
-          fill="rgba(255,255,255,0.24)" rx="1" />
-      )))}
-
-      <rect x="948" y="118" width="56" height="262" fill="url(#midBldg)" rx="4" />
-      <rect x="955" y="100" width="42" height="20" fill="rgba(10,196,224,0.8)" rx="3" />
-      <rect x="962" y="84" width="28" height="18" fill="rgba(10,196,224,0.7)" rx="2" />
-      {[0, 1, 2, 3, 4, 5, 6].map(r => [0, 1, 2, 3].map(c => (
-        <rect key={`rs${r}${c}`} x={955 + c * 12} y={126 + r * 24} width="8" height="7"
-          fill="rgba(255,255,255,0.25)" rx="1" />
-      )))}
-
-      <rect x="1010" y="148" width="46" height="232" fill="url(#warmBldg)" rx="3" opacity="0.85" />
-      <rect x="1062" y="128" width="52" height="252" fill="url(#midBldg)" rx="4" opacity="0.86" />
-      <rect x="1120" y="158" width="44" height="222" fill="url(#warmBldg)" rx="3" opacity="0.8" />
-      <rect x="1170" y="138" width="56" height="242" fill="url(#midBldg)" rx="4" opacity="0.82" />
-      {[0, 1, 2, 3, 4].map(r => [0, 1, 2].map(c => (
-        <rect key={`rr${r}${c}`} x={1177 + c * 15} y={146 + r * 28} width="10" height="8"
-          fill="rgba(255,255,255,0.23)" rx="1" />
-      )))}
-      <rect x="1232" y="168" width="46" height="212" fill="url(#warmBldg)" rx="3" opacity="0.75" />
-
-      {/* Right suspension bridge */}
-      <rect x="1298" y="135" width="16" height="245" fill="rgba(246,200,130,0.72)" rx="2" />
-      <rect x="1352" y="135" width="16" height="245" fill="rgba(246,200,130,0.72)" rx="2" />
-      <rect x="1284" y="270" width="150" height="8" fill="rgba(246,200,130,0.6)" rx="3" />
-      <line x1="1306" y1="138" x2="1284" y2="270" stroke="rgba(246,200,130,0.5)" strokeWidth="1.5" />
-      <line x1="1306" y1="138" x2="1434" y2="270" stroke="rgba(246,200,130,0.5)" strokeWidth="1.5" />
-      <line x1="1360" y1="138" x2="1284" y2="270" stroke="rgba(246,200,130,0.5)" strokeWidth="1.5" />
-      <line x1="1360" y1="138" x2="1434" y2="270" stroke="rgba(246,200,130,0.5)" strokeWidth="1.5" />
-      {[1296, 1315, 1332, 1348, 1366, 1384, 1400, 1418].map((x, i) => (
-        <line key={`hr${i}`} x1={x} y1="268" x2={x} y2="272" stroke="rgba(246,200,130,0.3)" strokeWidth="1" />
-      ))}
-
-      <rect x="1284" y="148" width="50" height="232" fill="url(#midBldg)" rx="4" opacity="0.75" />
-      <rect x="1374" y="158" width="44" height="222" fill="url(#warmBldg)" rx="3" opacity="0.7" />
-      <rect x="1424" y="175" width="16" height="205" fill="url(#farBldg)" rx="2" opacity="0.55" />
-
-      {/* ══ LAYER 3: Foreground silhouette ══ */}
-      <rect x="0" y="258" width="65" height="122" fill="url(#fgBldg)" rx="3" />
-      <rect x="68" y="242" width="48" height="138" fill="url(#fgBldg)" rx="3" opacity="0.9" />
-      {[0, 1].map(r => [0, 1, 2].map(c => (
-        <rect key={`fg1${r}${c}`} x={7 + c * 20} y={268 + r * 24} width="11" height="9"
-          fill="rgba(255,255,200,0.35)" rx="1" filter="url(#glow)" />
-      )))}
-      {[0, 1].map(r => [0, 1].map(c => (
-        <rect key={`fg2${r}${c}`} x={75 + c * 20} y={252 + r * 24} width="11" height="9"
-          fill="rgba(255,255,200,0.3)" rx="1" filter="url(#glow)" />
-      )))}
-
-      <rect x="1376" y="254" width="64" height="126" fill="url(#fgBldg)" rx="3" />
-      <rect x="1328" y="240" width="44" height="140" fill="url(#fgBldg)" rx="3" opacity="0.9" />
-      {[0, 1].map(r => [0, 1, 2].map(c => (
-        <rect key={`fg3${r}${c}`} x={1383 + c * 18} y={264 + r * 24} width="11" height="9"
-          fill="rgba(255,255,200,0.35)" rx="1" filter="url(#glow)" />
-      )))}
-
-      {/* Ground line */}
-      <rect x="0" y="377" width="1440" height="3" fill="rgba(11,45,114,0.3)" />
-    </svg>
+    <group ref={groupRef}>
+      <Float
+        speed={2} // Animation speed
+        rotationIntensity={0.5} // Base rotation intensity
+        floatIntensity={1.5} // Up/down float intensity
+        floatingRange={[-0.1, 0.1]} // Float range
+      >
+        {/* Initial tilt to make it look dynamic before mouse interaction */}
+        <primitive object={scene} scale={1.8} rotation={[0.1, -0.3, 0]} />
+      </Float>
+    </group>
   );
 }
 
@@ -348,15 +109,8 @@ export default function LandingPage() {
   const [query, setQuery] = useState('');
   const [indicatorStyle, setIndicatorStyle] = useState({ left: 0, width: 0 });
 
-  // Mouse offset — applied to INNER div only
-  // OUTER div carries the CSS float animation; INNER div carries the mouse translateX/Y.
-  // They MUST be separate elements — CSS animation owns the full `transform` property
-  // on whatever element it runs on, silently overriding any inline style on that same element.
-  const [mouseOffset, setMouseOffset] = useState({ x: 0, y: 0 });
-
   const tenantBtnRef = useRef(null);
   const landlordBtnRef = useRef(null);
-  const heroRef = useRef(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -371,21 +125,6 @@ export default function LandingPage() {
     const btnRect = btn.getBoundingClientRect();
     setIndicatorStyle({ left: btnRect.left - parentRect.left, width: btnRect.width });
   }, [roleTab]);
-
-  const handleHeroMouseMove = useCallback((e) => {
-    if (window.innerWidth < 768) return;
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    const hero = heroRef.current;
-    if (!hero) return;
-    const rect = hero.getBoundingClientRect();
-    const normX = (e.clientX - (rect.left + rect.width / 2)) / (rect.width / 2);
-    const normY = (e.clientY - (rect.top + rect.height / 2)) / (rect.height / 2);
-    setMouseOffset({ x: normX * 12, y: normY * 6 });
-  }, []);
-
-  const handleHeroMouseLeave = useCallback(() => {
-    setMouseOffset({ x: 0, y: 0 });
-  }, []);
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -403,67 +142,60 @@ export default function LandingPage() {
 
         {/* ── HERO ───────────────────────────────────────────────── */}
         <section
-          ref={heroRef}
-          className="relative min-h-[90vh] overflow-hidden flex flex-col"
-          style={{ background: 'linear-gradient(135deg, #F6C87A 0%, #0AC4E0 38%, #0992C2 60%, #0B2D72 100%)' }}
-          onMouseMove={handleHeroMouseMove}
-          onMouseLeave={handleHeroMouseLeave}
+          className="relative min-h-[90vh] overflow-hidden flex flex-col justify-center"
+          style={{
+            // Added linear-gradient overlay to make the background image "dull"
+            backgroundImage: `linear-gradient(to right, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.5)), url('https://res.cloudinary.com/dj4a5robb/image/upload/v1773217180/dc8b78b92964aa388580d992003fb77f_tf1wm9.jpg')`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundAttachment: 'fixed'
+          }}
         >
-          <div className="pointer-events-none absolute inset-0"
-            style={{ background: 'radial-gradient(ellipse 70% 60% at 20% 30%, rgba(246,231,188,0.35) 0%, transparent 60%), radial-gradient(ellipse 60% 80% at 80% 10%, rgba(10,196,224,0.25) 0%, transparent 55%)' }}
-          />
-
           {/* Content */}
-          <div className="relative z-10 flex flex-col items-center justify-center flex-1 px-4 pb-52 pt-28 text-center">
-            <h1 className="text-hero text-white drop-shadow-sm"
-              style={{ fontWeight: 800, letterSpacing: '-0.03em', lineHeight: 1.05 }}
-            >
-              Renting Done Right. Finally.
-            </h1>
+          <div className="relative z-10 flex flex-col lg:flex-row items-center justify-between flex-1 px-6 lg:px-16 mx-auto w-full max-w-7xl pb-20 pt-28">
 
-            <div className="mt-10 w-full max-w-2xl">
-              <form
-                onSubmit={handleSearch}
-                className="flex items-center gap-3 rounded-3xl bg-white/95 px-5 py-3.5 shadow-2xl shadow-[#0B2D72]/30 backdrop-blur"
+            {/* Left Side: Text & Search */}
+            <div className="lg:w-1/2 flex flex-col items-start text-left z-20 w-full">
+              <h1 className="text-hero text-white drop-shadow-lg"
+                style={{ fontWeight: 800, letterSpacing: '-0.03em', lineHeight: 1.05 }}
               >
-                <Search className="h-5 w-5 shrink-0 text-neutral-400" />
-                <input
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  placeholder="Type in a city, address, or ZIP code"
-                  className="flex-1 bg-transparent text-[0.95rem] text-neutral-800 placeholder:text-neutral-400 focus:outline-none"
-                />
-                <button
-                  type="submit"
-                  className="rounded-full bg-gradient-to-r from-[#0B2D72] to-[#0992C2] px-5 py-2 text-[0.8rem] font-semibold text-white shadow-md shadow-[#0992C2]/30 transition-all hover:scale-105 hover:shadow-lg"
+                Renting Done Right. Finally.
+              </h1>
+
+              <div className="mt-10 w-full max-w-xl">
+                <form
+                  onSubmit={handleSearch}
+                  className="flex items-center gap-3 rounded-3xl bg-white/95 px-5 py-3.5 shadow-2xl shadow-black/40 backdrop-blur"
                 >
-                  Search
-                </button>
-              </form>
+                  <Search className="h-5 w-5 shrink-0 text-neutral-400" />
+                  <input
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    placeholder="Type in a city, address, or ZIP code"
+                    className="flex-1 bg-transparent text-[0.95rem] text-neutral-800 placeholder:text-neutral-400 focus:outline-none"
+                  />
+                  <button
+                    type="submit"
+                    className="rounded-full bg-gradient-to-r from-[#0B2D72] to-[#0992C2] px-5 py-2 text-[0.8rem] font-semibold text-white shadow-md shadow-[#0992C2]/30 transition-all hover:scale-105 hover:shadow-lg"
+                  >
+                    Search
+                  </button>
+                </form>
+              </div>
             </div>
-          </div>
 
-          {/*
-            ── Two-div cityscape trick ──────────────────────────────────
-            OUTER  → `cityscape-float` CSS class (CSS @keyframes controls translateY)
-            INNER  → inline style (JS-driven translateX + translateY from mouse)
-
-            Why two divs? CSS animations claim full ownership of the `transform`
-            property on whatever element they run on, overriding any inline style
-            set on that same element. Splitting onto two wrappers lets each
-            transform axis be controlled by the right system independently.
-          */}
-          <div className="absolute inset-x-0 bottom-0 h-[24rem] pointer-events-none cityscape-float">
-            <div
-              style={{
-                width: '100%',
-                height: '100%',
-                transform: `translateX(${mouseOffset.x}px) translateY(${mouseOffset.y}px)`,
-                transition: 'transform 0.35s ease-out',
-              }}
-            >
-              <CityscapeSVG />
+            {/* Right Side: 3D Model Canvas */}
+            <div className="lg:w-1/2 h-[400px] lg:h-[600px] w-full mt-12 lg:mt-0 z-10 cursor-grab active:cursor-grabbing">
+              <Canvas camera={{ position: [0, 0, 6], fov: 45 }}>
+                <ambientLight intensity={0.6} />
+                <directionalLight position={[10, 10, 10]} intensity={1.5} />
+                <Environment preset="city" />
+                <Suspense fallback={null}>
+                  <InteractiveModel />
+                </Suspense>
+              </Canvas>
             </div>
+
           </div>
         </section>
 
