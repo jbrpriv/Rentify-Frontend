@@ -17,8 +17,8 @@ import { MotionRevealSection } from '@/components/ui/Motion';
 import { useReveal } from '@/hooks/useReveal';
 
 // ─── 3D Model Imports ─────────────────────────────────────────────────────────
-import { Canvas, useFrame } from '@react-three/fiber';
-import { useGLTF, Float, Environment, Center, ContactShadows } from '@react-three/drei';
+import { Canvas, useFrame, useThree } from '@react-three/fiber';
+import { useGLTF, Float, Environment, Center, ContactShadows, AccumulativeShadows, RandomizedLight } from '@react-three/drei';
 import * as THREE from 'three';
 
 const CITIES = [
@@ -55,18 +55,42 @@ const STATS = [
   { value: '4.7★', label: 'Avg Rating' },
 ];
 
+// ─── Tone-mapping & renderer setup ───────────────────────────────────────────
+function RendererSetup() {
+  const { gl } = useThree();
+  useEffect(() => {
+    gl.toneMapping = THREE.ACESFilmicToneMapping;
+    gl.toneMappingExposure = 1.1;
+    gl.outputColorSpace = THREE.SRGBColorSpace;
+  }, [gl]);
+  return null;
+}
+
 // ─── 3D Interactive Component ─────────────────────────────────────────────────
 function InteractiveModel() {
   const { scene } = useGLTF('https://res.cloudinary.com/dj4a5robb/image/upload/v1773217198/base_basic_shaded_dwvr0z.glb');
   const groupRef = useRef();
 
+  // Traverse and improve material quality for realism
+  useEffect(() => {
+    scene.traverse((child) => {
+      if (child.isMesh) {
+        child.castShadow = true;
+        child.receiveShadow = true;
+        if (child.material) {
+          // Boost metalness/roughness for physically-based look
+          child.material.roughness = Math.min((child.material.roughness ?? 0.5) + 0.1, 1);
+          child.material.envMapIntensity = 1.8;
+          child.material.needsUpdate = true;
+        }
+      }
+    });
+  }, [scene]);
+
   useFrame((state, delta) => {
     if (groupRef.current) {
-      // Limits rotation to a clean tilt instead of a wild 360 spin
       const targetRotationY = state.pointer.x * 0.8;
       const targetRotationX = (state.pointer.y * Math.PI) / 6;
-
-      // Apply damping for smooth inertia when mouse stops
       groupRef.current.rotation.y = THREE.MathUtils.damp(groupRef.current.rotation.y, targetRotationY, 4, delta);
       groupRef.current.rotation.x = THREE.MathUtils.damp(groupRef.current.rotation.x, -targetRotationX, 4, delta);
     }
@@ -75,14 +99,14 @@ function InteractiveModel() {
   return (
     <group ref={groupRef}>
       <Float
-        speed={2.5} // Animation speed
-        rotationIntensity={0.2} // Subtle auto-rotation
-        floatIntensity={1} // Up/down float intensity
-        floatingRange={[-0.1, 0.1]} // Float range
+        speed={2.0}
+        rotationIntensity={0.15}
+        floatIntensity={0.8}
+        floatingRange={[-0.08, 0.08]}
       >
-        {/* Center auto-fixes weird anchor points from the GLB file */}
         <Center>
-          <primitive object={scene} scale={0.5} rotation={[0.2, -0.4, 0]} />
+          {/* Slightly larger: 0.5 → 0.62 */}
+          <primitive object={scene} scale={0.62} rotation={[0.15, -0.4, 0]} />
         </Center>
       </Float>
     </group>
@@ -142,26 +166,44 @@ export default function LandingPage() {
 
         {/* ── HERO ───────────────────────────────────────────────── */}
         <section
-          className="relative min-h-[90vh] overflow-hidden flex flex-col justify-center"
+          className="relative min-h-screen overflow-hidden flex flex-col"
           style={{
-            backgroundImage: `linear-gradient(to right, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.5)), url('https://res.cloudinary.com/dj4a5robb/image/upload/v1773217180/dc8b78b92964aa388580d992003fb77f_tf1wm9.jpg')`,
+            backgroundImage: `linear-gradient(to right, rgba(0,0,0,0.82) 0%, rgba(0,0,0,0.55) 55%, rgba(0,0,0,0.25) 100%), url('https://res.cloudinary.com/dj4a5robb/image/upload/v1773217180/dc8b78b92964aa388580d992003fb77f_tf1wm9.jpg')`,
             backgroundSize: 'cover',
             backgroundPosition: 'center',
-            backgroundAttachment: 'fixed'
+            backgroundAttachment: 'fixed',
           }}
         >
-          {/* Content */}
-          <div className="relative z-10 flex flex-col lg:flex-row items-center justify-between flex-1 px-6 lg:px-16 mx-auto w-full max-w-7xl pb-20 pt-28">
+          {/* ── Main hero content — flex row on desktop, stack on mobile ── */}
+          <div className="relative z-10 flex flex-col lg:flex-row items-center flex-1 px-6 lg:px-16 mx-auto w-full max-w-7xl pt-24 pb-16 min-h-screen">
 
-            {/* Left Side: Text & Search */}
-            <div className="lg:w-1/2 flex flex-col items-start text-left z-20 w-full">
-              <h1 className="text-hero text-white drop-shadow-lg"
-                style={{ fontWeight: 800, letterSpacing: '-0.03em', lineHeight: 1.05 }}
+            {/* ── Left: Text + Search (desktop: 50%, mobile: full width centered) ── */}
+            <div className="w-full lg:w-1/2 flex flex-col items-center lg:items-start text-center lg:text-left z-20 lg:pr-8">
+              {/* Eyebrow */}
+              <span className="mb-5 inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-1.5 text-[0.7rem] font-semibold uppercase tracking-[0.22em] text-white/80 ring-1 ring-white/20 backdrop-blur-sm">
+                <span className="h-1.5 w-1.5 rounded-full bg-[#0992C2] animate-pulse" />
+                Property management, reimagined
+              </span>
+
+              <h1
+                className="text-white drop-shadow-lg"
+                style={{
+                  fontWeight: 800,
+                  letterSpacing: '-0.03em',
+                  lineHeight: 1.05,
+                  fontSize: 'clamp(2.4rem, 5vw, 4rem)',
+                }}
               >
-                Renting Done Right. Finally.
+                Renting Done Right.{' '}
+                <span className="text-[#0AC4E0]">Finally.</span>
               </h1>
 
-              <div className="mt-10 w-full max-w-xl">
+              <p className="mt-5 max-w-md text-[1rem] leading-relaxed text-white/70 hidden lg:block">
+                Find, apply, sign, and pay — all in one place. Built for modern tenants and landlords who expect more.
+              </p>
+
+              {/* Search bar */}
+              <div className="mt-8 w-full max-w-lg">
                 <form
                   onSubmit={handleSearch}
                   className="flex items-center gap-3 rounded-3xl bg-white/95 px-5 py-3.5 shadow-2xl shadow-black/40 backdrop-blur"
@@ -170,7 +212,7 @@ export default function LandingPage() {
                   <input
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
-                    placeholder="Type in a city, address, or ZIP code"
+                    placeholder="City, address, or ZIP code"
                     className="flex-1 bg-transparent text-[0.95rem] text-neutral-800 placeholder:text-neutral-400 focus:outline-none"
                   />
                   <button
@@ -181,23 +223,103 @@ export default function LandingPage() {
                   </button>
                 </form>
               </div>
+
+              {/* Quick CTAs */}
+              <div className="mt-6 flex items-center gap-4">
+                <Link
+                  href="/register"
+                  className="inline-flex items-center gap-2 rounded-full bg-[#0992C2] px-6 py-2.5 text-[0.82rem] font-bold text-white shadow-lg shadow-[#0992C2]/30 transition-all hover:scale-105 hover:shadow-xl"
+                >
+                  Get started free <ArrowRight size={14} />
+                </Link>
+                <Link
+                  href="/browse"
+                  className="text-[0.82rem] font-semibold text-white/70 underline-offset-2 hover:text-white hover:underline transition-colors"
+                >
+                  Browse listings
+                </Link>
+              </div>
+
+              {/* Social proof strip */}
+              <div className="mt-10 hidden lg:flex items-center gap-6 text-white/50 text-[0.72rem] font-medium uppercase tracking-widest">
+                <span>2M+ listings</span>
+                <span className="h-3 w-px bg-white/20" />
+                <span>60+ countries</span>
+                <span className="h-3 w-px bg-white/20" />
+                <span>500K+ landlords</span>
+              </div>
             </div>
 
-            {/* Right Side: 3D Model Canvas */}
-            <div className="lg:w-1/2 h-[400px] lg:h-[600px] w-full mt-12 lg:mt-0 z-10">
-              <Canvas camera={{ position: [0, 0, 7], fov: 45 }}>
-                <ambientLight intensity={0.8} />
-                <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} intensity={1.5} castShadow />
-                <Environment preset="apartment" />
+            {/* ── Right: 3D Canvas — hidden on mobile ── */}
+            <div className="hidden lg:flex lg:w-1/2 h-[580px] items-center justify-center">
+              <Canvas
+                shadows
+                camera={{ position: [0, 0.5, 6.5], fov: 42 }}
+                style={{ width: '100%', height: '100%' }}
+                gl={{ antialias: true, alpha: true }}
+              >
+                <RendererSetup />
+
+                {/* Realistic 3-point lighting rig */}
+                {/* Key light — warm, strong, from upper-right */}
+                <directionalLight
+                  position={[5, 8, 5]}
+                  intensity={2.8}
+                  color="#fff5e0"
+                  castShadow
+                  shadow-mapSize-width={2048}
+                  shadow-mapSize-height={2048}
+                  shadow-camera-near={0.5}
+                  shadow-camera-far={50}
+                  shadow-camera-left={-8}
+                  shadow-camera-right={8}
+                  shadow-camera-top={8}
+                  shadow-camera-bottom={-8}
+                  shadow-bias={-0.0005}
+                />
+                {/* Fill light — cool, soft, from left */}
+                <directionalLight
+                  position={[-6, 3, 2]}
+                  intensity={0.9}
+                  color="#c8e8ff"
+                />
+                {/* Rim/back light — adds depth and separates subject from bg */}
+                <directionalLight
+                  position={[-2, -1, -6]}
+                  intensity={1.2}
+                  color="#ffe8c0"
+                />
+                {/* Subtle warm floor bounce */}
+                <pointLight position={[0, -2, 2]} intensity={0.6} color="#ffddaa" distance={12} />
+                {/* Ambient — low so shadows stay rich */}
+                <ambientLight intensity={0.25} />
+
+                {/* High-quality HDRI for reflections and PBR accuracy */}
+                <Environment
+                  preset="apartment"
+                  environmentIntensity={0.9}
+                  backgroundBlurriness={0}
+                />
+
                 <Suspense fallback={null}>
                   <InteractiveModel />
-                  {/* Adds realistic shadow beneath the floating model */}
-                  <ContactShadows position={[0, -1.8, 0]} opacity={0.6} scale={10} blur={2.5} far={4} />
+                  {/* Soft shadow blob under model */}
+                  <ContactShadows
+                    position={[0, -1.6, 0]}
+                    opacity={0.5}
+                    scale={12}
+                    blur={3}
+                    far={3.5}
+                    color="#000820"
+                  />
                 </Suspense>
               </Canvas>
             </div>
 
           </div>
+
+          {/* Bottom fade for smooth section transition */}
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-white to-transparent" />
         </section>
 
         {/* ── RENT AROUND THE WORLD ──────────────────────────────── */}
