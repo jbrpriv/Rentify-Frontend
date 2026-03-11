@@ -160,11 +160,11 @@ export default function LandingPage() {
                 </button>
               </form>
 
-              <div className="mt-5 flex items-center gap-4">
+              <div className="mt-5 grid grid-cols-2 gap-3 w-full">
                 {!user ? (
                   <Link
                     href="/register"
-                    className="inline-flex items-center gap-2 rounded-xl bg-[#0992C2] px-8 py-3 text-[0.88rem] font-bold text-white transition-all hover:scale-105 hover:brightness-110"
+                    className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#0992C2] px-4 py-3.5 text-[0.88rem] font-bold text-white transition-all hover:scale-[1.02] hover:brightness-110"
                     style={{ boxShadow: '0 4px 20px rgba(9,146,194,0.45)' }}
                   >
                     Get started free <ArrowRight size={15} />
@@ -172,7 +172,7 @@ export default function LandingPage() {
                 ) : (
                   <Link
                     href="/dashboard"
-                    className="inline-flex items-center gap-2 rounded-xl bg-[#0992C2] px-8 py-3 text-[0.88rem] font-bold text-white transition-all hover:scale-105 hover:brightness-110"
+                    className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#0992C2] px-4 py-3.5 text-[0.88rem] font-bold text-white transition-all hover:scale-[1.02] hover:brightness-110"
                     style={{ boxShadow: '0 4px 20px rgba(9,146,194,0.45)' }}
                   >
                     <LayoutDashboard size={15} /> Go to dashboard
@@ -180,7 +180,7 @@ export default function LandingPage() {
                 )}
                 <Link
                   href="/browse"
-                  className="inline-flex items-center gap-1.5 rounded-xl border border-white/25 bg-white/10 px-8 py-3 text-[0.88rem] font-semibold text-white/80 backdrop-blur-sm transition-all hover:bg-white/18 hover:text-white"
+                  className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-white/20 bg-white/8 px-4 py-3.5 text-[0.88rem] font-semibold text-white/75 backdrop-blur-sm transition-all hover:bg-white/15 hover:text-white hover:border-white/35"
                 >
                   Browse listings
                 </Link>
