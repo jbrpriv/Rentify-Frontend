@@ -88,7 +88,7 @@ export default function LandingPage() {
         <section
           className="relative min-h-screen overflow-hidden"
           style={{
-            backgroundImage: `url('https://res.cloudinary.com/dj4a5robb/image/upload/v1773219846/dc8b78b92964aa388580d992003fb77f_bdwrll.jpg')`,
+            backgroundImage: `url('https://res.cloudinary.com/dj4a5robb/image/upload/v1773217180/dc8b78b92964aa388580d992003fb77f_tf1wm9.jpg')`,
             backgroundSize: 'cover',
             backgroundPosition: 'center',
             backgroundAttachment: 'fixed',
@@ -107,9 +107,7 @@ export default function LandingPage() {
 
           {/* Content — flush left, no centering container */}
           <div className="relative z-10 flex min-h-screen items-center">
-            <div
-              className="flex flex-col w-full max-w-[580px] px-8 sm:px-12 lg:pl-20 xl:pl-32 pb-16 pt-32"
-            >
+            <div className="flex flex-col w-full max-w-[680px] px-8 sm:px-12 lg:pl-20 xl:pl-32 pb-32 pt-16 items-center text-center lg:items-start lg:text-left mx-auto lg:mx-0">
               {/* Eyebrow pill */}
               <span className="mb-6 inline-flex w-fit items-center gap-2 rounded-full bg-white/8 px-4 py-1.5 text-[0.67rem] font-semibold uppercase tracking-[0.26em] text-white/70 ring-1 ring-white/12 backdrop-blur-sm">
                 <span className="h-1.5 w-1.5 rounded-full bg-[#0992C2] animate-pulse" />
@@ -156,33 +154,29 @@ export default function LandingPage() {
                 </button>
               </form>
 
-              {/* CTAs */}
               <div className="mt-5 flex items-center gap-4">
                 {!user ? (
                   <Link
                     href="/register"
-                    className="inline-flex items-center gap-2 rounded-xl bg-[#0992C2] px-6 py-2.5 text-[0.82rem] font-bold text-white transition-all hover:scale-105 hover:brightness-110"
+                    className="inline-flex items-center gap-2 rounded-xl bg-[#0992C2] px-8 py-3 text-[0.88rem] font-bold text-white transition-all hover:scale-105 hover:brightness-110"
                     style={{ boxShadow: '0 4px 20px rgba(9,146,194,0.45)' }}
                   >
-                    Get started free <ArrowRight size={14} />
+                    Get started free <ArrowRight size={15} />
                   </Link>
                 ) : (
                   <Link
                     href="/dashboard"
-                    className="inline-flex items-center gap-2 rounded-xl bg-[#0992C2] px-6 py-2.5 text-[0.82rem] font-bold text-white transition-all hover:scale-105 hover:brightness-110"
+                    className="inline-flex items-center gap-2 rounded-xl bg-[#0992C2] px-8 py-3 text-[0.88rem] font-bold text-white transition-all hover:scale-105 hover:brightness-110"
                     style={{ boxShadow: '0 4px 20px rgba(9,146,194,0.45)' }}
                   >
-                    <LayoutDashboard size={14} /> Go to dashboard
+                    <LayoutDashboard size={15} /> Go to dashboard
                   </Link>
                 )}
                 <Link
                   href="/browse"
-                  className="text-[0.82rem] font-semibold transition-colors"
-                  style={{ color: 'rgba(255,255,255,0.55)' }}
-                  onMouseEnter={e => e.currentTarget.style.color = 'rgba(255,255,255,0.9)'}
-                  onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.55)'}
+                  className="inline-flex items-center gap-1.5 rounded-xl border border-white/25 bg-white/10 px-8 py-3 text-[0.88rem] font-semibold text-white/80 backdrop-blur-sm transition-all hover:bg-white/18 hover:text-white"
                 >
-                  Browse listings →
+                  Browse listings
                 </Link>
               </div>
 
