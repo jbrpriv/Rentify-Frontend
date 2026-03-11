@@ -38,6 +38,10 @@ const interceptLandlordMe = () => {
         statusCode: 200,
         body: { _id: 'lnd_001', name: 'Test Landlord', email: 'landlord@test.com', role: 'landlord' },
     }).as('getMe');
+    cy.intercept('GET', '/api/users/dashboard-summary', {
+        statusCode: 200,
+        body: { counts: { activeAgreements: 1, pendingOffers: 0, propertyCount: 1, pendingDisputes: 0, pendingMaintenance: 0, overduePayments: 0 }, recentPayments: [], recentAgreements: [] },
+    });
 };
 
 // ─────────────────────────────────────────────────────────────────────────────

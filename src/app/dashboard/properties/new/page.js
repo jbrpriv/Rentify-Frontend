@@ -10,6 +10,38 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 
+// ─── Country / Province / City data ──────────────────────────────────────────
+const COUNTRIES = [
+  'Pakistan', 'United Arab Emirates', 'United Kingdom', 'United States',
+  'Canada', 'Australia', 'Saudi Arabia', 'Qatar', 'Bahrain', 'Kuwait',
+  'Germany', 'France', 'India', 'Bangladesh', 'Other',
+];
+
+const PROVINCES_BY_COUNTRY = {
+  'Pakistan': ['Punjab', 'Sindh', 'Khyber Pakhtunkhwa', 'Balochistan', 'Gilgit-Baltistan', 'Azad Kashmir', 'Islamabad Capital Territory'],
+  'United Arab Emirates': ['Abu Dhabi', 'Dubai', 'Sharjah', 'Ajman', 'Umm Al-Quwain', 'Ras Al Khaimah', 'Fujairah'],
+  'United Kingdom': ['England', 'Scotland', 'Wales', 'Northern Ireland'],
+  'United States': ['Alabama','Alaska','Arizona','Arkansas','California','Colorado','Connecticut','Delaware','Florida','Georgia','Hawaii','Idaho','Illinois','Indiana','Iowa','Kansas','Kentucky','Louisiana','Maine','Maryland','Massachusetts','Michigan','Minnesota','Mississippi','Missouri','Montana','Nebraska','Nevada','New Hampshire','New Jersey','New Mexico','New York','North Carolina','North Dakota','Ohio','Oklahoma','Oregon','Pennsylvania','Rhode Island','South Carolina','South Dakota','Tennessee','Texas','Utah','Vermont','Virginia','Washington','West Virginia','Wisconsin','Wyoming'],
+  'Canada': ['Alberta', 'British Columbia', 'Manitoba', 'New Brunswick', 'Newfoundland and Labrador', 'Nova Scotia', 'Ontario', 'Prince Edward Island', 'Quebec', 'Saskatchewan'],
+  'Australia': ['New South Wales', 'Victoria', 'Queensland', 'Western Australia', 'South Australia', 'Tasmania', 'Australian Capital Territory', 'Northern Territory'],
+};
+
+const CITIES_BY_PROVINCE = {
+  'Punjab': ['Lahore', 'Faisalabad', 'Rawalpindi', 'Gujranwala', 'Multan', 'Sialkot', 'Sargodha', 'Bahawalpur', 'Sheikhupura', 'Islamabad'],
+  'Sindh': ['Karachi', 'Hyderabad', 'Sukkur', 'Larkana', 'Nawabshah', 'Mirpur Khas', 'Thatta'],
+  'Khyber Pakhtunkhwa': ['Peshawar', 'Abbottabad', 'Mardan', 'Mingora', 'Kohat', 'Dera Ismail Khan'],
+  'Balochistan': ['Quetta', 'Turbat', 'Khuzdar', 'Hub', 'Gwadar'],
+  'Islamabad Capital Territory': ['Islamabad'],
+  'Dubai': ['Dubai City', 'Deira', 'Bur Dubai', 'Jumeirah', 'Business Bay', 'Dubai Marina', 'Downtown Dubai'],
+  'Abu Dhabi': ['Abu Dhabi City', 'Al Ain', 'Ruwais', 'Liwa'],
+  'Sharjah': ['Sharjah City', 'Khor Fakkan', 'Kalba'],
+  'Ontario': ['Toronto', 'Ottawa', 'Mississauga', 'Brampton', 'Hamilton', 'London', 'Markham'],
+  'British Columbia': ['Vancouver', 'Surrey', 'Burnaby', 'Richmond', 'Kelowna', 'Abbotsford'],
+  'England': ['London', 'Birmingham', 'Manchester', 'Leeds', 'Liverpool', 'Sheffield', 'Bristol'],
+  'New South Wales': ['Sydney', 'Newcastle', 'Wollongong', 'Central Coast', 'Maitland'],
+  'Victoria': ['Melbourne', 'Geelong', 'Ballarat', 'Bendigo', 'Shepparton'],
+};
+
 const AMENITIES_LIST = [
   { label: 'Parking', emoji: '🚗' },
   { label: 'Gym', emoji: '💪' },
@@ -331,21 +363,46 @@ export default function AddPropertyPage() {
                 <input className="np-input" style={inputStyle} placeholder="Unit 4B"
                   value={form.address.unitNumber} onChange={e => set('address.unitNumber', e.target.value)} />
               </F>
-              <F label="City" req half>
-                <input className="np-input" style={inputStyle} required placeholder="Karachi"
-                  value={form.address.city} onChange={e => set('address.city', e.target.value)} />
+              <F label="Country" req half>
+                <select style={inputStyle} required value={form.address.country}
+                  onChange={e => { set('address.country', e.target.value); set('address.state', ''); set('address.city', ''); }}>
+                  <option value="">Select Country</option>
+                  {COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)}
+                </select>
               </F>
               <F label="State / Province" req half>
-                <input className="np-input" style={inputStyle} required placeholder="Sindh"
-                  value={form.address.state} onChange={e => set('address.state', e.target.value)} />
+                {PROVINCES_BY_COUNTRY[form.address.country] ? (
+                  <select style={inputStyle} required value={form.address.state}
+                    onChange={e => { set('address.state', e.target.value); set('address.city', ''); }}>
+                    <option value="">Select Province</option>
+                    {PROVINCES_BY_COUNTRY[form.address.country].map(s => <option key={s} value={s}>{s}</option>)}
+                  </select>
+                ) : (
+                  <input className="np-input" style={inputStyle} required placeholder="State / Province"
+                    value={form.address.state} onChange={e => set('address.state', e.target.value)} />
+                )}
+              </F>
+              <F label="City" req half>
+                {CITIES_BY_PROVINCE[form.address.state] ? (
+                  <select style={inputStyle} required value={form.address.city}
+                    onChange={e => set('address.city', e.target.value)}>
+                    <option value="">Select City</option>
+                    {CITIES_BY_PROVINCE[form.address.state].map(c => <option key={c} value={c}>{c}</option>)}
+                    <option value="__other">Other (type below)</option>
+                  </select>
+                ) : (
+                  <input className="np-input" style={inputStyle} required placeholder="City"
+                    value={form.address.city} onChange={e => set('address.city', e.target.value)} />
+                )}
+                {/* Show free-text input when "Other" is selected */}
+                {form.address.city === '__other' && (
+                  <input className="np-input" style={{ ...inputStyle, marginTop: 6 }} required placeholder="Enter city name"
+                    onChange={e => set('address.city', e.target.value)} />
+                )}
               </F>
               <F label="ZIP / Postal Code" req half>
                 <input className="np-input" style={inputStyle} required placeholder="74000"
                   value={form.address.zip} onChange={e => set('address.zip', e.target.value)} />
-              </F>
-              <F label="Country" half>
-                <input className="np-input" style={inputStyle} placeholder="Pakistan"
-                  value={form.address.country} onChange={e => set('address.country', e.target.value)} />
               </F>
             </Row>
           </Card>

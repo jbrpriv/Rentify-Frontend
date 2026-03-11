@@ -437,6 +437,11 @@ function ClausePicker({ selectedClauseIds, onToggle, onReorder, offerData, formD
                       <span className="text-xs px-2 py-0.5 bg-gray-100 text-gray-500 rounded-full capitalize">
                         {clause.category?.replace(/_/g, ' ')}
                       </span>
+                      {clause.jurisdiction && (
+                        <span className="text-xs px-2 py-0.5 bg-blue-50 text-blue-600 rounded-full">
+                          {clause.jurisdiction}
+                        </span>
+                      )}
                       {clause.isDefault && (
                         <span className="text-xs px-2 py-0.5 bg-green-100 text-green-700 rounded-full">Recommended</span>
                       )}

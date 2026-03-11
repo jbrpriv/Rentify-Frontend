@@ -552,8 +552,13 @@ export default function TemplatesPage() {
                     </span>
                   )}
                   <div className="min-w-0">
-                    <p className="font-bold text-gray-900 truncate">{c.title}</p>
-                    <p className="text-xs text-gray-400">{c.category} • {c.jurisdiction} • v{c.version} • Used {c.usageCount}x</p>
+                    <p className="font-bold text-gray-900 truncate" title={c.title}>{c.title}</p>
+                    <p className="text-xs text-gray-400 mt-0.5">
+                      <span className="capitalize">{c.category?.replace(/_/g, ' ')}</span>
+                      {c.jurisdiction && <span> · <span className="text-blue-500">{c.jurisdiction}</span></span>}
+                      <span> · v{c.version}</span>
+                      <span> · Used {c.usageCount}×</span>
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2 ml-4 shrink-0">

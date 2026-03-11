@@ -259,3 +259,41 @@ describe('Properties — Landlord View', () => {
         cy.contains(/25,000/).should('exist');
     });
 });
+// ─────────────────────────────────────────────────────────────────────────────
+// NEW PROPERTY PAGE — Country / State / City Selects
+// ─────────────────────────────────────────────────────────────────────────────
+describe('Properties — New Page Selectable Location Fields', () => {
+
+    beforeEach(() => {
+        cy.loginAsLandlord();
+        cy.intercept('GET', '/api/users/me', { statusCode: 200, body: mockLandlordUser }).as('getMe');
+        cy.intercept('GET', '/api/notifications/counts', { statusCode: 200, body: { unreadCount: 0 } });
+        cy.intercept('GET', '/api/users/dashboard-summary', { statusCode: 200, body: { counts: {}, recentPayments: [], recentAgreements: [] } });
+        cy.intercept('GET', '/api/payments*', { statusCode: 200, body: { payments: [] } });
+        cy.visit('/dashboard/properties/new');
+    });
+
+    it('Country field is a select dropdown', () => {
+        cy.contains('Country').closest('div').find('select').should('exist');
+    });
+
+    it('contains Pakistan in country options', () => {
+        cy.contains('Country').closest('div').find('select').should('contain', 'Pakistan');
+    });
+
+    it('State becomes a dropdown when Pakistan selected', () => {
+        cy.contains('Country').closest('div').find('select').select('Pakistan');
+        cy.contains('State / Province').closest('div').find('select').should('contain', 'Punjab');
+    });
+
+    it('City becomes a dropdown when Punjab selected', () => {
+        cy.contains('Country').closest('div').find('select').select('Pakistan');
+        cy.contains('State / Province').closest('div').find('select').select('Punjab');
+        cy.contains('City').closest('div').find('select').should('contain', 'Lahore');
+    });
+
+    it('State reverts to text input when non-preset country selected', () => {
+        cy.contains('Country').closest('div').find('select').select('Other');
+        cy.contains('State / Province').closest('div').find('input').should('exist');
+    });
+});

@@ -131,6 +131,12 @@ const interceptUserMe = () => {
         statusCode: 200,
         body: { _id: 'lnd_001', name: 'Test Landlord', email: 'landlord@test.com', role: 'landlord' },
     }).as('getMe');
+    // Stub the new dashboard summary endpoint so dashboard load doesn't fail
+    cy.intercept('GET', '/api/users/dashboard-summary', {
+        statusCode: 200,
+        body: { counts: { activeAgreements: 1, pendingOffers: 0, propertyCount: 1, pendingDisputes: 0, pendingMaintenance: 0, overduePayments: 0 }, recentPayments: [], recentAgreements: [] },
+    }).as('getDashboardSummary');
+    cy.intercept('GET', '/api/payments*', { statusCode: 200, body: { payments: [] } });
 };
 
 // ─────────────────────────────────────────────────────────────────────────────

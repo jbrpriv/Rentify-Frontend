@@ -124,27 +124,48 @@ export default function DashboardHome() {
 
     (async () => {
       try {
-        const [agResp, offerResp] = await Promise.all([
-          api.get('/agreements').catch(() => ({ data: [] })),
-          api.get('/offers').catch(() => ({ data: { offers: [] } })),
+        // Use the lightweight dashboard summary endpoint for counts + recent items
+        const [summaryResp, payResp] = await Promise.all([
+          api.get('/users/dashboard-summary').catch(() => ({ data: null })),
+          api.get('/payments?limit=200').catch(() => ({ data: { payments: [] } })),
         ]);
-        setAgreements(agResp.data || []);
-        setOffers((offerResp.data?.offers || []));
 
-        if (['landlord', 'property_manager', 'admin'].includes(user.role)) {
-          const propResp = await api.get('/properties').catch(() => ({ data: [] }));
-          setProperties(Array.isArray(propResp.data) ? propResp.data : []);
+        const summary = summaryResp.data;
+        if (summary) {
+          setAgreements(summary.recentAgreements || []);
+          setPayments(payResp.data?.payments || []);
+          setPD(summary.counts?.pendingDisputes || 0);
+          setPM(summary.counts?.pendingMaintenance || 0);
+          // For property count and offers, use summary counts
+          if (['landlord', 'property_manager', 'admin'].includes(user.role)) {
+            // Properties list needed for calendar — fetch separately but lightweight
+            api.get('/properties').catch(() => ({ data: [] }))
+              .then(r => setProperties(Array.isArray(r.data) ? r.data : []));
+          }
+          setOffers([]); // offers list not needed for overview — count from summary
+        } else {
+          // Fallback: individual requests if summary endpoint unavailable
+          const [agResp, offerResp] = await Promise.all([
+            api.get('/agreements').catch(() => ({ data: [] })),
+            api.get('/offers').catch(() => ({ data: { offers: [] } })),
+          ]);
+          setAgreements(agResp.data || []);
+          setOffers((offerResp.data?.offers || []));
+
+          if (['landlord', 'property_manager', 'admin'].includes(user.role)) {
+            const propResp = await api.get('/properties').catch(() => ({ data: [] }));
+            setProperties(Array.isArray(propResp.data) ? propResp.data : []);
+          }
+
+          setPayments(payResp.data?.payments || []);
+
+          const [dispResp, maintResp] = await Promise.all([
+            api.get('/disputes').catch(() => ({ data: { disputes: [] } })),
+            api.get('/maintenance').catch(() => ({ data: [] })),
+          ]);
+          setPD((dispResp.data?.disputes || []).filter(d => ['open', 'under_review'].includes(d.status)).length);
+          setPM((Array.isArray(maintResp.data) ? maintResp.data : []).filter(m => ['pending', 'in_progress'].includes(m.status)).length);
         }
-
-        const payResp = await api.get('/payments').catch(() => ({ data: { payments: [] } }));
-        setPayments(payResp.data?.payments || []);
-
-        const [dispResp, maintResp] = await Promise.all([
-          api.get('/disputes').catch(() => ({ data: { disputes: [] } })),
-          api.get('/maintenance').catch(() => ({ data: [] })),
-        ]);
-        setPD((dispResp.data?.disputes || []).filter(d => ['open', 'under_review'].includes(d.status)).length);
-        setPM((Array.isArray(maintResp.data) ? maintResp.data : []).filter(m => ['pending', 'in_progress'].includes(m.status)).length);
       } catch (e) { console.error(e); }
       finally { setLoading(false); }
     })();
