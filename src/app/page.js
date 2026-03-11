@@ -1,25 +1,19 @@
 'use client';
 
-import { useEffect, useState, useRef, useCallback, Suspense } from 'react';
+import { useRef, useState } from 'react';
 import { useUser } from '@/context/UserContext';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
   Search, FileText, CreditCard, Users, ShieldCheck,
-  CheckCircle2, ArrowRight, Building2, MapPin,
-  LayoutDashboard, Bell, MessageSquare, Wrench, ClipboardList,
-  TrendingUp, Star, Key, BarChart2, UserCheck, Home,
-  Bed, Bath, Square
+  ArrowRight, Building2, MapPin,
+  LayoutDashboard, MessageSquare, Wrench, ClipboardList,
+  TrendingUp, BarChart2, UserCheck,
 } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { MotionRevealSection } from '@/components/ui/Motion';
 import { useReveal } from '@/hooks/useReveal';
-
-// ─── 3D Model Imports ─────────────────────────────────────────────────────────
-import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { useGLTF, Float, Environment, Center, ContactShadows, AccumulativeShadows, RandomizedLight } from '@react-three/drei';
-import * as THREE from 'three';
 
 const CITIES = [
   { name: 'New York', country: 'USA', count: '12,400+ listings', img: 'https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?w=700&q=80' },
@@ -55,65 +49,6 @@ const STATS = [
   { value: '4.7★', label: 'Avg Rating' },
 ];
 
-// ─── Tone-mapping & renderer setup ───────────────────────────────────────────
-function RendererSetup() {
-  const { gl } = useThree();
-  useEffect(() => {
-    gl.toneMapping = THREE.ACESFilmicToneMapping;
-    gl.toneMappingExposure = 1.1;
-    gl.outputColorSpace = THREE.SRGBColorSpace;
-  }, [gl]);
-  return null;
-}
-
-// ─── 3D Interactive Component ─────────────────────────────────────────────────
-function InteractiveModel() {
-  const { scene } = useGLTF('https://res.cloudinary.com/dj4a5robb/image/upload/v1773217198/base_basic_shaded_dwvr0z.glb');
-  const groupRef = useRef();
-
-  // Traverse and improve material quality for realism
-  useEffect(() => {
-    scene.traverse((child) => {
-      if (child.isMesh) {
-        child.castShadow = true;
-        child.receiveShadow = true;
-        if (child.material) {
-          // Boost metalness/roughness for physically-based look
-          child.material.roughness = Math.min((child.material.roughness ?? 0.5) + 0.1, 1);
-          child.material.envMapIntensity = 1.8;
-          child.material.needsUpdate = true;
-        }
-      }
-    });
-  }, [scene]);
-
-  useFrame((state, delta) => {
-    if (groupRef.current) {
-      const targetRotationY = state.pointer.x * 0.8;
-      const targetRotationX = (state.pointer.y * Math.PI) / 6;
-      groupRef.current.rotation.y = THREE.MathUtils.damp(groupRef.current.rotation.y, targetRotationY, 4, delta);
-      groupRef.current.rotation.x = THREE.MathUtils.damp(groupRef.current.rotation.x, -targetRotationX, 4, delta);
-    }
-  });
-
-  return (
-    <group ref={groupRef}>
-      <Float
-        speed={2.0}
-        rotationIntensity={0.15}
-        floatIntensity={0.8}
-        floatingRange={[-0.08, 0.08]}
-      >
-        <Center>
-          {/* Slightly larger: 0.5 → 0.62 */}
-          <primitive object={scene} scale={0.62} rotation={[0.15, -0.4, 0]} />
-        </Center>
-      </Float>
-    </group>
-  );
-}
-
-// Scroll-reveal wrapper
 function RevealCard({ children, delay = 0, className = '' }) {
   const [ref, revealed] = useReveal();
   return (
@@ -128,27 +63,12 @@ function RevealCard({ children, delay = 0, className = '' }) {
 }
 
 export default function LandingPage() {
-  const [user, setUser] = useState(null);
+  const { user } = useUser();
   const [roleTab, setRoleTab] = useState('tenant');
   const [query, setQuery] = useState('');
-  const [indicatorStyle, setIndicatorStyle] = useState({ left: 0, width: 0 });
-
   const tenantBtnRef = useRef(null);
   const landlordBtnRef = useRef(null);
   const router = useRouter();
-
-  useEffect(() => {
-    // user comes from UserContext — no localStorage read needed
-  }, []);
-
-  useEffect(() => {
-    const btn = roleTab === 'tenant' ? tenantBtnRef.current : landlordBtnRef.current;
-    if (!btn) return;
-    const parent = btn.parentElement;
-    const parentRect = parent.getBoundingClientRect();
-    const btnRect = btn.getBoundingClientRect();
-    setIndicatorStyle({ left: btnRect.left - parentRect.left, width: btnRect.width });
-  }, [roleTab]);
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -166,7 +86,7 @@ export default function LandingPage() {
 
         {/* ── HERO ───────────────────────────────────────────────── */}
         <section
-          className="relative min-h-screen overflow-hidden flex flex-col"
+          className="relative min-h-screen overflow-hidden flex flex-col justify-center"
           style={{
             backgroundImage: `linear-gradient(to right, rgba(0,0,0,0.82) 0%, rgba(0,0,0,0.55) 55%, rgba(0,0,0,0.25) 100%), url('https://res.cloudinary.com/dj4a5robb/image/upload/v1773217180/dc8b78b92964aa388580d992003fb77f_tf1wm9.jpg')`,
             backgroundSize: 'cover',
@@ -174,152 +94,90 @@ export default function LandingPage() {
             backgroundAttachment: 'fixed',
           }}
         >
-          {/* ── Main hero content — flex row on desktop, stack on mobile ── */}
-          <div className="relative z-10 flex flex-col lg:flex-row items-center flex-1 px-6 lg:px-16 mx-auto w-full max-w-7xl pt-24 pb-16 min-h-screen">
+          <div className="relative z-10 flex flex-col items-center lg:items-start text-center lg:text-left px-6 lg:px-16 mx-auto w-full max-w-7xl pt-24 pb-40">
 
-            {/* ── Left: Text + Search (desktop: 50%, mobile: full width centered) ── */}
-            <div className="w-full lg:w-1/2 flex flex-col items-center lg:items-start text-center lg:text-left z-20 lg:pr-8">
-              {/* Eyebrow */}
-              <span className="mb-5 inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-1.5 text-[0.7rem] font-semibold uppercase tracking-[0.22em] text-white/80 ring-1 ring-white/20 backdrop-blur-sm">
-                <span className="h-1.5 w-1.5 rounded-full bg-[#0992C2] animate-pulse" />
-                Property management, reimagined
-              </span>
+            {/* Eyebrow */}
+            <span className="mb-5 inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-1.5 text-[0.7rem] font-semibold uppercase tracking-[0.22em] text-white/80 ring-1 ring-white/20 backdrop-blur-sm">
+              <span className="h-1.5 w-1.5 rounded-full bg-[#0992C2] animate-pulse" />
+              Property management, reimagined
+            </span>
 
-              <h1
-                className="text-white drop-shadow-lg"
-                style={{
-                  fontWeight: 800,
-                  letterSpacing: '-0.03em',
-                  lineHeight: 1.05,
-                  fontSize: 'clamp(2.4rem, 5vw, 4rem)',
-                }}
+            <h1
+              className="text-white drop-shadow-lg max-w-2xl"
+              style={{ fontWeight: 800, letterSpacing: '-0.03em', lineHeight: 1.05, fontSize: 'clamp(2.6rem, 5.5vw, 4.2rem)' }}
+            >
+              Renting Done Right.{' '}
+              <span className="text-[#0AC4E0]">Finally.</span>
+            </h1>
+
+            <p className="mt-5 max-w-lg text-[1rem] leading-relaxed text-white/70">
+              Find, apply, sign, and pay — all in one place. Built for modern tenants and landlords who expect more.
+            </p>
+
+            {/* Search bar */}
+            <div className="mt-8 w-full max-w-lg">
+              <form
+                onSubmit={handleSearch}
+                className="flex items-center gap-3 rounded-3xl bg-white/95 px-5 py-3.5 shadow-2xl shadow-black/40 backdrop-blur"
               >
-                Renting Done Right.{' '}
-                <span className="text-[#0AC4E0]">Finally.</span>
-              </h1>
-
-              <p className="mt-5 max-w-md text-[1rem] leading-relaxed text-white/70 hidden lg:block">
-                Find, apply, sign, and pay — all in one place. Built for modern tenants and landlords who expect more.
-              </p>
-
-              {/* Search bar */}
-              <div className="mt-8 w-full max-w-lg">
-                <form
-                  onSubmit={handleSearch}
-                  className="flex items-center gap-3 rounded-3xl bg-white/95 px-5 py-3.5 shadow-2xl shadow-black/40 backdrop-blur"
+                <Search className="h-5 w-5 shrink-0 text-neutral-400" />
+                <input
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="City, address, or ZIP code"
+                  className="flex-1 bg-transparent text-[0.95rem] text-neutral-800 placeholder:text-neutral-400 focus:outline-none"
+                />
+                <button
+                  type="submit"
+                  className="rounded-full bg-gradient-to-r from-[#0B2D72] to-[#0992C2] px-5 py-2 text-[0.8rem] font-semibold text-white shadow-md shadow-[#0992C2]/30 transition-all hover:scale-105 hover:shadow-lg"
                 >
-                  <Search className="h-5 w-5 shrink-0 text-neutral-400" />
-                  <input
-                    value={query}
-                    onChange={(e) => setQuery(e.target.value)}
-                    placeholder="City, address, or ZIP code"
-                    className="flex-1 bg-transparent text-[0.95rem] text-neutral-800 placeholder:text-neutral-400 focus:outline-none"
-                  />
-                  <button
-                    type="submit"
-                    className="rounded-full bg-gradient-to-r from-[#0B2D72] to-[#0992C2] px-5 py-2 text-[0.8rem] font-semibold text-white shadow-md shadow-[#0992C2]/30 transition-all hover:scale-105 hover:shadow-lg"
-                  >
-                    Search
-                  </button>
-                </form>
-              </div>
+                  Search
+                </button>
+              </form>
+            </div>
 
-              {/* Quick CTAs */}
-              <div className="mt-6 flex items-center gap-4">
+            {/* CTAs — auth-aware */}
+            <div className="mt-6 flex items-center gap-4">
+              {!user ? (
                 <Link
                   href="/register"
                   className="inline-flex items-center gap-2 rounded-full bg-[#0992C2] px-6 py-2.5 text-[0.82rem] font-bold text-white shadow-lg shadow-[#0992C2]/30 transition-all hover:scale-105 hover:shadow-xl"
                 >
                   Get started free <ArrowRight size={14} />
                 </Link>
+              ) : (
                 <Link
-                  href="/browse"
-                  className="text-[0.82rem] font-semibold text-white/70 underline-offset-2 hover:text-white hover:underline transition-colors"
+                  href="/dashboard"
+                  className="inline-flex items-center gap-2 rounded-full bg-[#0992C2] px-6 py-2.5 text-[0.82rem] font-bold text-white shadow-lg shadow-[#0992C2]/30 transition-all hover:scale-105 hover:shadow-xl"
                 >
-                  Browse listings
+                  <LayoutDashboard size={14} /> Go to dashboard
                 </Link>
-              </div>
-
-              {/* Social proof strip */}
-              <div className="mt-10 hidden lg:flex items-center gap-6 text-white/50 text-[0.72rem] font-medium uppercase tracking-widest">
-                <span>2M+ listings</span>
-                <span className="h-3 w-px bg-white/20" />
-                <span>60+ countries</span>
-                <span className="h-3 w-px bg-white/20" />
-                <span>500K+ landlords</span>
-              </div>
-            </div>
-
-            {/* ── Right: 3D Canvas — hidden on mobile ── */}
-            <div className="hidden lg:flex lg:w-1/2 h-[580px] items-center justify-center">
-              <Canvas
-                shadows
-                camera={{ position: [0, 0.5, 6.5], fov: 42 }}
-                style={{ width: '100%', height: '100%' }}
-                gl={{ antialias: true, alpha: true }}
+              )}
+              <Link
+                href="/browse"
+                className="text-[0.82rem] font-semibold text-white/70 underline-offset-2 hover:text-white hover:underline transition-colors"
               >
-                <RendererSetup />
-
-                {/* Realistic 3-point lighting rig */}
-                {/* Key light — warm, strong, from upper-right */}
-                <directionalLight
-                  position={[5, 8, 5]}
-                  intensity={2.8}
-                  color="#fff5e0"
-                  castShadow
-                  shadow-mapSize-width={2048}
-                  shadow-mapSize-height={2048}
-                  shadow-camera-near={0.5}
-                  shadow-camera-far={50}
-                  shadow-camera-left={-8}
-                  shadow-camera-right={8}
-                  shadow-camera-top={8}
-                  shadow-camera-bottom={-8}
-                  shadow-bias={-0.0005}
-                />
-                {/* Fill light — cool, soft, from left */}
-                <directionalLight
-                  position={[-6, 3, 2]}
-                  intensity={0.9}
-                  color="#c8e8ff"
-                />
-                {/* Rim/back light — adds depth and separates subject from bg */}
-                <directionalLight
-                  position={[-2, -1, -6]}
-                  intensity={1.2}
-                  color="#ffe8c0"
-                />
-                {/* Subtle warm floor bounce */}
-                <pointLight position={[0, -2, 2]} intensity={0.6} color="#ffddaa" distance={12} />
-                {/* Ambient — low so shadows stay rich */}
-                <ambientLight intensity={0.25} />
-
-                {/* High-quality HDRI for reflections and PBR accuracy */}
-                <Environment
-                  preset="apartment"
-                  environmentIntensity={0.9}
-                  backgroundBlurriness={0}
-                />
-
-                <Suspense fallback={null}>
-                  <InteractiveModel />
-                  {/* Soft shadow blob under model */}
-                  <ContactShadows
-                    position={[0, -1.6, 0]}
-                    opacity={0.5}
-                    scale={12}
-                    blur={3}
-                    far={3.5}
-                    color="#000820"
-                  />
-                </Suspense>
-              </Canvas>
+                Browse listings
+              </Link>
             </div>
 
+            {/* Social proof strip */}
+            <div className="mt-10 flex items-center gap-6 text-white/50 text-[0.72rem] font-medium uppercase tracking-widest">
+              <span>2M+ listings</span>
+              <span className="h-3 w-px bg-white/20" />
+              <span>60+ countries</span>
+              <span className="h-3 w-px bg-white/20" />
+              <span>500K+ landlords</span>
+            </div>
           </div>
 
-          {/* Bottom fade for smooth section transition */}
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-white to-transparent" />
+          {/* Bottom fade — deep and gradual so white doesn't bleed abruptly */}
+          <div
+            className="pointer-events-none absolute inset-x-0 bottom-0 h-64"
+            style={{
+              background: 'linear-gradient(to top, #ffffff 0%, rgba(255,255,255,0.92) 20%, rgba(255,255,255,0.6) 50%, rgba(255,255,255,0.15) 80%, transparent 100%)',
+            }}
+          />
         </section>
 
         {/* ── RENT AROUND THE WORLD ──────────────────────────────── */}
@@ -419,6 +277,7 @@ export default function LandingPage() {
                     🏢 <span>Landlord View</span>
                   </button>
                 </div>
+                {/* Features section CTA — auth-aware, no "Get started" for logged-in users */}
                 <div className="flex flex-wrap gap-3 pt-2">
                   {!user ? (
                     <Link href="/register"
@@ -459,11 +318,13 @@ export default function LandingPage() {
           </div>
         </MotionRevealSection>
 
-        {/* ── CTA ────────────────────────────────────────────────── */}
-        <MotionRevealSection className="py-16 bg-white">
-          {!user && (
-            <section className="relative overflow-hidden px-6 py-24 text-center"
-              style={{ background: 'linear-gradient(135deg, #F6C87A 0%, #0AC4E0 45%, #0992C2 70%, #0B2D72 100%)' }}>
+        {/* ── CTA — guests only ──────────────────────────────────── */}
+        {!user && (
+          <MotionRevealSection className="bg-white">
+            <section
+              className="relative overflow-hidden px-6 py-24 text-center"
+              style={{ background: 'linear-gradient(135deg, #F6C87A 0%, #0AC4E0 45%, #0992C2 70%, #0B2D72 100%)' }}
+            >
               <div className="pointer-events-none absolute -left-16 top-0 h-64 w-64 rounded-full bg-white/25 blur-3xl" />
               <div className="pointer-events-none absolute -right-20 bottom-0 h-72 w-72 rounded-full bg-white/20 blur-3xl" />
               <div className="relative mx-auto max-w-2xl space-y-5">
@@ -481,29 +342,8 @@ export default function LandingPage() {
                 </div>
               </div>
             </section>
-          )}
-
-          {user && (
-            <section className="relative overflow-hidden px-6 py-24 text-center"
-              style={{ background: 'linear-gradient(135deg, #F8FBFC 0%, #0AC4E0 35%, #0992C2 65%, #0B2D72 100%)' }}>
-              <div className="pointer-events-none absolute inset-0"
-                style={{ background: 'radial-gradient(circle at 15% 25%, rgba(255,255,255,0.45) 0%, transparent 45%), radial-gradient(circle at 85% 75%, rgba(246,231,188,0.2) 0%, transparent 40%)' }}
-              />
-              <div className="relative mx-auto max-w-2xl space-y-6">
-                <h2 className="text-h2 text-white">Welcome back, {user.name?.split(' ')[0]}.</h2>
-                <p className="mx-auto max-w-md text-[1.05rem] leading-relaxed text-white/85">
-                  Continue where you left off — your applications, leases, and payments are already synced.
-                </p>
-                <div className="mt-8 flex justify-center">
-                  <Link href="/dashboard" className="inline-flex items-center justify-center gap-2 rounded-full bg-white px-8 py-3.5 text-[0.85rem] font-bold text-[#0992C2] shadow-md shadow-black/10 transition-all hover:scale-105 hover:shadow-lg">
-                    <LayoutDashboard size={18} />
-                    Go to dashboard
-                  </Link>
-                </div>
-              </div>
-            </section>
-          )}
-        </MotionRevealSection>
+          </MotionRevealSection>
+        )}
 
       </main>
       <Footer />
