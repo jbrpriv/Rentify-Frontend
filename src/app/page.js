@@ -18,7 +18,7 @@ import { useReveal } from '@/hooks/useReveal';
 
 // ─── 3D Model Imports ─────────────────────────────────────────────────────────
 import { Canvas, useFrame } from '@react-three/fiber';
-import { useGLTF, Float, Environment } from '@react-three/drei';
+import { useGLTF, Float, Environment, Center, ContactShadows } from '@react-three/drei';
 import * as THREE from 'three';
 
 const CITIES = [
@@ -62,28 +62,28 @@ function InteractiveModel() {
 
   useFrame((state, delta) => {
     if (groupRef.current) {
-      // state.pointer.x ranges from -1 (left) to 1 (right)
-      // Multiplying by Math.PI gives a full 360-degree range (-180deg to +180deg)
-      const targetRotationY = state.pointer.x * Math.PI;
-      // Slight vertical tilt based on mouse Y position
+      // Limits rotation to a clean tilt instead of a wild 360 spin
+      const targetRotationY = state.pointer.x * 0.8;
       const targetRotationX = (state.pointer.y * Math.PI) / 6;
 
-      // Apply damping for smooth inertia when the mouse stops moving
-      groupRef.current.rotation.y = THREE.MathUtils.damp(groupRef.current.rotation.y, targetRotationY, 3, delta);
-      groupRef.current.rotation.x = THREE.MathUtils.damp(groupRef.current.rotation.x, -targetRotationX, 3, delta);
+      // Apply damping for smooth inertia when mouse stops
+      groupRef.current.rotation.y = THREE.MathUtils.damp(groupRef.current.rotation.y, targetRotationY, 4, delta);
+      groupRef.current.rotation.x = THREE.MathUtils.damp(groupRef.current.rotation.x, -targetRotationX, 4, delta);
     }
   });
 
   return (
     <group ref={groupRef}>
       <Float
-        speed={2} // Animation speed
-        rotationIntensity={0.5} // Base rotation intensity
-        floatIntensity={1.5} // Up/down float intensity
+        speed={2.5} // Animation speed
+        rotationIntensity={0.2} // Subtle auto-rotation
+        floatIntensity={1} // Up/down float intensity
         floatingRange={[-0.1, 0.1]} // Float range
       >
-        {/* Initial tilt to make it look dynamic before mouse interaction */}
-        <primitive object={scene} scale={1.8} rotation={[0.1, -0.3, 0]} />
+        {/* Center auto-fixes weird anchor points from the GLB file */}
+        <Center>
+          <primitive object={scene} scale={0.5} rotation={[0.2, -0.4, 0]} />
+        </Center>
       </Float>
     </group>
   );
@@ -144,7 +144,6 @@ export default function LandingPage() {
         <section
           className="relative min-h-[90vh] overflow-hidden flex flex-col justify-center"
           style={{
-            // Added linear-gradient overlay to make the background image "dull"
             backgroundImage: `linear-gradient(to right, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.5)), url('https://res.cloudinary.com/dj4a5robb/image/upload/v1773217180/dc8b78b92964aa388580d992003fb77f_tf1wm9.jpg')`,
             backgroundSize: 'cover',
             backgroundPosition: 'center',
@@ -185,13 +184,15 @@ export default function LandingPage() {
             </div>
 
             {/* Right Side: 3D Model Canvas */}
-            <div className="lg:w-1/2 h-[400px] lg:h-[600px] w-full mt-12 lg:mt-0 z-10 cursor-grab active:cursor-grabbing">
-              <Canvas camera={{ position: [0, 0, 6], fov: 45 }}>
-                <ambientLight intensity={0.6} />
-                <directionalLight position={[10, 10, 10]} intensity={1.5} />
-                <Environment preset="city" />
+            <div className="lg:w-1/2 h-[400px] lg:h-[600px] w-full mt-12 lg:mt-0 z-10">
+              <Canvas camera={{ position: [0, 0, 7], fov: 45 }}>
+                <ambientLight intensity={0.8} />
+                <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} intensity={1.5} castShadow />
+                <Environment preset="apartment" />
                 <Suspense fallback={null}>
                   <InteractiveModel />
+                  {/* Adds realistic shadow beneath the floating model */}
+                  <ContactShadows position={[0, -1.8, 0]} opacity={0.6} scale={10} blur={2.5} far={4} />
                 </Suspense>
               </Canvas>
             </div>
