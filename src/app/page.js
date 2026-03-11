@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import { useUser } from '@/context/UserContext';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -66,8 +66,6 @@ export default function LandingPage() {
   const { user } = useUser();
   const [roleTab, setRoleTab] = useState('tenant');
   const [query, setQuery] = useState('');
-  const tenantBtnRef = useRef(null);
-  const landlordBtnRef = useRef(null);
   const router = useRouter();
 
   const handleSearch = (e) => {
@@ -286,11 +284,11 @@ export default function LandingPage() {
                   </p>
                 </div>
                 <div className="flex gap-3">
-                  <button ref={tenantBtnRef} type="button" onClick={() => setRoleTab('tenant')}
+                  <button type="button" onClick={() => setRoleTab('tenant')}
                     className={`flex items-center gap-2 rounded-2xl px-6 py-3 text-sm font-bold transition-all duration-200 shadow-lg ${roleTab === 'tenant' ? 'bg-white text-[#0992C2] scale-105 shadow-white/30' : 'bg-white/15 text-white hover:bg-white/25 border border-white/30'}`}>
                     <Home className="h-3.5 w-3.5" /><span>Tenant View</span>
                   </button>
-                  <button ref={landlordBtnRef} type="button" onClick={() => setRoleTab('landlord')}
+                  <button type="button" onClick={() => setRoleTab('landlord')}
                     className={`flex items-center gap-2 rounded-2xl px-6 py-3 text-sm font-bold transition-all duration-200 shadow-lg ${roleTab === 'landlord' ? 'bg-white text-[#0B2D72] scale-105 shadow-white/30' : 'bg-white/15 text-white hover:bg-white/25 border border-white/30'}`}>
                     <Building2 className="h-3.5 w-3.5" /><span>Landlord View</span>
                   </button>
@@ -316,15 +314,14 @@ export default function LandingPage() {
                 <div key={roleTab} className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
                   {features.map((f, i) => {
                     const Icon = f.icon;
-                    const isTenant = roleTab === 'tenant';
                     return (
                       <RevealCard key={f.title} delay={i * 70}>
-                        <div className={`rf-glass-card rounded-2xl p-4 transition-transform duration-200 hover:-translate-y-1 h-full ${isTenant ? 'bg-white/15 ring-1 ring-white/20 hover:bg-white/20' : 'bg-white/10 ring-1 ring-white/15 hover:bg-white/15'}`}>
-                          <div className={`mb-3 flex h-10 w-10 items-center justify-center rounded-2xl ${isTenant ? 'bg-white/30' : 'bg-[#0AC4E0]/30'}`}>
+                        <div className={`rf-glass-card rounded-2xl p-4 transition-transform duration-200 hover:-translate-y-1 h-full ${roleTab === 'tenant' ? 'bg-white/15 ring-1 ring-white/20 hover:bg-white/20' : 'bg-white/10 ring-1 ring-white/15 hover:bg-white/15'}`}>
+                          <div className={`mb-3 flex h-10 w-10 items-center justify-center rounded-2xl ${roleTab === 'tenant' ? 'bg-white/30' : 'bg-[#0AC4E0]/30'}`}>
                             <Icon size={18} className="text-white" />
                           </div>
                           <h3 className="mb-1 text-[0.9rem] font-semibold text-white">{f.title}</h3>
-                          <p className={`text-[0.75rem] leading-relaxed ${isTenant ? 'text-white/70' : 'text-white/60'}`}>{f.desc}</p>
+                          <p className={`text-[0.75rem] leading-relaxed ${roleTab === 'tenant' ? 'text-white/70' : 'text-white/60'}`}>{f.desc}</p>
                         </div>
                       </RevealCard>
                     );
@@ -334,33 +331,6 @@ export default function LandingPage() {
             </div>
           </div>
         </MotionRevealSection>
-
-        {/* ── CTA — guests only ──────────────────────────────────── */}
-        {!user && (
-          <MotionRevealSection className="bg-white">
-            <section
-              className="relative overflow-hidden px-6 py-24 text-center"
-              style={{ background: 'linear-gradient(135deg, #F6C87A 0%, #0AC4E0 45%, #0992C2 70%, #0B2D72 100%)' }}
-            >
-              <div className="pointer-events-none absolute -left-16 top-0 h-64 w-64 rounded-full bg-white/25 blur-3xl" />
-              <div className="pointer-events-none absolute -right-20 bottom-0 h-72 w-72 rounded-full bg-white/20 blur-3xl" />
-              <div className="relative mx-auto max-w-2xl space-y-5">
-                <h2 className="text-h2 text-white">Ready to make renting feel premium?</h2>
-                <p className="mx-auto max-w-md text-body text-white/85">
-                  Join thousands of tenants and landlords who already manage their entire rental lifecycle inside RentifyPro.
-                </p>
-                <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
-                  <Link href="/register" className="w-full sm:w-auto inline-flex items-center justify-center rounded-full bg-white px-7 py-2.5 text-[0.85rem] font-bold text-[#0992C2] shadow-md transition-all hover:scale-105 hover:shadow-lg">
-                    Get started free
-                  </Link>
-                  <Link href="/browse" className="w-full sm:w-auto inline-flex items-center justify-center rounded-full border border-white/60 px-7 py-2.5 text-[0.85rem] font-semibold text-white transition-all hover:bg-white/10">
-                    Browse listings
-                  </Link>
-                </div>
-              </div>
-            </section>
-          </MotionRevealSection>
-        )}
 
       </main>
       <Footer />
