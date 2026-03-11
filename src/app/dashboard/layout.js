@@ -228,8 +228,6 @@ export default function DashboardLayout({ children }) {
     }
   }, [mobileOpen]);
   useEffect(() => { setMobileOpen(false); }, [pathname]);
-
-  // Role-based route protection
   useEffect(() => {
     if (!user) return;
     const role = user.role;
@@ -318,8 +316,6 @@ export default function DashboardLayout({ children }) {
       socketRef.current?.disconnect();
     };
   }, [user]); // eslint-disable-line
-
-  useEffect(() => { if (pathname) fetchCounts(); }, [pathname, fetchCounts]);
 
   if (!user) {
     return (
