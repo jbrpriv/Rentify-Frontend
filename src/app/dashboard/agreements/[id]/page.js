@@ -170,7 +170,7 @@ export default function AgreementDetailPage() {
         : null;
     const showExpiryWarning = status === 'active' && daysUntilExpiry !== null && daysUntilExpiry <= 30 && daysUntilExpiry > 0;
     const canProposeRenewal = isLandlord && ['active', 'expired'].includes(status) && renewalProposal?.status !== 'pending';
-    const hasPendingRenewal = renewalProposal?.status === 'pending';
+    const hasPendingRenewal = renewalProposal?.status === 'pending' && ['active', 'expired'].includes(status);
 
     return (
         <>
@@ -242,8 +242,8 @@ export default function AgreementDetailPage() {
                         <RotateCcw className="w-5 h-5 text-purple-500 flex-shrink-0" />
                         <p className="text-sm font-semibold text-purple-800">
                             Renewal proposal sent — awaiting tenant response.
-                            New end date: <strong>{new Date(renewalProposal.newEndDate).toLocaleDateString()}</strong>{' '}·{' '}
-                            Rent: <strong>${Number(renewalProposal.newRentAmount).toLocaleString()}/mo</strong>
+                            New end date: <strong>{renewalProposal.newEndDate ? new Date(renewalProposal.newEndDate).toLocaleDateString() : '—'}</strong>{' '}·{' '}
+                            Rent: <strong>${renewalProposal.newRentAmount ? Number(renewalProposal.newRentAmount).toLocaleString() : '—'}/mo</strong>
                         </p>
                     </div>
                 )}

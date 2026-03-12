@@ -191,7 +191,7 @@ export default function MyLeasePage() {
                 className="bg-white shadow-md rounded-xl overflow-hidden border border-gray-100 transition-all hover:shadow-lg"
               >
                 {/* ── Renewal proposal banner — shown when landlord has proposed renewal */}
-                {ag.renewalProposal?.status === 'pending' && (
+                {ag.renewalProposal?.status === 'pending' && ['active', 'expired'].includes(ag.status) && (
                   <div className="px-6 py-4 bg-purple-50 border-b border-purple-100">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                       <div className="flex items-start gap-3">
@@ -199,8 +199,8 @@ export default function MyLeasePage() {
                         <div>
                           <p className="text-sm font-bold text-purple-900">Your landlord has proposed a lease renewal</p>
                           <p className="text-xs text-purple-700 mt-0.5">
-                            New end date: <strong>{new Date(ag.renewalProposal.newEndDate).toLocaleDateString()}</strong>
-                            {' · '}New rent: <strong>${Number(ag.renewalProposal.newRentAmount).toLocaleString()}/mo</strong>
+                            New end date: <strong>{ag.renewalProposal.newEndDate ? new Date(ag.renewalProposal.newEndDate).toLocaleDateString() : '—'}</strong>
+                            {' · '}New rent: <strong>${ag.renewalProposal.newRentAmount ? Number(ag.renewalProposal.newRentAmount).toLocaleString() : '—'}/mo</strong>
                             {ag.renewalProposal.notes && <span className="ml-1">· &quot;{ag.renewalProposal.notes}&quot;</span>}
                           </p>
                         </div>
