@@ -8,7 +8,7 @@ import { useToast } from '@/context/ToastContext';
 import {
   FileText, Download, CheckCircle, Clock, PenLine, Loader2,
   Building2, User, Calendar, DollarSign, CreditCard,
-  Eye, ChevronDown, ChevronUp, Mail, Phone, TrendingUp, RotateCcw, AlertCircle,
+  Eye, ChevronDown, ChevronUp, Mail, Phone, TrendingUp, RotateCcw, AlertCircle, XCircle,
 } from 'lucide-react';
 import SignatureModal from '@/components/SignatureModal';
 
@@ -114,11 +114,20 @@ export default function MyLeasePage() {
     setShowLandlord((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
+  // FIX: Check terminal statuses FIRST before checking isPaid.
+  // Previously, expired/terminated agreements with isPaid=true would show "Active Lease"
+  // because the isPaid check ran before any status-specific checks.
   const getStatusStyles = (status, isPaid) => {
+    if (status === 'expired')
+      return { bg: 'bg-red-50', border: 'border-red-100', text: 'text-red-700', icon: AlertCircle, label: 'Lease Expired' };
+    if (status === 'terminated')
+      return { bg: 'bg-red-50', border: 'border-red-100', text: 'text-red-700', icon: XCircle, label: 'Lease Terminated' };
     if (status === 'active' || isPaid)
       return { bg: 'bg-green-50', border: 'border-green-100', text: 'text-green-700', icon: CheckCircle, label: 'Active Lease' };
     if (status === 'signed')
       return { bg: 'bg-blue-50', border: 'border-blue-200', text: 'text-blue-800', icon: CreditCard, label: 'Awaiting Initial Payment' };
+    if (status === 'pending_signature')
+      return { bg: 'bg-yellow-50', border: 'border-yellow-100', text: 'text-yellow-700', icon: Clock, label: 'Pending Signatures' };
     if (status === 'sent')
       return { bg: 'bg-yellow-50', border: 'border-yellow-100', text: 'text-yellow-700', icon: Clock, label: 'Pending Signatures' };
     return { bg: 'bg-gray-50', border: 'border-gray-100', text: 'text-gray-700', icon: FileText, label: 'Draft' };
@@ -166,6 +175,9 @@ export default function MyLeasePage() {
             const deposit = ag.financials?.depositAmount || 0;
             const petDeposit = ag.petPolicy?.allowed ? (ag.petPolicy?.deposit || 0) : 0;
             const totalDueAtSigning = rent + deposit + petDeposit;
+
+            // FIX: block signing on both 'expired' and 'terminated' (previously only 'expired' was blocked)
+            const isTerminalStatus = ['expired', 'terminated'].includes(ag.status);
 
             return (
               <div
@@ -246,15 +258,16 @@ export default function MyLeasePage() {
 
                   {/* Details Grid */}
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    {/* FIX: Rs. → $ in both rent and deposit display */}
                     <div className="bg-gray-50 p-4 rounded-lg border border-gray-100">
                       <div className="flex items-center text-gray-500 mb-2">
                         <DollarSign className="h-4 w-4 mr-1" />
                         <span className="text-xs font-semibold uppercase tracking-wider">Financials</span>
                       </div>
                       <p className="font-bold text-gray-900">
-                        Rs. {rent.toLocaleString()} <span className="text-xs font-normal text-gray-500">/mo</span>
+                        ${rent.toLocaleString()} <span className="text-xs font-normal text-gray-500">/mo</span>
                       </p>
-                      <p className="text-xs text-gray-500 mt-1">Deposit: Rs. {deposit.toLocaleString()}</p>
+                      <p className="text-xs text-gray-500 mt-1">Deposit: ${deposit.toLocaleString()}</p>
                       {ag.rentEscalation?.enabled && (
                         <p className="text-xs text-purple-600 font-medium mt-1.5 flex items-center">
                           <TrendingUp className="h-3 w-3 mr-1" />
@@ -332,7 +345,8 @@ export default function MyLeasePage() {
                   {/* Action Bar */}
                   <div className="flex flex-col sm:flex-row gap-4 items-center justify-between bg-gray-50 p-4 rounded-lg border border-gray-200">
                     <div className="flex w-full sm:w-auto gap-3">
-                      {!tenantSigned && ag.status !== 'expired' && (
+                      {/* FIX: block signing on 'expired' OR 'terminated' (was only 'expired' before) */}
+                      {!tenantSigned && !isTerminalStatus && (
                         <button
                           onClick={() => handleSign(ag._id, ag.property?.title)}
                           disabled={signLoading && pendingSignId === ag._id}
@@ -357,6 +371,7 @@ export default function MyLeasePage() {
                         <p className="text-xs text-blue-600 font-medium mb-1 mr-1">
                           {petDeposit > 0 ? 'Includes 1st Month Rent, Deposit & Pet Deposit' : 'Includes 1st Month Rent & Deposit'}
                         </p>
+                        {/* FIX: Rs. → $ */}
                         <button
                           onClick={() => handlePaymentClick(ag)}
                           disabled={initiatingPayment}
@@ -365,7 +380,7 @@ export default function MyLeasePage() {
                           {initiatingPayment
                             ? <Loader2 className="animate-spin h-5 w-5 mr-2" />
                             : <CreditCard className="h-5 w-5 mr-2" />}
-                          Pay Total: Rs. {totalDueAtSigning.toLocaleString()}
+                          Pay Total: ${totalDueAtSigning.toLocaleString()}
                         </button>
                       </div>
                     )}
