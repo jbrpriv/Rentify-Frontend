@@ -133,7 +133,7 @@ export default function AgreementDetailPage() {
         e.preventDefault();
         setRenewLoading(true);
         try {
-            await api.post(`/agreements/${id}/renew`, {
+            await api.put(`/agreements/${id}/renew`, {
                 newEndDate: renewForm.newEndDate,
                 newRentAmount: Number(renewForm.newRentAmount),
                 notes: renewForm.notes,
@@ -217,7 +217,7 @@ export default function AgreementDetailPage() {
                 )}
 
                 {/* ── Expired banner */}
-                {status === 'expired' && (
+                {status === 'expired' && !hasPendingRenewal && (
                     <div className="flex items-center justify-between gap-3 rounded-2xl border border-red-200 bg-red-50 px-5 py-3">
                         <div className="flex items-center gap-2">
                             <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />

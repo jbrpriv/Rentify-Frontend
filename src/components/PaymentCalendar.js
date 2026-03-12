@@ -328,16 +328,7 @@ const PaymentCalendar = ({ theme, agreements = [], payments = [] }) => {
                                                             Receipt
                                                         </button>
                                                     )}
-                                                    {(isOverdue || (!isPaid && !isOverdue)) && (
-                                                        <button
-                                                            onClick={(e) => handleRemindTenant(pid, e)}
-                                                            disabled={sendingReminder === pid}
-                                                            className={`flex items-center gap-1 px-2.5 py-1.5 ${isOverdue ? 'bg-red-600 hover:bg-red-700' : 'bg-orange-500 hover:bg-orange-600'} disabled:opacity-70 text-white text-[10px] font-bold uppercase rounded-lg transition`}
-                                                        >
-                                                            {sendingReminder === pid ? <Loader2 className="w-3 h-3 animate-spin" /> : <Bell className="w-3 h-3" />}
-                                                            Remind
-                                                        </button>
-                                                    )}
+
                                                 </div>
                                             </div>
                                         </div>
