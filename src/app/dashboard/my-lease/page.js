@@ -67,13 +67,19 @@ export default function MyLeasePage() {
 
 
   const [initiatingPayment, setInitiatingPayment] = useState(false);
+  const [declinedAgreementId, setDeclinedAgreementId] = useState(null);
   const [renewResponding, setRenewResponding] = useState(null); // agreementId being responded to
 
   const handleRenewalResponse = async (agreementId, accept) => {
     setRenewResponding(agreementId);
     try {
       const { data } = await api.put(`/agreements/${agreementId}/renew/respond`, { accept });
-      toast(data.message, 'success');
+      if (!accept) {
+        setDeclinedAgreementId(agreementId);
+        toast('Renewal declined — your lease is now marked as Expired.', 'error');
+      } else {
+        toast(data.message || 'Renewal accepted!', 'success');
+      }
       fetchData();
     } catch (err) {
       toast(err.response?.data?.message || 'Failed to respond', 'error');
@@ -217,6 +223,19 @@ export default function MyLeasePage() {
                           Accept
                         </button>
                       </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* ── Post-decline expired notice */}
+                {declinedAgreementId === ag._id && ag.status === 'expired' && (
+                  <div className="px-6 py-4 bg-red-50 border-b border-red-100 flex items-start gap-3">
+                    <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-sm font-bold text-red-800">Renewal declined — this lease is now Expired</p>
+                      <p className="text-xs text-red-600 mt-0.5">
+                        Your landlord has been notified. Contact them if you'd like to discuss new terms.
+                      </p>
                     </div>
                   </div>
                 )}

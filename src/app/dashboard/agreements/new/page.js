@@ -8,7 +8,7 @@ import {
   Search, UserCheck, Calendar, FileText, Loader2,
   CheckSquare, Square, ChevronDown, ChevronUp, Tag,
   GripVertical, Eye, EyeOff, AlertTriangle, X, LayoutTemplate,
-  ArrowRight, CheckCircle2, PawPrint, Zap, ScrollText,
+  ArrowRight, CheckCircle2, PawPrint, Zap, ScrollText, RotateCcw,
 } from 'lucide-react';
 
 // ─── Flow Tracker ─────────────────────────────────────────────────────────────
@@ -31,7 +31,7 @@ function FlowTracker({ offerData }) {
     {
       key: 'agreement',
       label: 'Draft Agreement',
-      sublabel: 'Set terms & clauses',
+      sublabel: 'Set terms, clauses & renewal',
       done: false,
       active: true,
     },
@@ -499,6 +499,12 @@ function AgreementForm() {
   const startDateRef = useRef(null);
   const endDateRef = useRef(null);
 
+  // ── Step 3: Renewal proposal ──────────────────────────────────────────────
+  const [renewalEnabled, setRenewalEnabled] = useState(false);
+  const [renewalForm, setRenewalForm] = useState({ newEndDate: '', newRentAmount: '', notes: '' });
+  const [renewalErrors, setRenewalErrors] = useState({});
+  const [savingRenewal, setSavingRenewal] = useState(false);
+
   useEffect(() => { setMounted(true); }, []);
 
   const [formData, setFormData] = useState({
@@ -606,12 +612,47 @@ function AgreementForm() {
       if (selectedClauseIds.length > 0) {
         await api.put(`/agreements/${createdId}/clauses`, { clauseIds: selectedClauseIds });
       }
-      router.push('/dashboard/agreements');
+
+      // Pre-fill renewal rent from current agreement rent
+      setRenewalForm(prev => ({
+        ...prev,
+        newRentAmount: String(formData.rentAmount || ''),
+      }));
+
+      // Move to step 3 (renewal prompt) instead of redirecting directly
+      setStep(3);
     } catch (error) {
       toast(error.response?.data?.message || 'Failed to save agreement', 'error');
     } finally {
       setSavingClauses(false);
     }
+  };
+
+  const handleFinishWithRenewal = async () => {
+    if (renewalEnabled) {
+      const errs = {};
+      if (!renewalForm.newEndDate) errs.newEndDate = 'New end date is required.';
+      if (!renewalForm.newRentAmount || Number(renewalForm.newRentAmount) <= 0) errs.newRentAmount = 'Rent must be a positive number.';
+      if (renewalForm.newEndDate && formData.endDate && new Date(renewalForm.newEndDate) <= new Date(formData.endDate)) {
+        errs.newEndDate = 'Renewal end date must be after the current lease end date.';
+      }
+      if (Object.keys(errs).length > 0) { setRenewalErrors(errs); return; }
+
+      setSavingRenewal(true);
+      try {
+        await api.put(`/agreements/${createdAgreementId}/renew`, {
+          newEndDate: renewalForm.newEndDate,
+          newRentAmount: Number(renewalForm.newRentAmount),
+          notes: renewalForm.notes,
+        });
+        toast('Agreement created and renewal proposal sent to tenant!', 'success');
+      } catch (err) {
+        toast(err.response?.data?.message || 'Agreement saved, but renewal proposal failed.', 'error');
+      } finally {
+        setSavingRenewal(false);
+      }
+    }
+    router.push('/dashboard/agreements');
   };
 
   if (!mounted) {
@@ -672,13 +713,13 @@ function AgreementForm() {
 
           {/* Step indicator */}
           <div className="flex items-center mb-8">
-            {['Lease Terms', 'Clauses'].map((label, i) => (
+            {['Lease Terms', 'Clauses', 'Renewal'].map((label, i) => (
               <div key={label} className="flex items-center">
                 <div className={`flex items-center justify-center w-8 h-8 rounded-full text-sm font-medium ${step > i + 1 ? 'bg-green-500 text-white' : step === i + 1 ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-500'}`}>
                   {step > i + 1 ? '✓' : i + 1}
                 </div>
                 <span className={`ml-2 text-sm font-medium ${step === i + 1 ? 'text-blue-600' : 'text-gray-500'}`}>{label}</span>
-                {i === 0 && <div className="mx-4 flex-1 h-px bg-gray-200 w-16" />}
+                {i < 2 && <div className="mx-4 flex-1 h-px bg-gray-200 w-16" />}
               </div>
             ))}
           </div>
@@ -956,6 +997,117 @@ function AgreementForm() {
                     {selectedClauseIds.length > 0
                       ? `Attach ${selectedClauseIds.length} Clause${selectedClauseIds.length !== 1 ? 's' : ''} & Finish`
                       : 'Finish Without Clauses'}
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* ── Step 3: Renewal Proposal ────────────────────────────────── */}
+            {step === 3 && (
+              <div className="p-6 border-t border-gray-100">
+                <div className="flex items-center gap-2 mb-1">
+                  <RotateCcw className="w-5 h-5 text-purple-500" />
+                  <h2 className="text-lg font-medium text-gray-900">
+                    Step 3: Renewal Proposal
+                    <span className="ml-2 text-sm font-normal text-gray-500">(optional)</span>
+                  </h2>
+                </div>
+                <p className="text-sm text-gray-500 mb-5">
+                  Set up a renewal offer now so the tenant is prompted before this lease expires.
+                  The proposal will be sent to the tenant immediately.
+                </p>
+
+                {/* Toggle */}
+                <div className="mb-5">
+                  <Toggle
+                    enabled={renewalEnabled}
+                    onChange={setRenewalEnabled}
+                    label="Send a renewal proposal to the tenant"
+                    description="Tenant will receive a notification to accept or decline"
+                  />
+                </div>
+
+                {renewalEnabled && (
+                  <div className="rounded-xl border border-purple-200 bg-purple-50 px-5 py-4 space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">
+                          New End Date *
+                        </label>
+                        <input
+                          type="date"
+                          value={renewalForm.newEndDate}
+                          min={formData.endDate || new Date().toISOString().split('T')[0]}
+                          onChange={e => {
+                            setRenewalForm(f => ({ ...f, newEndDate: e.target.value }));
+                            setRenewalErrors(p => ({ ...p, newEndDate: null }));
+                          }}
+                          className={`w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white ${renewalErrors.newEndDate ? 'border-red-400' : 'border-purple-200'}`}
+                        />
+                        {renewalErrors.newEndDate && (
+                          <p className="mt-1 text-xs text-red-600 flex items-center gap-1">
+                            <AlertTriangle className="w-3 h-3" />{renewalErrors.newEndDate}
+                          </p>
+                        )}
+                        <p className="text-xs text-purple-600 mt-1">Must be after current lease end date</p>
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">
+                          New Monthly Rent ($) *
+                        </label>
+                        <input
+                          type="number"
+                          min="1"
+                          value={renewalForm.newRentAmount}
+                          onChange={e => {
+                            setRenewalForm(f => ({ ...f, newRentAmount: e.target.value }));
+                            setRenewalErrors(p => ({ ...p, newRentAmount: null }));
+                          }}
+                          placeholder={formData.rentAmount || ''}
+                          className={`w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white ${renewalErrors.newRentAmount ? 'border-red-400' : 'border-purple-200'}`}
+                        />
+                        {renewalErrors.newRentAmount && (
+                          <p className="mt-1 text-xs text-red-600 flex items-center gap-1">
+                            <AlertTriangle className="w-3 h-3" />{renewalErrors.newRentAmount}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">
+                        Notes for Tenant (optional)
+                      </label>
+                      <textarea
+                        rows={2}
+                        value={renewalForm.notes}
+                        onChange={e => setRenewalForm(f => ({ ...f, notes: e.target.value }))}
+                        placeholder="e.g. Renewal includes updated utilities policy..."
+                        className="w-full rounded-lg border border-purple-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none"
+                      />
+                    </div>
+                    <div className="flex items-center gap-2 text-xs text-purple-700 bg-white border border-purple-100 rounded-lg px-3 py-2">
+                      <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0" />
+                      If the tenant <strong>declines</strong> this renewal proposal, the agreement will automatically be marked as <strong>Expired</strong>.
+                    </div>
+                  </div>
+                )}
+
+                <div className="mt-6 flex justify-between items-center">
+                  <button
+                    type="button"
+                    onClick={() => setStep(2)}
+                    className="text-sm text-gray-500 hover:text-gray-700 underline"
+                  >
+                    ← Back to Clauses
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleFinishWithRenewal}
+                    disabled={savingRenewal}
+                    className="inline-flex items-center gap-2 px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 disabled:opacity-60"
+                  >
+                    {savingRenewal ? <Loader2 className="animate-spin h-5 w-5" /> : <CheckCircle2 className="h-5 w-5" />}
+                    {renewalEnabled ? 'Send Renewal & Finish' : 'Finish Agreement'}
                   </button>
                 </div>
               </div>
