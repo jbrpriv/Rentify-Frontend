@@ -20,7 +20,7 @@ const STATUS_META = {
   withdrawn: { label: 'Withdrawn', color: '#64748B', bg: '#F8FAFC', border: '#E2E8F0' },
 };
 
-const fmt = (n) => `Rs. ${Number(n).toLocaleString()}`;
+const fmt = (n) => `$${Number(n).toLocaleString()}`;
 
 /* ─── Diff badge ─────────────────────────────────────────────────────────── */
 function DiffBadge({ listed, proposed }) {
@@ -107,8 +107,8 @@ function CounterForm({ offer, onSubmit, onCancel, loading }) {
       <p style={{ fontSize: '0.78rem', fontWeight: 700, color: '#1D4ED8', marginBottom: 12 }}>Your Counter-Offer</p>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10, marginBottom: 10 }}>
         {[
-          { label: 'Monthly Rent (Rs.)', key: 'monthlyRent' },
-          { label: 'Security Deposit (Rs.)', key: 'securityDeposit' },
+          { label: 'Monthly Rent ($)', key: 'monthlyRent' },
+          { label: 'Security Deposit ($)', key: 'securityDeposit' },
           { label: 'Duration (months)', key: 'leaseDurationMonths' },
         ].map(({ label, key }) => (
           <div key={key}>
@@ -149,8 +149,8 @@ function TenantOfferForm({ properties, onSubmit, loading }) {
   const set = (k) => (e) => setForm(f => ({ ...f, [k]: e.target.value }));
 
   const fields = [
-    { key: 'monthlyRent', label: 'Monthly Rent', unit: 'Rs.', landlordVal: prop?.financials?.monthlyRent },
-    { key: 'securityDeposit', label: 'Security Deposit', unit: 'Rs.', landlordVal: prop?.financials?.securityDeposit },
+    { key: 'monthlyRent', label: 'Monthly Rent', unit: '$', landlordVal: prop?.financials?.monthlyRent },
+    { key: 'securityDeposit', label: 'Security Deposit', unit: '$', landlordVal: prop?.financials?.securityDeposit },
     { key: 'leaseDurationMonths', label: 'Duration', unit: 'mo', landlordVal: prop?.leaseTerms?.defaultDurationMonths || 12 },
   ];
 
@@ -169,7 +169,7 @@ function TenantOfferForm({ properties, onSubmit, loading }) {
           style={{ width: '100%', padding: '10px 12px', border: '1.5px solid #E2E8F0', borderRadius: 10, fontSize: '0.9rem', outline: 'none', background: 'white', boxSizing: 'border-box' }}>
           <option value="">— Choose a listed property —</option>
           {properties.map(p => (
-            <option key={p._id} value={p._id}>{p.title} — {p.address?.city} (Rs. {p.financials?.monthlyRent?.toLocaleString()}/mo)</option>
+            <option key={p._id} value={p._id}>{p.title} — {p.address?.city} (${p.financials?.monthlyRent?.toLocaleString()}/mo)</option>
           ))}
         </select>
       </div>
@@ -252,7 +252,7 @@ function AcceptModal({ offer, onConfirm, onClose, loading }) {
             <p style={{ fontSize: '0.72rem', fontWeight: 700, color: '#94A3B8', margin: '0 0 6px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Agreed Terms</p>
             <p style={{ fontWeight: 700, color: '#0F172A', margin: 0 }}>{offer.property?.title}</p>
             <p style={{ fontSize: '0.82rem', color: '#64748B', margin: '4px 0 0' }}>
-              Rs. {(offer.history[offer.history.length - 1]?.monthlyRent || 0).toLocaleString()}/mo · Deposit Rs. {(offer.history[offer.history.length - 1]?.securityDeposit || 0).toLocaleString()} · {offer.history[offer.history.length - 1]?.leaseDurationMonths} months
+              ${(offer.history[offer.history.length - 1]?.monthlyRent || 0).toLocaleString()}/mo · Deposit ${(offer.history[offer.history.length - 1]?.securityDeposit || 0).toLocaleString()} · {offer.history[offer.history.length - 1]?.leaseDurationMonths} months
             </p>
           </div>
 

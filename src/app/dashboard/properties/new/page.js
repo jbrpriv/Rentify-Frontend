@@ -446,19 +446,19 @@ export default function AddPropertyPage() {
           {/* ── Financials ───────────────────────────────────────────────── */}
           <Card icon={DollarSign} color="#D97706" title="Financials & Lease Rules" sub="Rent, deposit, late fees and lease duration">
             <Row>
-              <F label="Monthly Rent (Rs.)" req half>
+              <F label="Monthly Rent ($)" req half>
                 <input className="np-input" style={inputStyle} type="number" required placeholder="50,000"
                   value={form.financials.monthlyRent} onChange={e => set('financials.monthlyRent', e.target.value)} />
               </F>
-              <F label="Security Deposit (Rs.)" req half>
+              <F label="Security Deposit ($)" req half>
                 <input className="np-input" style={inputStyle} type="number" required placeholder="100,000"
                   value={form.financials.securityDeposit} onChange={e => set('financials.securityDeposit', e.target.value)} />
               </F>
-              <F label="Maintenance Fee (Rs.)" half>
+              <F label="Maintenance Fee ($)" half>
                 <input className="np-input" style={inputStyle} type="number" placeholder="0"
                   value={form.financials.maintenanceFee} onChange={e => set('financials.maintenanceFee', e.target.value)} />
               </F>
-              <F label="Late Fee Amount (Rs.)" half>
+              <F label="Late Fee Amount ($)" half>
                 <input className="np-input" style={inputStyle} type="number" placeholder="2,000"
                   value={form.financials.lateFeeAmount} onChange={e => set('financials.lateFeeAmount', e.target.value)} />
               </F>

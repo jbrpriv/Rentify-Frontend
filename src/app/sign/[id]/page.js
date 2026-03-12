@@ -95,24 +95,25 @@ function SignatureCanvas({ onCapture, onClear }) {
 }
 
 // ─── Inline PDF Preview ───────────────────────────────────────────────────────
-function PDFPreview({ agreementId, token }) {
+function PDFPreview({ agreementId, token, party }) {
   const [previewUrl, setPreviewUrl] = useState(null);
   const [loading, setLoading]       = useState(true);
   const [error, setError]           = useState('');
 
   useEffect(() => {
-    if (!agreementId || !token) return;
-    fetch(`/api/agreements/${agreementId}/preview`, {
-      headers: { 'x-sign-token': token },
-    })
+    if (!agreementId || !token || !party) return;
+    // NEW-03: Use the public preview route — validated via signing token query params,
+    // no Bearer auth required (this is an unauthenticated signing flow).
+    fetch(`/api/agreements/${agreementId}/preview/public?token=${encodeURIComponent(token)}&party=${encodeURIComponent(party)}`)
       .then(r => r.json())
       .then(data => {
         if (data.url)    setPreviewUrl(data.url);
         else if (data.base64) setPreviewUrl(`data:application/pdf;base64,${data.base64}`);
+        else setError(data.message || 'Preview unavailable');
       })
       .catch(() => setError('Could not load preview'))
       .finally(() => setLoading(false));
-  }, [agreementId, token]);
+  }, [agreementId, token, party]);
 
   if (loading) return <div className="flex items-center justify-center h-64 bg-gray-50 rounded-lg"><Loader2 className="animate-spin w-6 h-6 text-gray-400" /></div>;
   if (error)   return <div className="flex items-center justify-center h-32 bg-gray-50 rounded-lg text-gray-500 text-sm gap-2"><AlertTriangle className="w-4 h-4" /> {error}</div>;
@@ -134,6 +135,10 @@ function SignPageContent() {
   const token  = searchParams.get('token');
   const party  = searchParams.get('party');
 
+  // FE-15: Reject invalid party values immediately — only 'landlord' and 'tenant' are valid
+  const VALID_PARTIES = ['landlord', 'tenant'];
+  const partyIsValid = VALID_PARTIES.includes(party);
+
   const [agreement, setAgreement]   = useState(null);
   const [loading, setLoading]       = useState(true);
   const [signing, setSigning]       = useState(false);
@@ -145,6 +150,7 @@ function SignPageContent() {
 
   useEffect(() => {
     if (!params.id || !token) { setError('Invalid signing link — token is missing.'); setLoading(false); return; }
+    if (!partyIsValid) { setError(`Invalid party "${party}" — must be "landlord" or "tenant".`); setLoading(false); return; }
     fetch(`/api/agreements/${params.id}?token=${token}`)
       .then(r => r.json())
       .then(data => { if (data.message) setError(data.message); else setAgreement(data); })
@@ -170,6 +176,7 @@ function SignPageContent() {
       setError(err.message);
     } finally {
       setSigning(false);
+      setDrawData(null); // SEC-06: clear signature canvas data after attempt
     }
   };
 
@@ -285,7 +292,7 @@ function SignPageContent() {
           >
             <Eye className="w-4 h-4" />{showPreview ? 'Hide' : 'View'} Full Agreement PDF
           </button>
-          {showPreview && <div className="mt-4"><PDFPreview agreementId={params.id} token={token} /></div>}
+          {showPreview && <div className="mt-4"><PDFPreview agreementId={params.id} token={token} party={party} /></div>}
         </div>
 
         {/* Consent + Signature */}

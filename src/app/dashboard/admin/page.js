@@ -102,7 +102,7 @@ export default function AdminStatsPage() {
           <KpiCard label="Total Users" value={totals.users} icon={Users} color="text-blue-600" bg="bg-blue-50" />
           <KpiCard label="Pro Subscribers" value={totals.pro} icon={Zap} color="text-blue-600" bg="bg-blue-50" />
           <KpiCard label="Enterprise Subscribers" value={totals.enterprise} icon={Crown} color="text-purple-600" bg="bg-purple-50" />
-          <KpiCard label="Monthly Sub Revenue" value={`Rs. ${(monthlySubscriptionRevenue || 0).toLocaleString()}`} icon={TrendingUp} color="text-green-600" bg="bg-green-50" />
+          <KpiCard label="Monthly Sub Revenue" value={`$${(monthlySubscriptionRevenue || 0).toLocaleString()}`} icon={TrendingUp} color="text-green-600" bg="bg-green-50" />
         </div>
       </div>
 
@@ -120,7 +120,7 @@ export default function AdminStatsPage() {
         <div>
           <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-3">Revenue &amp; Churn</p>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <KpiCard label="Total Rent Collected" value={`Rs. ${(analytics.totalRentRevenue || 0).toLocaleString()}`} icon={DollarSign} color="text-green-600" bg="bg-green-50" />
+            <KpiCard label="Total Rent Collected" value={`$${(analytics.totalRentRevenue || 0).toLocaleString()}`} icon={DollarSign} color="text-green-600" bg="bg-green-50" />
             <KpiCard label="Agreements Created (6m)" value={analytics.createdLast6 ?? 0} icon={FileText} color="text-blue-600" bg="bg-blue-50" />
             <KpiCard label="Expired / Churned (6m)" value={analytics.expiredLast6 ?? 0} icon={AlertCircle} color="text-red-600" bg="bg-red-50" />
             <KpiCard label="Churn Rate" value={`${analytics.churnRate ?? 0}%`} icon={BarChart2} color="text-orange-600" bg="bg-orange-50" />
@@ -180,7 +180,7 @@ export default function AdminStatsPage() {
                 <BarChart data={revenueChartData}>
                   <XAxis dataKey="name" tick={{ fontSize: 11 }} />
                   <YAxis tick={{ fontSize: 11 }} tickFormatter={v => `${(v / 1000).toFixed(0)}k`} />
-                  <Tooltip formatter={(v) => [`Rs. ${v.toLocaleString()}`, 'Revenue']} />
+                  <Tooltip formatter={(v) => [`$${v.toLocaleString()}`, 'Revenue']} />
                   <Bar dataKey="revenue" fill="#10b981" radius={[6, 6, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>

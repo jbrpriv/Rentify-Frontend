@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useUser } from '@/context/UserContext';
-import api from '@/utils/api';
+import api, { setAccessToken } from '@/utils/api';
 import { requestFCMToken } from '@/utils/firebase';
 import { Lock, Mail, Loader2, Eye, EyeOff, ShieldCheck, UserPlus, LogIn, Phone, CheckCircle } from 'lucide-react';
 
@@ -44,7 +44,7 @@ export default function SuperLoginPage() {
   const clearAlerts = () => { setError(''); setSuccess(''); };
 
   const proceedAfterLogin = (loginData) => {
-    localStorage.setItem('token', loginData.token);
+    setAccessToken(loginData.token);
     setUser(loginData);
     requestFCMToken(true).catch(() => { }); // async, non-blocking
     router.push('/dashboard');

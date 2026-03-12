@@ -101,7 +101,7 @@ function LeaseRow({ lease, role }) {
         </div>
       </div>
       <div style={{ textAlign: 'right' }}>
-        <p style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 700, fontSize: '0.95rem', color: '#1F2933' }}>Rs. {(lease.financials?.rentAmount || 0).toLocaleString()}</p>
+        <p style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 700, fontSize: '0.95rem', color: '#1F2933' }}>${(lease.financials?.rentAmount || 0).toLocaleString()}</p>
         <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#0992C2', background: '#E6F4F8', padding: '2px 8px', borderRadius: 20 }}>Active</span>
       </div>
     </div>
@@ -332,8 +332,8 @@ export default function DashboardHome() {
         >
           {user.role === 'landlord' && (
             <>
-              <StatCard label="Monthly Income" value={`Rs. ${totalRevenue.toLocaleString()}`} icon={TrendingUp} theme={theme} sub={`${activeLeases.length} active lease(s)`} />
-              <StatCard label="Late Fees" value={`Rs. ${payments.reduce((s, p) => s + (p.lateFeeAmount || 0), 0).toLocaleString()}`} icon={AlertCircle} theme={ROLE_THEME.admin} sub={`${payments.filter(p => p.status === 'late_fee_applied').length} pending fee(s)`} />
+              <StatCard label="Monthly Income" value={`$${totalRevenue.toLocaleString()}`} icon={TrendingUp} theme={theme} sub={`${activeLeases.length} active lease(s)`} />
+              <StatCard label="Late Fees" value={`$${payments.reduce((s, p) => s + (p.lateFeeAmount || 0), 0).toLocaleString()}`} icon={AlertCircle} theme={ROLE_THEME.admin} sub={`${payments.filter(p => p.status === 'late_fee_applied').length} pending fee(s)`} />
               <StatCard label="Properties" value={properties.length} icon={Building2} theme={ROLE_THEME.property_manager} />
               <StatCard label="Agreements" value={agreements.length} icon={FileText} theme={theme} />
               <StatCard label="Active Offers" value={pendingOffers.length} icon={Tag} theme={ROLE_THEME.tenant} />
@@ -394,7 +394,7 @@ export default function DashboardHome() {
                 <BarChart data={monthlyData} margin={{ top: 0, right: 0, left: -24, bottom: 0 }}>
                   <XAxis dataKey="month" tick={{ fontSize: 10, fontWeight: 600 }} />
                   <YAxis tick={{ fontSize: 10 }} />
-                  <Tooltip formatter={v => [`Rs. ${v.toLocaleString()}`, 'Amount']} />
+                  <Tooltip formatter={v => [`$${v.toLocaleString()}`, 'Amount']} />
                   <Bar dataKey="amount" fill={theme.accent} radius={[6, 6, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>

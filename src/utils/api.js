@@ -1,5 +1,15 @@
 import axios from 'axios';
 
+// ─── SEC-01: In-memory access token store ────────────────────────────────────
+// The access token is kept in a module-level closure rather than localStorage.
+// This prevents XSS scripts from reading it via localStorage.getItem('token').
+// On page refresh the token is gone, but the HttpOnly refresh-token cookie
+// (set by the server) lets us silently re-issue one via /auth/refresh.
+let _accessToken = null;
+
+export const setAccessToken = (token) => { _accessToken = token; };
+export const getAccessToken = ()      => _accessToken;
+
 // ─── Plain instance — no auth header, used only for token refresh ─────────────
 // This MUST NOT use the main `api` instance, otherwise the expired Bearer token
 // gets attached to the /auth/refresh call and the server rejects it before it
@@ -18,10 +28,7 @@ const api = axios.create({
 
 // Attach access token to every request
 api.interceptors.request.use((config) => {
-  if (typeof window !== 'undefined') {
-    const token = localStorage.getItem('token');
-    if (token) config.headers.Authorization = `Bearer ${token}`;
-  }
+  if (_accessToken) config.headers.Authorization = `Bearer ${_accessToken}`;
   return config;
 });
 
@@ -68,7 +75,7 @@ api.interceptors.response.use(
 
         if (!data.token) throw new Error('No token in refresh response');
 
-        localStorage.setItem('token', data.token);
+        setAccessToken(data.token);
         api.defaults.headers.common.Authorization = `Bearer ${data.token}`;
         processQueue(null, data.token);
 
@@ -76,7 +83,7 @@ api.interceptors.response.use(
         return api(originalRequest);
       } catch (refreshError) {
         processQueue(refreshError, null);
-        localStorage.removeItem('token');
+        setAccessToken(null);
         localStorage.removeItem('userInfo');
         if (typeof window !== 'undefined') window.location.href = '/login';
         return Promise.reject(refreshError);

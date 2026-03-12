@@ -9,6 +9,7 @@ import {
     ArrowLeft, FileText, User, Building2, Calendar, DollarSign,
     CheckCircle, Clock, AlertCircle, PenLine, Download, GitBranch,
     TrendingUp, Shield, Loader2, Home, Mail, Phone, FolderOpen,
+    RotateCcw, X,
 } from 'lucide-react';
 
 // ─── Status config ─────────────────────────────────────────────────────────────
@@ -90,6 +91,12 @@ export default function AgreementDetailPage() {
     const [loading, setLoading] = useState(true);
     const [downloading, setDownloading] = useState(false);
 
+    // Renewal modal state
+    const [renewModal, setRenewModal] = useState(false);
+    const [renewForm, setRenewForm] = useState({ newEndDate: '', newRentAmount: '', notes: '' });
+    const [renewLoading, setRenewLoading] = useState(false);
+
+    const isLandlord = user && user.role === 'landlord';
     const isLandlordOrAdmin = user && ['landlord', 'property_manager', 'admin'].includes(user.role);
 
     useEffect(() => {
@@ -122,6 +129,27 @@ export default function AgreementDetailPage() {
         }
     };
 
+    const handleProposeRenewal = async (e) => {
+        e.preventDefault();
+        setRenewLoading(true);
+        try {
+            await api.post(`/agreements/${id}/renew`, {
+                newEndDate: renewForm.newEndDate,
+                newRentAmount: Number(renewForm.newRentAmount),
+                notes: renewForm.notes,
+            });
+            toast('Renewal proposal sent to tenant!', 'success');
+            setRenewModal(false);
+            setRenewForm({ newEndDate: '', newRentAmount: '', notes: '' });
+            const { data } = await api.get(`/agreements/${id}`);
+            setAgreement(data);
+        } catch (err) {
+            toast(err.response?.data?.message || 'Failed to send proposal', 'error');
+        } finally {
+            setRenewLoading(false);
+        }
+    };
+
     if (loading) {
         return (
             <div className="flex justify-center py-20">
@@ -132,10 +160,17 @@ export default function AgreementDetailPage() {
 
     if (!agreement) return null;
 
-    const { landlord, tenant, property, term, financials, signatures, status, rentEscalation, clauseSet } = agreement;
+    const { landlord, tenant, property, term, financials, signatures, status, rentEscalation, clauseSet, renewalProposal } = agreement;
 
     const startDate = term?.startDate ? new Date(term.startDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : '—';
     const endDate = term?.endDate ? new Date(term.endDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : '—';
+
+    const daysUntilExpiry = term?.endDate
+        ? Math.ceil((new Date(term.endDate) - new Date()) / (1000 * 60 * 60 * 24))
+        : null;
+    const showExpiryWarning = status === 'active' && daysUntilExpiry !== null && daysUntilExpiry <= 30 && daysUntilExpiry > 0;
+    const canProposeRenewal = isLandlord && ['active', 'expired'].includes(status) && renewalProposal?.status !== 'pending';
+    const hasPendingRenewal = renewalProposal?.status === 'pending';
 
     return (
         <>
@@ -159,6 +194,127 @@ export default function AgreementDetailPage() {
                     </div>
                     <StatusBadge status={status} />
                 </div>
+
+
+                {/* ── Expiry warning banner (≤30 days) */}
+                {showExpiryWarning && (
+                    <div className="flex items-center justify-between gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-5 py-3">
+                        <div className="flex items-center gap-2">
+                            <AlertCircle className="w-5 h-5 text-amber-500 flex-shrink-0" />
+                            <p className="text-sm font-semibold text-amber-800">
+                                Lease expires in <strong>{daysUntilExpiry} day{daysUntilExpiry !== 1 ? 's' : ''}</strong> — {endDate}
+                            </p>
+                        </div>
+                        {canProposeRenewal && (
+                            <button
+                                onClick={() => setRenewModal(true)}
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-600 text-white text-xs font-bold rounded-lg hover:bg-amber-700 transition flex-shrink-0"
+                            >
+                                <RotateCcw className="w-3.5 h-3.5" /> Propose Renewal
+                            </button>
+                        )}
+                    </div>
+                )}
+
+                {/* ── Expired banner */}
+                {status === 'expired' && (
+                    <div className="flex items-center justify-between gap-3 rounded-2xl border border-red-200 bg-red-50 px-5 py-3">
+                        <div className="flex items-center gap-2">
+                            <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
+                            <p className="text-sm font-semibold text-red-800">
+                                This lease expired on {endDate}.
+                            </p>
+                        </div>
+                        {canProposeRenewal && (
+                            <button
+                                onClick={() => setRenewModal(true)}
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-red-600 text-white text-xs font-bold rounded-lg hover:bg-red-700 transition flex-shrink-0"
+                            >
+                                <RotateCcw className="w-3.5 h-3.5" /> Propose Renewal
+                            </button>
+                        )}
+                    </div>
+                )}
+
+                {/* ── Pending renewal proposal banner (landlord view) */}
+                {hasPendingRenewal && isLandlord && (
+                    <div className="flex items-center gap-3 rounded-2xl border border-purple-200 bg-purple-50 px-5 py-3">
+                        <RotateCcw className="w-5 h-5 text-purple-500 flex-shrink-0" />
+                        <p className="text-sm font-semibold text-purple-800">
+                            Renewal proposal sent — awaiting tenant response.
+                            New end date: <strong>{new Date(renewalProposal.newEndDate).toLocaleDateString()}</strong>{' '}·{' '}
+                            Rent: <strong>${Number(renewalProposal.newRentAmount).toLocaleString()}/mo</strong>
+                        </p>
+                    </div>
+                )}
+
+                {/* ── Renewal Propose Modal */}
+                {renewModal && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+                        <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 space-y-4">
+                            <div className="flex items-center justify-between">
+                                <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                                    <RotateCcw className="w-5 h-5 text-blue-600" /> Propose Renewal
+                                </h2>
+                                <button onClick={() => setRenewModal(false)} className="p-1 rounded-lg hover:bg-gray-100">
+                                    <X className="w-5 h-5 text-gray-500" />
+                                </button>
+                            </div>
+                            <form onSubmit={handleProposeRenewal} className="space-y-4">
+                                <div>
+                                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">New End Date *</label>
+                                    <input
+                                        type="date"
+                                        required
+                                        value={renewForm.newEndDate}
+                                        onChange={e => setRenewForm(f => ({ ...f, newEndDate: e.target.value }))}
+                                        min={new Date().toISOString().split('T')[0]}
+                                        className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">New Monthly Rent ($) *</label>
+                                    <input
+                                        type="number"
+                                        required
+                                        min="1"
+                                        value={renewForm.newRentAmount}
+                                        onChange={e => setRenewForm(f => ({ ...f, newRentAmount: e.target.value }))}
+                                        placeholder={financials?.rentAmount || ''}
+                                        className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Notes (optional)</label>
+                                    <textarea
+                                        rows={3}
+                                        value={renewForm.notes}
+                                        onChange={e => setRenewForm(f => ({ ...f, notes: e.target.value }))}
+                                        placeholder="Any additional terms or notes for the tenant..."
+                                        className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                                    />
+                                </div>
+                                <div className="flex gap-3 pt-1">
+                                    <button
+                                        type="button"
+                                        onClick={() => setRenewModal(false)}
+                                        className="flex-1 px-4 py-2 border border-gray-200 rounded-xl text-sm font-semibold text-gray-600 hover:bg-gray-50 transition"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        type="submit"
+                                        disabled={renewLoading}
+                                        className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-bold rounded-xl hover:bg-blue-700 disabled:opacity-60 transition"
+                                    >
+                                        {renewLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <RotateCcw className="w-4 h-4" />}
+                                        Send Proposal
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                )}
 
                 {/* Action bar */}
                 <div className="flex flex-wrap gap-3">
@@ -186,6 +342,17 @@ export default function AgreementDetailPage() {
                         >
                             <FolderOpen className="w-4 h-4" />
                             Tenant Documents
+                        </button>
+                    )}
+
+                    {/* Propose Renewal — landlord only, active or expired */}
+                    {canProposeRenewal && (
+                        <button
+                            onClick={() => setRenewModal(true)}
+                            className="inline-flex items-center gap-2 px-4 py-2 bg-purple-600 text-white text-sm font-semibold rounded-xl hover:bg-purple-700 transition"
+                        >
+                            <RotateCcw className="w-4 h-4" />
+                            Propose Renewal
                         </button>
                     )}
                 </div>

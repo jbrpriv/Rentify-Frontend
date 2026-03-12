@@ -5,7 +5,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import api from '@/utils/api';
+import api, { getAccessToken } from '@/utils/api';
 import { useUser } from '@/context/UserContext';
 import {
   LayoutDashboard, Building2, FileText, Users, Key, User, Loader2, FolderOpen, Zap,
@@ -68,7 +68,7 @@ const NAV_BY_ROLE = {
   ],
   law_reviewer: [
     { name: 'Overview', href: '/dashboard', icon: LayoutDashboard },
-    { name: 'Clause Managemen', href: '/dashboard/admin/templates', icon: Scale },
+    { name: 'Clause Management', href: '/dashboard/admin/templates', icon: Scale },
     { name: 'Agreements', href: '/dashboard/agreements', icon: FileText, badgeKey: 'agreements' },
     { name: 'Messages', href: '/dashboard/messages', icon: MessageSquare, badgeKey: 'messages' },
     { name: 'Profile', href: '/dashboard/profile', icon: User },
@@ -288,7 +288,10 @@ export default function DashboardLayout({ children }) {
 
     const SOCKET_URL = process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://localhost:5000';
     import('socket.io-client').then(({ io }) => {
-      const socket = io(SOCKET_URL, { transports: ['websocket', 'polling'] });
+      const socket = io(SOCKET_URL, {
+        transports: ['websocket', 'polling'],
+        auth: { token: getAccessToken() },
+      });
       socketRef.current = socket;
       socket.on('connect', () => socket.emit('register', user._id));
       socket.on('reconnect', () => socket.emit('register', user._id));
@@ -307,12 +310,16 @@ export default function DashboardLayout({ children }) {
       });
     });
 
+    const handleUnload = () => socketRef.current?.disconnect();
+    window.addEventListener('beforeunload', handleUnload);
+
     const interval = setInterval(fetchCounts, 120_000);
     const handleRefresh = () => fetchCounts();
     window.addEventListener('dashboard:refresh_counts', handleRefresh);
     return () => {
       clearInterval(interval);
       window.removeEventListener('dashboard:refresh_counts', handleRefresh);
+      window.removeEventListener('beforeunload', handleUnload);
       socketRef.current?.disconnect();
     };
   }, [user]); // eslint-disable-line

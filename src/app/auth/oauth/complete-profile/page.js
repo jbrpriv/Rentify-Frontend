@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import api from '@/utils/api';
+import api, { setAccessToken } from '@/utils/api';
 import { useUser } from '@/context/UserContext';
 import { User, Phone, Building2, Mail, Loader2, CheckCircle, Lock } from 'lucide-react';
 
@@ -149,7 +149,7 @@ function CompleteProfileContent() {
       await api.post('/auth/verify-otp', { code: otp, email: formData.email });
       // OTP verified — NOW it is safe to write the session to localStorage.
       const { data: freshUser } = await api.get('/users/me');
-      localStorage.setItem('token', urlToken);
+      setAccessToken(urlToken);
       setUser({
         _id: freshUser._id,
         name: freshUser.name,

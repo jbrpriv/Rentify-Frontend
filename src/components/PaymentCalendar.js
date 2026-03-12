@@ -116,9 +116,9 @@ const PaymentCalendar = ({ theme, agreements = [], payments = [] }) => {
         setSendingReminder(paymentId);
         try {
             await api.post(`/notifications/remind/${paymentId}`);
-            alert('Reminder sent to tenant successfully!');
+            showCalToast('Reminder sent to tenant successfully!');
         } catch {
-            alert('Failed to send reminder.');
+            showCalToast('Failed to send reminder.');
         } finally {
             setSendingReminder(null);
         }
@@ -128,7 +128,7 @@ const PaymentCalendar = ({ theme, agreements = [], payments = [] }) => {
     const handleDownloadReceipt = async (paymentId, e) => {
         e.stopPropagation();
         if (!paymentId || paymentId.startsWith('temp_')) {
-            alert('Receipt not available for this payment.');
+            showCalToast('Receipt not available for this payment.');
             return;
         }
         setDownloadingReceipt(paymentId);
@@ -138,7 +138,7 @@ const PaymentCalendar = ({ theme, agreements = [], payments = [] }) => {
                 window.open(data.url, '_blank', 'noopener,noreferrer');
             }
         } catch {
-            alert('Receipt is not available yet. Please try again later.');
+            showCalToast('Receipt is not available yet. Please try again later.');
         } finally {
             setDownloadingReceipt(null);
         }
@@ -174,10 +174,10 @@ const PaymentCalendar = ({ theme, agreements = [], payments = [] }) => {
                 </div>
 
                 <div style={{ display: 'flex', gap: 6 }}>
-                    <button onClick={handlePrevMonth} style={{ width: 32, height: 32, borderRadius: 8, border: '1px solid #E5E7EB', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'white', cursor: 'pointer' }} hover={{ background: '#F3F4F6' }}>
+                    <button onClick={handlePrevMonth} style={{ width: 32, height: 32, borderRadius: 8, border: '1px solid #E5E7EB', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'white', cursor: 'pointer' }}>
                         <ChevronLeft size={16} color="#4B5563" />
                     </button>
-                    <button onClick={handleNextMonth} style={{ width: 32, height: 32, borderRadius: 8, border: '1px solid #E5E7EB', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'white', cursor: 'pointer' }} hover={{ background: '#F3F4F6' }}>
+                    <button onClick={handleNextMonth} style={{ width: 32, height: 32, borderRadius: 8, border: '1px solid #E5E7EB', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'white', cursor: 'pointer' }}>
                         <ChevronRight size={16} color="#4B5563" />
                     </button>
                 </div>
@@ -306,7 +306,7 @@ const PaymentCalendar = ({ theme, agreements = [], payments = [] }) => {
                                         <div key={pid || idx} className={`p-3 rounded-xl border ${isPaid ? 'bg-green-50 border-green-100' : isOverdue ? 'bg-red-50 border-red-100' : 'bg-orange-50 border-orange-100'}`}>
                                             <div className="flex justify-between items-start">
                                                 <div>
-                                                    <p className="text-sm font-bold text-gray-800">Rs. {displayAmount.toLocaleString()}</p>
+                                                    <p className="text-sm font-bold text-gray-800">${displayAmount.toLocaleString()}</p>
                                                     {propertyTitle && (
                                                         <p className="text-xs text-gray-500 mt-0.5 truncate max-w-[150px]">{propertyTitle}</p>
                                                     )}

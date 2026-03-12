@@ -16,6 +16,7 @@ export default function AgreementsPage() {
   const { toast } = useToast();
   const [agreements, setAgreements] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('active'); // 'active' | 'history'
   const [signingId, setSigningId] = useState(null); // kept for compat but unused below
   const [renewModal, setRenewModal] = useState(null); // holds agreement object
   const [renewForm, setRenewForm] = useState({ newEndDate: '', newRentAmount: '', notes: '' });
@@ -133,6 +134,17 @@ export default function AgreementsPage() {
     } catch (err) { toast(err.response?.data?.message || 'Error', 'error'); }
   };
 
+  const HISTORY_STATUSES = ['expired', 'terminated'];
+  const activeAgreements = agreements.filter(a =>
+    !HISTORY_STATUSES.includes(a.status) &&
+    !(a.renewalProposal?.status === 'rejected')
+  );
+  const historyAgreements = agreements.filter(a =>
+    HISTORY_STATUSES.includes(a.status) ||
+    a.renewalProposal?.status === 'rejected'
+  );
+  const displayed = activeTab === 'active' ? activeAgreements : historyAgreements;
+
   return (
     <motion.div
       className="space-y-6"
@@ -149,9 +161,25 @@ export default function AgreementsPage() {
           loading={signLoading}
         />
       )}
-      <h1 className="text-2xl font-bold text-gray-900">Rental Agreements</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold text-gray-900">Rental Agreements</h1>
+        <div className="flex rounded-xl border border-gray-200 overflow-hidden">
+          <button
+            onClick={() => setActiveTab('active')}
+            className={`px-4 py-2 text-sm font-semibold transition ${activeTab === 'active' ? 'bg-blue-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'}`}
+          >
+            Active ({activeAgreements.length})
+          </button>
+          <button
+            onClick={() => setActiveTab('history')}
+            className={`px-4 py-2 text-sm font-semibold transition border-l border-gray-200 ${activeTab === 'history' ? 'bg-blue-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'}`}
+          >
+            History ({historyAgreements.length})
+          </button>
+        </div>
+      </div>
 
-      {agreements.length === 0 ? (
+      {displayed.length === 0 ? (
         <motion.div
           className="bg-white p-12 text-center rounded-lg shadow border-2 border-dashed border-gray-200"
           initial={{ opacity: 0, y: 10 }}
@@ -164,7 +192,7 @@ export default function AgreementsPage() {
       ) : (
         <div className="bg-white shadow overflow-hidden sm:rounded-md">
           <ul className="divide-y divide-gray-200">
-            {agreements.map((ag) => (
+            {displayed.map((ag) => (
               <motion.li
                 key={ag._id}
                 className="hover:bg-gray-50 transition-colors"

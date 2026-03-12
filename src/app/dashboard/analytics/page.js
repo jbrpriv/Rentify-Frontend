@@ -168,7 +168,7 @@ function LandlordAnalytics({ data }) {
       <div>
         <SectionTitle>Portfolio Overview</SectionTitle>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <KpiCard label="Lifetime Revenue" value={`Rs. ${lifetimeRevenue.toLocaleString()}`} icon={TrendingUp} color="text-blue-600" bg="bg-blue-50" />
+          <KpiCard label="Lifetime Revenue" value={`$${lifetimeRevenue.toLocaleString()}`} icon={TrendingUp} color="text-blue-600" bg="bg-blue-50" />
           <KpiCard label="Active Tenants" value={activeTenantsCount} icon={Users} color="text-cyan-600" bg="bg-cyan-50" />
           <KpiCard label="Occupancy Rate" value={`${occupancyPct}%`}
             sub={`${occupancy.leased} / ${occupancy.total} units`}
@@ -176,7 +176,7 @@ function LandlordAnalytics({ data }) {
             color={occupancyPct >= 75 ? 'text-green-600' : 'text-orange-500'}
             bg={occupancyPct >= 75 ? 'bg-green-50' : 'bg-orange-50'}
           />
-          <KpiCard label="Late Fees Collected" value={`Rs. ${lateFeeCollected.toLocaleString()}`} icon={AlertCircle} color="text-orange-600" bg="bg-orange-50" />
+          <KpiCard label="Late Fees Collected" value={`$${lateFeeCollected.toLocaleString()}`} icon={AlertCircle} color="text-orange-600" bg="bg-orange-50" />
         </div>
       </div>
 
@@ -188,7 +188,7 @@ function LandlordAnalytics({ data }) {
               <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
               <XAxis dataKey="name" tick={{ fontSize: 11 }} />
               <YAxis tick={{ fontSize: 11 }} tickFormatter={v => `${(v / 1000).toFixed(0)}k`} />
-              <Tooltip formatter={v => `Rs. ${v.toLocaleString()}`} />
+              <Tooltip formatter={v => `$${v.toLocaleString()}`} />
               <Legend wrapperStyle={{ fontSize: 11 }} />
               <Bar dataKey="Revenue" fill="#0B2D72" radius={[4, 4, 0, 0]} />
               <Bar dataKey="Late Fees" fill="#F59E0B" radius={[4, 4, 0, 0]} />
@@ -260,7 +260,7 @@ function LandlordAnalytics({ data }) {
                   <div key={lease._id} className="flex items-center justify-between p-3 rounded-xl bg-gray-50 hover:bg-blue-50 transition">
                     <div>
                       <p className="text-sm font-bold text-gray-900">{lease.property?.title}</p>
-                      <p className="text-xs text-gray-400 mt-0.5">{lease.tenant?.name} · Rs. {lease.financials?.rentAmount?.toLocaleString()}/mo</p>
+                      <p className="text-xs text-gray-400 mt-0.5">{lease.tenant?.name} · ${lease.financials?.rentAmount?.toLocaleString()}/mo</p>
                     </div>
                     <div className={`text-right`}>
                       <span className={`text-xs font-black px-2 py-1 rounded-lg ${daysLeft <= 30 ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700'}`}>
@@ -322,10 +322,10 @@ function LandlordAnalytics({ data }) {
                         </span>
                       </td>
                       <td className="py-3 pr-4 font-black text-gray-900 text-xs whitespace-nowrap">
-                        Rs. {Number(p.amount).toLocaleString()}
+                        ${Number(p.amount).toLocaleString()}
                         {p.lateFeeIncluded && p.lateFeeAmount > 0 && (
                           <span className="block text-[10px] font-normal text-orange-500">
-                            +Rs. {Number(p.lateFeeAmount).toLocaleString()} late fee
+                            +${Number(p.lateFeeAmount).toLocaleString()} late fee
                           </span>
                         )}
                       </td>
@@ -406,7 +406,7 @@ function AdminAnalytics({ data, templateData }) {
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           <KpiCard
             label="Total Rent Revenue"
-            value={`Rs. ${(totalRentRevenue / 100000).toFixed(1)}L`}
+            value={`$${(totalRentRevenue / 100000).toFixed(1)}L`}
             sub="All time, all landlords"
             icon={TrendingUp}
             color="text-blue-600"
@@ -447,7 +447,7 @@ function AdminAnalytics({ data, templateData }) {
               <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
               <XAxis dataKey="name" tick={{ fontSize: 11 }} />
               <YAxis tick={{ fontSize: 11 }} tickFormatter={v => `${(v / 1000).toFixed(0)}k`} />
-              <Tooltip formatter={(v, n) => n === 'Revenue' ? `Rs. ${v.toLocaleString()}` : v} />
+              <Tooltip formatter={(v, n) => n === 'Revenue' ? `$${v.toLocaleString()}` : v} />
               <Bar dataKey="Revenue" fill="#0B2D72" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
@@ -474,7 +474,7 @@ function AdminAnalytics({ data, templateData }) {
               <Pie data={gatewayData} cx="50%" cy="50%" outerRadius={70} dataKey="value" paddingAngle={3}>
                 {gatewayData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
               </Pie>
-              <Tooltip formatter={v => `Rs. ${v.toLocaleString()}`} />
+              <Tooltip formatter={v => `$${v.toLocaleString()}`} />
               <Legend wrapperStyle={{ fontSize: 11 }} />
             </PieChart>
           </ResponsiveContainer>

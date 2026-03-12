@@ -24,7 +24,7 @@ function FlowTracker({ offerData }) {
       key: 'offer',
       label: 'Offer Negotiated',
       sublabel: offerData
-        ? `${offerData.history?.length} round${offerData.history?.length !== 1 ? 's' : ''} · Rs. ${offerData.history?.[offerData.history.length - 1]?.monthlyRent?.toLocaleString()}/mo`
+        ? `${offerData.history?.length} round${offerData.history?.length !== 1 ? 's' : ''} · $${offerData.history?.[offerData.history.length - 1]?.monthlyRent?.toLocaleString()}/mo`
         : 'Offer accepted',
       done: true,
     },
@@ -240,7 +240,7 @@ function substituteVariables(text, offer, form) {
 
   const petLabel = form?.petAllowed ? 'Pets allowed' : 'No pets';
   const petDeposit = form?.petAllowed && form?.petDeposit
-    ? `Rs. ${Number(form.petDeposit).toLocaleString()}`
+    ? `$${Number(form.petDeposit).toLocaleString()}`
     : 'N/A';
   const utilities = form?.utilitiesIncluded ? 'Utilities included' : 'Utilities not included';
   const utilDetails = form?.utilitiesDetails || '';
@@ -254,9 +254,9 @@ function substituteVariables(text, offer, form) {
     '{{propertyAddress}}': offer?.property?.address ? `${offer.property.address.street}, ${offer.property.address.city}` : '[Property Address]',
     '{{startDate}}': form?.startDate ? new Date(form.startDate).toLocaleDateString() : '[Start Date]',
     '{{endDate}}': form?.endDate ? new Date(form.endDate).toLocaleDateString() : '[End Date]',
-    '{{rentAmount}}': form?.rentAmount ? `Rs. ${Number(form.rentAmount).toLocaleString()}` : '[Rent Amount]',
-    '{{depositAmount}}': form?.depositAmount ? `Rs. ${Number(form.depositAmount).toLocaleString()}` : '[Deposit Amount]',
-    '{{lateFeeAmount}}': form?.lateFeeAmount ? `Rs. ${Number(form.lateFeeAmount).toLocaleString()}` : '[Late Fee]',
+    '{{rentAmount}}': form?.rentAmount ? `$${Number(form.rentAmount).toLocaleString()}` : '[Rent Amount]',
+    '{{depositAmount}}': form?.depositAmount ? `$${Number(form.depositAmount).toLocaleString()}` : '[Deposit Amount]',
+    '{{lateFeeAmount}}': form?.lateFeeAmount ? `$${Number(form.lateFeeAmount).toLocaleString()}` : '[Late Fee]',
     '{{lateFeeGraceDays}}': form?.lateFeeGracePeriodDays ? `${form.lateFeeGracePeriodDays} days` : '[Grace Period]',
     '{{petPolicy}}': petLabel,
     '{{petDeposit}}': petDeposit,
@@ -270,9 +270,9 @@ function substituteVariables(text, offer, form) {
     '{{property_address}}': offer?.property?.address ? `${offer.property.address.street}, ${offer.property.address.city}` : '[Property Address]',
     '{{start_date}}': form?.startDate ? new Date(form.startDate).toLocaleDateString() : '[Start Date]',
     '{{end_date}}': form?.endDate ? new Date(form.endDate).toLocaleDateString() : '[End Date]',
-    '{{rent_amount}}': form?.rentAmount ? `Rs. ${Number(form.rentAmount).toLocaleString()}` : '[Rent Amount]',
-    '{{deposit_amount}}': form?.depositAmount ? `Rs. ${Number(form.depositAmount).toLocaleString()}` : '[Deposit Amount]',
-    '{{late_fee_amount}}': form?.lateFeeAmount ? `Rs. ${Number(form.lateFeeAmount).toLocaleString()}` : '[Late Fee]',
+    '{{rent_amount}}': form?.rentAmount ? `$${Number(form.rentAmount).toLocaleString()}` : '[Rent Amount]',
+    '{{deposit_amount}}': form?.depositAmount ? `$${Number(form.depositAmount).toLocaleString()}` : '[Deposit Amount]',
+    '{{late_fee_amount}}': form?.lateFeeAmount ? `$${Number(form.lateFeeAmount).toLocaleString()}` : '[Late Fee]',
     '{{grace_period}}': form?.lateFeeGracePeriodDays ? `${form.lateFeeGracePeriodDays} days` : '[Grace Period]',
   };
 
@@ -662,7 +662,7 @@ function AgreementForm() {
                   Accepting offer from {offerData.tenant?.name}
                 </p>
                 <p className="text-green-700 mt-0.5">
-                  {offerData.property?.title} · Rs.{' '}
+                  {offerData.property?.title} · ${' '}
                   {offerData.history[offerData.history.length - 1]?.monthlyRent?.toLocaleString()}/mo ·{' '}
                   {offerData.history[offerData.history.length - 1]?.leaseDurationMonths} months
                 </p>
@@ -725,7 +725,7 @@ function AgreementForm() {
                   {/* Rent & Deposit (fixed from offer) */}
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">Monthly Rent (Rs.)</label>
+                      <label className="block text-sm font-medium text-gray-700">Monthly Rent ($)</label>
                       <input type="number" required disabled
                         className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm bg-gray-50 text-gray-500 cursor-not-allowed"
                         value={formData.rentAmount}
@@ -734,7 +734,7 @@ function AgreementForm() {
                       <p className="text-xs text-gray-400 mt-1">Fixed based on offer terms</p>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">Security Deposit (Rs.)</label>
+                      <label className="block text-sm font-medium text-gray-700">Security Deposit ($)</label>
                       <input type="number" required disabled
                         className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm bg-gray-50 text-gray-500 cursor-not-allowed"
                         value={formData.depositAmount}
@@ -747,7 +747,7 @@ function AgreementForm() {
                   {/* Late Fee Settings */}
                   <div className="grid grid-cols-2 gap-4 pt-2 border-t border-gray-100">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">Late Fee Amount (Rs.)</label>
+                      <label className="block text-sm font-medium text-gray-700">Late Fee Amount ($)</label>
                       <input type="number" min="0" disabled
                         className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm bg-gray-50 text-gray-500 cursor-not-allowed"
                         value={formData.lateFeeAmount}
@@ -784,7 +784,7 @@ function AgreementForm() {
                         />
                         <span className="text-sm text-gray-700">% per year</span>
                         <span className="text-xs text-blue-600 ml-auto">
-                          Rs. {formData.rentAmount ? Math.round(Number(formData.rentAmount) * (Number(formData.rentEscalationPercentage) / 100)).toLocaleString() : '—'} increase on year 1
+                          ${formData.rentAmount ? Math.round(Number(formData.rentAmount) * (Number(formData.rentEscalationPercentage) / 100)).toLocaleString() : '—'} increase on year 1
                         </span>
                       </div>
                     )}
@@ -808,7 +808,7 @@ function AgreementForm() {
                       <div className="rounded-lg bg-amber-50 border border-amber-100 px-4 py-3 space-y-3">
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Pet Deposit (Rs.)
+                            Pet Deposit ($)
                             <span className="ml-1 text-xs font-normal text-gray-400">— non-refundable, separate from security deposit</span>
                           </label>
                           <input

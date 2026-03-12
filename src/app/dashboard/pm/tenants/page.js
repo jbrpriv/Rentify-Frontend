@@ -54,7 +54,7 @@ export default function PMTenantsPage() {
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
           <div className="bg-green-100 w-10 h-10 rounded-xl flex items-center justify-center mb-3"><TrendingUp className="w-5 h-5 text-green-600" /></div>
           <p className="text-xs font-black text-gray-400 uppercase tracking-widest">Monthly Income</p>
-          <p className="text-2xl font-black text-gray-900">Rs. {totalRent.toLocaleString()}</p>
+          <p className="text-2xl font-black text-gray-900">${totalRent.toLocaleString()}</p>
         </div>
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
           <div className="bg-indigo-100 w-10 h-10 rounded-xl flex items-center justify-center mb-3"><Building2 className="w-5 h-5 text-indigo-600" /></div>
@@ -71,7 +71,7 @@ export default function PMTenantsPage() {
             <BarChart data={chartData} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
               <XAxis dataKey="name" tick={{ fontSize: 10, fontWeight: 700 }} />
               <YAxis tick={{ fontSize: 10 }} />
-              <Tooltip formatter={(v) => [`Rs. ${v.toLocaleString()}`, 'Monthly Rent']} />
+              <Tooltip formatter={(v) => [`$${v.toLocaleString()}`, 'Monthly Rent']} />
               <Bar dataKey="rent" fill="#6366f1" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
@@ -113,7 +113,7 @@ export default function PMTenantsPage() {
                       <span className="text-gray-700 text-xs font-medium">{a.property?.title}</span>
                     </div>
                   </td>
-                  <td className="px-4 py-4 font-bold text-gray-900">Rs. {a.financials?.rentAmount?.toLocaleString()}</td>
+                  <td className="px-4 py-4 font-bold text-gray-900">${a.financials?.rentAmount?.toLocaleString()}</td>
                   <td className="px-4 py-4">
                     <div className="flex items-center gap-1 text-xs text-gray-400">
                       <Calendar className="w-3 h-3" />

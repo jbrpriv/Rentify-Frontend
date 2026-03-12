@@ -122,7 +122,7 @@ export default function LandlordTenantsPage() {
                       </div>
                     </td>
                     <td className="px-4 py-4 font-semibold text-gray-900">
-                      Rs. {a.financials?.rentAmount?.toLocaleString()}
+                      ${a.financials?.rentAmount?.toLocaleString()}
                     </td>
                     <td className="px-4 py-4">
                       <div className={`flex items-center gap-1 text-xs ${expiringSoon ? 'text-amber-600 font-bold' : 'text-gray-400'}`}>

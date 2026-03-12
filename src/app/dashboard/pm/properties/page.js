@@ -130,7 +130,7 @@ export default function PMPropertiesPage() {
                 </div>
                 <div className="flex items-center justify-between text-xs text-gray-500">
                   <span className="flex items-center gap-1"><Users className="w-3 h-3" /> {p.landlord?.name || 'Landlord'}</span>
-                  <span className="font-bold text-gray-900">Rs. {p.financials?.monthlyRent?.toLocaleString()}/mo</span>
+                  <span className="font-bold text-gray-900">${p.financials?.monthlyRent?.toLocaleString()}/mo</span>
                 </div>
               </div>
             </div>

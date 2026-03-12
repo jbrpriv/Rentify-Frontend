@@ -165,7 +165,7 @@ export default function PaymentsPage() {
                 <SummaryCard label="Months Paid" value={paid} icon={CheckCircle} color="text-green-600" bg="bg-green-50" />
                 <SummaryCard label="Pending" value={pending} icon={Clock} color="text-blue-600" bg="bg-blue-50" />
                 <SummaryCard label="Overdue" value={overdue} icon={AlertCircle} color="text-red-600" bg="bg-red-50" />
-                <SummaryCard label="Total Paid" value={`Rs. ${totalPaid.toLocaleString()}`} icon={CreditCard} color="text-indigo-600" bg="bg-indigo-50" />
+                <SummaryCard label="Total Paid" value={`$${totalPaid.toLocaleString()}`} icon={CreditCard} color="text-indigo-600" bg="bg-indigo-50" />
               </div>
 
               {/* Lease Info */}
@@ -173,9 +173,9 @@ export default function PaymentsPage() {
                 <p className="text-xs font-black uppercase tracking-widest text-gray-400 mb-1">Active Lease</p>
                 <h2 className="text-xl font-black text-gray-900">{selected.property?.title}</h2>
                 <div className="flex flex-wrap gap-4 mt-2 text-sm text-gray-500">
-                  <span>Rent: <strong className="text-gray-900">Rs. {selected.financials?.rentAmount?.toLocaleString()}/mo</strong></span>
+                  <span>Rent: <strong className="text-gray-900">${selected.financials?.rentAmount?.toLocaleString()}/mo</strong></span>
                   <span>Grace period: <strong className="text-gray-900">{selected.financials?.lateFeeGracePeriodDays} days</strong></span>
-                  <span>Late fee: <strong className="text-gray-900">Rs. {selected.financials?.lateFeeAmount}</strong></span>
+                  <span>Late fee: <strong className="text-gray-900">${selected.financials?.lateFeeAmount}</strong></span>
                   <span>Lease ends: <strong className="text-gray-900">{new Date(selected.term?.endDate).toLocaleDateString()}</strong></span>
                 </div>
               </div>
@@ -219,12 +219,12 @@ export default function PaymentsPage() {
                         </div>
 
                         <p className="font-black text-gray-900 text-sm">
-                          Rs. {entry.amount?.toLocaleString()}
+                          ${entry.amount?.toLocaleString()}
                         </p>
 
                         {entry.lateFeeApplied && (
                           <p className="text-[10px] text-orange-600 mt-1">
-                            +Rs. {entry.lateFeeAmount} late fee
+                            +${entry.lateFeeAmount} late fee
                           </p>
                         )}
 

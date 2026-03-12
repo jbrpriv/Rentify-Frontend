@@ -51,7 +51,9 @@ export default function PropertiesPage() {
   }, [parsed]);
 
   const [properties, setProperties] = useState([]);
+  const [archivedProperties, setArchivedProperties] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [showArchivedModal, setShowArchivedModal] = useState(false);
   const [inviting, setInviting] = useState('');
   const [publishModal, setPublishModal] = useState(null);
   const [deleteModal, setDeleteModal] = useState(null);
@@ -61,7 +63,14 @@ export default function PropertiesPage() {
   const [archiveLoading, setArchiveLoading] = useState(false);
 
   const fetchProperties = async () => {
-    try { const { data } = await api.get('/properties'); setProperties(data); }
+    try {
+      const [activeRes, archivedRes] = await Promise.all([
+        api.get('/properties'),
+        api.get('/properties?archived=true'),
+      ]);
+      setProperties(activeRes.data);
+      setArchivedProperties(archivedRes.data);
+    }
     catch (e) { console.error(e); }
     finally { setLoading(false); }
   };
@@ -93,6 +102,7 @@ export default function PropertiesPage() {
       toast(`Property ${isArchived ? 'restored' : 'archived'} successfully`, 'success');
       fetchProperties();
       setArchiveModal(null);
+      if (isArchived && archivedProperties.length <= 1) setShowArchivedModal(false);
     } catch (err) {
       toast(err.response?.data?.message || 'Failed to update property', 'error');
       setArchiveModal(null);
@@ -250,6 +260,67 @@ export default function PropertiesPage() {
       />
       )}
 
+      {/* ── Archived Properties Modal ──────────────────────────────────────── */}
+      {showArchivedModal && (
+        <div className="cm-overlay" onClick={() => setShowArchivedModal(false)}>
+          <div onClick={e => e.stopPropagation()} style={{ background: 'white', borderRadius: 24, padding: '32px 28px', maxWidth: 680, width: '100%', maxHeight: '80vh', overflowY: 'auto', boxShadow: '0 24px 80px rgba(15,23,42,.2)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <div style={{ width: 40, height: 40, borderRadius: 12, background: 'linear-gradient(135deg,#FFFBEB,#FDE68A)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Archive size={20} style={{ color: '#D97706' }} />
+                </div>
+                <div>
+                  <h2 style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 800, fontSize: '1.2rem', color: '#0F172A', letterSpacing: '-0.02em' }}>Archived Properties</h2>
+                  <p style={{ color: '#94A3B8', fontSize: '0.78rem' }}>{archivedProperties.length} archived propert{archivedProperties.length === 1 ? 'y' : 'ies'}</p>
+                </div>
+              </div>
+              <button onClick={() => setShowArchivedModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#94A3B8', padding: 6, borderRadius: 8 }}>
+                ✕
+              </button>
+            </div>
+
+            {archivedProperties.length === 0 ? (
+              <p style={{ textAlign: 'center', color: '#94A3B8', padding: '32px 0', fontSize: '0.9rem' }}>No archived properties.</p>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                {archivedProperties.map(property => {
+                  const heroImg = property.images?.[0];
+                  return (
+                    <div key={property._id} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '14px 16px', background: '#F8FAFC', borderRadius: 14, border: '1px solid #E2E8F0' }}>
+                      {heroImg
+                        ? <img src={heroImg} alt={property.title} style={{ width: 56, height: 56, borderRadius: 10, objectFit: 'cover', flexShrink: 0 }} />
+                        : <div style={{ width: 56, height: 56, borderRadius: 10, background: 'linear-gradient(135deg,#EDE9FE,#DDD6FE)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                            <Building2 size={22} style={{ color: '#A78BFA' }} />
+                          </div>
+                      }
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <p style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 700, fontSize: '0.95rem', color: '#0F172A', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{property.title}</p>
+                        <p style={{ color: '#94A3B8', fontSize: '0.78rem', display: 'flex', alignItems: 'center', gap: 4 }}>
+                          <MapPin size={11} /> {property.address?.city}, {property.address?.state}
+                        </p>
+                        {property.archivedAt && (
+                          <p style={{ color: '#CBD5E1', fontSize: '0.72rem', marginTop: 2 }}>
+                            Archived {new Date(property.archivedAt).toLocaleDateString()}
+                            {property.archivedReason ? ` · ${property.archivedReason}` : ''}
+                          </p>
+                        )}
+                      </div>
+                      <button
+                        onClick={() => setArchiveModal({ property })}
+                        className="act-btn"
+                        style={{ background: '#F0FDF4', color: '#16A34A', border: '1.5px solid #BBF7D0', flexShrink: 0 }}
+                      >
+                        <ArchiveRestore size={13} /> Restore
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       <motion.div
         style={{ display: 'flex', flexDirection: 'column', gap: 24 }}
         initial={{ opacity: 0, y: 10 }}
@@ -267,10 +338,20 @@ export default function PropertiesPage() {
             <h1 style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 800, fontSize: '1.8rem', color: '#0F172A', letterSpacing: '-0.02em', lineHeight: 1 }}>My Properties</h1>
             <p style={{ color: '#94A3B8', fontSize: '0.83rem', marginTop: 4 }}>{properties.length} propert{properties.length === 1 ? 'y' : 'ies'} in your portfolio</p>
           </div>
-          <Link href="/dashboard/properties/new"
-            style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '10px 18px', background: 'linear-gradient(135deg,#4F46E5,#7C3AED)', color: 'white', borderRadius: 12, fontSize: '0.85rem', fontWeight: 700, textDecoration: 'none', boxShadow: '0 4px 14px rgba(79,70,229,.3)', fontFamily: "'Outfit',sans-serif" }}>
-            <Plus size={16} /> Add Property
-          </Link>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            {archivedProperties.length > 0 && (
+              <button
+                onClick={() => setShowArchivedModal(true)}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '10px 16px', background: '#FFFBEB', color: '#D97706', border: '1.5px solid #FDE68A', borderRadius: 12, fontSize: '0.82rem', fontWeight: 700, cursor: 'pointer', fontFamily: "'Outfit',sans-serif" }}
+              >
+                <Archive size={15} /> Archived ({archivedProperties.length})
+              </button>
+            )}
+            <Link href="/dashboard/properties/new"
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '10px 18px', background: 'linear-gradient(135deg,#4F46E5,#7C3AED)', color: 'white', borderRadius: 12, fontSize: '0.85rem', fontWeight: 700, textDecoration: 'none', boxShadow: '0 4px 14px rgba(79,70,229,.3)', fontFamily: "'Outfit',sans-serif" }}>
+              <Plus size={16} /> Add Property
+            </Link>
+          </div>
         </motion.div>
 
         {properties.length === 0 ? (
@@ -328,7 +409,7 @@ export default function PropertiesPage() {
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 14, paddingTop: 14, borderTop: '1px solid #F1F5F9' }}>
                       <div>
                         <p style={{ fontSize: '0.67rem', fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 2 }}>Monthly Rent</p>
-                        <p style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 800, fontSize: '1.05rem', color: '#0F172A' }}>Rs. {property.financials?.monthlyRent?.toLocaleString()}</p>
+                        <p style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 800, fontSize: '1.05rem', color: '#0F172A' }}>$ {property.financials?.monthlyRent?.toLocaleString()}</p>
                       </div>
                       <div>
                         <p style={{ fontSize: '0.67rem', fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 2 }}>Type</p>
@@ -373,21 +454,15 @@ export default function PropertiesPage() {
                         </button>
                       )}
 
-                      {/* Archive / Restore */}
+                      {/* Archive — only if not occupied */}
                       {!isOccupied && (
                         <button
                           onClick={() => setArchiveModal({ property })}
                           className="act-btn"
-                          style={property.isArchived
-                            ? { background: '#F0FDF4', color: '#16A34A', border: '1.5px solid #BBF7D0' }
-                            : { background: '#FFFBEB', color: '#D97706', border: '1.5px solid #FDE68A' }
-                          }
-                          title={property.isArchived ? 'Restore property' : 'Archive property'}
+                          style={{ background: '#FFFBEB', color: '#D97706', border: '1.5px solid #FDE68A' }}
+                          title="Archive property"
                         >
-                          {property.isArchived
-                            ? <><ArchiveRestore size={13} /> Restore</>
-                            : <><Archive size={13} /> Archive</>
-                          }
+                          <Archive size={13} /> Archive
                         </button>
                       )}
 

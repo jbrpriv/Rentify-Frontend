@@ -200,7 +200,7 @@ export default function AdminAgreementsPage() {
                     </td>
                     <td className="px-4 py-3 text-gray-700 font-semibold whitespace-nowrap">
                       {a.financials?.rentAmount
-                        ? `Rs. ${a.financials.rentAmount.toLocaleString()}`
+                        ? `$${a.financials.rentAmount.toLocaleString()}`
                         : '—'}
                     </td>
                     <td className="px-4 py-3">

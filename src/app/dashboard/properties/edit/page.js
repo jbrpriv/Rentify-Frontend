@@ -219,9 +219,9 @@ function EditPropertyContent() {
         {/* Financials */}
         <Section title="Financials">
           <div className="grid grid-cols-2 gap-4">
-            <InputField label="Monthly Rent (Rs.)"     type="number" value={form.financials.monthlyRent}     onChange={v => set('financials.monthlyRent', v)}     required />
-            <InputField label="Security Deposit (Rs.)" type="number" value={form.financials.securityDeposit} onChange={v => set('financials.securityDeposit', v)} required />
-            <InputField label="Late Fee Amount (Rs.)"  type="number" value={form.financials.lateFeeAmount}   onChange={v => set('financials.lateFeeAmount', v)} />
+            <InputField label="Monthly Rent ($)"     type="number" value={form.financials.monthlyRent}     onChange={v => set('financials.monthlyRent', v)}     required />
+            <InputField label="Security Deposit ($)" type="number" value={form.financials.securityDeposit} onChange={v => set('financials.securityDeposit', v)} required />
+            <InputField label="Late Fee Amount ($)"  type="number" value={form.financials.lateFeeAmount}   onChange={v => set('financials.lateFeeAmount', v)} />
             <InputField label="Grace Period (days)"    type="number" value={form.financials.lateFeeGracePeriodDays} onChange={v => set('financials.lateFeeGracePeriodDays', v)} />
             <div className="col-span-2">
               <InputField label="Tax / NTN ID" value={form.financials.taxId} onChange={v => set('financials.taxId', v)} placeholder="Optional landlord tax ID" />

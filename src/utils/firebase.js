@@ -1,3 +1,4 @@
+import { getAccessToken } from '@/utils/api';
 /**
  * firebase.js — Frontend Firebase / FCM push notification utility
  *
@@ -87,64 +88,67 @@ export async function requestFCMToken(promptPermission = false) {
     }
 
     if (!('Notification' in window)) {
-        console.warn('[FCM] Browser does not support notifications.');
+        if (process.env.NODE_ENV !== 'production') console.warn('[FCM] Browser does not support notifications.');
         return null;
     }
 
     if (!('serviceWorker' in navigator)) {
-        console.warn('[FCM] Browser does not support service workers.');
+        if (process.env.NODE_ENV !== 'production') console.warn('[FCM] Browser does not support service workers.');
         return null;
     }
 
     const currentPermission = Notification.permission;
-    console.log(`[FCM] Current permission: ${currentPermission}, Prompting: ${promptPermission}`);
+    if (process.env.NODE_ENV !== 'production') console.log(`[FCM] Current permission: ${currentPermission}, Prompting: ${promptPermission}`);
 
     if (currentPermission === 'denied') return null;
 
     if (currentPermission !== 'granted' && !promptPermission) {
-        console.log('[FCM] Permission not granted and prompt=false. Exiting.');
+        if (process.env.NODE_ENV !== 'production') console.log('[FCM] Permission not granted and prompt=false. Exiting.');
         return null;
     }
 
     try {
-        console.log('[FCM] Registering service worker...');
+        if (process.env.NODE_ENV !== 'production') console.log('[FCM] Registering service worker...');
         const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js', { scope: '/' });
-        console.log('[FCM] SW registered:', registration.active ? 'active' : 'installing');
+        if (process.env.NODE_ENV !== 'production') console.log('[FCM] SW registered:', registration.active ? 'active' : 'installing');
 
         const messaging = getFirebaseMessaging();
 
-        console.log('[FCM] Requesting token...');
+        if (process.env.NODE_ENV !== 'production') console.log('[FCM] Requesting token...');
         const token = await getToken(messaging, {
             vapidKey: VAPID_KEY,
             serviceWorkerRegistration: registration,
         });
 
         if (!token) {
-            console.warn('[FCM] getToken returned null or empty.');
+            if (process.env.NODE_ENV !== 'production') console.warn('[FCM] getToken returned null or empty.');
             return null;
         }
 
-        console.log('[FCM] Token acquired, sending to backend...');
+        if (process.env.NODE_ENV !== 'production') console.log('[FCM] Token acquired, sending to backend...');
 
         // Wait until the auth token is in localStorage (set during login) before
         // calling the backend — poll for up to 5 seconds instead of a blind delay.
         const authReady = await new Promise((resolve) => {
-            if (localStorage.getItem('token')) { resolve(true); return; }
-            let elapsed = 0;
-            const interval = setInterval(() => {
-                elapsed += 100;
-                if (localStorage.getItem('token')) { clearInterval(interval); resolve(true); }
-                else if (elapsed >= 5000)           { clearInterval(interval); resolve(false); }
-            }, 100);
+            if (getAccessToken()) { resolve(true); return; }
+            // Poll with exponential back-off instead of a tight 100ms interval
+            let attempts = 0;
+            const delays = [100, 200, 400, 800, 1500, 2000];
+            function check() {
+                if (getAccessToken()) { resolve(true); return; }
+                if (attempts >= delays.length) { resolve(false); return; }
+                setTimeout(check, delays[attempts++]);
+            }
+            setTimeout(check, delays[attempts++]);
         });
 
         if (!authReady) {
-            console.warn('[FCM] Auth token not available after 5s — skipping backend registration.');
+            if (process.env.NODE_ENV !== 'production') console.warn('[FCM] Auth token not available after 5s — skipping backend registration.');
             return token;
         }
 
         await api.post('/auth/fcm-token', { fcmToken: token }).then(() => {
-            console.log('[FCM] Successfully registered token with backend.');
+            if (process.env.NODE_ENV !== 'production') console.log('[FCM] Successfully registered token with backend.');
         }).catch((err) => {
             console.error('[FCM] Backend registration failed:', err.response?.data?.message || err.message);
         });

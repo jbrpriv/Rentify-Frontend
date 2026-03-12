@@ -227,7 +227,7 @@ function BillingContent() {
 
                 <div className="mb-5">
                   <span className="text-3xl font-black text-gray-900 tracking-tighter">
-                    {plan.price === 0 ? 'Free' : `Rs. ${plan.price.toLocaleString()}`}
+                    {plan.price === 0 ? 'Free' : `$${plan.price.toLocaleString()}`}
                   </span>
                   {plan.price > 0 && <span className="text-gray-400 text-sm">/month</span>}
                 </div>

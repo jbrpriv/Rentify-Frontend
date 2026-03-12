@@ -4,7 +4,7 @@ import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import axios from 'axios';
-import api from '@/utils/api';
+import api, { setAccessToken } from '@/utils/api';
 import { useUser } from '@/context/UserContext';
 import {
   User, Mail, Lock, Phone, Building2, Loader2, CheckCircle,
@@ -37,7 +37,12 @@ const ROLE_OPTIONS = [
 function RegisterContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { setUser } = useUser();
+  const { setUser, user } = useUser();
+
+  // SEC-05: redirect already-logged-in users away from register page
+  useEffect(() => {
+    if (user) router.replace('/dashboard');
+  }, [user]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const [step, setStep] = useState('register');
   const [loading, setLoading] = useState(false);
@@ -93,7 +98,7 @@ function RegisterContent() {
     setLoading(true); setError('');
     try {
       const { data } = await api.post('/auth/verify-otp', { email: formData.email, code: phoneOTP });
-      localStorage.setItem('token', data.token);
+      setAccessToken(data.token);
       setUser({
         _id: data._id, name: data.name, role: data.role, email: data.email,
         isVerified: true, isPhoneVerified: true, twoFactorEnabled: data.twoFactorEnabled || false,

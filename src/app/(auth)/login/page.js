@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import api from '@/utils/api';
+import api, { setAccessToken } from '@/utils/api';
 import { requestFCMToken } from '@/utils/firebase';
 import Link from 'next/link';
 import { useUser } from '@/context/UserContext';
@@ -33,7 +33,12 @@ const getRecaptchaToken = (action) => {
 
 function LoginContent() {
   const router = useRouter();
-  const { setUser } = useUser();
+  const { setUser, user } = useUser();
+
+  // SEC-05: redirect already-logged-in users away from login page
+  useEffect(() => {
+    if (user) router.replace('/dashboard');
+  }, [user]); // eslint-disable-line react-hooks/exhaustive-deps
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -81,7 +86,7 @@ function LoginContent() {
         setUserId2FA(data._id);
         setNeeds2FA(true);
       } else {
-        localStorage.setItem('token', data.token);
+        setAccessToken(data.token);
         setUser(data);
         requestFCMToken(true).catch(() => { }); // async, non-blocking
         router.push('/dashboard');
@@ -124,7 +129,7 @@ function LoginContent() {
     setTotpLoading(true); setError('');
     try {
       const { data } = await api.post('/auth/2fa/validate', { userId: userId2FA, token: totp });
-      localStorage.setItem('token', data.token);
+      setAccessToken(data.token);
       setUser(data);
       requestFCMToken(true).catch(() => { }); // async, non-blocking
       router.push('/dashboard');
@@ -168,7 +173,7 @@ function LoginContent() {
     try {
       const { data } = await api.post('/auth/verify-otp', { email: pendingEmail, code: phoneOTP });
       // Server confirmed OTP and returned real tokens — safe to persist now
-      localStorage.setItem('token', data.token);
+      setAccessToken(data.token);
       setUser({
         _id: data._id,
         name: data.name,

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import api from '@/utils/api';
+import { useUser } from '@/context/UserContext';
 import {
   HeadphonesIcon, Mail, Phone, MessageSquare,
   CheckCircle, Loader2, ChevronDown, ChevronUp,
@@ -53,8 +54,6 @@ const FAQS = [
 
 const CONTACT_CHANNELS = [
   { icon: Mail, label: 'Email', value: 'support@rentifypro.com', href: 'mailto:support@rentifypro.com', accent: '#0992C2' },
-  { icon: Phone, label: 'Phone', value: '+92 311 0000000', href: 'tel:+923110000000', accent: '#0AC4E0' },
-  { icon: MessageSquare, label: 'Live Chat', value: 'Available 9am–6pm PKT', href: null, accent: '#38BDF8' },
 ];
 
 // ─── Reveal wrapper ────────────────────────────────────────────────────────────
@@ -98,6 +97,7 @@ const labelStyle = {
 
 // ─── Page ──────────────────────────────────────────────────────────────────────
 export default function SupportPage() {
+  const { user } = useUser();
   const [form, setForm] = useState({
     name: '', email: '', phone: '', subject: '', category: 'general', message: '',
   });
@@ -379,7 +379,8 @@ export default function SupportPage() {
                   </div>
                 </RevealCard>
 
-                {/* Sign-in CTA */}
+                {/* Sign-in CTA — only shown to guests */}
+                {!user && (
                 <RevealCard delay={180}>
                   <div
                     className="relative overflow-hidden rounded-3xl p-6 text-center"
@@ -406,6 +407,7 @@ export default function SupportPage() {
                     </div>
                   </div>
                 </RevealCard>
+                )}
 
               </div>
             </div>

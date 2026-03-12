@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import api from '@/utils/api';
+import api, { setAccessToken, getAccessToken } from '@/utils/api';
 import { useUser } from '@/context/UserContext';
 import {
   Check, X, Building2, Zap, Crown, ArrowRight,
@@ -75,7 +75,7 @@ export default function PricingPage() {
 
   useEffect(() => {
     const fetches = [api.get('/billing/plans')];
-    const stored = localStorage.getItem('token');
+    const stored = getAccessToken();
     if (stored) fetches.push(api.get('/billing/status'));
 
     Promise.allSettled(fetches).then(([plansRes, statusRes]) => {
@@ -188,7 +188,7 @@ export default function PricingPage() {
                           className="text-4xl font-black tracking-tighter"
                           style={{ color: meta.highlight ? '#0B2D72' : '#111827' }}
                         >
-                          {plan.price === 0 ? 'Free' : `Rs. ${plan.price.toLocaleString()}`}
+                          {plan.price === 0 ? 'Free' : `$${plan.price.toLocaleString()}`}
                         </span>
                         {plan.price > 0 && <span className="text-neutral-400 mb-1 text-sm">/mo</span>}
                       </div>

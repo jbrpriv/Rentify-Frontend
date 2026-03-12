@@ -13,10 +13,10 @@ import Footer from '@/components/Footer';
 
 const PRICE_RANGES = [
   { label: 'Any Price', min: '', max: '' },
-  { label: 'Under Rs. 30K', min: '', max: '30000' },
-  { label: 'Rs. 30K – 60K', min: '30000', max: '60000' },
-  { label: 'Rs. 60K – 100K', min: '60000', max: '100000' },
-  { label: 'Rs. 100K+', min: '100000', max: '' },
+  { label: 'Under $30K', min: '', max: '30000' },
+  { label: '$30K – 60K', min: '30000', max: '60000' },
+  { label: '$60K – 100K', min: '60000', max: '100000' },
+  { label: '$100K+', min: '100000', max: '' },
 ];
 const TYPES = ['apartment', 'house', 'studio', 'commercial'];
 const BEDS = ['1', '2', '3', '4', '5+'];
@@ -231,7 +231,7 @@ function BrowseContent() {
                           {listing.title}
                         </span>
                         <span className="text-[0.95rem] font-bold text-[#0992C2]">
-                          Rs. {(listing.financials?.monthlyRent || 0).toLocaleString()}
+                          ${(listing.financials?.monthlyRent || 0).toLocaleString()}
                         </span>
                       </div>
                       <button

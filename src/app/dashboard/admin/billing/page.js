@@ -67,8 +67,8 @@ export default function AdminBillingPage() {
     setTier(t === tier ? '' : t);
   };
 
-  const fmt = (n) => `Rs. ${(n ?? 0).toLocaleString('en-PK')}`;
-  const fmtDate = (d) => d ? new Date(d).toLocaleDateString('en-PK', { year: 'numeric', month: 'short', day: 'numeric' }) : '—';
+  const fmt = (n) => `$${(n ?? 0).toLocaleString('en-US')}`;
+  const fmtDate = (d) => d ? new Date(d).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : '—';
 
   return (
     <div className="p-6 max-w-7xl mx-auto">

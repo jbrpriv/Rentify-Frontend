@@ -14,7 +14,7 @@ import {
 } from 'lucide-react';
 import { MotionFadeIn } from '@/components/ui/Motion';
 
-const fmt = (n) => `Rs. ${Number(n || 0).toLocaleString()}`;
+const fmt = (n) => `$${Number(n || 0).toLocaleString()}`;
 
 /* ─── Diff badge ──────────────────────────────────────────────────── */
 function DiffBadge({ listed, proposed }) {
@@ -181,8 +181,8 @@ function OfferForm({ listing, user, router, listingId }) {
   const set = (k) => (e) => setForm(f => ({ ...f, [k]: e.target.value }));
 
   const fields = [
-    { key: 'monthlyRent', label: 'Monthly Rent', prefix: 'Rs.', listedVal: listing.financials?.monthlyRent },
-    { key: 'securityDeposit', label: 'Security Deposit', prefix: 'Rs.', listedVal: listing.financials?.securityDeposit },
+    { key: 'monthlyRent', label: 'Monthly Rent', prefix: '$', listedVal: listing.financials?.monthlyRent },
+    { key: 'securityDeposit', label: 'Security Deposit', prefix: '$', listedVal: listing.financials?.securityDeposit },
     { key: 'leaseDurationMonths', label: 'Lease Duration', prefix: 'mo', listedVal: listing.leaseTerms?.defaultDurationMonths || 12 },
   ];
 
@@ -427,7 +427,7 @@ function ListingDetailContent() {
                       <div className="stat-chip"><Bath size={17} style={{ color: 'rgba(255,255,255,.7)' }} /><span className="stat-val">{listing.specs?.bathrooms ?? '—'}</span><span className="stat-label">Baths</span></div>
                       <div className="stat-chip"><SquareCode size={17} style={{ color: 'rgba(255,255,255,.7)' }} /><span className="stat-val">{listing.specs?.sizeSqFt || '—'}</span><span className="stat-label">Sq Ft</span></div>
                       <div className="stat-chip"><PawPrint size={17} style={{ color: 'rgba(255,255,255,.7)' }} /><span className="stat-val" style={{ fontSize: '0.82rem' }}>{listing.amenities?.includes('pets allowed') ? 'Pets OK' : 'No Pets'}</span><span className="stat-label">Policy</span></div>
-                      <div className="stat-chip"><ShieldCheck size={17} style={{ color: 'rgba(255,255,255,.7)' }} /><span className="stat-val" style={{ fontSize: '0.82rem' }}>Rs. {deposit?.toLocaleString() || '—'}</span><span className="stat-label">Deposit</span></div>
+                      <div className="stat-chip"><ShieldCheck size={17} style={{ color: 'rgba(255,255,255,.7)' }} /><span className="stat-val" style={{ fontSize: '0.82rem' }}>${deposit?.toLocaleString() || '—'}</span><span className="stat-label">Deposit</span></div>
                     </div>
                   </div>
                   <div style={{ background: 'rgba(255,255,255,.12)', backdropFilter: 'blur(12px)', border: '1px solid rgba(255,255,255,.2)', color: 'white', borderRadius: 40, padding: '8px 20px', fontSize: '0.8rem', fontWeight: 500, display: 'flex', alignItems: 'center', gap: 6, alignSelf: 'flex-end' }}>
@@ -566,7 +566,7 @@ function ListingDetailContent() {
                     </div>
                     <div style={{ textAlign: 'center' }}>
                       <p style={{ color: '#94A3B8', fontSize: '0.7rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 4 }}>Monthly Rent</p>
-                      <p style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 800, fontSize: '2rem', color: '#0F172A', lineHeight: 1 }}>Rs. {rent?.toLocaleString() || '—'}</p>
+                      <p style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 800, fontSize: '2rem', color: '#0F172A', lineHeight: 1 }}>${rent?.toLocaleString() || '—'}</p>
                       <p style={{ fontSize: '0.75rem', color: '#16A34A', fontWeight: 600, marginTop: 4 }}>Available Now</p>
                     </div>
                   </div>

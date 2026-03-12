@@ -38,8 +38,6 @@ export default function RootLayout({ children }) {
               strategy="afterInteractive"
             />
           )}
-          {/* Razorpay checkout SDK */}
-          <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="afterInteractive" />
         </UserProvider>
       </body>
     </html>

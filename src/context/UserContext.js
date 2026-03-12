@@ -27,7 +27,7 @@
 
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import api from '@/utils/api';
+import api, { setAccessToken } from '@/utils/api';
 import { requestFCMToken } from '@/utils/firebase';
 
 const UserContext = createContext(null);
@@ -77,16 +77,24 @@ export function UserProvider({ children }) {
     }
   }, [setUser]);
 
-  // On mount, if we have a token, silently refresh so we always have the
-  // latest role/name/preferences — catches the "stale between tabs" bug.
+  // On mount, silently hit /auth/refresh to re-hydrate the in-memory access
+  // token from the HttpOnly refresh cookie. This replaces the old pattern of
+  // checking localStorage for a token (SEC-01: tokens no longer in storage).
   useEffect(() => {
-    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
-    if (token) {
-      refreshUser();
-      // Silently re-register FCM token if the user already granted permission.
-      // We pass `false` so we never show a permission prompt unprompted.
-      requestFCMToken(false).catch(() => { });
-    }
+    api.post('/auth/refresh')
+      .then(({ data }) => {
+        if (data?.token) setAccessToken(data.token);
+        return refreshUser();
+      })
+      .then(() => {
+        // Silently re-register FCM token without prompting
+        requestFCMToken(false).catch(() => { });
+      })
+      .catch(() => {
+        // No valid refresh cookie — user is logged out, clear stale UI state
+        setUserState(null);
+        localStorage.removeItem('userInfo');
+      });
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Listen for storage events from OTHER tabs so role/logout changes propagate
@@ -100,10 +108,6 @@ export function UserProvider({ children }) {
           try { setUserState(JSON.parse(e.newValue)); } catch { /* ignore */ }
         }
       }
-      if (e.key === 'token' && !e.newValue) {
-        // Token was removed in another tab → treat as logout here too
-        setUserState(null);
-      }
     };
     window.addEventListener('storage', handleStorage);
     return () => window.removeEventListener('storage', handleStorage);
@@ -111,7 +115,7 @@ export function UserProvider({ children }) {
 
   const logout = useCallback(async () => {
     try { await api.post('/auth/logout'); } catch (e) { /* ignore */ }
-    localStorage.removeItem('token');
+    setAccessToken(null);
     localStorage.removeItem('userInfo');
     setUserState(null);
     router.push('/login');

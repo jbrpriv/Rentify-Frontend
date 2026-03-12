@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, Suspense } from 'react';
+import { setAccessToken } from '@/utils/api';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useUser } from '@/context/UserContext';
 import { Loader2 } from 'lucide-react';
@@ -44,7 +45,7 @@ function OAuthSuccessContent() {
       router.replace(`/auth/oauth/complete-profile?${params.toString()}`);
     } else {
       // Fully verified returning user — safe to persist session now.
-      localStorage.setItem('token', token);
+      setAccessToken(token);
       setUser({ _id: id, name, role, email, isPhoneVerified, provider });
       router.replace('/dashboard');
     }

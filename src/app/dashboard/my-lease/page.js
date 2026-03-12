@@ -8,7 +8,7 @@ import { useToast } from '@/context/ToastContext';
 import {
   FileText, Download, CheckCircle, Clock, PenLine, Loader2,
   Building2, User, Calendar, DollarSign, CreditCard,
-  Eye, ChevronDown, ChevronUp, Mail, Phone, TrendingUp
+  Eye, ChevronDown, ChevronUp, Mail, Phone, TrendingUp, RotateCcw, AlertCircle,
 } from 'lucide-react';
 import SignatureModal from '@/components/SignatureModal';
 
@@ -67,6 +67,20 @@ export default function MyLeasePage() {
 
 
   const [initiatingPayment, setInitiatingPayment] = useState(false);
+  const [renewResponding, setRenewResponding] = useState(null); // agreementId being responded to
+
+  const handleRenewalResponse = async (agreementId, accept) => {
+    setRenewResponding(agreementId);
+    try {
+      const { data } = await api.put(`/agreements/${agreementId}/renew/respond`, { accept });
+      toast(data.message, 'success');
+      fetchData();
+    } catch (err) {
+      toast(err.response?.data?.message || 'Failed to respond', 'error');
+    } finally {
+      setRenewResponding(null);
+    }
+  };
 
   const handlePaymentClick = async (agreement) => {
     setInitiatingPayment(true);
@@ -158,6 +172,43 @@ export default function MyLeasePage() {
                 key={ag._id}
                 className="bg-white shadow-md rounded-xl overflow-hidden border border-gray-100 transition-all hover:shadow-lg"
               >
+                {/* ── Renewal proposal banner — shown when landlord has proposed renewal */}
+                {ag.renewalProposal?.status === 'pending' && (
+                  <div className="px-6 py-4 bg-purple-50 border-b border-purple-100">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                      <div className="flex items-start gap-3">
+                        <RotateCcw className="w-5 h-5 text-purple-600 flex-shrink-0 mt-0.5" />
+                        <div>
+                          <p className="text-sm font-bold text-purple-900">Your landlord has proposed a lease renewal</p>
+                          <p className="text-xs text-purple-700 mt-0.5">
+                            New end date: <strong>{new Date(ag.renewalProposal.newEndDate).toLocaleDateString()}</strong>
+                            {' · '}New rent: <strong>${Number(ag.renewalProposal.newRentAmount).toLocaleString()}/mo</strong>
+                            {ag.renewalProposal.notes && <span className="ml-1">· &quot;{ag.renewalProposal.notes}&quot;</span>}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex gap-2 flex-shrink-0">
+                        <button
+                          onClick={() => handleRenewalResponse(ag._id, false)}
+                          disabled={renewResponding === ag._id}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-red-300 bg-white text-red-600 text-xs font-bold rounded-lg hover:bg-red-50 disabled:opacity-50 transition"
+                        >
+                          {renewResponding === ag._id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <AlertCircle className="w-3.5 h-3.5" />}
+                          Decline
+                        </button>
+                        <button
+                          onClick={() => handleRenewalResponse(ag._id, true)}
+                          disabled={renewResponding === ag._id}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-purple-600 text-white text-xs font-bold rounded-lg hover:bg-purple-700 disabled:opacity-50 transition"
+                        >
+                          {renewResponding === ag._id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle className="w-3.5 h-3.5" />}
+                          Accept
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 {/* Status Bar */}
                 <div className={`px-6 py-4 flex flex-col sm:flex-row sm:items-center justify-between border-b ${style.bg} ${style.border}`}>
                   <div className="flex items-center mb-2 sm:mb-0">
