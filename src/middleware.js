@@ -56,31 +56,32 @@ export function middleware(request) {
     return NextResponse.next();
   }
 
-  // NEW-01 fix: check for the `refreshToken` HttpOnly cookie (set by backend),
-  // not a `token` cookie (which was never set by anyone).
-  const hasRefreshToken = Boolean(request.cookies.get('refreshToken')?.value);
-  const userRole        = request.cookies.get('userRole')?.value || '';
+  // Auth is handled client-side via UserContext + localStorage (cross-domain setup).
+  // Middleware only handles static public/auth page rules; API enforces real auth.
+  const userInfo = request.cookies.get('userInfo')?.value;
+  let isLoggedIn = false;
+  let userRole = '';
+  try {
+    if (userInfo) {
+      const parsed = JSON.parse(decodeURIComponent(userInfo));
+      isLoggedIn = !!parsed?.token;
+      userRole = parsed?.role || '';
+    }
+  } catch {}
 
   // Public pages — always accessible
-  if (isPublic(pathname)) {
-    return NextResponse.next();
-  }
+  if (isPublic(pathname)) return NextResponse.next();
 
   // SEC-05: Redirect already-logged-in users away from auth pages
-  if (hasRefreshToken && isAuthPage(pathname)) {
+  if (isLoggedIn && isAuthPage(pathname)) {
     return NextResponse.redirect(new URL('/dashboard', request.url));
   }
 
-  // Dashboard routes — must be logged in
-  if (pathname.startsWith('/dashboard')) {
-    if (!hasRefreshToken) {
-      const loginUrl = new URL('/login', request.url);
-      loginUrl.searchParams.set('redirect', pathname);
-      return NextResponse.redirect(loginUrl);
-    }
+  // Auth pages — always accessible if not logged in
+  if (isAuthPage(pathname)) return NextResponse.next();
 
-    // NEW-04: Enforce role-based access using the non-HttpOnly `userRole` cookie.
-    // Only blocks if userRole is known; if cookie is absent we let the API decide.
+  // Dashboard routes — let client-side UserContext handle redirect if not logged in
+  if (pathname.startsWith('/dashboard')) {
     for (const [prefix, allowedRoles] of Object.entries(ROLE_PREFIXES)) {
       if (pathname.startsWith(prefix) && userRole && !allowedRoles.includes(userRole)) {
         return NextResponse.redirect(new URL('/dashboard', request.url));
