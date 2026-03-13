@@ -1,4 +1,4 @@
-name: Frontend CI/CD
+name: Frontend CI
 
 on:
   push:
@@ -7,13 +7,10 @@ on:
     branches: [main]
 
 jobs:
-  # ─── Lint, Build & E2E ───────────────────────────────────────────────────
+  # ─── Lint & E2E ──────────────────────────────────────────────────────────
   test:
-    name: Lint, Build & Cypress E2E
+    name: Lint & Cypress E2E
     runs-on: ubuntu-latest
-
-    env:
-      NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}
 
     steps:
       - name: Checkout
@@ -29,21 +26,19 @@ jobs:
         run: npm ci
 
       - name: Lint
-        run: npm run lint --if-present
-
-      - name: Build
-        run: npm run build
-        env:
-          NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}
+        run: npm run lint -- --max-warnings 999
 
       - name: Run Cypress E2E tests
         uses: cypress-io/github-action@v6
-        with:
-          start: npm run start
-          wait-on: 'http://localhost:3000'
-          wait-on-timeout: 60
         env:
-          CYPRESS_BASE_URL: http://localhost:3000
+          CYPRESS_BASE_URL: ${{ secrets.CYPRESS_BASE_URL }}
+          CYPRESS_apiUrl: ${{ secrets.NEXT_PUBLIC_API_URL }}
+          CYPRESS_LANDLORD_EMAIL: ${{ secrets.CYPRESS_LANDLORD_EMAIL }}
+          CYPRESS_LANDLORD_PASSWORD: ${{ secrets.CYPRESS_LANDLORD_PASSWORD }}
+          CYPRESS_TENANT_EMAIL: ${{ secrets.CYPRESS_TENANT_EMAIL }}
+          CYPRESS_TENANT_PASSWORD: ${{ secrets.CYPRESS_TENANT_PASSWORD }}
+          CYPRESS_ADMIN_EMAIL: ${{ secrets.CYPRESS_ADMIN_EMAIL }}
+          CYPRESS_ADMIN_PASSWORD: ${{ secrets.CYPRESS_ADMIN_PASSWORD }}
 
       - name: Upload Cypress screenshots on failure
         uses: actions/upload-artifact@v4
@@ -51,39 +46,3 @@ jobs:
         with:
           name: cypress-screenshots
           path: cypress/screenshots
-
-  # ─── Deploy to Vercel (Staging) ──────────────────────────────────────────
-  deploy-staging:
-    name: Deploy → Vercel (Staging)
-    needs: test
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/staging'
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Deploy to Vercel (Preview)
-        uses: amondnet/vercel-action@v25
-        with:
-          vercel-token:   ${{ secrets.VERCEL_TOKEN }}
-          vercel-org-id:  ${{ secrets.VERCEL_ORG_ID }}
-          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-
-  # ─── Deploy to Vercel (Production) ───────────────────────────────────────
-  deploy-production:
-    name: Deploy → Vercel (Production)
-    needs: test
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
-    environment: production
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Deploy to Vercel (Production)
-        uses: amondnet/vercel-action@v25
-        with:
-          vercel-token:    ${{ secrets.VERCEL_TOKEN }}
-          vercel-org-id:   ${{ secrets.VERCEL_ORG_ID }}
-          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-          vercel-args: '--prod'

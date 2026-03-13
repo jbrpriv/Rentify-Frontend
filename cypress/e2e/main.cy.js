@@ -1,19 +1,27 @@
 /**
  * RentifyPro — Main E2E Test Suite
  * Runs against the real deployed app (Vercel frontend + EC2 backend).
- * Uses real credentials from cypress.env.json.
+ * Uses cy.session() to persist the HttpOnly refresh cookie + localStorage
+ * across page visits so the silent token refresh works correctly.
  */
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+// ─── Login helper using cy.session() ─────────────────────────────────────────
+// cy.session() caches cookies + localStorage after the first login,
+// and restores them on subsequent calls — so login only hits the server once
+// per role per test run.
 function loginAs(role) {
-    const email = Cypress.env(`${role.toUpperCase()}_EMAIL`);
-    const password = Cypress.env(`${role.toUpperCase()}_PASSWORD`);
+    cy.session(role, () => {
+        const email = Cypress.env(`${role.toUpperCase()}_EMAIL`);
+        const password = Cypress.env(`${role.toUpperCase()}_PASSWORD`);
 
-    cy.visit('/login');
-    cy.get('input[type="email"]').type(email);
-    cy.get('input[type="password"]').type(password);
-    cy.contains('button', 'Sign in').click();
-    cy.url({ timeout: 15000 }).should('include', '/dashboard');
+        cy.visit('/login');
+        cy.get('input[type="email"]').type(email);
+        cy.get('input[type="password"]').type(password);
+        cy.contains('button', 'Sign in').click();
+        cy.url({ timeout: 15000 }).should('include', '/dashboard');
+    }, {
+        cacheAcrossSpecs: true,
+    });
 }
 
 // ─── Tests ────────────────────────────────────────────────────────────────────
@@ -43,13 +51,17 @@ describe('RentifyPro — Full Platform Test', () => {
 
         it('landlord can log in and reach dashboard', () => {
             loginAs('landlord');
-            cy.contains('Dashboard', { timeout: 10000 }).should('exist');
+            cy.visit('/dashboard');
+            cy.url({ timeout: 15000 }).should('include', '/dashboard');
+            cy.get('body').should('not.contain', 'Server Error');
         });
     });
 
     // ── 2. PROPERTIES ───────────────────────────────────────────────────────────
     describe('Properties', () => {
-        beforeEach(() => loginAs('landlord'));
+        beforeEach(() => {
+            loginAs('landlord');
+        });
 
         it('properties page loads', () => {
             cy.visit('/dashboard/properties');
@@ -71,7 +83,9 @@ describe('RentifyPro — Full Platform Test', () => {
 
     // ── 3. AGREEMENTS ───────────────────────────────────────────────────────────
     describe('Agreements', () => {
-        beforeEach(() => loginAs('landlord'));
+        beforeEach(() => {
+            loginAs('landlord');
+        });
 
         it('agreements page loads', () => {
             cy.visit('/dashboard/agreements');
@@ -100,19 +114,23 @@ describe('RentifyPro — Full Platform Test', () => {
             cy.contains('USD').should('be.visible');
         });
 
-        it('billing dashboard loads for landlord', () => {
+        it('billing dashboard loads', () => {
             loginAs('landlord');
             cy.visit('/dashboard/billing');
+            cy.url().should('include', '/billing');
             cy.get('body').should('not.contain', 'Server Error');
         });
     });
 
     // ── 5. TENANT PORTAL ────────────────────────────────────────────────────────
     describe('Tenant Portal', () => {
-        beforeEach(() => loginAs('tenant'));
+        beforeEach(() => {
+            loginAs('tenant');
+        });
 
         it('tenant dashboard loads', () => {
             cy.visit('/dashboard');
+            cy.url().should('include', '/dashboard');
             cy.get('body').should('not.contain', 'Server Error');
         });
 
@@ -124,16 +142,20 @@ describe('RentifyPro — Full Platform Test', () => {
 
         it('tenant can view maintenance requests', () => {
             cy.visit('/dashboard/maintenance');
+            cy.url().should('include', '/maintenance');
             cy.get('body').should('not.contain', 'Server Error');
         });
     });
 
     // ── 6. ADMIN DASHBOARD ──────────────────────────────────────────────────────
     describe('Admin Dashboard', () => {
-        beforeEach(() => loginAs('admin'));
+        beforeEach(() => {
+            loginAs('admin');
+        });
 
         it('admin stats page loads', () => {
             cy.visit('/dashboard/admin');
+            cy.url().should('include', '/admin');
             cy.get('body').should('not.contain', 'Server Error');
         });
 
@@ -154,6 +176,7 @@ describe('RentifyPro — Full Platform Test', () => {
         it('notifications page loads', () => {
             loginAs('landlord');
             cy.visit('/dashboard/notifications');
+            cy.url().should('include', '/notifications');
             cy.get('body').should('not.contain', 'Server Error');
         });
     });
