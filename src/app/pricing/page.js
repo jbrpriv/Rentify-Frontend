@@ -19,8 +19,8 @@ const TIERS = {
 };
 
 const FEATURE_TABLE = [
-  { label: 'Properties', free: '1', pro: 'Up to 20', enterprise: 'Unlimited' },
-  { label: 'Agreement templates', free: 'Basic', pro: '50+ clauses', enterprise: 'Custom' },
+  { label: 'Properties', free: '1', pro: 'Up to 5', enterprise: 'Unlimited' },
+  { label: 'Agreement templates', free: false, pro: false, enterprise: 'Custom' },
   { label: 'Clause builder', free: false, pro: true, enterprise: true },
   { label: 'Document vault (S3)', free: false, pro: true, enterprise: true },
   { label: 'Email notifications', free: true, pro: true, enterprise: true },
@@ -54,7 +54,7 @@ const FAQ = [
   },
   {
     q: 'What currency are prices in?',
-    a: 'All prices are in Pakistani Rupees (PKR) and are billed monthly. No hidden fees.',
+    a: 'All prices are in US Dollars (USD) and are billed monthly. No hidden fees.',
   },
 ];
 
@@ -150,8 +150,8 @@ export default function PricingPage() {
                   <div
                     key={plan.tier}
                     className={`relative flex flex-col rounded-3xl border-2 p-8 transition-all duration-300 ${meta.highlight
-                        ? 'border-[#0992C2] shadow-xl shadow-[#0992C2]/15'
-                        : 'border-[#0992C2]/15 bg-[#F8FBFC] hover:border-[#0992C2]/40'
+                      ? 'border-[#0992C2] shadow-xl shadow-[#0992C2]/15'
+                      : 'border-[#0992C2]/15 bg-[#F8FBFC] hover:border-[#0992C2]/40'
                       }`}
                     style={meta.highlight ? { background: 'linear-gradient(160deg, #f0f9ff 0%, #ffffff 100%)' } : {}}
                   >

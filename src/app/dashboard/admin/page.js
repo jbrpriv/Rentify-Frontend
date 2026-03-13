@@ -66,7 +66,7 @@ export default function AdminStatsPage() {
     </div>
   );
 
-  const { totals, monthlySubscriptionRevenue, usersBySubscription, agreementsByMonth } = stats;
+  const { totals, monthlySubscriptionRevenue, usersBySubscription, agreementsByMonth, generatedAt } = stats;
 
   const agreementsChartData = agreementsByMonth.map(m => ({ name: monthLabel(m._id), count: m.count }));
 
@@ -90,6 +90,11 @@ export default function AdminStatsPage() {
         <div>
           <h1 className="text-3xl font-black text-gray-900 tracking-tighter">Platform Analytics</h1>
           <p className="text-gray-400 text-sm font-medium mt-1">Real-time platform health &amp; metrics</p>
+          {generatedAt && (
+            <p className="text-gray-300 text-xs mt-0.5">
+              Data as of {new Date(generatedAt).toLocaleString()}
+            </p>
+          )}
         </div>
         <button onClick={loadData} className="p-2 rounded-xl border border-gray-200 hover:bg-gray-50 transition" title="Refresh">
           <RefreshCw className="w-4 h-4 text-gray-500" />

@@ -419,10 +419,10 @@ export default function AgreementDetailPage() {
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <InfoRow label="Start Date" value={startDate} icon={Calendar} />
                                 <InfoRow label="End Date" value={endDate} icon={Calendar} />
-                                <InfoRow label="Monthly Rent" value={`Rs. ${financials?.rentAmount?.toLocaleString()}`} icon={DollarSign} />
-                                <InfoRow label="Security Deposit" value={`Rs. ${financials?.depositAmount?.toLocaleString()}`} icon={Shield} />
+                                <InfoRow label="Monthly Rent" value={`$${financials?.rentAmount?.toLocaleString()}`} icon={DollarSign} />
+                                <InfoRow label="Security Deposit" value={`$${financials?.depositAmount?.toLocaleString()}`} icon={Shield} />
                                 {financials?.lateFeeAmount > 0 && (
-                                    <InfoRow label="Late Fee" value={`Rs. ${financials.lateFeeAmount} after ${financials.lateFeeGracePeriodDays} days`} icon={AlertCircle} />
+                                    <InfoRow label="Late Fee" value={`$${financials.lateFeeAmount} after ${financials.lateFeeGracePeriodDays} days`} icon={AlertCircle} />
                                 )}
                             </div>
 
