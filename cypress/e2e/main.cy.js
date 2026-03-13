@@ -18,7 +18,7 @@ function loginAs(role) {
         cy.visit(loginUrl);
         cy.get('input[type="email"]').type(email);
         cy.get('input[type="password"]').type(password);
-        cy.contains('button', 'Sign in').click();
+        cy.get('button[type="submit"]').click();
         cy.url({ timeout: 15000 }).should('include', '/dashboard');
     }, {
         cacheAcrossSpecs: true,
