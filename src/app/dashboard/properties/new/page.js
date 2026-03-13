@@ -253,7 +253,7 @@ export default function AddPropertyPage() {
             <ArrowLeft size={16} />
           </Link>
           <div>
-            <h1 style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 800, fontSize: '1.65rem', color: '#0F172A', lineHeight: 1, letterSpacing: '-0.02em' }}>Add New Property</h1>
+            <h1 style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 800, fontSize: '1.65rem', color: '#0F172A', lineHeight: 1, letterSpacing: '-0.02em' }}>Add Property</h1>
             <p style={{ color: '#94A3B8', fontSize: '0.83rem', marginTop: 3 }}>Fill in all details to create your listing</p>
           </div>
         </div>

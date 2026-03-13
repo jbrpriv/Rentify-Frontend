@@ -90,10 +90,17 @@ export function UserProvider({ children }) {
         // Silently re-register FCM token without prompting
         requestFCMToken(false).catch(() => { });
       })
-      .catch(() => {
-        // No valid refresh cookie — user is logged out, clear stale UI state
-        setUserState(null);
-        localStorage.removeItem('userInfo');
+      .catch((err) => {
+        // Only clear state on an explicit 401 (token truly invalid/expired).
+        // Network errors or 5xx should NOT log the user out — this prevents
+        // Cypress cy.session() restores (which replay localStorage but may not
+        // have the HttpOnly cookie ready in time) from incorrectly clearing
+        // a freshly-restored admin/landlord session.
+        if (err.response?.status === 401) {
+          setUserState(null);
+          localStorage.removeItem('userInfo');
+        }
+        // For any other error (network down, 500, etc.) keep existing state.
       });
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 

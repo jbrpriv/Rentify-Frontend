@@ -140,7 +140,11 @@ export default function PricingPage() {
 
           {/* ── Plan Cards ────────────────────────────────────────────────────── */}
           <section className="bg-white py-20 px-4">
-            <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="max-w-5xl mx-auto">
+              <p className="text-center text-xs font-semibold text-neutral-400 uppercase tracking-widest mb-6">
+                All prices in <span className="text-[#0992C2]">USD</span> · Billed monthly · No hidden fees
+              </p>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {plans.map((plan) => {
                 const meta = TIERS[plan.tier] || TIERS.free;
                 const PlanIcon = meta.icon;
@@ -199,12 +203,17 @@ export default function PricingPage() {
 
                     {/* Features list */}
                     <ul className="space-y-2.5 mb-8 flex-1">
-                      {plan.features.map((feat) => (
-                        <li key={feat} className="flex items-start gap-2 text-sm text-neutral-600">
-                          <Check className="w-4 h-4 text-[#0992C2] shrink-0 mt-0.5" />
-                          {feat}
-                        </li>
-                      ))}
+                      {plan.features.map((feat) => {
+                        const displayFeat = typeof feat === 'string'
+                          ? feat.replace(/-1\s*(properties?)?/gi, (_, p) => p ? `Unlimited ${p}` : 'Unlimited')
+                          : feat;
+                        return (
+                          <li key={feat} className="flex items-start gap-2 text-sm text-neutral-600">
+                            <Check className="w-4 h-4 text-[#0992C2] shrink-0 mt-0.5" />
+                            {displayFeat}
+                          </li>
+                        );
+                      })}
                     </ul>
 
                     {/* CTA Button */}
@@ -260,6 +269,7 @@ export default function PricingPage() {
                   </div>
                 );
               })}
+            </div>
             </div>
           </section>
 

@@ -642,6 +642,13 @@ function AgreementForm() {
             <LayoutTemplate className="w-8 h-8 text-blue-500" />
           </div>
           <h2 className="text-xl font-bold text-gray-900 mb-3">Start from an Offer</h2>
+          {/* Step indicator shown even before an offer is selected */}
+          <div className="flex items-center gap-2 mb-5 text-sm text-gray-500">
+            <span className="flex items-center justify-center w-6 h-6 rounded-full bg-blue-600 text-white text-xs font-bold">1</span>
+            <span className="font-medium text-blue-700">Step 1 of 2</span>
+            <span className="mx-1 text-gray-300">—</span>
+            <span>Select an offer to proceed</span>
+          </div>
           <p className="text-gray-500 mb-8 max-w-sm">
             To create a valid agreement, you must first accept an offer from a prospective tenant. The agreement will be automatically populated with the negotiated rent and terms.
           </p>

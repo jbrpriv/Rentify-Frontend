@@ -233,12 +233,17 @@ function BillingContent() {
                 </div>
 
                 <ul className="space-y-2 mb-6 flex-1">
-                  {plan.features.map((feat) => (
-                    <li key={feat} className="flex items-start gap-2 text-sm text-gray-600">
-                      <Check className="w-4 h-4 text-green-500 shrink-0 mt-0.5" />
-                      {feat}
-                    </li>
-                  ))}
+                  {plan.features.map((feat) => {
+                    const displayFeat = typeof feat === 'string'
+                      ? feat.replace(/-1\s*(properties?)?/gi, (_, p) => p ? `Unlimited ${p}` : 'Unlimited')
+                      : feat;
+                    return (
+                      <li key={feat} className="flex items-start gap-2 text-sm text-gray-600">
+                        <Check className="w-4 h-4 text-green-500 shrink-0 mt-0.5" />
+                        {displayFeat}
+                      </li>
+                    );
+                  })}
                 </ul>
 
                 {/* ── CTA button (below features) ───────────── */}
