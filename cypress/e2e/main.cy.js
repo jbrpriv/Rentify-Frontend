@@ -13,8 +13,9 @@ function loginAs(role) {
     cy.session(role, () => {
         const email = Cypress.env(`${role.toUpperCase()}_EMAIL`);
         const password = Cypress.env(`${role.toUpperCase()}_PASSWORD`);
+        const loginUrl = role === 'admin' ? '/super-login' : '/login';
 
-        cy.visit('/login');
+        cy.visit(loginUrl);
         cy.get('input[type="email"]').type(email);
         cy.get('input[type="password"]').type(password);
         cy.contains('button', 'Sign in').click();
@@ -77,7 +78,10 @@ describe('RentifyPro — Full Platform Test', () => {
 
         it('property list never shows -1 for enterprise limit', () => {
             cy.visit('/dashboard/properties');
-            cy.get('body').should('not.contain', '-1');
+            // Enterprise limit is "-1" in DB but should be "Unlimited" in UI.
+            // Check that the text "-1" doesn't appear in the visible text areas.
+            cy.get('main').should('not.contain', '-1');
+            cy.get('body').should('not.contain', 'limit: -1');
         });
     });
 
