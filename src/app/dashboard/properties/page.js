@@ -109,6 +109,19 @@ export default function PropertiesPage() {
     } finally { setArchiveLoading(false); }
   };
 
+  /* Direct restore — no confirmation modal, used by the Restore button inside the archived list */
+  const restoreDirectly = async (property) => {
+    setArchiveLoading(true);
+    try {
+      await api.put(`/properties/${property._id}/restore`, { reason: 'Restored by landlord' });
+      toast('Property restored successfully', 'success');
+      fetchProperties();
+      if (archivedProperties.length <= 1) setShowArchivedModal(false);
+    } catch (err) {
+      toast(err.response?.data?.message || 'Failed to restore property', 'error');
+    } finally { setArchiveLoading(false); }
+  };
+
   /* Delete */
   const confirmDelete = async () => {
     if (!deleteModal) return;
@@ -290,8 +303,8 @@ export default function PropertiesPage() {
                       {heroImg
                         ? <img src={heroImg} alt={property.title} style={{ width: 56, height: 56, borderRadius: 10, objectFit: 'cover', flexShrink: 0 }} />
                         : <div style={{ width: 56, height: 56, borderRadius: 10, background: 'linear-gradient(135deg,#EDE9FE,#DDD6FE)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                            <Building2 size={22} style={{ color: '#A78BFA' }} />
-                          </div>
+                          <Building2 size={22} style={{ color: '#A78BFA' }} />
+                        </div>
                       }
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <p style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 700, fontSize: '0.95rem', color: '#0F172A', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{property.title}</p>
@@ -306,7 +319,8 @@ export default function PropertiesPage() {
                         )}
                       </div>
                       <button
-                        onClick={() => setArchiveModal({ property })}
+                        onClick={() => restoreDirectly(property)}
+                        disabled={archiveLoading}
                         className="act-btn"
                         style={{ background: '#F0FDF4', color: '#16A34A', border: '1.5px solid #BBF7D0', flexShrink: 0 }}
                       >
