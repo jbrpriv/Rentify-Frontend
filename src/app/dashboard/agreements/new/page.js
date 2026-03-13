@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import api from '@/utils/api';
 import { useToast } from '@/context/ToastContext';
+import { useUser } from '@/context/UserContext';
 import {
   Search, UserCheck, Calendar, FileText, Loader2,
   CheckSquare, Square, ChevronDown, ChevronUp, Tag,
@@ -483,7 +484,12 @@ function AgreementForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { toast } = useToast();
+  const { user } = useUser();
   const offerId = searchParams.get('offerId');
+
+  // Clause access: pro and enterprise only
+  const tier = user?.subscriptionTier || 'free';
+  const canUseClauses = tier === 'pro' || tier === 'enterprise';
 
   const [loading, setLoading] = useState(false);
   const [step, setStep] = useState(1);
@@ -910,34 +916,61 @@ function AgreementForm() {
                     Step 2: Additional Clauses
                     <span className="ml-2 text-sm font-normal text-gray-500">(optional)</span>
                   </h2>
-                  <button
-                    type="button"
-                    onClick={() => setShowTemplatePicker(true)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-semibold text-blue-700 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition"
-                  >
-                    <LayoutTemplate className="w-4 h-4" />
-                    Use Template
-                  </button>
+                  {canUseClauses && (
+                    <button
+                      type="button"
+                      onClick={() => setShowTemplatePicker(true)}
+                      className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-semibold text-blue-700 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition"
+                    >
+                      <LayoutTemplate className="w-4 h-4" />
+                      Use Template
+                    </button>
+                  )}
                 </div>
 
-                {appliedTemplate && (
-                  <div className="mb-3 flex items-center gap-2 text-xs px-3 py-2 bg-green-50 border border-green-200 rounded-lg text-green-700">
-                    <CheckSquare className="w-3.5 h-3.5" />
-                    Template applied: <strong>{appliedTemplate}</strong> — you can still adjust clauses below.
+                {!canUseClauses ? (
+                  /* ── Free tier upgrade prompt ─────────────────────────────── */
+                  <div className="mt-4 rounded-2xl border-2 border-dashed border-blue-200 bg-blue-50 px-6 py-8 text-center">
+                    <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-blue-100">
+                      <ScrollText className="w-6 h-6 text-blue-500" />
+                    </div>
+                    <h3 className="text-base font-bold text-gray-900 mb-1">Custom Clauses — Pro & Enterprise</h3>
+                    <p className="text-sm text-gray-500 max-w-sm mx-auto mb-5">
+                      Add jurisdiction-specific clauses, drag-and-drop to reorder, and apply approved legal templates.
+                      Upgrade to unlock this feature.
+                    </p>
+                    <a
+                      href="/dashboard/billing"
+                      className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-blue-600 text-white text-sm font-bold hover:bg-blue-700 transition"
+                    >
+                      <Zap className="w-4 h-4" /> Upgrade to Pro
+                    </a>
+                    <p className="mt-3 text-xs text-gray-400">You can still finish the agreement without custom clauses.</p>
                   </div>
+                ) : (
+                  /* ── Pro / Enterprise clause picker ───────────────────────── */
+                  <>
+                    {appliedTemplate && (
+                      <div className="mb-3 flex items-center gap-2 text-xs px-3 py-2 bg-green-50 border border-green-200 rounded-lg text-green-700">
+                        <CheckSquare className="w-3.5 h-3.5" />
+                        Template applied: <strong>{appliedTemplate}</strong> — you can still adjust clauses below.
+                      </div>
+                    )}
+
+                    <p className="text-sm text-gray-500 mb-4">
+                      Select approved clauses to include. Drag to reorder. Or start from a template above.
+                    </p>
+
+                    <ClausePicker
+                      selectedClauseIds={selectedClauseIds}
+                      onToggle={handleToggleClause}
+                      onReorder={handleReorderClauses}
+                      offerData={offerData}
+                      formData={formData}
+                    />
+                  </>
                 )}
 
-                <p className="text-sm text-gray-500 mb-4">
-                  Select approved clauses to include. Drag to reorder. Or start from a template above.
-                </p>
-
-                <ClausePicker
-                  selectedClauseIds={selectedClauseIds}
-                  onToggle={handleToggleClause}
-                  onReorder={handleReorderClauses}
-                  offerData={offerData}
-                  formData={formData}
-                />
                 <div className="mt-6 flex justify-between items-center">
                   <button
                     type="button"
@@ -953,7 +986,7 @@ function AgreementForm() {
                     className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-60"
                   >
                     {savingClauses ? <Loader2 className="animate-spin h-5 w-5 mr-2" /> : null}
-                    {selectedClauseIds.length > 0
+                    {canUseClauses && selectedClauseIds.length > 0
                       ? `Attach ${selectedClauseIds.length} Clause${selectedClauseIds.length !== 1 ? 's' : ''} & Finish`
                       : 'Finish Without Clauses'}
                   </button>
@@ -961,8 +994,8 @@ function AgreementForm() {
               </div>
             )}
 
-            {/* Template Picker Modal */}
-            {showTemplatePicker && (
+            {/* Template Picker Modal — pro/enterprise only */}
+            {showTemplatePicker && canUseClauses && (
               <TemplatePicker
                 onApply={handleApplyTemplate}
                 onClose={() => setShowTemplatePicker(false)}
