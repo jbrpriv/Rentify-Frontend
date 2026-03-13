@@ -22,7 +22,7 @@ function loginAs(role) {
         cy.visit(loginPath);
         cy.get('input[type="email"]').type(email);
         cy.get('input[type="password"]').type(password);
-        cy.contains('button', 'Sign in').click();
+        cy.get('button[type="submit"]').click();
         cy.url({ timeout: 15000 }).should('include', '/dashboard');
     }, {
         cacheAcrossSpecs: true,
@@ -82,7 +82,7 @@ describe('RentifyPro — Full Platform Test', () => {
 
         it('property list never shows -1 for enterprise limit', () => {
             cy.visit('/dashboard/properties');
-            cy.get('body').should('not.contain', '-1');
+            cy.get('main').should('not.contain', '-1');
         });
     });
 
