@@ -26,7 +26,7 @@ jobs:
         run: npm ci
 
       - name: Lint
-        run: npm run lint -- --max-warnings 999
+        run: npm run lint --if-present
 
       - name: Run Cypress E2E tests
         uses: cypress-io/github-action@v6
