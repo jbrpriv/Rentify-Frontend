@@ -16,10 +16,10 @@ module.exports = {
           accent: '#F6E7BC',         // warm cream accent
         },
         action: {
-          bg: '#F1F5F9',             // unified grey background
+          bg: '#E6EAF2',             // noticeable grey background
           text: '#0B2D72',           // unified deep blue text
-          border: '#E2E8F0',         // unified grey border
-          hover: '#E2E8F0',          // unified grey hover state
+          border: 'rgba(11, 45, 114, 0.15)', // unified grey border
+          hover: '#DBE2ED',          // unified grey hover state
         },
       },
       borderRadius: {

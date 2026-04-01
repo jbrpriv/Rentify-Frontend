@@ -20,7 +20,7 @@ const ROLE_COLORS = {
 };
 
 function Avatar({ name, size = 'md', role }) {
-  const c = ROLE_COLORS[role] || { bg: 'bg-slate-100', text: 'text-slate-600' };
+  const c = { bg: 'bg-action-bg border border-action-border', text: 'text-action-text' };
   const s = size === 'sm' ? 'w-8 h-8 text-xs' : size === 'lg' ? 'w-12 h-12 text-base' : 'w-10 h-10 text-sm';
   return (
     <div className={`${s} ${c.bg} ${c.text} rounded-2xl flex items-center justify-center font-black flex-shrink-0`}>
@@ -166,14 +166,14 @@ function ChatModal({ active, user, onClose, onNewMessage }) {
                   )}
                   <div className={`flex ${isMe ? 'justify-end' : 'justify-start'} mb-1`}>
                     <div className={`max-w-[72%] px-4 py-2.5 rounded-2xl text-sm leading-relaxed ${
-                      isMe ? 'bg-blue-600 text-white rounded-br-sm' : 'bg-gray-100 text-gray-900 rounded-bl-sm'
+                      isMe ? 'bg-action-text text-action-bg rounded-br-sm' : 'bg-action-bg text-action-text border border-action-border rounded-bl-sm'
                     } ${msg._opt ? 'opacity-60' : ''}`}>
                       {msg.content}
                       <div className={`flex items-center gap-1 mt-0.5 ${isMe ? 'justify-end' : ''}`}>
-                        <span className={`text-[10px] ${isMe ? 'text-blue-200' : 'text-gray-400'}`}>
+                        <span className={`text-[10px] ${isMe ? 'text-action-hover' : 'text-action-text opacity-70'}`}>
                           {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                         </span>
-                        {isMe && !msg._opt && <CheckCheck className="w-3 h-3 text-blue-300" />}
+                        {isMe && !msg._opt && <CheckCheck className="w-3 h-3 text-action-bg" />}
                       </div>
                     </div>
                   </div>
@@ -195,7 +195,7 @@ function ChatModal({ active, user, onClose, onNewMessage }) {
             onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(e); } }}
           />
           <button type="submit" disabled={sending || !content.trim()}
-            className="w-10 h-10 bg-blue-600 text-white rounded-2xl flex items-center justify-center hover:bg-blue-700 disabled:opacity-40 transition-all active:scale-95">
+            className="w-10 h-10 bg-action-text text-action-bg rounded-2xl flex items-center justify-center hover:opacity-90 disabled:opacity-40 transition-all active:scale-95">
             {sending ? <Loader2 className="animate-spin w-4 h-4" /> : <Send className="w-4 h-4" />}
           </button>
         </form>
@@ -258,14 +258,10 @@ function ContactsPanel({ contacts, onSelect, onClose }) {
               <p className="text-sm">No contacts found</p>
             </div>
           ) : filtered.map((c, i) => {
-            const rc = ROLE_COLORS[c.user?.role] || { bg: 'bg-gray-100', text: 'text-gray-600' };
-            // Context tag color — Payment Pending gets amber
-            const ctxColor = c.context === 'Payment Pending'
-              ? 'bg-amber-100 text-amber-700'
-              : `${rc.bg} ${rc.text}`;
+            const ctxColor = 'bg-action-bg text-action-text border border-action-border';
             return (
               <button key={i} onClick={() => select(c)}
-                className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors text-left">
+                className="w-full flex items-center gap-3 px-4 py-3 hover:bg-action-hover transition-colors text-left">
                 <Avatar name={c.user?.name} size="md" role={c.user?.role} />
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-bold text-gray-900 truncate">{c.user?.name}</p>
@@ -428,12 +424,12 @@ export default function MessagesPage() {
             onClick={() => setShowContacts(true)}
             whileHover={{ y: -1 }}
             whileTap={{ scale: 0.97 }}
-            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-2xl text-sm font-bold shadow-lg shadow-blue-100 transition-all"
+            className="flex items-center gap-2 bg-action-bg text-action-text border border-action-border hover:bg-action-hover px-4 py-2.5 rounded-2xl text-sm font-bold shadow-sm transition-all"
           >
             <Users className="w-4 h-4" />
             Contacts
             {contacts.length > 0 && (
-              <span className="bg-blue-500 text-white text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center">
+              <span className="bg-action-text text-action-bg text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center">
                 {contacts.length > 9 ? '9+' : contacts.length}
               </span>
             )}
@@ -486,7 +482,7 @@ export default function MessagesPage() {
                       <div className="relative flex-shrink-0">
                         <Avatar name={other?.name} size="lg" role={other?.role} />
                         {unread && (
-                          <span className="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 bg-blue-500 rounded-full border-2 border-white" />
+                          <span className="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 bg-action-text rounded-full border-2 border-white" />
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
@@ -507,7 +503,7 @@ export default function MessagesPage() {
                         )}
                       </div>
                       {unread && (
-                        <span className="w-5 h-5 bg-blue-600 text-white rounded-full text-[10px] font-black flex items-center justify-center flex-shrink-0">
+                        <span className="w-5 h-5 bg-action-text text-action-bg rounded-full text-[10px] font-black flex items-center justify-center flex-shrink-0">
                           {conv.unreadCount > 9 ? '9+' : conv.unreadCount}
                         </span>
                       )}
