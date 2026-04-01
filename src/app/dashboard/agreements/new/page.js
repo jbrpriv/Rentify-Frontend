@@ -331,12 +331,27 @@ function mapCategoryToSectionKey(category = '') {
   return 'misc';
 }
 
-function AgreementComposer({ selectedClauseIds, onReorder, offerData, formData, showEditor = true }) {
+function AgreementComposer({
+  selectedClauseIds,
+  onReorder,
+  offerData,
+  formData,
+  showEditor = true,
+  canUseClauses = false,
+  formErrors = {},
+  setField = () => {},
+  clearFieldError = () => {},
+  onOpenTemplate = () => {},
+  onFinish = () => {},
+  saving = false,
+  onCancel = () => {},
+  appliedTemplate = '',
+}) {
   const [clauses, setClauses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [categoryFilter, setCategoryFilter] = useState('');
   const [search, setSearch] = useState('');
-  const [editorTab, setEditorTab] = useState('library');
+  const [editorTab, setEditorTab] = useState('terms');
   const [dragState, setDragState] = useState(null);
   const [sectionAssignments, setSectionAssignments] = useState(EMPTY_SECTION_MAP);
   const [hoveredSection, setHoveredSection] = useState('');
@@ -563,11 +578,10 @@ function AgreementComposer({ selectedClauseIds, onReorder, offerData, formData, 
           </div>
 
           <div className="px-3 py-2 border-b bg-white">
-            <div className="grid grid-cols-3 gap-1 bg-gray-100 p-1 rounded-lg">
+            <div className="grid grid-cols-4 gap-1 bg-gray-100 p-1 rounded-lg">
               {[
-                { key: 'library', label: 'Library' },
-                { key: 'selected', label: 'Selected' },
-                { key: 'sections', label: 'Sections' },
+                { key: 'terms', label: 'Terms' },
+                ...(canUseClauses ? [{ key: 'library', label: 'Library' }, { key: 'selected', label: 'Selected' }, { key: 'sections', label: 'Sections' }] : []),
               ].map(tab => (
                 <button
                   key={tab.key}
@@ -582,6 +596,98 @@ function AgreementComposer({ selectedClauseIds, onReorder, offerData, formData, 
           </div>
 
           <div className="p-3 space-y-3 max-h-[62vh] overflow-y-auto">
+            {editorTab === 'terms' && (
+              <div className="space-y-3">
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="block text-[11px] font-semibold text-gray-600 mb-1">Start Date</label>
+                    <input
+                      type="date"
+                      value={formData.startDate}
+                      onChange={(e) => { setField('startDate', e.target.value); clearFieldError('startDate'); }}
+                      className={`w-full rounded-md border px-2 py-1.5 text-xs ${formErrors.startDate ? 'border-red-400 bg-red-50' : 'border-gray-300'}`}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-semibold text-gray-600 mb-1">End Date</label>
+                    <input
+                      type="date"
+                      value={formData.endDate}
+                      onChange={(e) => { setField('endDate', e.target.value); clearFieldError('endDate'); }}
+                      className={`w-full rounded-md border px-2 py-1.5 text-xs ${formErrors.endDate ? 'border-red-400 bg-red-50' : 'border-gray-300'}`}
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="block text-[11px] font-semibold text-gray-600 mb-1">Rent</label>
+                    <input value={formData.rentAmount} disabled className="w-full rounded-md border border-gray-300 px-2 py-1.5 text-xs bg-gray-50 text-gray-500" />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-semibold text-gray-600 mb-1">Deposit</label>
+                    <input value={formData.depositAmount} disabled className="w-full rounded-md border border-gray-300 px-2 py-1.5 text-xs bg-gray-50 text-gray-500" />
+                  </div>
+                </div>
+
+                <div className="rounded-lg border border-gray-200 p-2.5 space-y-2">
+                  <Toggle
+                    enabled={formData.rentEscalationEnabled}
+                    onChange={(v) => setField('rentEscalationEnabled', v)}
+                    label="Annual Escalation"
+                    description="Increase each anniversary"
+                  />
+                  {formData.rentEscalationEnabled && (
+                    <input
+                      type="number"
+                      min="1"
+                      max="50"
+                      value={formData.rentEscalationPercentage}
+                      onChange={(e) => setField('rentEscalationPercentage', e.target.value)}
+                      className="w-full rounded-md border border-gray-300 px-2 py-1.5 text-xs"
+                      placeholder="Escalation %"
+                    />
+                  )}
+                  <Toggle
+                    enabled={formData.petAllowed}
+                    onChange={(v) => setField('petAllowed', v)}
+                    label="Pets Allowed"
+                  />
+                  {formData.petAllowed && (
+                    <input
+                      type="number"
+                      min="0"
+                      value={formData.petDeposit}
+                      onChange={(e) => setField('petDeposit', e.target.value)}
+                      className="w-full rounded-md border border-gray-300 px-2 py-1.5 text-xs"
+                      placeholder="Pet deposit"
+                    />
+                  )}
+                  <Toggle
+                    enabled={formData.utilitiesIncluded}
+                    onChange={(v) => setField('utilitiesIncluded', v)}
+                    label="Utilities Included"
+                  />
+                  {formData.utilitiesIncluded && (
+                    <input
+                      type="text"
+                      value={formData.utilitiesDetails}
+                      onChange={(e) => setField('utilitiesDetails', e.target.value)}
+                      className="w-full rounded-md border border-gray-300 px-2 py-1.5 text-xs"
+                      placeholder="Utilities details"
+                    />
+                  )}
+                  <textarea
+                    rows={2}
+                    value={formData.terminationPolicy}
+                    onChange={(e) => setField('terminationPolicy', e.target.value)}
+                    className="w-full rounded-md border border-gray-300 px-2 py-1.5 text-xs resize-none"
+                    placeholder="Termination policy"
+                  />
+                </div>
+              </div>
+            )}
+
             {editorTab === 'library' && (
               <>
                 <div className="space-y-2">
@@ -690,6 +796,45 @@ function AgreementComposer({ selectedClauseIds, onReorder, offerData, formData, 
                 })}
               </div>
             )}
+
+            {!canUseClauses && (
+              <div className="rounded-lg border border-blue-200 bg-blue-50 p-2.5 text-[11px] text-blue-700">
+                Clause drag-and-drop is available on Pro/Enterprise plans.
+              </div>
+            )}
+
+            {canUseClauses && appliedTemplate && (
+              <div className="rounded-lg border border-green-200 bg-green-50 p-2.5 text-[11px] text-green-700">
+                Template applied: <strong>{appliedTemplate}</strong>
+              </div>
+            )}
+          </div>
+
+          <div className="px-3 py-2.5 border-t bg-gray-50 flex items-center gap-2">
+            {canUseClauses && (
+              <button
+                type="button"
+                onClick={onOpenTemplate}
+                className="px-2.5 py-1.5 text-[11px] font-semibold text-blue-700 border border-blue-200 bg-blue-50 rounded-lg hover:bg-blue-100"
+              >
+                Use Template
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={onCancel}
+              className="px-2.5 py-1.5 text-[11px] font-semibold text-gray-600 border border-gray-300 bg-white rounded-lg hover:bg-gray-100"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={onFinish}
+              disabled={saving}
+              className="ml-auto px-3 py-1.5 text-[11px] font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-60"
+            >
+              {saving ? 'Saving...' : 'Finish Draft'}
+            </button>
           </div>
         </div>
       </div>
@@ -711,7 +856,6 @@ function AgreementForm() {
   const canUseClauses = tier === 'pro' || tier === 'enterprise';
 
   const [loading, setLoading] = useState(false);
-  const [step, setStep] = useState(1);
   const [formErrors, setFormErrors] = useState({});
   const [selectedClauseIds, setSelectedClauseIds] = useState([]);
   const [createdAgreementId, setCreatedAgreementId] = useState(null);
@@ -721,8 +865,6 @@ function AgreementForm() {
   const [showTemplatePicker, setShowTemplatePicker] = useState(false);
   const [appliedTemplate, setAppliedTemplate] = useState('');
   const [mounted, setMounted] = useState(false);
-  const startDateRef = useRef(null);
-  const endDateRef = useRef(null);
 
   useEffect(() => { setMounted(true); }, []);
 
@@ -765,7 +907,6 @@ function AgreementForm() {
           lateFeeAmount: String(data.property?.financials?.lateFeeAmount || 0),
           lateFeeGracePeriodDays: String(data.property?.financials?.lateFeeGracePeriodDays || 5),
         }));
-        setStep(1);
       })
       .catch(() => { })
       .finally(() => setLoading(false));
@@ -783,22 +924,13 @@ function AgreementForm() {
     rentEscalationPercentage: Number(formData.rentEscalationPercentage) || 5,
   });
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    const startDateValue = startDateRef.current?.value ?? formData.startDate;
-    const endDateValue = endDateRef.current?.value ?? formData.endDate;
-
-    if (startDateValue !== formData.startDate || endDateValue !== formData.endDate) {
-      setFormData(prev => ({ ...prev, startDate: startDateValue, endDate: endDateValue }));
-    }
-
+  const validateAgreementForm = () => {
     const errors = {};
-    const start = startDateValue ? new Date(startDateValue) : null;
-    const end = endDateValue ? new Date(endDateValue) : null;
+    const start = formData.startDate ? new Date(formData.startDate) : null;
+    const end = formData.endDate ? new Date(formData.endDate) : null;
 
-    if (!startDateValue) errors.startDate = 'Start date is required.';
-    if (!endDateValue) errors.endDate = 'End date is required.';
+    if (!formData.startDate) errors.startDate = 'Start date is required.';
+    if (!formData.endDate) errors.endDate = 'End date is required.';
     if (start && end && end <= start) errors.endDate = 'End date must be after start date.';
 
     const rent = Number(formData.rentAmount);
@@ -806,16 +938,18 @@ function AgreementForm() {
     if (!formData.rentAmount || isNaN(rent) || rent <= 0) errors.rentAmount = 'Rent must be a positive number.';
     if (!formData.depositAmount || isNaN(deposit) || deposit < 0) errors.depositAmount = 'Deposit must be 0 or more.';
 
-    if (Object.keys(errors).length > 0) { setFormErrors(errors); return; }
-
-    setFormErrors({});
-    setStep(2);
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
   };
 
   const handleReorderClauses = (reorderedIds) => setSelectedClauseIds(reorderedIds);
   const handleApplyTemplate = (clauseIds, templateName) => { setSelectedClauseIds(clauseIds); setAppliedTemplate(templateName); setShowTemplatePicker(false); };
 
   const handleSaveClauses = async () => {
+    if (!validateAgreementForm()) {
+      toast('Please fix lease term errors before finishing the draft.', 'error');
+      return;
+    }
     setSavingClauses(true);
     try {
       let createdId = createdAgreementId;
@@ -860,13 +994,6 @@ function AgreementForm() {
             <LayoutTemplate className="w-8 h-8 text-blue-500" />
           </div>
           <h2 className="text-xl font-bold text-gray-900 mb-3">Start from an Offer</h2>
-          {/* Step indicator shown even before an offer is selected */}
-          <div className="flex items-center gap-2 mb-5 text-sm text-gray-500">
-            <span className="flex items-center justify-center w-6 h-6 rounded-full bg-blue-600 text-white text-xs font-bold">1</span>
-            <span className="font-medium text-blue-700">Step 1 of 2</span>
-            <span className="mx-1 text-gray-300">—</span>
-            <span>Select an offer to proceed</span>
-          </div>
           <p className="text-gray-500 mb-8 max-w-sm">
             To create a valid agreement, you must first accept an offer from a prospective tenant. The agreement will be automatically populated with the negotiated rent and terms.
           </p>
@@ -881,10 +1008,6 @@ function AgreementForm() {
 
       {offerId && (
         <>
-          {/* Flow tracker */}
-          <FlowTracker offerData={offerData} />
-
-          {/* Offer accepted banner */}
           {offerData && (
             <div className="mb-6 flex items-start gap-3 p-4 bg-green-50 border border-green-200 rounded-xl text-sm">
               <CheckSquare className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
@@ -901,342 +1024,38 @@ function AgreementForm() {
             </div>
           )}
 
-          {/* Step indicator */}
-          <div className="flex items-center mb-8">
-            {['Lease Terms', 'Clauses'].map((label, i) => (
-              <div key={label} className="flex items-center">
-                <div className={`flex items-center justify-center w-8 h-8 rounded-full text-sm font-medium ${step > i + 1 ? 'bg-green-500 text-white' : step === i + 1 ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-500'}`}>
-                  {step > i + 1 ? '✓' : i + 1}
-                </div>
-                <span className={`ml-2 text-sm font-medium ${step === i + 1 ? 'text-blue-600' : 'text-gray-500'}`}>{label}</span>
-                {i === 0 && <div className="mx-4 flex-1 h-px bg-gray-200 w-16" />}
-              </div>
-            ))}
-          </div>
-
           <div className="mb-8">
             <AgreementComposer
               selectedClauseIds={selectedClauseIds}
               onReorder={handleReorderClauses}
               offerData={offerData}
               formData={formData}
-              showEditor={step === 2 && canUseClauses}
+              showEditor={true}
+              canUseClauses={canUseClauses}
+              formErrors={formErrors}
+              setField={set}
+              clearFieldError={(key) => setFormErrors((prev) => ({ ...prev, [key]: null }))}
+              onOpenTemplate={() => setShowTemplatePicker(true)}
+              onFinish={handleSaveClauses}
+              saving={savingClauses}
+              onCancel={() => router.push('/dashboard/agreements')}
+              appliedTemplate={appliedTemplate}
             />
           </div>
 
-          <div className="bg-white shadow rounded-lg overflow-hidden">
-            {/* ── Step 1: Lease Terms ────────────────────────────────────────── */}
-            {step === 1 && (
-              <div className="p-6 border-t border-gray-100">
-                <h2 className="text-lg font-medium text-gray-900 flex items-center mb-6">
-                  <FileText className="w-5 h-5 mr-2 text-blue-500" />
-                  Step 1: Lease Terms
-                </h2>
+          {showTemplatePicker && canUseClauses && (
+            <TemplatePicker
+              onApply={handleApplyTemplate}
+              onClose={() => setShowTemplatePicker(false)}
+            />
+          )}
 
-                <form onSubmit={handleSubmit} noValidate className="space-y-6">
-
-                  {/* Dates */}
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">Start Date</label>
-                      <input
-                        ref={startDateRef}
-                        type="date"
-                        required
-                        className={`mt-1 block w-full rounded-md border px-3 py-2 shadow-sm focus:ring-blue-500 focus:border-blue-500 ${formErrors.startDate ? 'border-red-400 bg-red-50' : 'border-gray-300'}`}
-                        value={formData.startDate}
-                        onChange={e => { set('startDate', e.target.value); setFormErrors(p => ({ ...p, startDate: null })); }}
-                      />
-                      {formErrors.startDate && <p className="mt-1 text-xs text-red-600 flex items-center gap-1"><AlertTriangle className="w-3 h-3" />{formErrors.startDate}</p>}
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">End Date</label>
-                      <input
-                        ref={endDateRef}
-                        type="date"
-                        required
-                        className={`mt-1 block w-full rounded-md border px-3 py-2 shadow-sm focus:ring-blue-500 focus:border-blue-500 ${formErrors.endDate ? 'border-red-400 bg-red-50' : 'border-gray-300'}`}
-                        value={formData.endDate}
-                        onChange={e => { set('endDate', e.target.value); setFormErrors(p => ({ ...p, endDate: null })); }}
-                      />
-                      {formErrors.endDate && <p className="mt-1 text-xs text-red-600 flex items-center gap-1"><AlertTriangle className="w-3 h-3" />{formErrors.endDate}</p>}
-                    </div>
-                  </div>
-
-                  {/* Rent & Deposit (fixed from offer) */}
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">Monthly Rent ($)</label>
-                      <input type="number" required disabled
-                        className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm bg-gray-50 text-gray-500 cursor-not-allowed"
-                        value={formData.rentAmount}
-                      />
-                      {formErrors.rentAmount && <p className="mt-1 text-xs text-red-600 flex items-center gap-1"><AlertTriangle className="w-3 h-3" />{formErrors.rentAmount}</p>}
-                      <p className="text-xs text-gray-400 mt-1">Fixed based on offer terms</p>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">Security Deposit ($)</label>
-                      <input type="number" required disabled
-                        className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm bg-gray-50 text-gray-500 cursor-not-allowed"
-                        value={formData.depositAmount}
-                      />
-                      {formErrors.depositAmount && <p className="mt-1 text-xs text-red-600 flex items-center gap-1"><AlertTriangle className="w-3 h-3" />{formErrors.depositAmount}</p>}
-                      <p className="text-xs text-gray-400 mt-1">Fixed based on offer terms</p>
-                    </div>
-                  </div>
-
-                  {/* Late Fee Settings */}
-                  <div className="grid grid-cols-2 gap-4 pt-2 border-t border-gray-100">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">Late Fee Amount ($)</label>
-                      <input type="number" min="0" disabled
-                        className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm bg-gray-50 text-gray-500 cursor-not-allowed"
-                        value={formData.lateFeeAmount}
-                        placeholder="0"
-                      />
-                      <p className="text-xs text-gray-400 mt-1">Pre-filled from property settings</p>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">Grace Period (days)</label>
-                      <input type="number" min="1" max="30" disabled
-                        className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm bg-gray-50 text-gray-500 cursor-not-allowed"
-                        value={formData.lateFeeGracePeriodDays}
-                      />
-                      <p className="text-xs text-gray-400 mt-1">Pre-filled from property settings</p>
-                    </div>
-                  </div>
-
-                  {/* Rent Escalation */}
-                  <div className="pt-2 border-t border-gray-100 space-y-3">
-                    <Toggle
-                      enabled={formData.rentEscalationEnabled}
-                      onChange={v => set('rentEscalationEnabled', v)}
-                      label="Annual Rent Escalation"
-                      description="Automatically increase rent on each lease anniversary"
-                    />
-                    {formData.rentEscalationEnabled && (
-                      <div className="flex items-center gap-3 bg-blue-50 rounded-lg px-4 py-3">
-                        <label className="text-sm font-medium text-gray-700 flex-shrink-0">Increase by</label>
-                        <input
-                          type="number" min="1" max="50"
-                          className="w-20 rounded-md border border-gray-300 px-3 py-1.5 text-sm shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                          value={formData.rentEscalationPercentage}
-                          onChange={e => set('rentEscalationPercentage', e.target.value)}
-                        />
-                        <span className="text-sm text-gray-700">% per year</span>
-                        <span className="text-xs text-blue-600 ml-auto">
-                          ${formData.rentAmount ? Math.round(Number(formData.rentAmount) * (Number(formData.rentEscalationPercentage) / 100)).toLocaleString() : '—'} increase on year 1
-                        </span>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* ── Pet Policy ──────────────────────────────────────────── */}
-                  <div className="pt-2 border-t border-gray-100 space-y-3">
-                    <div className="flex items-center gap-2 mb-1">
-                      <PawPrint className="w-4 h-4 text-gray-400" />
-                      <span className="text-sm font-semibold text-gray-700">Pet Policy</span>
-                    </div>
-
-                    <Toggle
-                      enabled={formData.petAllowed}
-                      onChange={v => set('petAllowed', v)}
-                      label="Pets allowed on the premises"
-                      description="Tenant may keep domestic pets with conditions"
-                    />
-
-                    {formData.petAllowed && (
-                      <div className="rounded-lg bg-amber-50 border border-amber-100 px-4 py-3 space-y-3">
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Pet Deposit ($)
-                            <span className="ml-1 text-xs font-normal text-gray-400">— non-refundable, separate from security deposit</span>
-                          </label>
-                          <input
-                            type="number"
-                            min="0"
-                            placeholder="e.g. 5000"
-                            value={formData.petDeposit}
-                            onChange={e => set('petDeposit', e.target.value)}
-                            className="w-full rounded-md border border-amber-200 bg-white px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-400"
-                          />
-                          <p className="text-xs text-amber-700 mt-1">
-                            This value populates <code className="bg-amber-100 px-1 rounded font-mono">{'{{petDeposit}}'}</code> in pet clauses.
-                          </p>
-                        </div>
-                      </div>
-                    )}
-
-                    {!formData.petAllowed && (
-                      <p className="text-xs text-gray-400 italic">
-                        No pets permitted. Pet-related clause variables will render as "No pets" / "N/A".
-                      </p>
-                    )}
-                  </div>
-
-                  {/* ── Utilities ───────────────────────────────────────────── */}
-                  <div className="pt-2 border-t border-gray-100 space-y-3">
-                    <div className="flex items-center gap-2 mb-1">
-                      <Zap className="w-4 h-4 text-gray-400" />
-                      <span className="text-sm font-semibold text-gray-700">Utilities</span>
-                    </div>
-
-                    <Toggle
-                      enabled={formData.utilitiesIncluded}
-                      onChange={v => set('utilitiesIncluded', v)}
-                      label="Utilities included in rent"
-                      description="Water, gas, electricity, or other services"
-                    />
-
-                    {formData.utilitiesIncluded && (
-                      <div className="rounded-lg bg-emerald-50 border border-emerald-100 px-4 py-3">
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Which utilities are included?
-                        </label>
-                        <input
-                          type="text"
-                          placeholder="e.g. Water, Electricity, Gas"
-                          value={formData.utilitiesDetails}
-                          onChange={e => set('utilitiesDetails', e.target.value)}
-                          className="w-full rounded-md border border-emerald-200 bg-white px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400"
-                        />
-                        <p className="text-xs text-emerald-700 mt-1">
-                          Populates <code className="bg-emerald-100 px-1 rounded font-mono">{'{{utilitiesDetails}}'}</code> in utility clauses.
-                        </p>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* ── Termination Policy ──────────────────────────────────── */}
-                  <div className="pt-2 border-t border-gray-100 space-y-3">
-                    <div className="flex items-center gap-2 mb-1">
-                      <ScrollText className="w-4 h-4 text-gray-400" />
-                      <span className="text-sm font-semibold text-gray-700">Termination Policy</span>
-                      <span className="text-xs text-gray-400 font-normal">(optional)</span>
-                    </div>
-                    <div>
-                      <textarea
-                        rows={3}
-                        placeholder="e.g. Either party may terminate this agreement with 30 days written notice. Early termination by the tenant shall incur a penalty of one month's rent."
-                        value={formData.terminationPolicy}
-                        onChange={e => set('terminationPolicy', e.target.value)}
-                        className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
-                      />
-                      <p className="text-xs text-gray-400 mt-1">
-                        Populates <code className="bg-gray-100 px-1 rounded font-mono">{'{{terminationPolicy}}'}</code> in termination clauses. Leave blank if not applicable.
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="pt-4 flex justify-end">
-                    <button
-                      type="submit"
-                      disabled={loading}
-                      className="inline-flex justify-center items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none disabled:opacity-60"
-                    >
-                      {loading ? <Loader2 className="animate-spin h-5 w-5 mr-2" /> : <FileText className="h-5 w-5 mr-2" />}
-                      Continue to Clauses
-                    </button>
-                  </div>
-                </form>
-              </div>
-            )}
-
-            {/* ── Step 2: Clauses ────────────────────────────────────────────── */}
-            {step === 2 && (
-              <div className="p-6 border-t border-gray-100">
-                <div className="flex items-center justify-between mb-2">
-                  <h2 className="text-lg font-medium text-gray-900 flex items-center">
-                    <Tag className="w-5 h-5 mr-2 text-blue-500" />
-                    Step 2: Additional Clauses
-                    <span className="ml-2 text-sm font-normal text-gray-500">(optional)</span>
-                  </h2>
-                  {canUseClauses && (
-                    <button
-                      type="button"
-                      onClick={() => setShowTemplatePicker(true)}
-                      className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-semibold text-blue-700 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition"
-                    >
-                      <LayoutTemplate className="w-4 h-4" />
-                      Use Template
-                    </button>
-                  )}
-                </div>
-
-                {!canUseClauses ? (
-                  /* ── Free tier upgrade prompt ─────────────────────────────── */
-                  <div className="mt-4 rounded-2xl border-2 border-dashed border-blue-200 bg-blue-50 px-6 py-8 text-center">
-                    <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-blue-100">
-                      <ScrollText className="w-6 h-6 text-blue-500" />
-                    </div>
-                    <h3 className="text-base font-bold text-gray-900 mb-1">Custom Clauses — Pro & Enterprise</h3>
-                    <p className="text-sm text-gray-500 max-w-sm mx-auto mb-5">
-                      Add jurisdiction-specific clauses, drag-and-drop to reorder, and apply approved legal templates.
-                      Upgrade to unlock this feature.
-                    </p>
-                    <a
-                      href="/dashboard/billing"
-                      className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-blue-600 text-white text-sm font-bold hover:bg-blue-700 transition"
-                    >
-                      <Zap className="w-4 h-4" /> Upgrade to Pro
-                    </a>
-                    <p className="mt-3 text-xs text-gray-400">You can still finish the agreement without custom clauses.</p>
-                  </div>
-                ) : (
-                  /* ── Pro / Enterprise clause picker ───────────────────────── */
-                  <>
-                    {appliedTemplate && (
-                      <div className="mb-3 flex items-center gap-2 text-xs px-3 py-2 bg-green-50 border border-green-200 rounded-lg text-green-700">
-                        <CheckSquare className="w-3.5 h-3.5" />
-                        Template applied: <strong>{appliedTemplate}</strong> — you can still adjust clauses below.
-                      </div>
-                    )}
-
-                    <p className="text-sm text-gray-500 mb-4">
-                      Use the floating editor over the live agreement to drag and place clauses into each section.
-                    </p>
-                  </>
-                )}
-
-                <div className="mt-6 flex justify-between items-center">
-                  <button
-                    type="button"
-                    onClick={() => router.push('/dashboard/agreements')}
-                    className="text-sm text-gray-500 hover:text-gray-700 underline"
-                  >
-                    Cancel Draft
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleSaveClauses}
-                    disabled={savingClauses}
-                    className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-60"
-                  >
-                    {savingClauses ? <Loader2 className="animate-spin h-5 w-5 mr-2" /> : null}
-                    {canUseClauses && selectedClauseIds.length > 0
-                      ? `Attach ${selectedClauseIds.length} Clause${selectedClauseIds.length !== 1 ? 's' : ''} & Finish`
-                      : 'Finish Without Clauses'}
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* Template Picker Modal — pro/enterprise only */}
-            {showTemplatePicker && canUseClauses && (
-              <TemplatePicker
-                onApply={handleApplyTemplate}
-                onClose={() => setShowTemplatePicker(false)}
-              />
-            )}
-
-            {/* PDF Preview Modal */}
-            {showPDFPreview && createdAgreementId && (
-              <InlinePDFPreview
-                agreementId={createdAgreementId}
-                onClose={() => setShowPDFPreview(false)}
-              />
-            )}
-          </div>
+          {showPDFPreview && createdAgreementId && (
+            <InlinePDFPreview
+              agreementId={createdAgreementId}
+              onClose={() => setShowPDFPreview(false)}
+            />
+          )}
         </>
       )}
     </div>
