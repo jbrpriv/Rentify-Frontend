@@ -172,7 +172,7 @@ function Lightbox({ images, startIndex, onClose }) {
 
 /* ─── Offer form ──────────────────────────────────────────────────── */
 function OfferForm({ listing, user, router, listingId }) {
-  const { formatMoney, currency, convertToUSD } = useCurrency();
+  const { formatMoney, currency, convertToUSD, convertFromUSD } = useCurrency();
   const defaultDuration = String(listing.leaseTerms?.defaultDurationMonths || 12);
   const [form, setForm] = useState({ monthlyRent: '', securityDeposit: '', leaseDurationMonths: defaultDuration });
   const [submitting, setSubmitting] = useState(false);
@@ -241,7 +241,7 @@ function OfferForm({ listing, user, router, listingId }) {
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
               <label style={{ fontSize: '0.68rem', fontWeight: 700, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{label}</label>
               <span style={{ fontSize: '0.66rem', color: '#64748B', background: 'white', border: '1px solid #E2E8F0', borderRadius: 5, padding: '2px 7px', whiteSpace: 'nowrap' }}>
-                Landlord: <strong style={{ color: '#0F172A' }}>{prefix === 'mo' ? `${listedVal} mo` : formatMoney(listedVal)}</strong>
+                Landlord: <strong style={{ color: '#0F172A' }}>{prefix === 'mo' ? `${listedVal} mo` : formatMoney(convertFromUSD(listedVal))}</strong>
               </span>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -257,7 +257,7 @@ function OfferForm({ listing, user, router, listingId }) {
                   onBlur={e => e.target.style.borderColor = '#E2E8F0'}
                 />
               </div>
-              {form[key] && prefix !== 'mo' && <DiffBadge listed={listedVal} proposed={form[key]} />}
+              {form[key] && prefix !== 'mo' && <DiffBadge listed={convertFromUSD(listedVal)} proposed={form[key]} />}
             </div>
           </div>
         ))}

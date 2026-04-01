@@ -77,6 +77,36 @@ export function CurrencyProvider({ children }) {
     }).format(value);
   }, [convertFromUSD, currency]);
 
+  const formatMoneyCompact = useCallback((amount) => {
+    const value = convertFromUSD(amount);
+    let absValue = Math.abs(value);
+    let suffix = '';
+    
+    if (absValue >= 1000000) {
+      // 1 million and above (10 lacs+)
+      absValue = value / 1000000;
+      suffix = 'M';
+    } else if (absValue >= 100000) {
+      // 100K to 999K (lacs)
+      absValue = value / 100000;
+      suffix = 'L';
+    } else if (absValue >= 1000) {
+      // 1K to 99K
+      absValue = value / 1000;
+      suffix = 'K';
+    }
+    
+    const formatted = absValue.toFixed(1);
+    const symbol = new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency,
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(0).replace(/0/g, '').replace(/,/g, '');
+    
+    return `${symbol}${formatted}${suffix}`;
+  }, [convertFromUSD, currency]);
+
   const value = useMemo(() => ({
     currency,
     supportedCurrencies: SUPPORTED,
@@ -84,9 +114,10 @@ export function CurrencyProvider({ children }) {
     convertFromUSD,
     convertToUSD,
     formatMoney,
+    formatMoneyCompact,
     rates,
     lastUpdated,
-  }), [currency, selectCurrency, convertFromUSD, convertToUSD, formatMoney, rates, lastUpdated]);
+  }), [currency, selectCurrency, convertFromUSD, convertToUSD, formatMoney, formatMoneyCompact, rates, lastUpdated]);
 
   return <CurrencyContext.Provider value={value}>{children}</CurrencyContext.Provider>;
 }

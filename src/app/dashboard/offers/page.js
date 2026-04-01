@@ -93,11 +93,11 @@ function NegotiationHistory({ history, listedTerms }) {
 
 /* ─── Landlord: Counter form ─────────────────────────────────────────────── */
 function CounterForm({ offer, onSubmit, onCancel, loading }) {
-  const { currency } = useCurrency();
+  const { currency, convertFromUSD } = useCurrency();
   const last = offer.history[offer.history.length - 1];
   const [form, setForm] = useState({
-    monthlyRent: last?.monthlyRent || offer.listedTerms?.monthlyRent || '',
-    securityDeposit: last?.securityDeposit || offer.listedTerms?.securityDeposit || '',
+    monthlyRent: convertFromUSD(last?.monthlyRent || offer.listedTerms?.monthlyRent || 0) || '',
+    securityDeposit: convertFromUSD(last?.securityDeposit || offer.listedTerms?.securityDeposit || 0) || '',
     leaseDurationMonths: last?.leaseDurationMonths || offer.listedTerms?.leaseDurationMonths || 12,
     note: '',
   });
@@ -143,7 +143,7 @@ function CounterForm({ offer, onSubmit, onCancel, loading }) {
 
 /* ─── Tenant: New offer form ─────────────────────────────────────────────── */
 function TenantOfferForm({ properties, onSubmit, loading }) {
-  const { formatMoney, currency } = useCurrency();
+  const { formatMoney, currency, convertFromUSD } = useCurrency();
   const [selectedProp, setSelectedProp] = useState('');
   const [form, setForm] = useState({ monthlyRent: '', securityDeposit: '', leaseDurationMonths: '12' });
   const prop = properties.find(p => p._id === selectedProp);
@@ -151,8 +151,8 @@ function TenantOfferForm({ properties, onSubmit, loading }) {
   const set = (k) => (e) => setForm(f => ({ ...f, [k]: e.target.value }));
 
   const fields = [
-    { key: 'monthlyRent', label: 'Monthly Rent', unit: currency, landlordVal: prop?.financials?.monthlyRent },
-    { key: 'securityDeposit', label: 'Security Deposit', unit: currency, landlordVal: prop?.financials?.securityDeposit },
+    { key: 'monthlyRent', label: 'Monthly Rent', unit: currency, landlordVal: convertFromUSD(prop?.financials?.monthlyRent) },
+    { key: 'securityDeposit', label: 'Security Deposit', unit: currency, landlordVal: convertFromUSD(prop?.financials?.securityDeposit) },
     { key: 'leaseDurationMonths', label: 'Duration', unit: 'mo', landlordVal: prop?.leaseTerms?.defaultDurationMonths || 12 },
   ];
 

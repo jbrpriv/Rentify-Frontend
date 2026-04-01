@@ -113,7 +113,7 @@ function LeaseRow({ lease, role }) {
 /* ─── Main ───────────────────────────────────────────────────────────────── */
 export default function DashboardHome() {
   const { user } = useUser();
-  const { formatMoney } = useCurrency();
+  const { formatMoney, formatMoneyCompact } = useCurrency();
   const [agreements, setAgreements] = useState([]);
   const [properties, setProperties] = useState([]);
   const [payments, setPayments] = useState([]);
@@ -335,8 +335,8 @@ export default function DashboardHome() {
         >
           {user.role === 'landlord' && (
             <>
-              <StatCard label="Monthly Income" value={formatMoney(totalRevenue)} icon={TrendingUp} theme={theme} sub={`${activeLeases.length} active lease(s)`} />
-              <StatCard label="Late Fees" value={formatMoney(payments.reduce((s, p) => s + (p.lateFeeAmount || 0), 0))} icon={AlertCircle} theme={ROLE_THEME.admin} sub={`${payments.filter(p => p.status === 'late_fee_applied').length} pending fee(s)`} />
+              <StatCard label="Monthly Income" value={formatMoneyCompact(totalRevenue)} icon={TrendingUp} theme={theme} sub={`${activeLeases.length} active lease(s)`} />
+              <StatCard label="Late Fees" value={formatMoneyCompact(payments.reduce((s, p) => s + (p.lateFeeAmount || 0), 0))} icon={AlertCircle} theme={ROLE_THEME.admin} sub={`${payments.filter(p => p.status === 'late_fee_applied').length} pending fee(s)`} />
               <StatCard label="Properties" value={properties.length} icon={Building2} theme={ROLE_THEME.property_manager} />
               <StatCard label="Agreements" value={agreements.length} icon={FileText} theme={theme} />
               <StatCard label="Active Offers" value={pendingOffers.length} icon={Tag} theme={ROLE_THEME.tenant} />

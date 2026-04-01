@@ -118,7 +118,7 @@ async function downloadReceipt(paymentId, setDownloading, toast, currency) {
 // ─── LANDLORD VIEW ────────────────────────────────────────────────────────────
 function LandlordAnalytics({ data }) {
   const { toast } = useToast();
-  const { formatMoney, currency } = useCurrency();
+  const { formatMoney, formatMoneyCompact, currency } = useCurrency();
   const { monthlyRevenue, paymentHealth, lateFeeCollected, occupancy,
     expiringLeases, agreementStatus, lifetimeRevenue, activeTenantsCount } = data;
 
@@ -171,7 +171,7 @@ function LandlordAnalytics({ data }) {
       <div>
         <SectionTitle>Portfolio Overview</SectionTitle>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <KpiCard label="Lifetime Revenue" value={formatMoney(lifetimeRevenue)} icon={TrendingUp} color="text-blue-600" bg="bg-blue-50" />
+          <KpiCard label="Lifetime Revenue" value={formatMoneyCompact(lifetimeRevenue)} icon={TrendingUp} color="text-blue-600" bg="bg-blue-50" />
           <KpiCard label="Active Tenants" value={activeTenantsCount} icon={Users} color="text-cyan-600" bg="bg-cyan-50" />
           <KpiCard label="Occupancy Rate" value={`${occupancyPct}%`}
             sub={`${occupancy.leased} / ${occupancy.total} units`}
@@ -370,7 +370,7 @@ function LandlordAnalytics({ data }) {
 
 // ─── ADMIN VIEW ───────────────────────────────────────────────────────────────
 function AdminAnalytics({ data, templateData }) {
-  const { formatMoney } = useCurrency();
+  const { formatMoney, formatMoneyCompact } = useCurrency();
   const { monthlyRentRevenue, totalRentRevenue, revenueByGateway,
     churnRate, expiredLast6, createdLast6, userGrowth,
     disputeStats, maintenanceStats } = data;
