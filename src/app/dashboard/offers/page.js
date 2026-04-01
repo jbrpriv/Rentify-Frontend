@@ -205,7 +205,11 @@ function TenantOfferForm({ properties, onSubmit, loading }) {
           </div>
 
           <button
-            onClick={() => onSubmit({ propertyId: selectedProp, ...form })}
+            onClick={() => onSubmit({ 
+              propertyId: selectedProp, 
+              monthlyRent: convertToUSD(Number(form.monthlyRent) || 0),
+              securityDeposit: convertToUSD(Number(form.securityDeposit) || 0),
+            })}
             disabled={loading || !form.monthlyRent || !form.securityDeposit}
             style={{
               width: '100%', padding: '11px', background: 'linear-gradient(135deg,#1D4ED8,#4F46E5)', color: 'white',
@@ -475,6 +479,7 @@ function OfferCard({ offer, user, onAction, actionLoading }) {
 export default function OffersPage() {
   const router = useRouter();
   const { user } = useUser();
+  const { convertToUSD } = useCurrency();
   const [offers, setOffers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(null);
@@ -507,7 +512,15 @@ export default function OffersPage() {
     try {
       if (type === 'decline') await api.put(`/offers/${offerId}/decline`);
       if (type === 'withdraw') await api.delete(`/offers/${offerId}`);
-      if (type === 'counter') await api.post(`/offers/${offerId}/counter`, form);
+      if (type === 'counter') {
+        // Convert counter offer amounts from selected currency to USD before posting
+        const convertedForm = {
+          ...form,
+          monthlyRent: convertToUSD(Number(form.monthlyRent) || 0),
+          securityDeposit: convertToUSD(Number(form.securityDeposit) || 0),
+        };
+        await api.post(`/offers/${offerId}/counter`, convertedForm);
+      }
       showToast(`Offer ${type === 'withdraw' ? 'withdrawn' : type + 'd'} successfully`);
       fetchOffers();
     } catch (err) {

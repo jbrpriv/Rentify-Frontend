@@ -60,6 +60,11 @@ export function CurrencyProvider({ children }) {
 
   const convertFromUSD = useCallback((amount) => safeNumber(amount) * rate, [rate]);
 
+  const convertToUSD = useCallback((amount) => {
+    const num = safeNumber(amount);
+    return rate > 0 ? num / rate : 0;
+  }, [rate]);
+
   const formatMoney = useCallback((amount, opts = {}) => {
     const value = convertFromUSD(amount);
     const maximumFractionDigits = opts.maximumFractionDigits ?? 0;
@@ -77,10 +82,11 @@ export function CurrencyProvider({ children }) {
     supportedCurrencies: SUPPORTED,
     selectCurrency,
     convertFromUSD,
+    convertToUSD,
     formatMoney,
     rates,
     lastUpdated,
-  }), [currency, selectCurrency, convertFromUSD, formatMoney, rates, lastUpdated]);
+  }), [currency, selectCurrency, convertFromUSD, convertToUSD, formatMoney, rates, lastUpdated]);
 
   return <CurrencyContext.Provider value={value}>{children}</CurrencyContext.Provider>;
 }

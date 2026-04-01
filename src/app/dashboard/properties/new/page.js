@@ -118,7 +118,7 @@ function F({ label, req, half, children }) {
 export default function AddPropertyPage() {
   const router = useRouter();
   const { toast } = useToast();
-  const { currency } = useCurrency();
+  const { currency, convertToUSD } = useCurrency();
 
   // ── State ──────────────────────────────────────────────────────────────────
   const [loading, setLoading] = useState(false);
@@ -211,7 +211,19 @@ export default function AddPropertyPage() {
     e.preventDefault();
     setLoading(true);
     try {
-      await api.post('/properties', { ...form, images });
+      // Convert financial values from selected currency to USD before saving
+      const dataToSave = {
+        ...form,
+        financials: {
+          ...form.financials,
+          monthlyRent: convertToUSD(Number(form.financials.monthlyRent) || 0),
+          securityDeposit: convertToUSD(Number(form.financials.securityDeposit) || 0),
+          maintenanceFee: convertToUSD(Number(form.financials.maintenanceFee) || 0),
+          lateFeeAmount: convertToUSD(Number(form.financials.lateFeeAmount) || 0),
+        },
+        images,
+      };
+      await api.post('/properties', dataToSave);
       router.push('/dashboard/properties');
     } catch (error) {
       toast(error.response?.data?.message || 'Failed to create property', 'error');

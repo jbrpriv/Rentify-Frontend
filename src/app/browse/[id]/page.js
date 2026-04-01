@@ -172,7 +172,7 @@ function Lightbox({ images, startIndex, onClose }) {
 
 /* ─── Offer form ──────────────────────────────────────────────────── */
 function OfferForm({ listing, user, router, listingId }) {
-  const { formatMoney, currency } = useCurrency();
+  const { formatMoney, currency, convertToUSD } = useCurrency();
   const defaultDuration = String(listing.leaseTerms?.defaultDurationMonths || 12);
   const [form, setForm] = useState({ monthlyRent: '', securityDeposit: '', leaseDurationMonths: defaultDuration });
   const [submitting, setSubmitting] = useState(false);
@@ -196,8 +196,8 @@ function OfferForm({ listing, user, router, listingId }) {
     try {
       await api.post('/offers', {
         propertyId: listingId,
-        monthlyRent: Number(form.monthlyRent),
-        securityDeposit: Number(form.securityDeposit),
+        monthlyRent: convertToUSD(Number(form.monthlyRent)),
+        securityDeposit: convertToUSD(Number(form.securityDeposit)),
         leaseDurationMonths: Number(form.leaseDurationMonths),
       });
       setSubmitted(true);

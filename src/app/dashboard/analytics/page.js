@@ -33,7 +33,7 @@ function KpiCard({ label, value, sub, icon: Icon, color = 'text-blue-600', bg = 
         <Icon className="w-5 h-5" />
       </div>
       <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">{label}</p>
-      <p className="text-2xl font-black text-gray-900 tracking-tight">{value}</p>
+      <p className="text-xl lg:text-2xl font-black text-gray-900 tracking-tight overflow-hidden text-ellipsis whitespace-nowrap">{value}</p>
       {sub && <p className="text-xs text-gray-400 mt-1">{sub}</p>}
       {trend !== undefined && (
         <div className={`flex items-center gap-1 mt-2 text-xs font-bold ${trendUp ? 'text-green-600' : 'text-red-500'}`}>

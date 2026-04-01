@@ -17,7 +17,7 @@ function EditPropertyContent() {
   const router        = useRouter();
   const searchParams  = useSearchParams();
   const id            = searchParams.get('id');
-  const { currency } = useCurrency();
+  const { currency, convertToUSD } = useCurrency();
 
   const [form, setForm]   = useState(null);
   const [loading, setLoading] = useState(true);
@@ -82,7 +82,17 @@ function EditPropertyContent() {
     setSaving(true);
     setError('');
     try {
-      await api.put(`/properties/${id}`, form);
+      // Convert financial values from selected currency to USD before saving
+      const dataToSave = {
+        ...form,
+        financials: {
+          ...form.financials,
+          monthlyRent: convertToUSD(Number(form.financials.monthlyRent) || 0),
+          securityDeposit: convertToUSD(Number(form.financials.securityDeposit) || 0),
+          lateFeeAmount: convertToUSD(Number(form.financials.lateFeeAmount) || 0),
+        },
+      };
+      await api.put(`/properties/${id}`, dataToSave);
       router.push('/dashboard/properties');
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to save');
