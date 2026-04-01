@@ -453,11 +453,62 @@ function AgreementComposer({
   };
 
   const moveClauseById = (sectionKey, clauseId, direction) => {
-    const current = sectionAssignments[sectionKey] || [];
+    const sectionIndex = CLAUSE_SECTION_CONFIG.findIndex((s) => s.key === sectionKey);
+    if (sectionIndex < 0) return;
+
+    const current = [...(sectionAssignments[sectionKey] || [])];
     const fromIndex = current.findIndex((id) => id === clauseId);
     if (fromIndex < 0) return;
-    const toIndex = direction === 'up' ? fromIndex - 1 : fromIndex + 1;
-    moveClauseWithinSection(sectionKey, fromIndex, toIndex);
+
+    if (direction === 'up') {
+      if (fromIndex > 0) {
+        moveClauseWithinSection(sectionKey, fromIndex, fromIndex - 1);
+        return;
+      }
+
+      if (sectionIndex === 0) return;
+
+      const prevKey = CLAUSE_SECTION_CONFIG[sectionIndex - 1].key;
+      const next = { ...sectionAssignments };
+      next[sectionKey] = (next[sectionKey] || []).filter((id) => id !== clauseId);
+      next[prevKey] = [...(next[prevKey] || []), clauseId];
+      pushUpdate(next);
+      return;
+    }
+
+    if (direction === 'down') {
+      if (fromIndex < current.length - 1) {
+        moveClauseWithinSection(sectionKey, fromIndex, fromIndex + 1);
+        return;
+      }
+
+      if (sectionIndex === CLAUSE_SECTION_CONFIG.length - 1) return;
+
+      const nextKey = CLAUSE_SECTION_CONFIG[sectionIndex + 1].key;
+      const next = { ...sectionAssignments };
+      next[sectionKey] = (next[sectionKey] || []).filter((id) => id !== clauseId);
+      next[nextKey] = [clauseId, ...(next[nextKey] || [])];
+      pushUpdate(next);
+    }
+  };
+
+  const canMoveClause = (sectionKey, clauseId, direction) => {
+    const sectionIndex = CLAUSE_SECTION_CONFIG.findIndex((s) => s.key === sectionKey);
+    if (sectionIndex < 0) return false;
+
+    const current = sectionAssignments[sectionKey] || [];
+    const fromIndex = current.findIndex((id) => id === clauseId);
+    if (fromIndex < 0) return false;
+
+    if (direction === 'up') {
+      return fromIndex > 0 || sectionIndex > 0;
+    }
+
+    if (direction === 'down') {
+      return fromIndex < current.length - 1 || sectionIndex < CLAUSE_SECTION_CONFIG.length - 1;
+    }
+
+    return false;
   };
 
   const handlePanelMouseDown = (e) => {
@@ -584,8 +635,8 @@ function AgreementComposer({
                     {ids.map((id, idx) => {
                       const clause = clausesById.get(id);
                       if (!clause) return null;
-                      const isFirst = idx === 0;
-                      const isLast = idx === ids.length - 1;
+                      const canMoveUp = canMoveClause(section.key, id, 'up');
+                      const canMoveDown = canMoveClause(section.key, id, 'down');
                       return (
                         <div
                           key={id}
@@ -601,7 +652,7 @@ function AgreementComposer({
                                 <div className="flex items-center gap-1">
                                   <button
                                     type="button"
-                                    disabled={isFirst}
+                                    disabled={!canMoveUp}
                                     className="text-xs px-2 py-0.5 rounded border border-blue-200 text-blue-700 hover:bg-blue-100 disabled:opacity-40 disabled:cursor-not-allowed"
                                     onMouseDown={(e) => e.stopPropagation()}
                                     onDragStart={(e) => e.preventDefault()}
@@ -611,7 +662,7 @@ function AgreementComposer({
                                   </button>
                                   <button
                                     type="button"
-                                    disabled={isLast}
+                                    disabled={!canMoveDown}
                                     className="text-xs px-2 py-0.5 rounded border border-blue-200 text-blue-700 hover:bg-blue-100 disabled:opacity-40 disabled:cursor-not-allowed"
                                     onMouseDown={(e) => e.stopPropagation()}
                                     onDragStart={(e) => e.preventDefault()}
