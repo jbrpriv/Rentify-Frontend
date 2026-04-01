@@ -87,7 +87,7 @@ export default function AgreementDetailPage() {
     const router = useRouter();
     const { toast } = useToast();
     const { user } = useUser();
-    const { formatMoney, currency } = useCurrency();
+    const { formatMoney, currency, convertToUSD, convertFromUSD } = useCurrency();
 
     const [agreement, setAgreement] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -137,7 +137,7 @@ export default function AgreementDetailPage() {
         try {
             await api.put(`/agreements/${id}/renew`, {
                 newEndDate: renewForm.newEndDate,
-                newRentAmount: Number(renewForm.newRentAmount),
+                newRentAmount: convertToUSD(Number(renewForm.newRentAmount) || 0),
                 notes: renewForm.notes,
             });
             toast('Renewal proposal sent to tenant!', 'success');
@@ -275,14 +275,14 @@ export default function AgreementDetailPage() {
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">New Monthly Rent *</label>
+                                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">New Monthly Rent ({currency}) *</label>
                                     <input
                                         type="number"
                                         required
                                         min="1"
                                         value={renewForm.newRentAmount}
                                         onChange={e => setRenewForm(f => ({ ...f, newRentAmount: e.target.value }))}
-                                        placeholder={financials?.rentAmount || ''}
+                                        placeholder={String(Math.round(convertFromUSD(financials?.rentAmount || 0)))}
                                         className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     />
                                 </div>
