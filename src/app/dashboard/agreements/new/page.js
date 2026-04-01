@@ -306,13 +306,14 @@ function Toggle({ enabled, onChange, label, description }) {
 }
 
 const CLAUSE_SECTION_CONFIG = [
-  { key: 'payment', title: 'Section A: Payment and Fees', droppable: true },
-  { key: 'occupancy', title: 'Section B: Occupancy and Use', droppable: true },
-  { key: 'maintenance', title: 'Section C: Maintenance and Repairs', droppable: true },
-  { key: 'utilities', title: 'Section D: Utilities and Services', droppable: true },
-  { key: 'pets', title: 'Section E: Pets and Visitors', droppable: true },
-  { key: 'legal', title: 'Section F: Legal and Compliance', droppable: true },
-  { key: 'misc', title: 'Section G: Additional Terms', droppable: true },
+  { key: 'general', title: 'Section A: General Clauses', droppable: true },
+  { key: 'payment', title: 'Section B: Payment and Fees', droppable: true },
+  { key: 'occupancy', title: 'Section C: Occupancy and Use', droppable: true },
+  { key: 'maintenance', title: 'Section D: Maintenance and Repairs', droppable: true },
+  { key: 'utilities', title: 'Section E: Utilities and Services', droppable: true },
+  { key: 'pets', title: 'Section F: Pets and Visitors', droppable: true },
+  { key: 'legal', title: 'Section G: Legal and Compliance', droppable: true },
+  { key: 'misc', title: 'Section H: Additional Terms', droppable: true },
 ];
 
 const EMPTY_SECTION_MAP = CLAUSE_SECTION_CONFIG.reduce((acc, section) => {
@@ -322,6 +323,7 @@ const EMPTY_SECTION_MAP = CLAUSE_SECTION_CONFIG.reduce((acc, section) => {
 
 function mapCategoryToSectionKey(category = '') {
   const value = String(category).toLowerCase();
+  if (value.includes('general')) return 'general';
   if (value.includes('payment') || value.includes('rent') || value.includes('fee')) return 'payment';
   if (value.includes('occup') || value.includes('tenant') || value.includes('use')) return 'occupancy';
   if (value.includes('maint') || value.includes('repair')) return 'maintenance';
@@ -358,8 +360,17 @@ function AgreementComposer({
   const [hoveredSection, setHoveredSection] = useState('');
   const [panelPosition, setPanelPosition] = useState({ x: 24, y: 110 });
   const [draggingPanel, setDraggingPanel] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const [mobilePanelOpen, setMobilePanelOpen] = useState(true);
   const panelRef = useRef(null);
   const panelDragOffsetRef = useRef({ x: 0, y: 0 });
+
+  useEffect(() => {
+    const onResize = () => setIsMobile(window.innerWidth < 1024);
+    onResize();
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
 
   useEffect(() => {
     api.get('/agreements/clauses')
@@ -438,6 +449,7 @@ function AgreementComposer({
   };
 
   const handlePanelMouseDown = (e) => {
+    if (isMobile) return;
     if (e.button !== 0) return;
     const panelRect = panelRef.current?.getBoundingClientRect();
     if (!panelRect) return;
@@ -452,6 +464,7 @@ function AgreementComposer({
   };
 
   useEffect(() => {
+    if (isMobile) return;
     if (!draggingPanel) return;
 
     const handleMouseMove = (e) => {
@@ -479,13 +492,13 @@ function AgreementComposer({
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseup', handleMouseUp);
     };
-  }, [draggingPanel]);
+  }, [draggingPanel, isMobile]);
 
   return (
     <div className="relative rounded-2xl border border-gray-200 bg-[#eef1ef] overflow-hidden min-h-[75vh]">
       <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_10%_10%,rgba(37,99,235,0.10),transparent_45%),radial-gradient(circle_at_85%_80%,rgba(22,163,74,0.08),transparent_40%)]" />
 
-      <div className="relative z-10 h-[75vh] overflow-y-auto p-4 sm:p-6 lg:p-8 xl:pl-8">
+      <div className={`relative z-10 h-[75vh] overflow-y-auto p-4 sm:p-6 lg:p-8 xl:pl-8 ${isMobile ? 'pb-64' : ''}`}>
         <div className="max-w-4xl mx-auto">
           <div className="sticky top-0 z-10 mb-3 bg-white/80 backdrop-blur border border-gray-200 rounded-xl px-4 py-3 flex items-center justify-between">
             <div>
@@ -621,8 +634,8 @@ function AgreementComposer({
       {showEditor && (
       <div
         ref={panelRef}
-        className="fixed z-[70] w-[330px] max-w-[calc(100%-1rem)]"
-        style={{ left: panelPosition.x, top: panelPosition.y }}
+        className={isMobile ? 'fixed z-[70] left-2 right-2 bottom-2' : 'fixed z-[70] w-[330px] max-w-[calc(100%-1rem)]'}
+        style={isMobile ? undefined : { left: panelPosition.x, top: panelPosition.y }}
       >
         <div className="bg-white/95 backdrop-blur border border-gray-200 rounded-2xl shadow-xl overflow-hidden">
           <div onMouseDown={handlePanelMouseDown} className="px-4 py-3 border-b bg-gray-50 cursor-move select-none flex items-center justify-between">
@@ -630,9 +643,22 @@ function AgreementComposer({
               <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Editor</p>
               <p className="text-sm font-semibold text-gray-800">Clause Library</p>
             </div>
-            <GripVertical className="w-4 h-4 text-gray-400" />
+            <div className="flex items-center gap-2">
+              {isMobile && (
+                <button
+                  type="button"
+                  onClick={() => setMobilePanelOpen((v) => !v)}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  {mobilePanelOpen ? <ChevronDown className="w-4 h-4" /> : <ChevronUp className="w-4 h-4" />}
+                </button>
+              )}
+              {!isMobile && <GripVertical className="w-4 h-4 text-gray-400" />}
+            </div>
           </div>
 
+          {(!isMobile || mobilePanelOpen) && (
+          <>
           <div className="px-3 py-2 border-b bg-white">
             <div className="grid grid-cols-4 gap-1 bg-gray-100 p-1 rounded-lg">
               {[
@@ -877,6 +903,8 @@ function AgreementComposer({
               </div>
             )}
           </div>
+          </>
+          )}
 
           <div className="px-3 py-2.5 border-t bg-gray-50 flex items-center gap-2">
             {canUseClauses && (
