@@ -250,7 +250,7 @@ function substituteVariables(text, offer, form) {
   const rules = {
     // camelCase tokens (used by the admin clause builder)
     '{{tenantName}}': offer?.tenant?.name || '[Tenant Name]',
-    '{{landlordName}}': offer?.property?.landlord?.name || '[Landlord Name]',
+    '{{landlordName}}': offer?.landlord?.name || offer?.property?.landlord?.name || '[Landlord Name]',
     '{{propertyTitle}}': offer?.property?.title || '[Property Title]',
     '{{propertyAddress}}': offer?.property?.address ? `${offer.property.address.street}, ${offer.property.address.city}` : '[Property Address]',
     '{{startDate}}': form?.startDate ? new Date(form.startDate).toLocaleDateString() : '[Start Date]',
@@ -267,7 +267,7 @@ function substituteVariables(text, offer, form) {
     '{{currentDate}}': new Date().toLocaleDateString(),
     // snake_case tokens (legacy)
     '{{tenant_name}}': offer?.tenant?.name || '[Tenant Name]',
-    '{{landlord_name}}': offer?.property?.landlord?.name || '[Landlord Name]',
+    '{{landlord_name}}': offer?.landlord?.name || offer?.property?.landlord?.name || '[Landlord Name]',
     '{{property_address}}': offer?.property?.address ? `${offer.property.address.street}, ${offer.property.address.city}` : '[Property Address]',
     '{{start_date}}': form?.startDate ? new Date(form.startDate).toLocaleDateString() : '[Start Date]',
     '{{end_date}}': form?.endDate ? new Date(form.endDate).toLocaleDateString() : '[End Date]',
@@ -399,6 +399,9 @@ function AgreementComposer({
 
   const clausesById = new Map(clauses.map(c => [c._id, c]));
   const assignedClauses = selectedClauseIds.map(id => clausesById.get(id)).filter(Boolean);
+  const leaseDurationMonths = offerData?.history?.length
+    ? offerData.history[offerData.history.length - 1]?.leaseDurationMonths
+    : null;
 
   const pushBucketUpdate = (nextBuckets) => {
     const normalized = nextBuckets.map((b) => ({ ...b, clauseId: b.clauseId ? String(b.clauseId) : null }));
@@ -517,7 +520,7 @@ function AgreementComposer({
 
           <div className="rounded-md bg-white border border-gray-200 p-4">
             <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Permanent Section: Parties and Property</p>
-            <p className="text-sm text-gray-700"><strong>Landlord:</strong> {offerData?.property?.landlord?.name || 'Landlord'}</p>
+            <p className="text-sm text-gray-700"><strong>Landlord:</strong> {offerData?.landlord?.name || offerData?.property?.landlord?.name || 'Landlord'}</p>
             <p className="text-sm text-gray-700"><strong>Tenant:</strong> {offerData?.tenant?.name || 'Tenant'}</p>
             <p className="text-sm text-gray-700"><strong>Premises:</strong> {offerData?.property?.title || 'Property'}{offerData?.property?.address?.street ? `, ${offerData.property.address.street}, ${offerData.property.address.city}` : ''}</p>
           </div>
@@ -687,7 +690,7 @@ function AgreementComposer({
 
             <div className="mt-2 rounded-lg border border-green-200 bg-green-50 px-2.5 py-2 text-[11px] text-green-800">
               <p className="font-semibold">Offer: {offerData?.tenant?.name || 'Tenant'} · ${Number(formData?.rentAmount || 0).toLocaleString()}/mo</p>
-              <p className="text-green-700">{offerData?.property?.title || 'Property'} · {(offerData?.history?.[offerData.history.length - 1]?.leaseDurationMonths) || '—'} months</p>
+              <p className="text-green-700">{offerData?.property?.title || 'Property'} · {leaseDurationMonths || '—'} months</p>
             </div>
           </div>
 
