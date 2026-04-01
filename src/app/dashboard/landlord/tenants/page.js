@@ -4,12 +4,14 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import api from '@/utils/api';
 import { useUser } from '@/context/UserContext';
+import { useCurrency } from '@/context/CurrencyContext';
 import Link from 'next/link';
 import { Users, Loader2, Mail, Phone, Building2, Calendar, AlertCircle, CheckCircle } from 'lucide-react';
 
 export default function LandlordTenantsPage() {
   const router = useRouter();
   const { user: parsed } = useUser();
+  const { formatMoney } = useCurrency();
   // ── Role guard ────────────────────────────────────────────────────────────
   useEffect(() => {
     if (!['landlord','admin'].includes(parsed.role)) {
@@ -122,7 +124,7 @@ export default function LandlordTenantsPage() {
                       </div>
                     </td>
                     <td className="px-4 py-4 font-semibold text-gray-900">
-                      ${a.financials?.rentAmount?.toLocaleString()}
+                      {formatMoney(a.financials?.rentAmount || 0)}
                     </td>
                     <td className="px-4 py-4">
                       <div className={`flex items-center gap-1 text-xs ${expiringSoon ? 'text-amber-600 font-bold' : 'text-gray-400'}`}>
