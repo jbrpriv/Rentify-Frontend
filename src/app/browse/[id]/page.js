@@ -242,7 +242,7 @@ function OfferForm({ listing, user, router, listingId }) {
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
               <label style={{ fontSize: '0.68rem', fontWeight: 700, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{label}</label>
               <span style={{ fontSize: '0.66rem', color: '#64748B', background: 'white', border: '1px solid #E2E8F0', borderRadius: 5, padding: '2px 7px', whiteSpace: 'nowrap' }}>
-                Landlord: <strong style={{ color: '#0F172A' }}>{prefix === 'mo' ? `${listedVal} mo` : formatMoney(convertFromUSD(listedVal))}</strong>
+                Landlord: <strong style={{ color: '#0F172A' }}>{prefix === 'mo' ? `${listedVal} mo` : formatMoney(listedVal)}</strong>
               </span>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -252,7 +252,7 @@ function OfferForm({ listing, user, router, listingId }) {
                 </span>
                 <input
                   type="number" min={0} value={form[key]} onChange={set(key)}
-                  placeholder={String(listedVal)}
+                  placeholder={prefix === 'mo' ? String(listedVal) : String(Math.round(convertFromUSD(listedVal || 0)))}
                   style={{ width: '100%', padding: `9px 10px 9px ${prefix === 'mo' ? 36 : 40}px`, border: '1.5px solid #E2E8F0', borderRadius: 8, fontSize: '0.9rem', fontWeight: 600, outline: 'none', boxSizing: 'border-box', background: 'white', color: '#0F172A', transition: 'border-color .15s' }}
                   onFocus={e => e.target.style.borderColor = '#7C3AED'}
                   onBlur={e => e.target.style.borderColor = '#E2E8F0'}
@@ -506,6 +506,28 @@ function ListingDetailContent() {
                   <div className="info-card">
                     <p className="section-title">Location</p>
                     <MapPicker center={locationMarker} marker={locationMarker} readOnly height={260} />
+                    <div style={{ marginTop: 10, display: 'flex', flexWrap: 'wrap', gap: 10, alignItems: 'center' }}>
+                      <a
+                        href={`https://www.google.com/maps/search/?api=1&query=${locationMarker.lat},${locationMarker.lng}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: 6,
+                          padding: '8px 12px',
+                          borderRadius: 10,
+                          border: '1.5px solid #0B2D72',
+                          background: '#EFF6FF',
+                          color: '#0B2D72',
+                          fontSize: '0.78rem',
+                          fontWeight: 700,
+                          textDecoration: 'none',
+                        }}
+                      >
+                        See on Google Maps
+                      </a>
+                    </div>
                     <p style={{ marginTop: 10, fontSize: '0.8rem', color: '#64748B' }}>
                       {address || 'Address available on request'}
                     </p>
