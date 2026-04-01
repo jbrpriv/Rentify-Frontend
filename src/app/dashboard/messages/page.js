@@ -19,9 +19,16 @@ const ROLE_COLORS = {
   law_reviewer:    { bg: 'bg-violet-100', text: 'text-violet-700' },
 };
 
-function Avatar({ name, size = 'md', role }) {
-  const c = { bg: 'bg-action-bg border border-action-border', text: 'text-action-text' };
+function Avatar({ src, name, size = 'md' }) {
+  const c = { bg: 'bg-[#E6EAF2] border border-[#CBD5E1]', text: 'text-[#0B2D72]' };
   const s = size === 'sm' ? 'w-8 h-8 text-xs' : size === 'lg' ? 'w-12 h-12 text-base' : 'w-10 h-10 text-sm';
+  
+  if (src) {
+    return (
+      <img src={src} alt={name || 'Avatar'} className={`${s} rounded-2xl object-cover flex-shrink-0`} />
+    );
+  }
+
   return (
     <div className={`${s} ${c.bg} ${c.text} rounded-2xl flex items-center justify-center font-black flex-shrink-0`}>
       {name?.charAt(0)?.toUpperCase() || '?'}
@@ -132,7 +139,7 @@ function ChatModal({ active, user, onClose, onNewMessage }) {
       >
         {/* Header */}
         <div className="flex items-center gap-3 px-5 py-4 border-b border-gray-100 flex-shrink-0">
-          <Avatar name={active?.otherName} size="md" role={active?.otherRole} />
+          <Avatar src={active?.otherProfilePicture} name={active?.otherName} size="md" />
           <div className="flex-1 min-w-0">
             <p className="font-black text-gray-900 leading-tight">{active?.otherName}</p>
             <p className="text-xs text-gray-400 truncate">{active?.propertyTitle || 'Direct Message'}</p>
@@ -262,7 +269,7 @@ function ContactsPanel({ contacts, onSelect, onClose }) {
             return (
               <button key={i} onClick={() => select(c)}
                 className="w-full flex items-center gap-3 px-4 py-3 hover:bg-[#DBE2ED] transition-colors text-left">
-                <Avatar name={c.user?.name} size="md" role={c.user?.role} />
+                <Avatar src={c.user?.profilePicture} name={c.user?.name} size="md" />
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-bold text-gray-900 truncate">{c.user?.name}</p>
                   <p className="text-[10px] text-gray-400 truncate">{c.propertyTitle}</p>
@@ -365,6 +372,7 @@ export default function MessagesPage() {
       otherUserId: otherId,
       otherName: other?.name || 'Unknown',
       otherRole: other?.role,
+      otherProfilePicture: other?.profilePicture,
       propertyTitle: conv.property?.title || 'Direct Message',
     });
   };
@@ -378,6 +386,7 @@ export default function MessagesPage() {
       otherUserId: contact.user?._id,
       otherName: contact.user?.name || 'Unknown',
       otherRole: contact.user?.role,
+      otherProfilePicture: contact.user?.profilePicture,
       propertyTitle: contact.propertyTitle || 'Direct Message',
     });
   };
@@ -480,7 +489,7 @@ export default function MessagesPage() {
                       whileHover={{ backgroundColor: '#f9fafb' }}
                     >
                       <div className="relative flex-shrink-0">
-                        <Avatar name={other?.name} size="lg" role={other?.role} />
+                        <Avatar src={other?.profilePicture} name={other?.name} size="lg" />
                         {unread && (
                           <span className="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 bg-[#0B2D72] rounded-full border-2 border-white" />
                         )}

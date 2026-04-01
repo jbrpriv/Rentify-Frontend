@@ -150,9 +150,9 @@ export default function PaymentsPage() {
                 <button
                   key={a._id}
                   onClick={() => setSelected(a)}
-                  className={`px-4 py-2 rounded-xl text-sm font-semibold transition ${selected?._id === a._id
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-white border border-gray-200 text-gray-600 hover:border-blue-400'
+                  className={`px-4 py-2 rounded-xl text-sm font-semibold transition tracking-wide ${selected?._id === a._id
+                    ? 'bg-[#E6EAF2] text-[#0B2D72] border border-[#CBD5E1]'
+                    : 'bg-white border border-[#CBD5E1] text-[#4B5563] hover:border-[#0B2D72]'
                     }`}
                 >
                   {a.property?.title}
@@ -247,7 +247,7 @@ export default function PaymentsPage() {
                             type="button"
                             onClick={() => handlePayNow(i)}
                             disabled={paying === i}
-                            className="mt-3 w-full flex items-center justify-center gap-1 py-1.5 px-2 bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-black uppercase rounded-lg disabled:opacity-60 transition-colors"
+                            className="mt-3 w-full flex items-center justify-center gap-1 py-1.5 px-2 bg-[#E6EAF2] hover:bg-[#DBE2ED] text-[#0B2D72] border border-[#CBD5E1] text-[10px] font-black uppercase rounded-lg disabled:opacity-60 transition-colors"
                           >
                             {paying === i
                               ? <Loader2 className="w-3 h-3 animate-spin" />
@@ -262,7 +262,7 @@ export default function PaymentsPage() {
                             type="button"
                             onClick={() => handleDownloadReceipt(paymentId)}
                             disabled={downloading === paymentId}
-                            className="mt-3 w-full flex items-center justify-center gap-1 py-1.5 px-2 bg-green-50 hover:bg-green-100 text-green-700 text-[10px] font-black uppercase rounded-lg disabled:opacity-60 transition-colors border border-green-200"
+                            className="mt-3 w-full flex items-center justify-center gap-1 py-1.5 px-2 bg-[#E6EAF2] hover:bg-[#DBE2ED] text-[#0B2D72] border border-[#CBD5E1] text-[10px] font-black uppercase rounded-lg disabled:opacity-60 transition-colors"
                           >
                             {downloading === paymentId
                               ? <Loader2 className="w-3 h-3 animate-spin" />

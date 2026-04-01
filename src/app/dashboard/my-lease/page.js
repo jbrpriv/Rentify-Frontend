@@ -371,7 +371,7 @@ export default function MyLeasePage() {
                         <button
                           onClick={() => handleSign(ag._id, ag.property?.title)}
                           disabled={signLoading && pendingSignId === ag._id}
-                          className="flex-1 sm:flex-none inline-flex justify-center items-center px-6 py-2.5 bg-green-600 text-white text-sm font-semibold rounded-lg hover:bg-green-700 disabled:bg-green-400 transition-colors shadow-sm"
+                          className="flex-1 sm:flex-none inline-flex justify-center items-center px-6 py-2.5 bg-[#E6EAF2] text-[#0B2D72] border border-[#CBD5E1] text-sm font-semibold rounded-lg hover:bg-[#DBE2ED] disabled:opacity-60 transition-colors shadow-sm"
                         >
                           <PenLine className="h-4 w-4 mr-2" />
                           Sign Agreement
@@ -380,7 +380,7 @@ export default function MyLeasePage() {
 
                       <button
                         onClick={() => handleDownload(ag._id, ag.property?.title)}
-                        className="flex-1 sm:flex-none inline-flex justify-center items-center px-4 py-2.5 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition-colors shadow-sm"
+                        className="flex-1 sm:flex-none inline-flex justify-center items-center px-4 py-2.5 bg-[#E6EAF2] text-[#0B2D72] border border-[#CBD5E1] text-sm font-medium rounded-lg hover:bg-[#DBE2ED] transition-colors shadow-sm"
                       >
                         <Download className="h-4 w-4 mr-2" /> Download PDF
                       </button>
@@ -396,7 +396,7 @@ export default function MyLeasePage() {
                         <button
                           onClick={() => handlePaymentClick(ag)}
                           disabled={initiatingPayment}
-                          className="w-full sm:w-auto inline-flex justify-center items-center px-8 py-3 bg-blue-600 text-white text-sm font-bold rounded-lg hover:bg-blue-700 shadow-md transform hover:-translate-y-0.5 transition-all disabled:opacity-60"
+                          className="w-full sm:w-auto inline-flex justify-center items-center px-8 py-3 bg-[#E6EAF2] text-[#0B2D72] border border-[#CBD5E1] text-sm font-bold rounded-lg hover:bg-[#DBE2ED] shadow-md transform hover:-translate-y-0.5 transition-all disabled:opacity-60"
                         >
                           {initiatingPayment
                             ? <Loader2 className="animate-spin h-5 w-5 mr-2" />
