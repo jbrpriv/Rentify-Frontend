@@ -410,7 +410,7 @@ function AdminAnalytics({ data, templateData }) {
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           <KpiCard
             label="Total Rent Revenue"
-            value={`${formatMoney(totalRentRevenue / 100000, { maximumFractionDigits: 1, minimumFractionDigits: 1 })}L`}
+            value={formatMoneyCompact(totalRentRevenue)}
             sub="All time, all landlords"
             icon={TrendingUp}
             color="text-blue-600"
