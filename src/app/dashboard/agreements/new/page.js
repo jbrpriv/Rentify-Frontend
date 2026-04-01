@@ -356,9 +356,8 @@ function AgreementComposer({
   const [dragState, setDragState] = useState(null);
   const [sectionAssignments, setSectionAssignments] = useState(EMPTY_SECTION_MAP);
   const [hoveredSection, setHoveredSection] = useState('');
-  const [panelPosition, setPanelPosition] = useState({ x: 16, y: 16 });
+  const [panelPosition, setPanelPosition] = useState({ x: 24, y: 110 });
   const [draggingPanel, setDraggingPanel] = useState(false);
-  const containerRef = useRef(null);
   const panelRef = useRef(null);
   const panelDragOffsetRef = useRef({ x: 0, y: 0 });
 
@@ -440,9 +439,10 @@ function AgreementComposer({
 
   const handlePanelMouseDown = (e) => {
     if (e.button !== 0) return;
-    const containerRect = containerRef.current?.getBoundingClientRect();
     const panelRect = panelRef.current?.getBoundingClientRect();
-    if (!containerRect || !panelRect) return;
+    if (!panelRect) return;
+
+    e.preventDefault();
 
     panelDragOffsetRef.current = {
       x: e.clientX - panelRect.left,
@@ -455,15 +455,14 @@ function AgreementComposer({
     if (!draggingPanel) return;
 
     const handleMouseMove = (e) => {
-      const containerRect = containerRef.current?.getBoundingClientRect();
       const panelRect = panelRef.current?.getBoundingClientRect();
-      if (!containerRect || !panelRect) return;
+      if (!panelRect) return;
 
-      const rawX = e.clientX - containerRect.left - panelDragOffsetRef.current.x;
-      const rawY = e.clientY - containerRect.top - panelDragOffsetRef.current.y;
+      const rawX = e.clientX - panelDragOffsetRef.current.x;
+      const rawY = e.clientY - panelDragOffsetRef.current.y;
 
-      const maxX = Math.max(8, containerRect.width - panelRect.width - 8);
-      const maxY = Math.max(8, containerRect.height - panelRect.height - 8);
+      const maxX = Math.max(8, window.innerWidth - panelRect.width - 8);
+      const maxY = Math.max(8, window.innerHeight - panelRect.height - 8);
 
       setPanelPosition({
         x: Math.min(Math.max(8, rawX), maxX),
@@ -483,7 +482,7 @@ function AgreementComposer({
   }, [draggingPanel]);
 
   return (
-    <div ref={containerRef} className="relative rounded-2xl border border-gray-200 bg-[#eef1ef] overflow-hidden min-h-[75vh]">
+    <div className="relative rounded-2xl border border-gray-200 bg-[#eef1ef] overflow-hidden min-h-[75vh]">
       <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_10%_10%,rgba(37,99,235,0.10),transparent_45%),radial-gradient(circle_at_85%_80%,rgba(22,163,74,0.08),transparent_40%)]" />
 
       <div className="relative z-10 h-[75vh] overflow-y-auto p-4 sm:p-6 lg:p-8 xl:pl-8">
@@ -622,7 +621,7 @@ function AgreementComposer({
       {showEditor && (
       <div
         ref={panelRef}
-        className="absolute z-30 w-[330px] max-w-[calc(100%-1rem)]"
+        className="fixed z-[70] w-[330px] max-w-[calc(100%-1rem)]"
         style={{ left: panelPosition.x, top: panelPosition.y }}
       >
         <div className="bg-white/95 backdrop-blur border border-gray-200 rounded-2xl shadow-xl overflow-hidden">
@@ -649,6 +648,11 @@ function AgreementComposer({
                   {tab.label}
                 </button>
               ))}
+            </div>
+
+            <div className="mt-2 rounded-lg border border-green-200 bg-green-50 px-2.5 py-2 text-[11px] text-green-800">
+              <p className="font-semibold">Offer: {offerData?.tenant?.name || 'Tenant'} · ${Number(formData?.rentAmount || 0).toLocaleString()}/mo</p>
+              <p className="text-green-700">{offerData?.property?.title || 'Property'} · {(offerData?.history?.[offerData.history.length - 1]?.leaseDurationMonths) || '—'} months</p>
             </div>
           </div>
 
@@ -951,6 +955,7 @@ function AgreementForm() {
   });
 
   const set = (key, value) => setFormData(prev => ({ ...prev, [key]: value }));
+  const normalizeClauseIds = (ids = []) => Array.from(new Set(ids.map((id) => String(id))));
 
   // Pre-load offer details
   useEffect(() => {
@@ -1008,11 +1013,12 @@ function AgreementForm() {
   };
 
   const handleReorderClauses = (reorderedIds) => {
-    setSelectedClauseIds(reorderedIds);
+    const normalized = normalizeClauseIds(reorderedIds);
+    setSelectedClauseIds(normalized);
 
     if (appliedTemplate && templateClauseIds.length > 0) {
-      const idSet = new Set(reorderedIds);
-      const stillContainsTemplate = templateClauseIds.every((id) => idSet.has(id));
+      const idSet = new Set(normalized.map((id) => String(id)));
+      const stillContainsTemplate = templateClauseIds.every((id) => idSet.has(String(id)));
       if (!stillContainsTemplate) {
         setAppliedTemplate('');
         setTemplateClauseIds([]);
@@ -1021,16 +1027,17 @@ function AgreementForm() {
   };
 
   const handleApplyTemplate = (clauseIds, templateName) => {
-    setSelectedClauseIds(clauseIds);
-    setTemplateClauseIds(clauseIds);
+    const normalized = normalizeClauseIds(clauseIds);
+    setSelectedClauseIds(normalized);
+    setTemplateClauseIds(normalized);
     setAppliedTemplate(templateName);
     setShowTemplatePicker(false);
   };
 
   const handleRemoveTemplate = () => {
     if (templateClauseIds.length > 0) {
-      const templateIdSet = new Set(templateClauseIds);
-      setSelectedClauseIds((prev) => prev.filter((id) => !templateIdSet.has(id)));
+      const templateIdSet = new Set(templateClauseIds.map((id) => String(id)));
+      setSelectedClauseIds((prev) => prev.filter((id) => !templateIdSet.has(String(id))));
     }
     setAppliedTemplate('');
     setTemplateClauseIds([]);
@@ -1072,11 +1079,7 @@ function AgreementForm() {
   }
 
   return (
-    <div className="max-w-[1400px] mx-auto py-8 px-2 sm:px-4">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Accept Offer & Draft Agreement</h1>
-        <p className="text-gray-500">Review the negotiated terms, add clauses, and finalise the agreement.</p>
-      </div>
+    <div className="max-w-[1400px] mx-auto py-4 px-2 sm:px-4">
 
       {/* No offerId guard */}
       {!offerId && (
@@ -1099,22 +1102,6 @@ function AgreementForm() {
 
       {offerId && (
         <>
-          {offerData && (
-            <div className="mb-6 flex items-start gap-3 p-4 bg-green-50 border border-green-200 rounded-xl text-sm">
-              <CheckSquare className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-              <div>
-                <p className="font-semibold text-green-800">
-                  Accepting offer from {offerData.tenant?.name}
-                </p>
-                <p className="text-green-700 mt-0.5">
-                  {offerData.property?.title} · ${' '}
-                  {offerData.history[offerData.history.length - 1]?.monthlyRent?.toLocaleString()}/mo ·{' '}
-                  {offerData.history[offerData.history.length - 1]?.leaseDurationMonths} months
-                </p>
-              </div>
-            </div>
-          )}
-
           <div className="mb-8">
             <AgreementComposer
               selectedClauseIds={selectedClauseIds}
