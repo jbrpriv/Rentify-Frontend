@@ -279,8 +279,8 @@ function OfferForm({ listing, user, router, listingId }) {
         disabled={submitting}
         style={{
           width: '100%', marginTop: 12, padding: '12px 0',
-          background: submitting ? '#C4B5FD' : 'linear-gradient(135deg,#5B21B6,#7C3AED)',
-          color: 'white', border: 'none', borderRadius: 11,
+          background: '#F1F5F9',
+          color: '#0B2D72', border: '1.5px solid #E2E8F0', borderRadius: 11,
           fontSize: '0.9rem', fontWeight: 700, cursor: submitting ? 'not-allowed' : 'pointer',
           display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
           fontFamily: "'Outfit',sans-serif", transition: 'opacity .2s',
@@ -333,7 +333,7 @@ function ListingDetailContent() {
 
   if (loading) return (
     <div className="min-h-screen flex items-center justify-center">
-      <Loader2 className="animate-spin h-8 w-8" style={{ color: '#7C3AED' }} />
+      <Loader2 className="animate-spin h-8 w-8" style={{ color: '#0B2D72' }} />
     </div>
   );
   if (!listing) return (
@@ -383,7 +383,7 @@ function ListingDetailContent() {
         .photo-thumb:hover { transform:scale(1.03);opacity:.88; }
         .info-card { background:white;border:1px solid #E2E8F0;border-radius:16px;padding:24px; }
         .section-title { font-family:'Outfit',sans-serif;font-weight:700;font-size:1.1rem;color:#0F172A;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid #F1F5F9; }
-        .amenity-chip  { display:inline-flex;align-items:center;gap:6px;background:#F5F3FF;border:1px solid #DDD6FE;color:#5B21B6;border-radius:8px;padding:6px 12px;font-size:.8rem;font-weight:600; }
+        .amenity-chip  { display:inline-flex;align-items:center;gap:6px;background:#F1F5F9;border:1px solid #E2E8F0;color:#0B2D72;border-radius:8px;padding:6px 12px;font-size:.8rem;font-weight:600; }
       `}</style>
 
       {/* Lightbox */}
@@ -458,7 +458,7 @@ function ListingDetailContent() {
                       <p className="section-title" style={{ marginBottom: 0, paddingBottom: 0, borderBottom: 'none', fontSize: '0.85rem' }}>
                         Photos <span style={{ color: '#94A3B8', fontWeight: 500 }}>({images.length})</span>
                       </p>
-                      <button onClick={() => openLightbox(0)} style={{ fontSize: '0.75rem', color: '#7C3AED', fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }}>
+                      <button onClick={() => openLightbox(0)} style={{ fontSize: '0.75rem', color: '#0B2D72', fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }}>
                         <Eye size={13} /> View all
                       </button>
                     </div>
@@ -480,7 +480,7 @@ function ListingDetailContent() {
                             onClick={() => { setActiveImage(i); openLightbox(i); }}
                             style={{ height: 72, position: 'relative' }}
                           >
-                            <img src={img} alt={`Thumb ${i + 1}`} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 8, display: 'block', border: i === activeImage ? '2.5px solid #7C3AED' : '2.5px solid transparent' }} />
+                            <img src={img} alt={`Thumb ${i + 1}`} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 8, display: 'block', border: i === activeImage ? '2.5px solid #0B2D72' : '2.5px solid transparent' }} />
                             {i === 4 && images.length > 5 && (
                               <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,.55)', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 700, fontSize: '0.85rem', fontFamily: "'Outfit',sans-serif" }}>
                                 +{images.length - 5}
@@ -517,8 +517,8 @@ function ListingDetailContent() {
                           gap: 6,
                           padding: '8px 12px',
                           borderRadius: 10,
-                          border: '1.5px solid #0B2D72',
-                          background: '#EFF6FF',
+                          border: '1.5px solid #E2E8F0',
+                          background: '#F1F5F9',
                           color: '#0B2D72',
                           fontSize: '0.78rem',
                           fontWeight: 700,
@@ -571,7 +571,7 @@ function ListingDetailContent() {
                       {listing.landlord?.profilePhoto ? (
                         <img src={listing.landlord.profilePhoto} alt={listing.landlord.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                       ) : (
-                        <div style={{ width: '100%', height: '100%', background: 'linear-gradient(135deg,#5B21B6,#7C3AED)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 700, fontSize: '1.1rem', fontFamily: "'Outfit',sans-serif" }}>
+                        <div style={{ width: '100%', height: '100%', background: 'linear-gradient(135deg,#F1F5F9,#E2E8F0)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#0B2D72', fontWeight: 700, fontSize: '1.1rem', fontFamily: "'Outfit',sans-serif" }}>
                           {(listing.landlord?.name || 'L')[0].toUpperCase()}
                         </div>
                       )}
@@ -613,9 +613,9 @@ function ListingDetailContent() {
                   {/* Offer / status area */}
                   {isViewOnly ? (
                     <div style={{ padding: '16px 20px' }}>
-                      <div style={{ background: '#F5F3FF', border: '1px solid #DDD6FE', borderRadius: 12, padding: 16, textAlign: 'center' }}>
-                        <FileText size={20} style={{ color: '#7C3AED', margin: '0 auto 8px' }} />
-                        <p style={{ fontSize: '0.85rem', fontWeight: 600, color: '#5B21B6' }}>You have an active lease for this property.</p>
+                      <div style={{ background: '#F1F5F9', border: '1px solid #E2E8F0', borderRadius: 12, padding: 16, textAlign: 'center' }}>
+                        <FileText size={20} style={{ color: '#0B2D72', margin: '0 auto 8px' }} />
+                        <p style={{ fontSize: '0.85rem', fontWeight: 600, color: '#0B2D72' }}>You have an active lease for this property.</p>
                       </div>
                     </div>
                   ) : showActiveOffer ? (
@@ -636,8 +636,8 @@ function ListingDetailContent() {
                       <a href={`/login?redirect=/browse/${id}`} style={{
                         display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
                         width: '100%', padding: '13px 0',
-                        background: 'linear-gradient(135deg,#5B21B6,#7C3AED)',
-                        color: 'white', borderRadius: 11, fontSize: '0.9rem', fontWeight: 700,
+                        background: '#F1F5F9', border: '1.5px solid #E2E8F0',
+                        color: '#0B2D72', borderRadius: 11, fontSize: '0.9rem', fontWeight: 700,
                         textDecoration: 'none', fontFamily: "'Outfit',sans-serif",
                       }}>
                         <Tag size={16} /> Login to Make an Offer

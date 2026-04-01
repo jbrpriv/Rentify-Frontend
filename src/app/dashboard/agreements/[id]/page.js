@@ -15,13 +15,13 @@ import {
 
 // ─── Status config ─────────────────────────────────────────────────────────────
 const STATUS = {
-    draft: { label: 'Draft', color: 'bg-gray-100 text-gray-700' },
-    sent: { label: 'Sent', color: 'bg-yellow-100 text-yellow-700' },
-    pending_signature: { label: 'Pending Signature', color: 'bg-orange-100 text-orange-700' },
-    signed: { label: 'Signed', color: 'bg-blue-100 text-blue-700' },
-    active: { label: 'Active', color: 'bg-green-100 text-green-700' },
-    expired: { label: 'Expired', color: 'bg-red-100 text-red-700' },
-    terminated: { label: 'Terminated', color: 'bg-red-100 text-red-800' },
+    draft: { label: 'Draft', color: 'bg-[#F1F5F9] text-[#0B2D72] border border-[#E2E8F0]' },
+    sent: { label: 'Sent', color: 'bg-[#F1F5F9] text-[#0B2D72] border border-[#E2E8F0]' },
+    pending_signature: { label: 'Pending Signature', color: 'bg-[#F1F5F9] text-[#0B2D72] border border-[#E2E8F0]' },
+    signed: { label: 'Signed', color: 'bg-[#F1F5F9] text-[#0B2D72] border border-[#E2E8F0]' },
+    active: { label: 'Active', color: 'bg-[#F1F5F9] text-[#0B2D72] border border-[#E2E8F0]' },
+    expired: { label: 'Expired', color: 'bg-[#F1F5F9] text-[#0B2D72] border border-[#E2E8F0]' },
+    terminated: { label: 'Terminated', color: 'bg-[#F1F5F9] text-[#0B2D72] border border-[#E2E8F0]' },
 };
 
 function StatusBadge({ status }) {
@@ -53,8 +53,8 @@ function PartyCard({ label, person }) {
         <div className="bg-gray-50 rounded-2xl p-4 space-y-2">
             <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">{label}</p>
             <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
-                    <User className="w-5 h-5 text-blue-600" />
+                <div className="w-10 h-10 rounded-full bg-[#F1F5F9] flex items-center justify-center">
+                    <User className="w-5 h-5 text-[#0B2D72]" />
                 </div>
                 <div>
                     <p className="font-bold text-gray-900">{person.name}</p>
@@ -74,7 +74,7 @@ function PartyCard({ label, person }) {
 
 function SignatureBadge({ signed, label }) {
     return (
-        <div className={`flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-semibold ${signed ? 'bg-green-50 text-green-700' : 'bg-yellow-50 text-yellow-700'}`}>
+        <div className={`flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-semibold bg-[#F1F5F9] text-[#0B2D72] border border-[#E2E8F0]`}>
             {signed ? <CheckCircle className="w-4 h-4" /> : <Clock className="w-4 h-4" />}
             {label}: {signed ? 'Signed' : 'Pending'}
         </div>
@@ -155,7 +155,7 @@ export default function AgreementDetailPage() {
     if (loading) {
         return (
             <div className="flex justify-center py-20">
-                <Loader2 className="animate-spin h-8 w-8 text-blue-600" />
+                <Loader2 className="animate-spin h-8 w-8 text-[#0B2D72]" />
             </div>
         );
     }
@@ -323,14 +323,14 @@ export default function AgreementDetailPage() {
                     <button
                         onClick={handleDownload}
                         disabled={downloading}
-                        className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-xl hover:bg-blue-700 disabled:opacity-60 transition"
+                        className="inline-flex items-center gap-2 px-4 py-2 bg-[#F1F5F9] text-[#0B2D72] border border-[#E2E8F0] text-sm font-semibold rounded-xl hover:bg-[#E2E8F0] disabled:opacity-60 transition"
                     >
                         {downloading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
                         Download PDF
                     </button>
                     <button
                         onClick={() => router.push(`/dashboard/agreements/${id}/history`)}
-                        className="inline-flex items-center gap-2 px-4 py-2 border border-gray-200 text-sm font-semibold rounded-xl text-gray-700 hover:bg-gray-50 transition"
+                        className="inline-flex items-center gap-2 px-4 py-2 border border-[#E2E8F0] text-sm font-semibold rounded-xl text-[#0B2D72] bg-[#F1F5F9] hover:bg-[#E2E8F0] transition"
                     >
                         <GitBranch className="w-4 h-4" />
                         Version History
@@ -340,7 +340,7 @@ export default function AgreementDetailPage() {
                     {isLandlordOrAdmin && tenant && (
                         <button
                             onClick={() => router.push(`/dashboard/agreements/${id}/tenant-documents`)}
-                            className="inline-flex items-center gap-2 px-4 py-2 border border-blue-200 bg-blue-50 text-sm font-semibold rounded-xl text-blue-700 hover:bg-blue-100 transition"
+                            className="inline-flex items-center gap-2 px-4 py-2 border border-[#E2E8F0] bg-[#F1F5F9] text-sm font-semibold rounded-xl text-[#0B2D72] hover:bg-[#E2E8F0] transition"
                         >
                             <FolderOpen className="w-4 h-4" />
                             Tenant Documents
@@ -351,7 +351,7 @@ export default function AgreementDetailPage() {
                     {canProposeRenewal && (
                         <button
                             onClick={() => setRenewModal(true)}
-                            className="inline-flex items-center gap-2 px-4 py-2 bg-purple-600 text-white text-sm font-semibold rounded-xl hover:bg-purple-700 transition"
+                            className="inline-flex items-center gap-2 px-4 py-2 bg-[#F1F5F9] text-[#0B2D72] border border-[#E2E8F0] text-sm font-semibold rounded-xl hover:bg-[#E2E8F0] transition"
                         >
                             <RotateCcw className="w-4 h-4" />
                             Propose Renewal

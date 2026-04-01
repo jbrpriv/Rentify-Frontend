@@ -319,12 +319,12 @@ export default function AddPropertyPage() {
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
         .np-input:focus { border-color: #2563EB !important; outline: none; background: #F0F5FF !important; }
-        .type-btn { cursor:pointer; border:2px solid #E2E8F0; border-radius:14px; padding:14px 10px; text-align:center; transition:all 0.2s; background:white; width:100%; }
-        .type-btn:hover { border-color:#93C5FD; background:#F0F5FF; }
-        .type-btn.sel { border-color:#2563EB; background:#EFF6FF; }
-        .am-btn { cursor:pointer; border:1.5px solid #E2E8F0; border-radius:10px; padding:7px 13px; font-size:0.8rem; font-weight:600; display:flex; align-items:center; gap:6px; background:white; color:#475569; transition:all 0.2s; font-family:'Plus Jakarta Sans',sans-serif; }
-        .am-btn:hover { border-color:#93C5FD; color:#2563EB; background:#F0F5FF; }
-        .am-btn.sel { border-color:#2563EB; background:#EFF6FF; color:#1D4ED8; }
+        .type-btn { cursor:pointer; border:2px solid #E2E8F0; border-radius:14px; padding:14px 10px; text-align:center; transition:all 0.2s; background:#F1F5F9; width:100%; }
+        .type-btn:hover { border-color:#93C5FD; background:#E2E8F0; }
+        .type-btn.sel { border-color:#0B2D72; background:#E2E8F0; }
+        .am-btn { cursor:pointer; border:1.5px solid #E2E8F0; border-radius:10px; padding:7px 13px; font-size:0.8rem; font-weight:600; display:flex; align-items:center; gap:6px; background:#F1F5F9; color:#0B2D72; transition:all 0.2s; font-family:'Plus Jakarta Sans',sans-serif; }
+        .am-btn:hover { border-color:#93C5FD; color:#0B2D72; background:#E2E8F0; }
+        .am-btn.sel { border-color:#0B2D72; background:#E2E8F0; color:#0B2D72; }
         .thumb-wrap { position:relative; border-radius:12px; overflow:hidden; aspect-ratio:16/9; background:#F1F5F9; }
         .thumb-wrap img { width:100%; height:100%; object-fit:cover; }
         .rm-btn { position:absolute; top:8px; right:8px; background:rgba(239,68,68,0.9); color:white; border:none; border-radius:50%; width:26px; height:26px; display:flex; align-items:center; justify-content:center; cursor:pointer; opacity:0; transition:opacity 0.2s; }
@@ -433,7 +433,7 @@ export default function AddPropertyPage() {
                       className={`type-btn ${form.type === t.value ? 'sel' : ''}`}
                       onClick={() => set('type', t.value)}>
                       <div style={{ fontSize: '1.4rem', marginBottom: 5 }}>{t.emoji}</div>
-                      <p style={{ fontSize: '0.78rem', fontWeight: 700, color: form.type === t.value ? '#1D4ED8' : '#475569' }}>{t.label}</p>
+                      <p style={{ fontSize: '0.78rem', fontWeight: 700, color: '#0B2D72' }}>{t.label}</p>
                     </button>
                   ))}
                 </div>
@@ -509,9 +509,9 @@ export default function AddPropertyPage() {
                   style={{
                     padding: '10px 14px',
                     borderRadius: 12,
-                    border: '1.5px solid #2563EB',
-                    background: '#EFF6FF',
-                    color: '#1D4ED8',
+                    border: '1.5px solid #E2E8F0',
+                    background: '#F1F5F9',
+                    color: '#0B2D72',
                     fontSize: '0.8rem',
                     fontWeight: 700,
                     cursor: 'pointer',
@@ -531,9 +531,9 @@ export default function AddPropertyPage() {
                     style={{
                       padding: '8px 12px',
                       borderRadius: 10,
-                      border: '1.5px solid #FCA5A5',
-                      background: '#FEF2F2',
-                      color: '#DC2626',
+                      border: '1.5px solid #E2E8F0',
+                      background: '#F1F5F9',
+                      color: '#0B2D72',
                       fontSize: '0.75rem',
                       fontWeight: 700,
                       cursor: 'pointer',
@@ -560,9 +560,9 @@ export default function AddPropertyPage() {
                       style={{
                         padding: '10px 14px',
                         borderRadius: 12,
-                        border: '1.5px solid #CBD5E1',
-                        background: 'white',
-                        color: '#334155',
+                        border: '1.5px solid #E2E8F0',
+                        background: '#F1F5F9',
+                        color: '#0B2D72',
                         fontSize: '0.8rem',
                         fontWeight: 700,
                         cursor: 'pointer',
@@ -669,7 +669,7 @@ export default function AddPropertyPage() {
               Cancel
             </Link>
             <button type="submit" disabled={loading || uploading}
-              style={{ flex: 2, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '14px', background: loading || uploading ? '#93C5FD' : 'linear-gradient(135deg,#1D4ED8,#3B82F6)', color: 'white', border: 'none', borderRadius: 14, fontSize: '0.9rem', fontWeight: 700, cursor: loading || uploading ? 'not-allowed' : 'pointer', fontFamily: "'Outfit',sans-serif", boxShadow: '0 4px 16px rgba(37,99,235,0.25)' }}>
+              style={{ flex: 2, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '14px', background: '#F1F5F9', color: '#0B2D72', border: '1.5px solid #E2E8F0', borderRadius: 14, fontSize: '0.9rem', fontWeight: 700, cursor: loading || uploading ? 'not-allowed' : 'pointer', fontFamily: "'Outfit',sans-serif" }}>
               {loading ? <><Loader2 size={16} className="animate-spin" /> Saving...</>
                 : uploading ? <><Loader2 size={16} className="animate-spin" /> Uploading...</>
                   : <><Upload size={16} /> Save Property</>}

@@ -10,18 +10,9 @@ import {
 } from 'lucide-react';
 
 // ─── Status badge ─────────────────────────────────────────────────────────────
-const STATUS_COLORS = {
-  draft:              'bg-gray-100 text-gray-600',
-  pending_signature:  'bg-yellow-100 text-yellow-700',
-  signed:             'bg-blue-100 text-blue-700',
-  active:             'bg-green-100 text-green-700',
-  expired:            'bg-red-100 text-red-700',
-  cancelled:          'bg-red-100 text-red-600',
-};
-
 function StatusBadge({ status }) {
   return (
-    <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_COLORS[status] || 'bg-gray-100 text-gray-600'}`}>
+    <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium bg-[#F1F5F9] text-[#0B2D72] border border-[#E2E8F0]`}>
       {status?.replace(/_/g, ' ')}
     </span>
   );
@@ -29,16 +20,16 @@ function StatusBadge({ status }) {
 
 // ─── Audit Action Labels ──────────────────────────────────────────────────────
 const ACTION_ICONS = {
-  AGREEMENT_CREATED:       { icon: FileText,  color: 'text-blue-500',  bg: 'bg-blue-50' },
-  SIGNING_INVITES_SENT:    { icon: Shield,    color: 'text-purple-500',bg: 'bg-purple-50' },
-  PARTIAL_SIGNATURE:       { icon: User,      color: 'text-orange-500',bg: 'bg-orange-50' },
-  AGREEMENT_FULLY_SIGNED:  { icon: Shield,    color: 'text-green-500', bg: 'bg-green-50' },
-  LEASE_ACTIVATED:         { icon: Eye,       color: 'text-green-600', bg: 'bg-green-50' },
-  RENT_PAID:               { icon: Eye,       color: 'text-green-500', bg: 'bg-green-50' },
-  AUTO_EXPIRED:            { icon: Clock,     color: 'text-red-500',   bg: 'bg-red-50' },
-  CLAUSES_UPDATED:         { icon: FileText,  color: 'text-blue-500',  bg: 'bg-blue-50' },
-  DOCUMENTS_ARCHIVED:      { icon: Camera,    color: 'text-gray-500',  bg: 'bg-gray-50' },
-  DEFAULT:                 { icon: Clock,     color: 'text-gray-400',  bg: 'bg-gray-50' },
+  AGREEMENT_CREATED:       { icon: FileText,  color: 'text-[#0B2D72]',  bg: 'bg-[#F1F5F9]' },
+  SIGNING_INVITES_SENT:    { icon: Shield,    color: 'text-[#0B2D72]',bg: 'bg-[#F1F5F9]' },
+  PARTIAL_SIGNATURE:       { icon: User,      color: 'text-[#0B2D72]',bg: 'bg-[#F1F5F9]' },
+  AGREEMENT_FULLY_SIGNED:  { icon: Shield,    color: 'text-[#0B2D72]', bg: 'bg-[#F1F5F9]' },
+  LEASE_ACTIVATED:         { icon: Eye,       color: 'text-[#0B2D72]', bg: 'bg-[#F1F5F9]' },
+  RENT_PAID:               { icon: Eye,       color: 'text-[#0B2D72]', bg: 'bg-[#F1F5F9]' },
+  AUTO_EXPIRED:            { icon: Clock,     color: 'text-[#0B2D72]',   bg: 'bg-[#F1F5F9]' },
+  CLAUSES_UPDATED:         { icon: FileText,  color: 'text-[#0B2D72]',  bg: 'bg-[#F1F5F9]' },
+  DOCUMENTS_ARCHIVED:      { icon: Camera,    color: 'text-[#0B2D72]',  bg: 'bg-[#F1F5F9]' },
+  DEFAULT:                 { icon: Clock,     color: 'text-[#0B2D72]',  bg: 'bg-[#F1F5F9]' },
 };
 
 // ─── Version Card ─────────────────────────────────────────────────────────────
@@ -52,7 +43,7 @@ function VersionCard({ version }) {
         onClick={() => setExpanded(v => !v)}
       >
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold text-sm">
+          <div className="w-8 h-8 rounded-full bg-[#F1F5F9] flex items-center justify-center text-[#0B2D72] font-bold text-sm">
             v{version.version}
           </div>
           <div>
@@ -197,7 +188,7 @@ export default function AgreementHistoryPage() {
 
   if (loading) return (
     <div className="flex items-center justify-center h-64">
-      <Loader2 className="animate-spin w-6 h-6 text-blue-600" />
+      <Loader2 className="animate-spin w-6 h-6 text-[#0B2D72]" />
     </div>
   );
 
@@ -222,7 +213,7 @@ export default function AgreementHistoryPage() {
         </button>
         <div>
           <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-            <GitBranch className="w-6 h-6 text-indigo-600" /> Version History
+            <GitBranch className="w-6 h-6 text-[#0B2D72]" /> Version History
           </h1>
           <p className="text-sm text-gray-500">
             Agreement &bull; {data?.currentVersion || 0} version(s) saved
@@ -231,7 +222,7 @@ export default function AgreementHistoryPage() {
         <button
           onClick={takeSnapshot}
           disabled={snapping}
-          className="ml-auto flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm px-4 py-2 rounded-lg transition disabled:opacity-50"
+          className="ml-auto flex items-center gap-2 bg-[#F1F5F9] text-[#0B2D72] border border-[#E2E8F0] hover:bg-[#E2E8F0] text-sm px-4 py-2 rounded-lg transition disabled:opacity-50"
         >
           {snapping ? <Loader2 className="animate-spin w-4 h-4" /> : <Camera className="w-4 h-4" />}
           Save Snapshot
@@ -247,7 +238,7 @@ export default function AgreementHistoryPage() {
       )}
 
       {/* Tabs */}
-      <div className="flex border-b border-gray-200 mb-6 gap-1">
+      <div style={{ display: 'flex', gap: 4, background: '#F1F5F9', borderRadius: 10, padding: 4, alignSelf: 'flex-start', marginBottom: 24, width: 'fit-content' }}>
         {[
           { key: 'versions', label: 'Versions', count: data?.versionHistory?.length },
           { key: 'audit',    label: 'Audit Log', count: data?.auditLog?.length },
@@ -255,15 +246,15 @@ export default function AgreementHistoryPage() {
           <button
             key={t.key}
             onClick={() => setTab(t.key)}
-            className={`px-4 py-3 text-sm font-medium border-b-2 transition ${
-              tab === t.key
-                ? 'border-indigo-600 text-indigo-700'
-                : 'border-transparent text-gray-500 hover:text-gray-700'
-            }`}
+            style={{
+              padding: '6px 16px', borderRadius: 7, fontSize: '0.82rem', fontWeight: 700, border: 'none', cursor: 'pointer',
+              background: tab === t.key ? 'white' : 'transparent', color: tab === t.key ? '#0F172A' : '#94A3B8',
+              boxShadow: tab === t.key ? '0 1px 4px rgba(0,0,0,0.08)' : 'none', display: 'flex', alignItems: 'center', gap: 6
+            }}
           >
             {t.label}
             {t.count > 0 && (
-              <span className="ml-2 bg-gray-100 text-gray-600 text-xs px-1.5 py-0.5 rounded-full">
+               <span className="bg-[#F1F5F9] text-[#0B2D72] border border-[#E2E8F0] text-xs px-1.5 py-0.5 rounded-full">
                 {t.count}
               </span>
             )}

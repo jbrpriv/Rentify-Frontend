@@ -98,14 +98,7 @@ export default function AgreementsPage() {
   };
 
   const getStatusColor = (status) => {
-    const colors = {
-      draft: 'bg-gray-100 text-gray-800',
-      sent: 'bg-yellow-100 text-yellow-800',
-      active: 'bg-green-100 text-green-800',
-      expired: 'bg-red-100 text-red-800',
-      terminated: 'bg-red-100 text-red-800',
-    };
-    return colors[status] || 'bg-gray-100 text-gray-800';
+    return 'bg-[#F1F5F9] text-[#0B2D72] border border-[#E2E8F0]';
   };
 
   if (loading) return (
@@ -165,19 +158,17 @@ export default function AgreementsPage() {
       )}
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-900">Rental Agreements</h1>
-        <div className="flex rounded-xl border border-gray-200 overflow-hidden">
-          <button
-            onClick={() => setActiveTab('active')}
-            className={`px-4 py-2 text-sm font-semibold transition ${activeTab === 'active' ? 'bg-blue-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'}`}
-          >
-            Active ({activeAgreements.length})
-          </button>
-          <button
-            onClick={() => setActiveTab('history')}
-            className={`px-4 py-2 text-sm font-semibold transition border-l border-gray-200 ${activeTab === 'history' ? 'bg-blue-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'}`}
-          >
-            History ({historyAgreements.length})
-          </button>
+        <div style={{ display: 'flex', gap: 4, background: '#F1F5F9', borderRadius: 10, padding: 4, alignSelf: 'flex-start' }}>
+          {[['active', `Active (${activeAgreements.length})`], ['history', `History (${historyAgreements.length})`]].map(([k, label]) => (
+            <button key={k} onClick={() => setActiveTab(k)}
+              style={{
+                padding: '6px 16px', borderRadius: 7, fontSize: '0.82rem', fontWeight: 700, border: 'none', cursor: 'pointer',
+                background: activeTab === k ? 'white' : 'transparent', color: activeTab === k ? '#0F172A' : '#94A3B8',
+                boxShadow: activeTab === k ? '0 1px 4px rgba(0,0,0,0.08)' : 'none'
+              }}>
+              {label}
+            </button>
+          ))}
         </div>
       </div>
 
@@ -231,15 +222,14 @@ export default function AgreementsPage() {
                           )}
                         </div>
 
-                        {/* Signature Status */}
                         <div className="flex gap-3 mt-2">
-                          <span className={`inline-flex items-center text-xs px-2 py-1 rounded-full ${ag.signatures?.landlord?.signed ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
+                          <span className="inline-flex items-center text-xs px-2 py-1 rounded-full bg-[#F1F5F9] text-[#0B2D72] border border-[#E2E8F0]">
                             {ag.signatures?.landlord?.signed
                               ? <><CheckCircle className="h-3 w-3 mr-1" /> Landlord Signed</>
                               : <><Clock className="h-3 w-3 mr-1" /> Landlord Pending</>
                             }
                           </span>
-                          <span className={`inline-flex items-center text-xs px-2 py-1 rounded-full ${ag.signatures?.tenant?.signed ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
+                          <span className="inline-flex items-center text-xs px-2 py-1 rounded-full bg-[#F1F5F9] text-[#0B2D72] border border-[#E2E8F0]">
                             {ag.signatures?.tenant?.signed
                               ? <><CheckCircle className="h-3 w-3 mr-1" /> Tenant Signed</>
                               : <><Clock className="h-3 w-3 mr-1" /> Tenant Pending</>
@@ -261,7 +251,7 @@ export default function AgreementsPage() {
                           <button
                             onClick={() => handleSign(ag._id, ag.property?.title)}
                             disabled={signLoading && pendingSignId === ag._id}
-                            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 disabled:bg-green-400"
+                            className="inline-flex items-center px-4 py-2 border border-[#E2E8F0] text-sm font-medium rounded-md text-[#0B2D72] bg-[#F1F5F9] hover:bg-[#E2E8F0] disabled:opacity-50"
                           >
                             <PenLine className="h-4 w-4 mr-2" />
                             Sign
@@ -280,7 +270,7 @@ export default function AgreementsPage() {
                                 toast(err.response?.data?.message || 'Failed to send invites', 'error');
                               }
                             }}
-                            className="inline-flex items-center px-4 py-2 border border-purple-500 text-sm font-medium rounded-md text-purple-600 bg-white hover:bg-purple-50"
+                            className="inline-flex items-center px-4 py-2 border border-[#E2E8F0] text-sm font-medium rounded-md text-[#0B2D72] bg-[#F1F5F9] hover:bg-[#E2E8F0]"
                           >
                             <Mail className="h-4 w-4 mr-2" /> Send Invites
                           </button>
@@ -288,7 +278,7 @@ export default function AgreementsPage() {
 
                       <button
                         onClick={() => handleDownload(ag._id, ag.property?.title)}
-                        className="inline-flex items-center px-4 py-2 border border-blue-600 text-sm font-medium rounded-md text-blue-600 bg-white hover:bg-blue-50"
+                        className="inline-flex items-center px-4 py-2 border border-[#E2E8F0] text-sm font-medium rounded-md text-[#0B2D72] bg-[#F1F5F9] hover:bg-[#E2E8F0]"
                       >
                         <Download className="h-4 w-4 mr-2" /> PDF
                       </button>
@@ -296,7 +286,7 @@ export default function AgreementsPage() {
                       {/* View detail */}
                       <button
                         onClick={() => router.push(`/dashboard/agreements/${ag._id}`)}
-                        className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-600 bg-white hover:bg-gray-50"
+                        className="inline-flex items-center px-4 py-2 border border-[#E2E8F0] text-sm font-medium rounded-md text-[#0B2D72] bg-[#F1F5F9] hover:bg-[#E2E8F0]"
                         title="View agreement detail"
                       >
                         <Eye className="h-4 w-4 mr-2" /> View
@@ -305,7 +295,7 @@ export default function AgreementsPage() {
                       {/* Version history */}
                       <button
                         onClick={() => router.push(`/dashboard/agreements/${ag._id}/history`)}
-                        className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-600 bg-white hover:bg-gray-50"
+                        className="inline-flex items-center px-4 py-2 border border-[#E2E8F0] text-sm font-medium rounded-md text-[#0B2D72] bg-[#F1F5F9] hover:bg-[#E2E8F0]"
                         title="View version history"
                       >
                         <GitBranch className="h-4 w-4 mr-2" /> History

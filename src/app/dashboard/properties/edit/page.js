@@ -152,7 +152,7 @@ function EditPropertyContent() {
     }
   };
 
-  if (loading) return <div className="flex justify-center py-20"><Loader2 className="animate-spin h-8 w-8 text-blue-600" /></div>;
+  if (loading) return <div className="flex justify-center py-20"><Loader2 className="animate-spin h-8 w-8 text-[#0B2D72]" /></div>;
   if (!form)   return <p className="text-red-500">{error}</p>;
 
   return (
@@ -187,7 +187,7 @@ function EditPropertyContent() {
             <div>
               <label className="label">Listing Status</label>
               <label className="flex items-center gap-2 mt-2.5 cursor-pointer">
-                <input type="checkbox" checked={form.isListed} onChange={e => set('isListed', e.target.checked)} className="w-4 h-4 accent-blue-600" />
+                <input type="checkbox" checked={form.isListed} onChange={e => set('isListed', e.target.checked)} className="w-4 h-4 accent-[#0B2D72]" />
                 <span className="text-sm text-gray-700">Listed publicly on marketplace</span>
               </label>
             </div>
@@ -254,8 +254,8 @@ function EditPropertyContent() {
                   onClick={() => toggleAmenity(a)}
                   className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition ${
                     selected
-                      ? 'bg-blue-600 text-white border-blue-600'
-                      : 'bg-white text-gray-600 border-gray-200 hover:border-blue-300'
+                      ? 'bg-[#F1F5F9] text-[#0B2D72] border-[#0B2D72]'
+                      : 'bg-[#F1F5F9] text-[#0B2D72] border-[#E2E8F0] hover:border-[#0B2D72]'
                   }`}
                 >
                   {a}
@@ -273,7 +273,7 @@ function EditPropertyContent() {
           <button
             type="submit"
             disabled={saving}
-            className="flex-1 flex items-center justify-center gap-2 bg-blue-600 text-white rounded-2xl py-3.5 text-sm font-black hover:bg-blue-700 disabled:bg-blue-400 transition"
+            className="flex-1 flex items-center justify-center gap-2 bg-[#F1F5F9] text-[#0B2D72] border border-[#E2E8F0] rounded-2xl py-3.5 text-sm font-black hover:bg-[#E2E8F0] disabled:bg-[#F1F5F9] disabled:opacity-50 transition"
           >
             {saving ? <Loader2 className="animate-spin w-4 h-4" /> : <><Save className="w-4 h-4" /> Save Changes</>}
           </button>
@@ -321,13 +321,13 @@ function EditPropertyContent() {
               value={managerEmail}
               onChange={e => { setManagerEmail(e.target.value); setManagerSearch(null); setManagerError(''); setManagerSuccess(''); }}
               onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), handleSearchManager())}
-              className="flex-1 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="flex-1 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#0B2D72]"
             />
             <button
               type="button"
               onClick={handleSearchManager}
               disabled={managerSearching || !managerEmail.trim()}
-              className="flex items-center gap-1.5 px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-bold rounded-xl transition disabled:opacity-50"
+              className="flex items-center gap-1.5 px-4 py-2.5 bg-[#F1F5F9] hover:bg-[#E2E8F0] text-[#0B2D72] text-sm font-bold rounded-xl transition disabled:opacity-50"
             >
               {managerSearching ? <Loader2 className="animate-spin h-4 w-4" /> : <Search className="h-4 w-4" />}
               Lookup
@@ -351,7 +351,7 @@ function EditPropertyContent() {
               <button
                 onClick={() => handleAssignManager(managerSearch._id)}
                 disabled={assigning}
-                className="flex items-center gap-1.5 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg px-4 py-1.5 transition"
+                className="flex items-center gap-1.5 text-xs font-bold bg-[#F1F5F9] text-[#0B2D72] border border-[#E2E8F0] hover:bg-[#E2E8F0] rounded-lg px-4 py-1.5 transition"
               >
                 {assigning ? <Loader2 className="animate-spin h-3.5 w-3.5" /> : <UserCheck className="h-3.5 w-3.5" />}
                 Assign
@@ -368,7 +368,7 @@ export default function EditPropertyPage() {
   return (
     <Suspense fallback={
       <div className="flex justify-center py-20">
-        <Loader2 className="animate-spin h-8 w-8 text-blue-600" />
+        <Loader2 className="animate-spin h-8 w-8 text-[#0B2D72]" />
       </div>
     }>
       <EditPropertyContent />
@@ -395,7 +395,7 @@ function InputField({ label, value, onChange, type = 'text', required, placehold
         onChange={e => onChange(e.target.value)}
         required={required}
         placeholder={placeholder}
-        className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#0B2D72]"
       />
     </div>
   );

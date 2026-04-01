@@ -191,7 +191,7 @@ export default function PropertiesPage() {
         .prop-card { background:white;border-radius:20px;border:1px solid #E2E8F0;overflow:hidden;box-shadow:0 1px 6px rgba(15,23,42,.06);transition:box-shadow .2s,transform .2s; }
         .prop-card:hover { box-shadow:0 8px 28px rgba(15,23,42,.10);transform:translateY(-2px); }
         .prop-img { width:100%;height:145px;object-fit:cover; }
-        .prop-img-ph { width:100%;height:145px;background:linear-gradient(135deg,#EDE9FE,#DDD6FE);display:flex;align-items:center;justify-content:center; }
+        .prop-img-ph { width:100%;height:145px;background:linear-gradient(135deg,#F1F5F9,#E2E8F0);display:flex;align-items:center;justify-content:center; }
         .act-btn { display:inline-flex;align-items:center;justify-content:center;gap:5px;padding:7px 13px;border-radius:9px;font-size:.78rem;font-weight:700;cursor:pointer;border:none;transition:all .15s;font-family:'Plus Jakarta Sans',sans-serif; }
         .cm-overlay { position:fixed;inset:0;background:rgba(15,23,42,0.55);backdrop-filter:blur(4px);z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px; }
         .cm-card { background:white;border-radius:24px;padding:36px 32px;max-width:420px;width:100%;box-shadow:0 24px 80px rgba(15,23,42,.2); }
@@ -304,8 +304,8 @@ export default function PropertiesPage() {
                     <div key={property._id} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '14px 16px', background: '#F8FAFC', borderRadius: 14, border: '1px solid #E2E8F0' }}>
                       {heroImg
                         ? <img src={heroImg} alt={property.title} style={{ width: 56, height: 56, borderRadius: 10, objectFit: 'cover', flexShrink: 0 }} />
-                        : <div style={{ width: 56, height: 56, borderRadius: 10, background: 'linear-gradient(135deg,#EDE9FE,#DDD6FE)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                          <Building2 size={22} style={{ color: '#A78BFA' }} />
+                        : <div style={{ width: 56, height: 56, borderRadius: 10, background: 'linear-gradient(135deg,#F1F5F9,#E2E8F0)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                          <Building2 size={22} style={{ color: '#94A3B8' }} />
                         </div>
                       }
                       <div style={{ flex: 1, minWidth: 0 }}>
@@ -324,7 +324,7 @@ export default function PropertiesPage() {
                         onClick={() => restoreDirectly(property)}
                         disabled={archiveLoading}
                         className="act-btn"
-                        style={{ background: '#F0FDF4', color: '#16A34A', border: '1.5px solid #BBF7D0', flexShrink: 0 }}
+                        style={{ background: '#F1F5F9', color: '#0B2D72', border: '1.5px solid #E2E8F0', flexShrink: 0 }}
                       >
                         <ArchiveRestore size={13} /> Restore
                       </button>
@@ -404,7 +404,7 @@ export default function PropertiesPage() {
                 >
                   {heroImg
                     ? <img src={heroImg} alt={property.title} className="prop-img" />
-                    : <div className="prop-img-ph"><Building2 size={32} style={{ color: '#A78BFA' }} /></div>
+                    : <div className="prop-img-ph"><Building2 size={32} style={{ color: '#94A3B8' }} /></div>
                   }
                   <div style={{ padding: '16px 18px' }}>
                     {/* Badges */}
@@ -447,25 +447,25 @@ export default function PropertiesPage() {
                     {/* Actions */}
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 7, paddingTop: 14, borderTop: '1px solid #F1F5F9' }}>
                       <Link href={`/dashboard/properties/edit?id=${property._id}`}
-                        className="act-btn" style={{ background: '#F8FAFC', color: '#475569', border: '1.5px solid #E2E8F0', textDecoration: 'none' }}>
+                        className="act-btn" style={{ background: '#F1F5F9', color: '#0B2D72', border: '1.5px solid #E2E8F0', textDecoration: 'none' }}>
                         Edit
                       </Link>
 
                       {!isOccupied && (
                         <button onClick={() => setPublishModal({ property })} className="act-btn"
-                          style={{ flex: 1, background: property.isListed ? '#FFF7F7' : '#F5F3FF', color: property.isListed ? '#DC2626' : '#7C3AED', border: `1.5px solid ${property.isListed ? '#FECACA' : '#DDD6FE'}` }}>
+                          style={{ flex: 1, background: '#F1F5F9', color: '#0B2D72', border: '1.5px solid #E2E8F0' }}>
                           {property.isListed ? <><EyeOff size={13} /> Unpublish</> : <><Eye size={13} /> Publish</>}
                         </button>
                       )}
 
                       <Link href={`/dashboard/agreements/new?propertyId=${property._id}`}
-                        className="act-btn" style={{ background: '#EFF6FF', color: '#2563EB', border: '1.5px solid #BFDBFE', textDecoration: 'none' }}>
+                        className="act-btn" style={{ background: '#F1F5F9', color: '#0B2D72', border: '1.5px solid #E2E8F0', textDecoration: 'none' }}>
                         <FileText size={13} /> Agreement
                       </Link>
 
                       {!hasManager && !hasPendingInvite && (
                         <button onClick={() => openInviteModal(property._id)} disabled={inviting === property._id} className="act-btn"
-                          style={{ background: '#F5F3FF', color: '#7C3AED', border: '1.5px solid #DDD6FE' }}>
+                          style={{ background: '#F1F5F9', color: '#0B2D72', border: '1.5px solid #E2E8F0' }}>
                           {inviting === property._id ? <Loader2 size={13} className="animate-spin" /> : <UserPlus size={13} />} Invite PM
                         </button>
                       )}
@@ -475,7 +475,7 @@ export default function PropertiesPage() {
                         <button
                           onClick={() => setArchiveModal({ property })}
                           className="act-btn"
-                          style={{ background: '#FFFBEB', color: '#D97706', border: '1.5px solid #FDE68A' }}
+                          style={{ background: '#F1F5F9', color: '#0B2D72', border: '1.5px solid #E2E8F0' }}
                           title="Archive property"
                         >
                           <Archive size={13} /> Archive
@@ -485,7 +485,7 @@ export default function PropertiesPage() {
                       {/* Delete — only if NOT occupied */}
                       {!isOccupied && (
                         <button onClick={() => setDeleteModal({ property })} className="act-btn"
-                          style={{ background: '#FFF7F7', color: '#DC2626', border: '1.5px solid #FECACA' }}>
+                          style={{ background: '#F1F5F9', color: '#0B2D72', border: '1.5px solid #E2E8F0' }}>
                           <Trash2 size={13} /> Delete
                         </button>
                       )}
