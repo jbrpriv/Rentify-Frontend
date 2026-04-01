@@ -20,8 +20,8 @@ import PaymentCalendar from '@/components/PaymentCalendar';
 /* ─── Colour tokens (Updated to New Palette) ─────────────────────────────── */
 const ROLE_THEME = {
   landlord: { accent: '#0B2D72', light: '#E6EAF2', text: '#0B2D72', dot: '#0B2D72' }, // Deep Blue
-  tenant: { accent: '#0992C2', light: '#E6F4F8', text: '#0992C2', dot: '#0992C2' }, // Mid Blue
-  property_manager: { accent: '#0AC4E0', light: '#E6FAFD', text: '#078A9E', dot: '#0AC4E0' }, // Cyan
+  tenant: { accent: '#0B2D72', light: '#E6EAF2', text: '#0B2D72', dot: '#0B2D72' }, // Deep Blue
+  property_manager: { accent: '#0B2D72', light: '#E6EAF2', text: '#0B2D72', dot: '#0B2D72' }, // Deep Blue
   admin: { accent: '#DC2626', light: '#FEE2E2', text: '#991B1B', dot: '#EF4444' }, // Kept semantic red for admin alerts
   law_reviewer: { accent: '#1F2933', light: '#F3F4F6', text: '#1F2933', dot: '#4B5563' }, // Neutral Slate
 };
@@ -408,15 +408,33 @@ export default function DashboardHome() {
           <div style={{ background: 'white', borderRadius: 20, border: '1px solid rgba(11, 45, 114, 0.12)', padding: '24px' }}>
             <p style={{ fontSize: '0.75rem', fontWeight: 700, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 16 }}>Agreement Status</p>
             {statusData.length > 0 ? (
-              <ResponsiveContainer width="100%" height={200}>
-                <PieChart>
-                  <Pie data={statusData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={72} labelLine={false}
-                    label={({ name, value }) => `${name}: ${value}`}>
-                    {statusData.map((_, i) => <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />)}
-                  </Pie>
-                  <Tooltip />
-                </PieChart>
-              </ResponsiveContainer>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
+                <ResponsiveContainer width="55%" height={200}>
+                  <PieChart>
+                    <Pie data={statusData} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={55} outerRadius={80} paddingAngle={3}>
+                      {statusData.map((_, i) => {
+                        const colors = ['#0B2D72', '#0992C2', '#E6EAF2', '#94A3B8', '#CBD5E1'];
+                        return <Cell key={i} fill={colors[i % colors.length]} />;
+                      })}
+                    </Pie>
+                    <Tooltip formatter={v => `${v} agreements`} />
+                  </PieChart>
+                </ResponsiveContainer>
+                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 12 }}>
+                  {statusData.map((d, i) => {
+                    const colors = ['#0B2D72', '#0992C2', '#E6EAF2', '#94A3B8', '#CBD5E1'];
+                    return (
+                      <div key={d.name} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                          <div style={{ width: 10, height: 10, borderRadius: '50%', background: colors[i % colors.length] }} />
+                          <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#4B5563', textTransform: 'capitalize' }}>{d.name}</span>
+                        </div>
+                        <span style={{ fontSize: '0.875rem', fontWeight: 900, color: '#1F2933' }}>{d.value}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
             ) : <div style={{ height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#9CA3AF', fontSize: '0.85rem', fontWeight: 600 }}>No agreements yet</div>}
           </div>
         </motion.div>

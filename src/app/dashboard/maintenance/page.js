@@ -8,15 +8,15 @@ import { Wrench, Plus, Loader2, ChevronDown, ChevronUp, CheckCircle, Clock, Aler
 import { motion } from 'framer-motion';
 
 const STATUS_CONFIG = {
-  open: { label: 'Open', color: 'bg-action-bg text-action-text border border-action-border' },
-  in_progress: { label: 'In Progress', color: 'bg-action-bg text-action-text border border-action-border' },
-  resolved: { label: 'Resolved', color: 'bg-action-bg text-action-text border border-action-border' },
-  closed: { label: 'Closed', color: 'bg-action-bg text-action-text border border-action-border' },
+  open: { label: 'Open', color: 'bg-[#E6EAF2] text-[#0B2D72] border border-[#CBD5E1]' },
+  in_progress: { label: 'In Progress', color: 'bg-[#E6EAF2] text-[#0B2D72] border border-[#CBD5E1]' },
+  resolved: { label: 'Resolved', color: 'bg-[#E6EAF2] text-[#0B2D72] border border-[#CBD5E1]' },
+  closed: { label: 'Closed', color: 'bg-[#E6EAF2] text-[#0B2D72] border border-[#CBD5E1]' },
 };
 const PRIORITY_CONFIG = {
-  low: { color: 'bg-action-bg text-action-text border border-action-border' },
-  medium: { color: 'bg-action-bg text-action-text border border-action-border' },
-  urgent: { color: 'bg-action-bg text-action-text border border-action-border' },
+  low: { color: 'bg-[#E6EAF2] text-[#0B2D72] border border-[#CBD5E1]' },
+  medium: { color: 'bg-[#E6EAF2] text-[#0B2D72] border border-[#CBD5E1]' },
+  urgent: { color: 'bg-[#E6EAF2] text-[#0B2D72] border border-[#CBD5E1]' },
 };
 const CATEGORIES = ['plumbing', 'electrical', 'hvac', 'appliance', 'structural', 'pest', 'other'];
 
@@ -121,7 +121,7 @@ export default function MaintenancePage() {
             onClick={() => setShowForm(v => !v)}
             whileHover={{ y: -1 }}
             whileTap={{ scale: 0.97 }}
-            className="flex items-center gap-2 bg-action-bg text-action-text border border-action-border px-5 py-2.5 rounded-xl text-sm font-black hover:bg-action-hover transition-colors"
+            className="flex items-center gap-2 bg-[#E6EAF2] text-[#0B2D72] border border-[#CBD5E1] px-5 py-2.5 rounded-xl text-sm font-black hover:bg-[#DBE2ED] transition-colors"
           >
             <Plus className="w-4 h-4" /> New Request
           </motion.button>
@@ -187,7 +187,7 @@ export default function MaintenancePage() {
 
           <div className="flex gap-3">
             <button type="button" onClick={() => setShowForm(false)} className="flex-1 border border-gray-200 rounded-xl py-2.5 text-sm hover:bg-gray-50">Cancel</button>
-            <button type="submit" disabled={submitting} className="flex-1 bg-action-bg text-action-text border border-action-border rounded-xl py-2.5 text-sm font-black hover:bg-action-hover disabled:opacity-50 transition-colors">
+            <button type="submit" disabled={submitting} className="flex-1 bg-[#E6EAF2] text-[#0B2D72] border border-[#CBD5E1] rounded-xl py-2.5 text-sm font-black hover:bg-[#DBE2ED] disabled:opacity-50 transition-colors">
               {submitting ? <Loader2 className="animate-spin w-4 h-4 mx-auto" /> : 'Submit Request'}
             </button>
           </div>

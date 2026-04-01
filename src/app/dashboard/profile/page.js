@@ -296,7 +296,7 @@ function SecurityTab({ user, twoFAEnabled, show2FASetup, qrCode, totpInput, setT
                     <button
                       type="submit"
                       disabled={twoFALoading || totpInput.length < 6}
-                      className="flex-1 flex items-center justify-center gap-2 bg-gradient-to-r from-[#0B2D72] to-[#0992C2] text-white rounded-xl py-3 text-sm font-bold hover:opacity-90 disabled:opacity-50 transition-all"
+                      className="flex-1 flex items-center justify-center gap-2 bg-[#E6EAF2] text-[#0B2D72] border border-[#CBD5E1] rounded-xl py-3 text-sm font-bold hover:bg-[#DBE2ED] disabled:opacity-50 transition-all"
                     >
                       {twoFALoading ? <Loader2 className="animate-spin w-4 h-4" /> : <CheckCircle className="w-4 h-4" />}
                       Confirm & Enable
