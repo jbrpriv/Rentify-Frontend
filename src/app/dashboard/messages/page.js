@@ -139,7 +139,7 @@ function ChatModal({ active, user, onClose, onNewMessage }) {
       >
         {/* Header */}
         <div className="flex items-center gap-3 px-5 py-4 border-b border-gray-100 flex-shrink-0">
-          <Avatar src={active?.otherProfilePicture} name={active?.otherName} size="md" />
+          <Avatar src={active?.otherProfilePhoto} name={active?.otherName} size="md" />
           <div className="flex-1 min-w-0">
             <p className="font-black text-gray-900 leading-tight">{active?.otherName}</p>
             <p className="text-xs text-gray-400 truncate">{active?.propertyTitle || 'Direct Message'}</p>
@@ -269,7 +269,7 @@ function ContactsPanel({ contacts, onSelect, onClose }) {
             return (
               <button key={i} onClick={() => select(c)}
                 className="w-full flex items-center gap-3 px-4 py-3 hover:bg-[#DBE2ED] transition-colors text-left">
-                <Avatar src={c.user?.profilePicture} name={c.user?.name} size="md" />
+                <Avatar src={c.user?.profilePhoto} name={c.user?.name} size="md" />
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-bold text-gray-900 truncate">{c.user?.name}</p>
                   <p className="text-[10px] text-gray-400 truncate">{c.propertyTitle}</p>
@@ -372,7 +372,7 @@ export default function MessagesPage() {
       otherUserId: otherId,
       otherName: other?.name || 'Unknown',
       otherRole: other?.role,
-      otherProfilePicture: other?.profilePicture,
+      otherProfilePhoto: other?.profilePhoto,
       propertyTitle: conv.property?.title || 'Direct Message',
     });
   };
@@ -386,7 +386,7 @@ export default function MessagesPage() {
       otherUserId: contact.user?._id,
       otherName: contact.user?.name || 'Unknown',
       otherRole: contact.user?.role,
-      otherProfilePicture: contact.user?.profilePicture,
+      otherProfilePhoto: contact.user?.profilePhoto,
       propertyTitle: contact.propertyTitle || 'Direct Message',
     });
   };
@@ -489,7 +489,7 @@ export default function MessagesPage() {
                       whileHover={{ backgroundColor: '#f9fafb' }}
                     >
                       <div className="relative flex-shrink-0">
-                        <Avatar src={other?.profilePicture} name={other?.name} size="lg" />
+                        <Avatar src={other?.profilePhoto} name={other?.name} size="lg" />
                         {unread && (
                           <span className="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 bg-[#0B2D72] rounded-full border-2 border-white" />
                         )}
