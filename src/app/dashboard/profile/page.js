@@ -128,7 +128,7 @@ function ProfileTab({ user, form, setForm, saving, onSubmit, photoFile, photoPre
           <button
             type="submit"
             disabled={saving}
-            className="flex items-center gap-2 bg-gradient-to-r from-[#0B2D72] to-[#0992C2] text-white rounded-2xl px-7 py-3 text-sm font-bold hover:opacity-90 disabled:opacity-60 transition-all shadow-lg shadow-blue-800/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0992C2] focus-visible:ring-offset-2"
+            className="flex items-center gap-2 bg-[#E6EAF2] text-[#0B2D72] border border-[#CBD5E1] rounded-2xl px-7 py-3 text-sm font-bold hover:bg-[#DBE2ED] disabled:opacity-60 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0B2D72] focus-visible:ring-offset-2"
           >
             {saving ? <Loader2 className="animate-spin w-4 h-4" /> : <Save className="w-4 h-4" />}
             {saving ? 'Saving…' : 'Save Changes'}
@@ -236,7 +236,7 @@ function SecurityTab({ user, twoFAEnabled, show2FASetup, qrCode, totpInput, setT
               <button
                 onClick={onSetup2FA}
                 disabled={twoFALoading}
-                className="flex items-center gap-2 bg-gradient-to-r from-[#0B2D72] to-[#0992C2] text-white rounded-xl px-4 py-2.5 text-sm font-bold hover:opacity-90 disabled:opacity-60 transition-all shadow-md shadow-blue-800/15 focus:outline-none"
+                className="flex items-center gap-2 bg-[#E6EAF2] text-[#0B2D72] border border-[#CBD5E1] rounded-xl px-4 py-2.5 text-sm font-bold hover:bg-[#DBE2ED] disabled:opacity-60 transition-all focus:outline-none"
               >
                 {twoFALoading ? <Loader2 className="animate-spin w-4 h-4" /> : <QrCode className="w-4 h-4" />}
                 Enable 2FA
@@ -424,7 +424,7 @@ function NotificationsTab({ prefs, setPrefs, prefSaving, onSave }) {
       <button
         onClick={onSave}
         disabled={prefSaving}
-        className="mt-6 flex items-center gap-2 bg-gradient-to-r from-[#0B2D72] to-[#0992C2] text-white rounded-2xl px-7 py-3 text-sm font-bold hover:opacity-90 disabled:opacity-60 transition-all shadow-lg shadow-blue-800/20 focus:outline-none"
+        className="mt-6 flex items-center gap-2 bg-[#E6EAF2] text-[#0B2D72] border border-[#CBD5E1] rounded-2xl px-7 py-3 text-sm font-bold hover:bg-[#DBE2ED] disabled:opacity-60 transition-all focus:outline-none"
       >
         {prefSaving ? <Loader2 className="animate-spin w-4 h-4" /> : <Bell className="w-4 h-4" />}
         {prefSaving ? 'Saving…' : 'Save Preferences'}

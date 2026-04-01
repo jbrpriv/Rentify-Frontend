@@ -364,7 +364,7 @@ export default function PropertiesPage() {
               </button>
             )}
             <Link href="/dashboard/properties/new"
-              style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '10px 18px', background: 'linear-gradient(135deg,#4F46E5,#7C3AED)', color: 'white', borderRadius: 12, fontSize: '0.85rem', fontWeight: 700, textDecoration: 'none', boxShadow: '0 4px 14px rgba(79,70,229,.3)', fontFamily: "'Outfit',sans-serif" }}>
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '10px 18px', background: '#E6EAF2', color: '#0B2D72', border: '1px solid #CBD5E1', borderRadius: 12, fontSize: '0.85rem', fontWeight: 700, textDecoration: 'none', fontFamily: "'Outfit',sans-serif" }}>
               <Plus size={16} /> Add Property
             </Link>
           </div>
@@ -380,7 +380,7 @@ export default function PropertiesPage() {
             <Building2 size={44} style={{ color: '#CBD5E1', margin: '0 auto 12px' }} />
             <h3 style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 700, color: '#475569', fontSize: '1.1rem' }}>No properties yet</h3>
             <p style={{ color: '#94A3B8', fontSize: '0.85rem', marginTop: 4, marginBottom: 20 }}>Create your first property to start managing tenants.</p>
-            <Link href="/dashboard/properties/new" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '10px 20px', background: '#4F46E5', color: 'white', borderRadius: 10, fontSize: '0.85rem', fontWeight: 700, textDecoration: 'none' }}>
+            <Link href="/dashboard/properties/new" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '10px 20px', background: '#E6EAF2', color: '#0B2D72', border: '1px solid #CBD5E1', borderRadius: 10, fontSize: '0.85rem', fontWeight: 700, textDecoration: 'none' }}>
               <Plus size={15} /> Add Your First Property
             </Link>
           </motion.div>

@@ -287,7 +287,10 @@ export default function DashboardLayout({ children }) {
     fetchCounts();
 
     const SOCKET_URL = process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://localhost:5000';
+    let isMounted = true;
+
     import('socket.io-client').then(({ io }) => {
+      if (!isMounted) return;
       const socket = io(SOCKET_URL, {
         transports: ['websocket', 'polling'],
         auth: { token: getAccessToken() },
@@ -317,10 +320,12 @@ export default function DashboardLayout({ children }) {
     const handleRefresh = () => fetchCounts();
     window.addEventListener('dashboard:refresh_counts', handleRefresh);
     return () => {
+      isMounted = false;
       clearInterval(interval);
       window.removeEventListener('dashboard:refresh_counts', handleRefresh);
       window.removeEventListener('beforeunload', handleUnload);
       socketRef.current?.disconnect();
+      socketRef.current = null;
     };
   }, [user]); // eslint-disable-line
 

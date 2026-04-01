@@ -98,7 +98,7 @@ export default function DisputesPage() {
         {canFile && (
           <button
             onClick={() => setShowForm(v => !v)}
-            className="flex items-center gap-2 bg-blue-600 text-white px-5 py-2.5 rounded-xl text-sm font-black hover:bg-blue-700 transition"
+            className="flex items-center gap-2 bg-[#E6EAF2] text-[#0B2D72] border border-[#CBD5E1] px-5 py-2.5 rounded-xl text-sm font-black hover:bg-[#DBE2ED] transition"
           >
             <Plus className="w-4 h-4" /> File Dispute
           </button>
@@ -151,7 +151,7 @@ export default function DisputesPage() {
 
           <div className="flex gap-3">
             <button type="button" onClick={() => setShowForm(false)} className="flex-1 border border-gray-200 rounded-xl py-2.5 text-sm hover:bg-gray-50">Cancel</button>
-            <button type="submit" disabled={submitting} className="flex-1 bg-blue-600 text-white rounded-xl py-2.5 text-sm font-black hover:bg-blue-700 disabled:bg-blue-400">
+            <button type="submit" disabled={submitting} className="flex-1 bg-[#E6EAF2] text-[#0B2D72] border border-[#CBD5E1] rounded-xl py-2.5 text-sm font-black hover:bg-[#DBE2ED] disabled:opacity-50">
               {submitting ? <Loader2 className="animate-spin w-4 h-4 mx-auto" /> : 'Submit Dispute'}
             </button>
           </div>
@@ -235,10 +235,10 @@ export default function DisputesPage() {
                             <div className="w-7 h-7 rounded-full bg-gray-200 flex items-center justify-center text-xs font-bold text-gray-600 shrink-0">
                               {c.author?.name?.[0] || '?'}
                             </div>
-                            <div className={`max-w-sm rounded-2xl px-4 py-2.5 ${c.author?._id === myId ? 'bg-blue-600 text-white rounded-br-sm' : 'bg-gray-100 text-gray-900 rounded-bl-sm'}`}>
+                            <div className={`max-w-sm rounded-2xl px-4 py-2.5 ${c.author?._id === myId ? 'bg-[#0B2D72] text-[#E6EAF2] rounded-br-sm' : 'bg-gray-100 text-gray-900 rounded-bl-sm'}`}>
                               <p className="text-xs font-semibold mb-0.5 opacity-70">{c.author?.name} · {c.author?.role}</p>
                               <p className="text-sm">{c.content}</p>
-                              <p className={`text-[10px] mt-1 ${c.author?._id === myId ? 'text-blue-200' : 'text-gray-400'}`}>
+                              <p className={`text-[10px] mt-1 ${c.author?._id === myId ? 'text-[#DBE2ED]' : 'text-gray-400'}`}>
                                 {new Date(c.createdAt).toLocaleDateString()}
                               </p>
                             </div>
@@ -259,7 +259,7 @@ export default function DisputesPage() {
                           <button
                             onClick={() => handleComment(d._id)}
                             disabled={posting === d._id || !comment[d._id]?.trim()}
-                            className="bg-blue-600 text-white px-4 py-2 rounded-xl hover:bg-blue-700 disabled:bg-blue-300 transition"
+                            className="bg-[#E6EAF2] text-[#0B2D72] border border-[#CBD5E1] px-4 py-2 rounded-xl hover:bg-[#DBE2ED] disabled:opacity-50 transition"
                           >
                             {posting === d._id ? <Loader2 className="animate-spin w-4 h-4" /> : <Send className="w-4 h-4" />}
                           </button>
