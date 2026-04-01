@@ -310,6 +310,14 @@ const makeBucket = (clauseId = null) => ({
   clauseId,
 });
 
+const arraysEqual = (a = [], b = []) => {
+  if (a.length !== b.length) return false;
+  for (let i = 0; i < a.length; i += 1) {
+    if (String(a[i]) !== String(b[i])) return false;
+  }
+  return true;
+};
+
 function AgreementComposer({
   selectedClauseIds,
   onReorder,
@@ -362,15 +370,23 @@ function AgreementComposer({
 
   useEffect(() => {
     setClauseBuckets((prev) => {
-      const prevByClause = new Map(prev.filter((b) => b.clauseId).map((b) => [b.clauseId, b]));
       const normalized = selectedClauseIds.map((id) => String(id));
-      const next = normalized.map((id) => {
+      const currentFilledIds = prev.map((b) => b.clauseId).filter(Boolean).map((id) => String(id));
+
+      // No external change: keep bucket layout as-is (especially empty include boxes)
+      if (arraysEqual(currentFilledIds, normalized)) return prev;
+
+      const prevByClause = new Map(prev.filter((b) => b.clauseId).map((b) => [String(b.clauseId), b]));
+      const nextFilled = normalized.map((id) => {
         const existing = prevByClause.get(id);
         return existing ? { ...existing, clauseId: id } : makeBucket(id);
       });
 
-      if (next.length === 0) return [makeBucket()];
-      return next;
+      // Preserve existing empty boxes so user can keep adding include slots.
+      const emptyBuckets = prev.filter((b) => !b.clauseId);
+      const merged = [...nextFilled, ...emptyBuckets];
+
+      return merged.length ? merged : [makeBucket()];
     });
   }, [selectedClauseIds]);
 
@@ -387,7 +403,11 @@ function AgreementComposer({
   const pushBucketUpdate = (nextBuckets) => {
     const normalized = nextBuckets.map((b) => ({ ...b, clauseId: b.clauseId ? String(b.clauseId) : null }));
     setClauseBuckets(normalized);
-    onReorder(normalized.map((b) => b.clauseId).filter(Boolean));
+    const nextIds = normalized.map((b) => b.clauseId).filter(Boolean);
+    const currentIds = selectedClauseIds.map((id) => String(id));
+    if (!arraysEqual(nextIds, currentIds)) {
+      onReorder(nextIds);
+    }
   };
 
   const handleDragStart = (clauseId, origin) => {
