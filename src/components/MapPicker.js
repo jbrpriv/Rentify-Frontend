@@ -4,8 +4,10 @@ import { useEffect, useRef } from 'react';
 import maplibregl from 'maplibre-gl';
 
 const DEFAULT_CENTER = { lat: 24.8607, lng: 67.0011 };
-const DEFAULT_ZOOM = 13;
-const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json';
+const DEFAULT_ZOOM = 14;
+const TARGET_ZOOM = 15;
+// Voyager provides stronger street labels while keeping a light, blue-friendly palette.
+const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json';
 
 export default function MapPicker({
   center,
@@ -53,7 +55,7 @@ export default function MapPicker({
     if (!mapRef.current || !center) return;
     mapRef.current.flyTo({
       center: [center.lng, center.lat],
-      zoom: Math.max(mapRef.current.getZoom(), DEFAULT_ZOOM),
+      zoom: Math.max(mapRef.current.getZoom(), TARGET_ZOOM),
       essential: true,
     });
   }, [center?.lat, center?.lng]);

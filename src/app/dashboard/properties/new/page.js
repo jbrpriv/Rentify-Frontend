@@ -198,7 +198,19 @@ export default function AddPropertyPage() {
     try {
       const coords = await geocodeAddress(addressQuery);
       if (!coords) {
-        toast('Unable to find that address. Try a more specific address.', 'error');
+        const { city, state, country } = form.address;
+        const fallbackQuery = [city, state, country].filter(Boolean).join(', ');
+        if (fallbackQuery && fallbackQuery !== addressQuery) {
+          const cityCoords = await geocodeAddress(fallbackQuery);
+          if (cityCoords) {
+            setMapCenter(cityCoords);
+            toast('Address not found. Centered on the city instead.', 'error');
+          } else {
+            toast('Unable to find that address. Try a more specific address.', 'error');
+          }
+        } else {
+          toast('Unable to find that address. Try a more specific address.', 'error');
+        }
       } else {
         setMapCenter(coords);
       }
