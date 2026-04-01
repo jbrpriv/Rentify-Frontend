@@ -305,33 +305,10 @@ function Toggle({ enabled, onChange, label, description }) {
   );
 }
 
-const CLAUSE_SECTION_CONFIG = [
-  { key: 'general', title: 'Clause A', droppable: true },
-  { key: 'payment', title: 'Clause B', droppable: true },
-  { key: 'occupancy', title: 'Clause C', droppable: true },
-  { key: 'maintenance', title: 'Clause D', droppable: true },
-  { key: 'utilities', title: 'Clause E', droppable: true },
-  { key: 'pets', title: 'Clause F', droppable: true },
-  { key: 'legal', title: 'Clause G', droppable: true },
-  { key: 'misc', title: 'Clause H', droppable: true },
-];
-
-const EMPTY_SECTION_MAP = CLAUSE_SECTION_CONFIG.reduce((acc, section) => {
-  acc[section.key] = [];
-  return acc;
-}, {});
-
-function mapCategoryToSectionKey(category = '') {
-  const value = String(category).toLowerCase();
-  if (value.includes('general')) return 'general';
-  if (value.includes('payment') || value.includes('rent') || value.includes('fee')) return 'payment';
-  if (value.includes('occup') || value.includes('tenant') || value.includes('use')) return 'occupancy';
-  if (value.includes('maint') || value.includes('repair')) return 'maintenance';
-  if (value.includes('utilit') || value.includes('service')) return 'utilities';
-  if (value.includes('pet') || value.includes('visitor')) return 'pets';
-  if (value.includes('legal') || value.includes('law') || value.includes('compliance')) return 'legal';
-  return 'misc';
-}
+const makeBucket = (clauseId = null) => ({
+  key: `bucket-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+  clauseId,
+});
 
 function AgreementComposer({
   selectedClauseIds,
@@ -356,8 +333,8 @@ function AgreementComposer({
   const [search, setSearch] = useState('');
   const [editorTab, setEditorTab] = useState('terms');
   const [dragState, setDragState] = useState(null);
-  const [sectionAssignments, setSectionAssignments] = useState(EMPTY_SECTION_MAP);
-  const [hoveredSection, setHoveredSection] = useState('');
+  const [clauseBuckets, setClauseBuckets] = useState([makeBucket()]);
+  const [hoveredBucketKey, setHoveredBucketKey] = useState('');
   const [panelPosition, setPanelPosition] = useState({ x: 24, y: 110 });
   const [draggingPanel, setDraggingPanel] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
@@ -384,18 +361,18 @@ function AgreementComposer({
   }, []);
 
   useEffect(() => {
-    if (!clauses.length) return;
-    const byId = new Map(clauses.map(c => [c._id, c]));
-    const next = { ...EMPTY_SECTION_MAP };
+    setClauseBuckets((prev) => {
+      const prevByClause = new Map(prev.filter((b) => b.clauseId).map((b) => [b.clauseId, b]));
+      const normalized = selectedClauseIds.map((id) => String(id));
+      const next = normalized.map((id) => {
+        const existing = prevByClause.get(id);
+        return existing ? { ...existing, clauseId: id } : makeBucket(id);
+      });
 
-    selectedClauseIds.forEach((id) => {
-      const clause = byId.get(id);
-      const sectionKey = mapCategoryToSectionKey(clause?.category);
-      next[sectionKey] = [...next[sectionKey], id];
+      if (next.length === 0) return [makeBucket()];
+      return next;
     });
-
-    setSectionAssignments(next);
-  }, [clauses, selectedClauseIds]);
+  }, [selectedClauseIds]);
 
   const availableClauses = clauses.filter(c =>
     !selectedClauseIds.includes(c._id) &&
@@ -407,108 +384,45 @@ function AgreementComposer({
   const clausesById = new Map(clauses.map(c => [c._id, c]));
   const assignedClauses = selectedClauseIds.map(id => clausesById.get(id)).filter(Boolean);
 
-  const pushUpdate = (nextAssignments) => {
-    setSectionAssignments(nextAssignments);
-    const flattened = CLAUSE_SECTION_CONFIG.flatMap(section => nextAssignments[section.key] || []);
-    onReorder(flattened);
-  };
-
-  const removeClauseFromAssignments = (currentAssignments, clauseId) => {
-    const next = { ...currentAssignments };
-    for (const section of CLAUSE_SECTION_CONFIG) {
-      next[section.key] = (next[section.key] || []).filter(id => id !== clauseId);
-    }
-    return next;
-  };
-
-  const addClauseToSection = (sectionKey, clauseId) => {
-    const next = removeClauseFromAssignments(sectionAssignments, clauseId);
-    next[sectionKey] = [...(next[sectionKey] || []), clauseId];
-    pushUpdate(next);
+  const pushBucketUpdate = (nextBuckets) => {
+    const normalized = nextBuckets.map((b) => ({ ...b, clauseId: b.clauseId ? String(b.clauseId) : null }));
+    setClauseBuckets(normalized);
+    onReorder(normalized.map((b) => b.clauseId).filter(Boolean));
   };
 
   const handleDragStart = (clauseId, origin) => {
     setDragState({ clauseId, origin });
   };
 
-  const handleDropToSection = (sectionKey) => {
+  const handleDropToBucket = (bucketKey) => {
     if (!dragState?.clauseId) return;
-    addClauseToSection(sectionKey, dragState.clauseId);
-    setHoveredSection('');
+    const clauseId = String(dragState.clauseId);
+    const next = clauseBuckets.map((b) => ({ ...b, clauseId: b.clauseId === clauseId ? null : b.clauseId }));
+    const targetIndex = next.findIndex((b) => b.key === bucketKey);
+    if (targetIndex >= 0) next[targetIndex] = { ...next[targetIndex], clauseId };
+    pushBucketUpdate(next);
+    setHoveredBucketKey('');
     setDragState(null);
   };
 
   const handleRemoveClause = (clauseId) => {
-    const next = removeClauseFromAssignments(sectionAssignments, clauseId);
-    pushUpdate(next);
+    const id = String(clauseId);
+    const next = clauseBuckets.map((b) => (b.clauseId === id ? { ...b, clauseId: null } : b));
+    pushBucketUpdate(next);
   };
 
-  const moveClauseWithinSection = (sectionKey, fromIndex, toIndex) => {
-    const current = [...(sectionAssignments[sectionKey] || [])];
-    if (fromIndex === toIndex || fromIndex < 0 || toIndex < 0 || fromIndex >= current.length || toIndex >= current.length) return;
-    const [moved] = current.splice(fromIndex, 1);
-    current.splice(toIndex, 0, moved);
-    const next = { ...sectionAssignments, [sectionKey]: current };
-    pushUpdate(next);
+  const moveBucketClause = (bucketIndex, direction) => {
+    const toIndex = direction === 'up' ? bucketIndex - 1 : bucketIndex + 1;
+    if (bucketIndex < 0 || toIndex < 0 || toIndex >= clauseBuckets.length) return;
+    const next = [...clauseBuckets];
+    const currentId = next[bucketIndex].clauseId;
+    next[bucketIndex] = { ...next[bucketIndex], clauseId: next[toIndex].clauseId };
+    next[toIndex] = { ...next[toIndex], clauseId: currentId };
+    pushBucketUpdate(next);
   };
 
-  const moveClauseById = (sectionKey, clauseId, direction) => {
-    const sectionIndex = CLAUSE_SECTION_CONFIG.findIndex((s) => s.key === sectionKey);
-    if (sectionIndex < 0) return;
-
-    const current = [...(sectionAssignments[sectionKey] || [])];
-    const fromIndex = current.findIndex((id) => id === clauseId);
-    if (fromIndex < 0) return;
-
-    if (direction === 'up') {
-      if (fromIndex > 0) {
-        moveClauseWithinSection(sectionKey, fromIndex, fromIndex - 1);
-        return;
-      }
-
-      if (sectionIndex === 0) return;
-
-      const prevKey = CLAUSE_SECTION_CONFIG[sectionIndex - 1].key;
-      const next = { ...sectionAssignments };
-      next[sectionKey] = (next[sectionKey] || []).filter((id) => id !== clauseId);
-      next[prevKey] = [...(next[prevKey] || []), clauseId];
-      pushUpdate(next);
-      return;
-    }
-
-    if (direction === 'down') {
-      if (fromIndex < current.length - 1) {
-        moveClauseWithinSection(sectionKey, fromIndex, fromIndex + 1);
-        return;
-      }
-
-      if (sectionIndex === CLAUSE_SECTION_CONFIG.length - 1) return;
-
-      const nextKey = CLAUSE_SECTION_CONFIG[sectionIndex + 1].key;
-      const next = { ...sectionAssignments };
-      next[sectionKey] = (next[sectionKey] || []).filter((id) => id !== clauseId);
-      next[nextKey] = [clauseId, ...(next[nextKey] || [])];
-      pushUpdate(next);
-    }
-  };
-
-  const canMoveClause = (sectionKey, clauseId, direction) => {
-    const sectionIndex = CLAUSE_SECTION_CONFIG.findIndex((s) => s.key === sectionKey);
-    if (sectionIndex < 0) return false;
-
-    const current = sectionAssignments[sectionKey] || [];
-    const fromIndex = current.findIndex((id) => id === clauseId);
-    if (fromIndex < 0) return false;
-
-    if (direction === 'up') {
-      return fromIndex > 0 || sectionIndex > 0;
-    }
-
-    if (direction === 'down') {
-      return fromIndex < current.length - 1 || sectionIndex < CLAUSE_SECTION_CONFIG.length - 1;
-    }
-
-    return false;
+  const addClauseBucket = () => {
+    pushBucketUpdate([...clauseBuckets, makeBucket()]);
   };
 
   const handlePanelMouseDown = (e) => {
@@ -611,86 +525,89 @@ function AgreementComposer({
             </div>
           </div>
 
-            {CLAUSE_SECTION_CONFIG.map((section) => {
-              const ids = sectionAssignments[section.key] || [];
-              const isHovered = hoveredSection === section.key;
+            <div className="flex items-center justify-between">
+              <p className="text-sm font-semibold text-gray-800">Clause Buckets</p>
+              <button
+                type="button"
+                onClick={addClauseBucket}
+                className="px-2.5 py-1 text-xs font-semibold text-blue-700 border border-blue-200 bg-blue-50 rounded-lg hover:bg-blue-100"
+              >
+                Add Clause
+              </button>
+            </div>
+
+            {clauseBuckets.map((bucket, idx) => {
+              const letter = String.fromCharCode(65 + idx);
+              const clause = bucket.clauseId ? clausesById.get(bucket.clauseId) : null;
+              const isHovered = hoveredBucketKey === bucket.key;
               return (
                 <div
-                  key={section.key}
-                  onDragOver={(e) => { e.preventDefault(); setHoveredSection(section.key); }}
-                  onDragLeave={() => setHoveredSection('')}
-                  onDrop={(e) => { e.preventDefault(); handleDropToSection(section.key); }}
+                  key={bucket.key}
+                  onDragOver={(e) => { e.preventDefault(); setHoveredBucketKey(bucket.key); }}
+                  onDragLeave={() => setHoveredBucketKey('')}
+                  onDrop={(e) => { e.preventDefault(); handleDropToBucket(bucket.key); }}
                   className={`rounded-md border-2 p-4 transition ${isHovered ? 'border-blue-400 bg-blue-50' : 'border-dashed border-gray-300 bg-white'}`}
                 >
                   <div className="flex items-center justify-between mb-2">
-                    <p className="text-sm font-semibold text-gray-800">{section.title}</p>
+                    <p className="text-sm font-semibold text-gray-800">{`Clause ${letter}`}</p>
                     <span className="text-xs text-gray-400">Drop zone</span>
                   </div>
 
-                  {ids.length === 0 && (
+                  {!clause && (
                     <p className="text-xs text-gray-400 italic">Drag clauses here from the floating editor.</p>
                   )}
 
-                  <div className="space-y-2">
-                    {ids.map((id, idx) => {
-                      const clause = clausesById.get(id);
-                      if (!clause) return null;
-                      const canMoveUp = canMoveClause(section.key, id, 'up');
-                      const canMoveDown = canMoveClause(section.key, id, 'down');
-                      return (
-                        <div
-                          key={id}
-                          draggable
-                          onDragStart={() => handleDragStart(id, section.key)}
-                          className="rounded-md border border-blue-100 bg-blue-50 p-3 cursor-grab active:cursor-grabbing"
-                        >
-                          <div className="flex items-start gap-2">
-                            <GripVertical className="w-4 h-4 text-blue-400 mt-0.5 flex-shrink-0" />
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center justify-between gap-2">
-                                <p className="text-sm font-semibold text-blue-900 truncate">{clause.title}</p>
-                                <div className="flex items-center gap-1">
-                                  <button
-                                    type="button"
-                                    disabled={!canMoveUp}
-                                    className="text-xs px-2 py-0.5 rounded border border-blue-200 text-blue-700 hover:bg-blue-100 disabled:opacity-40 disabled:cursor-not-allowed"
-                                    onMouseDown={(e) => e.stopPropagation()}
-                                    onDragStart={(e) => e.preventDefault()}
-                                    onClick={(e) => { e.stopPropagation(); moveClauseById(section.key, id, 'up'); }}
-                                  >
-                                    Up
-                                  </button>
-                                  <button
-                                    type="button"
-                                    disabled={!canMoveDown}
-                                    className="text-xs px-2 py-0.5 rounded border border-blue-200 text-blue-700 hover:bg-blue-100 disabled:opacity-40 disabled:cursor-not-allowed"
-                                    onMouseDown={(e) => e.stopPropagation()}
-                                    onDragStart={(e) => e.preventDefault()}
-                                    onClick={(e) => { e.stopPropagation(); moveClauseById(section.key, id, 'down'); }}
-                                  >
-                                    Down
-                                  </button>
-                                  <button
-                                    type="button"
-                                    className="text-xs px-2 py-0.5 rounded border border-red-200 text-red-600 hover:bg-red-50"
-                                    onMouseDown={(e) => e.stopPropagation()}
-                                    onDragStart={(e) => e.preventDefault()}
-                                    onClick={(e) => { e.stopPropagation(); handleRemoveClause(id); }}
-                                  >
-                                    Remove
-                                  </button>
-                                </div>
-                              </div>
-                              <p
-                                className="mt-2 text-xs text-gray-700 leading-relaxed whitespace-pre-line"
-                                dangerouslySetInnerHTML={{ __html: substituteVariables(clause.body, offerData, formData) }}
-                              />
+                  {clause && (
+                    <div
+                      draggable
+                      onDragStart={() => handleDragStart(clause._id, 'bucket')}
+                      className="rounded-md border border-blue-100 bg-blue-50 p-3 cursor-grab active:cursor-grabbing"
+                    >
+                      <div className="flex items-start gap-2">
+                        <GripVertical className="w-4 h-4 text-blue-400 mt-0.5 flex-shrink-0" />
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between gap-2">
+                            <p className="text-sm font-semibold text-blue-900 truncate">{clause.title}</p>
+                            <div className="flex items-center gap-1">
+                              <button
+                                type="button"
+                                disabled={idx === 0}
+                                className="text-xs px-2 py-0.5 rounded border border-blue-200 text-blue-700 hover:bg-blue-100 disabled:opacity-40 disabled:cursor-not-allowed"
+                                onMouseDown={(e) => e.stopPropagation()}
+                                onDragStart={(e) => e.preventDefault()}
+                                onClick={(e) => { e.stopPropagation(); moveBucketClause(idx, 'up'); }}
+                              >
+                                Up
+                              </button>
+                              <button
+                                type="button"
+                                disabled={idx === clauseBuckets.length - 1}
+                                className="text-xs px-2 py-0.5 rounded border border-blue-200 text-blue-700 hover:bg-blue-100 disabled:opacity-40 disabled:cursor-not-allowed"
+                                onMouseDown={(e) => e.stopPropagation()}
+                                onDragStart={(e) => e.preventDefault()}
+                                onClick={(e) => { e.stopPropagation(); moveBucketClause(idx, 'down'); }}
+                              >
+                                Down
+                              </button>
+                              <button
+                                type="button"
+                                className="text-xs px-2 py-0.5 rounded border border-red-200 text-red-600 hover:bg-red-50"
+                                onMouseDown={(e) => e.stopPropagation()}
+                                onDragStart={(e) => e.preventDefault()}
+                                onClick={(e) => { e.stopPropagation(); handleRemoveClause(clause._id); }}
+                              >
+                                Remove
+                              </button>
                             </div>
                           </div>
+                          <p
+                            className="mt-2 text-xs text-gray-700 leading-relaxed whitespace-pre-line"
+                            dangerouslySetInnerHTML={{ __html: substituteVariables(clause.body, offerData, formData) }}
+                          />
                         </div>
-                      );
-                    })}
-                  </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               );
             })}
