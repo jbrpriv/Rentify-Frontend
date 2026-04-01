@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import maplibregl from 'maplibre-gl';
 
 const DEFAULT_CENTER = { lat: 24.8607, lng: 67.0011 };
@@ -60,6 +60,7 @@ export default function MapPicker({
   const mapRef = useRef(null);
   const markerRef = useRef(null);
   const onMarkerRef = useRef(onMarkerChange);
+  const [mapReady, setMapReady] = useState(false);
 
   useEffect(() => {
     onMarkerRef.current = onMarkerChange;
@@ -94,6 +95,7 @@ export default function MapPicker({
     }
 
       mapRef.current = map;
+      setMapReady(true);
     };
 
     initMap();
@@ -103,20 +105,21 @@ export default function MapPicker({
         mapRef.current.remove();
         mapRef.current = null;
       }
+      setMapReady(false);
     };
   }, [readOnly]);
 
   useEffect(() => {
-    if (!mapRef.current || !center) return;
+    if (!mapRef.current || !center || !mapReady) return;
     mapRef.current.flyTo({
       center: [center.lng, center.lat],
       zoom: Math.max(mapRef.current.getZoom(), TARGET_ZOOM),
       essential: true,
     });
-  }, [center?.lat, center?.lng]);
+  }, [center?.lat, center?.lng, mapReady]);
 
   useEffect(() => {
-    if (!mapRef.current) return;
+    if (!mapRef.current || !mapReady) return;
 
     if (!marker || marker.lat == null || marker.lng == null) {
       if (markerRef.current) {
@@ -150,7 +153,7 @@ export default function MapPicker({
     } else {
       markerRef.current.setLngLat([marker.lng, marker.lat]);
     }
-  }, [marker?.lat, marker?.lng]);
+  }, [marker?.lat, marker?.lng, mapReady]);
 
   return (
     <div
