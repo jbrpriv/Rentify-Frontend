@@ -29,7 +29,7 @@ export default function PMTenantsPage() {
       .finally(() => setLoading(false));
   }, []);
 
-  if (loading) return <div className="flex justify-center py-20"><Loader2 className="animate-spin h-8 w-8 text-blue-600" /></div>;
+  if (loading) return <div className="flex justify-center py-20"><Loader2 className="animate-spin h-8 w-8 text-[#0B2D72]" /></div>;
 
   const totalRent = agreements.reduce((s, a) => s + (a.financials?.rentAmount || 0), 0);
   const rentByProp = agreements.reduce((acc, a) => {
@@ -49,17 +49,17 @@ export default function PMTenantsPage() {
       {/* Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
-          <div className="bg-blue-100 w-10 h-10 rounded-xl flex items-center justify-center mb-3"><Users className="w-5 h-5 text-blue-600" /></div>
+          <div className="bg-[#E6EAF2] w-10 h-10 rounded-xl flex items-center justify-center mb-3"><Users className="w-5 h-5 text-[#0B2D72]" /></div>
           <p className="text-xs font-black text-gray-400 uppercase tracking-widest">Active Tenants</p>
           <p className="text-3xl font-black text-gray-900">{agreements.length}</p>
         </div>
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
-          <div className="bg-green-100 w-10 h-10 rounded-xl flex items-center justify-center mb-3"><TrendingUp className="w-5 h-5 text-green-600" /></div>
+          <div className="bg-[#E6EAF2] w-10 h-10 rounded-xl flex items-center justify-center mb-3"><TrendingUp className="w-5 h-5 text-[#0B2D72]" /></div>
           <p className="text-xs font-black text-gray-400 uppercase tracking-widest">Monthly Income</p>
           <p className="text-2xl font-black text-gray-900">{formatMoney(totalRent)}</p>
         </div>
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
-          <div className="bg-indigo-100 w-10 h-10 rounded-xl flex items-center justify-center mb-3"><Building2 className="w-5 h-5 text-indigo-600" /></div>
+          <div className="bg-[#E6EAF2] w-10 h-10 rounded-xl flex items-center justify-center mb-3"><Building2 className="w-5 h-5 text-[#0B2D72]" /></div>
           <p className="text-xs font-black text-gray-400 uppercase tracking-widest">Properties Occupied</p>
           <p className="text-3xl font-black text-gray-900">{new Set(agreements.map(a => a.property?._id)).size}</p>
         </div>
@@ -74,7 +74,7 @@ export default function PMTenantsPage() {
               <XAxis dataKey="name" tick={{ fontSize: 10, fontWeight: 700 }} />
               <YAxis tick={{ fontSize: 10 }} />
               <Tooltip formatter={(v) => [formatMoney(v), 'Monthly Rent']} />
-              <Bar dataKey="rent" fill="#6366f1" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="rent" fill="#0B2D72" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -103,7 +103,7 @@ export default function PMTenantsPage() {
                 <tr key={a._id} className="hover:bg-gray-50 transition-colors">
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full flex items-center justify-center">
+                      <div className="w-8 h-8 bg-[#0B2D72] rounded-full flex items-center justify-center">
                         <span className="text-white text-xs font-black">{a.tenant?.name?.charAt(0)?.toUpperCase()}</span>
                       </div>
                       <p className="font-bold text-gray-900">{a.tenant?.name}</p>
@@ -124,8 +124,8 @@ export default function PMTenantsPage() {
                   </td>
                   <td className="px-4 py-4">
                     <div className="flex gap-2">
-                      {a.tenant?.email && (<a href={`mailto:${a.tenant.email}`} className="text-blue-500 hover:text-blue-700"><Mail className="w-4 h-4" /></a>)}
-                      {a.tenant?.phoneNumber && a.tenant?.phoneNumber !== '0000000000' && (<a href={`tel:${a.tenant.phoneNumber}`} className="text-green-500 hover:text-green-700"><Phone className="w-4 h-4" /></a>)}
+                      {a.tenant?.email && (<a href={`mailto:${a.tenant.email}`} className="text-[#0B2D72] hover:opacity-80"><Mail className="w-4 h-4" /></a>)}
+                      {a.tenant?.phoneNumber && a.tenant?.phoneNumber !== '0000000000' && (<a href={`tel:${a.tenant.phoneNumber}`} className="text-[#0B2D72] hover:opacity-80"><Phone className="w-4 h-4" /></a>)}
                     </div>
                   </td>
                 </tr>

@@ -8,15 +8,15 @@ import { useToast } from '@/context/ToastContext';
 import { Wrench, Plus, Loader2, ChevronDown, ChevronUp, CheckCircle, Clock, AlertCircle, X } from 'lucide-react';
 
 const STATUS_CONFIG = {
-  open:        { label: 'Open',        color: 'bg-blue-100 text-blue-700' },
-  in_progress: { label: 'In Progress', color: 'bg-amber-100 text-amber-700' },
-  resolved:    { label: 'Resolved',    color: 'bg-green-100 text-green-700' },
-  closed:      { label: 'Closed',      color: 'bg-gray-100 text-gray-500' },
+  open:        { label: 'Open',        color: 'bg-[#E6EAF2] text-[#0B2D72] border border-[#CBD5E1]' },
+  in_progress: { label: 'In Progress', color: 'bg-[#E6EAF2] text-[#0B2D72] border border-[#CBD5E1]' },
+  resolved:    { label: 'Resolved',    color: 'bg-[#0B2D72] text-[#E6EAF2]' },
+  closed:      { label: 'Closed',      color: 'bg-[#CBD5E1] text-[#1F2933]' },
 };
 const PRIORITY_CONFIG = {
-  low:    { color: 'bg-gray-100 text-gray-500' },
-  medium: { color: 'bg-amber-100 text-amber-700' },
-  urgent: { color: 'bg-red-100 text-red-700' },
+  low:    { color: 'bg-[#E6EAF2] text-[#0B2D72]' },
+  medium: { color: 'bg-[#E6EAF2] text-[#0B2D72]' },
+  urgent: { color: 'bg-[#0B2D72] text-[#E6EAF2]' },
 };
 const CATEGORIES = ['plumbing','electrical','hvac','appliance','structural','pest','other'];
 
@@ -115,7 +115,7 @@ export default function MaintenancePage() {
         {isTenant && (
           <button
             onClick={() => setShowForm(v => !v)}
-            className="flex items-center gap-2 bg-blue-600 text-white px-5 py-2.5 rounded-xl text-sm font-black hover:bg-blue-700 transition"
+            className="flex items-center gap-2 bg-[#0B2D72] text-[#E6EAF2] px-5 py-2.5 rounded-xl text-sm font-black hover:opacity-90 transition"
           >
             <Plus className="w-4 h-4" /> New Request
           </button>
@@ -124,14 +124,14 @@ export default function MaintenancePage() {
 
       {/* Submit Form (Tenant Only) */}
       {showForm && isTenant && (
-        <form onSubmit={handleSubmit} className="bg-white rounded-2xl border border-blue-100 shadow-sm p-6 space-y-4">
+        <form onSubmit={handleSubmit} className="bg-white rounded-2xl border border-[#CBD5E1] shadow-sm p-6 space-y-4">
           <h3 className="font-black text-gray-900">Submit Maintenance Request</h3>
 
           <select
             required
             value={form.propertyId}
             onChange={e => setForm(f => ({ ...f, propertyId: e.target.value }))}
-            className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#0B2D72]"
           >
             <option value="">Select Property</option>
             {properties.map(p => <option key={p._id} value={p._id}>{p.title}</option>)}
@@ -142,7 +142,7 @@ export default function MaintenancePage() {
             placeholder="Issue title (e.g. Leaking bathroom pipe)"
             value={form.title}
             onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
-            className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#0B2D72]"
           />
 
           <textarea
@@ -151,7 +151,7 @@ export default function MaintenancePage() {
             value={form.description}
             onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
             rows={3}
-            className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#0B2D72]"
           />
 
           <div className="flex gap-3">
@@ -175,7 +175,7 @@ export default function MaintenancePage() {
 
           <div className="flex gap-3">
             <button type="button" onClick={() => setShowForm(false)} className="flex-1 border border-gray-200 rounded-xl py-2.5 text-sm hover:bg-gray-50">Cancel</button>
-            <button type="submit" disabled={submitting} className="flex-1 bg-blue-600 text-white rounded-xl py-2.5 text-sm font-black hover:bg-blue-700 disabled:bg-blue-400">
+            <button type="submit" disabled={submitting} className="flex-1 bg-[#0B2D72] text-[#E6EAF2] rounded-xl py-2.5 text-sm font-black hover:opacity-90 disabled:opacity-50 transition">
               {submitting ? <Loader2 className="animate-spin w-4 h-4 mx-auto" /> : 'Submit Request'}
             </button>
           </div>
@@ -184,7 +184,7 @@ export default function MaintenancePage() {
 
       {/* Requests List */}
       {loading ? (
-        <div className="flex justify-center py-16"><Loader2 className="animate-spin h-8 w-8 text-blue-600" /></div>
+        <div className="flex justify-center py-16"><Loader2 className="animate-spin h-8 w-8 text-[#0B2D72]" /></div>
       ) : requests.length === 0 ? (
         <div className="text-center py-20 bg-white rounded-3xl border border-dashed border-gray-200">
           <Wrench className="w-12 h-12 mx-auto text-gray-300 mb-3" />
@@ -214,7 +214,7 @@ export default function MaintenancePage() {
                   </div>
                   <div className="flex items-center gap-2 ml-4 shrink-0">
                     {isTenant && r.status === 'open' && (
-                      <button onClick={() => handleDelete(r._id)} className="text-red-400 hover:text-red-600 p-1">
+                      <button onClick={() => handleDelete(r._id)} className="text-[#0B2D72] hover:opacity-70 p-1">
                         <X className="w-4 h-4" />
                       </button>
                     )}
@@ -231,7 +231,7 @@ export default function MaintenancePage() {
                   <div className="px-5 pb-5 border-t border-gray-50 space-y-4">
                     <p className="text-sm text-gray-700 mt-4">{r.description}</p>
                     {r.resolutionNotes && (
-                      <div className="bg-green-50 rounded-xl p-3 text-sm text-green-800">
+                      <div className="bg-[#E6EAF2] rounded-xl p-3 text-sm text-[#0B2D72]">
                         <strong>Resolution notes:</strong> {r.resolutionNotes}
                       </div>
                     )}
@@ -285,7 +285,7 @@ export default function MaintenancePage() {
                         <button
                           onClick={() => handleUpdate(r._id)}
                           disabled={actionId === r._id}
-                          className="bg-blue-600 text-white px-5 py-2 rounded-xl text-sm font-black hover:bg-blue-700 disabled:bg-blue-400 transition"
+                          className="bg-[#0B2D72] text-[#E6EAF2] px-5 py-2 rounded-xl text-sm font-black hover:opacity-90 disabled:opacity-50 transition"
                         >
                           {actionId === r._id ? <Loader2 className="animate-spin w-4 h-4 mx-auto" /> : 'Save Update'}
                         </button>
