@@ -305,15 +305,40 @@ function Toggle({ enabled, onChange, label, description }) {
   );
 }
 
-// ─── Drag-and-Drop Clause Picker ──────────────────────────────────────────────
-function ClausePicker({ selectedClauseIds, onToggle, onReorder, offerData, formData }) {
+const CLAUSE_SECTION_CONFIG = [
+  { key: 'payment', title: 'Section A: Payment and Fees', droppable: true },
+  { key: 'occupancy', title: 'Section B: Occupancy and Use', droppable: true },
+  { key: 'maintenance', title: 'Section C: Maintenance and Repairs', droppable: true },
+  { key: 'utilities', title: 'Section D: Utilities and Services', droppable: true },
+  { key: 'pets', title: 'Section E: Pets and Visitors', droppable: true },
+  { key: 'legal', title: 'Section F: Legal and Compliance', droppable: true },
+  { key: 'misc', title: 'Section G: Additional Terms', droppable: true },
+];
+
+const EMPTY_SECTION_MAP = CLAUSE_SECTION_CONFIG.reduce((acc, section) => {
+  acc[section.key] = [];
+  return acc;
+}, {});
+
+function mapCategoryToSectionKey(category = '') {
+  const value = String(category).toLowerCase();
+  if (value.includes('payment') || value.includes('rent') || value.includes('fee')) return 'payment';
+  if (value.includes('occup') || value.includes('tenant') || value.includes('use')) return 'occupancy';
+  if (value.includes('maint') || value.includes('repair')) return 'maintenance';
+  if (value.includes('utilit') || value.includes('service')) return 'utilities';
+  if (value.includes('pet') || value.includes('visitor')) return 'pets';
+  if (value.includes('legal') || value.includes('law') || value.includes('compliance')) return 'legal';
+  return 'misc';
+}
+
+function AgreementComposer({ selectedClauseIds, onReorder, offerData, formData }) {
   const [clauses, setClauses] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [expanded, setExpanded] = useState({});
   const [categoryFilter, setCategoryFilter] = useState('');
   const [search, setSearch] = useState('');
-  const dragItem = useRef(null);
-  const dragOverItem = useRef(null);
+  const [dragState, setDragState] = useState(null);
+  const [sectionAssignments, setSectionAssignments] = useState(EMPTY_SECTION_MAP);
+  const [hoveredSection, setHoveredSection] = useState('');
 
   useEffect(() => {
     api.get('/agreements/clauses')
@@ -322,24 +347,73 @@ function ClausePicker({ selectedClauseIds, onToggle, onReorder, offerData, formD
       .finally(() => setLoading(false));
   }, []);
 
+  useEffect(() => {
+    if (!clauses.length) return;
+    const byId = new Map(clauses.map(c => [c._id, c]));
+    const next = { ...EMPTY_SECTION_MAP };
+
+    selectedClauseIds.forEach((id) => {
+      const clause = byId.get(id);
+      const sectionKey = mapCategoryToSectionKey(clause?.category);
+      next[sectionKey] = [...next[sectionKey], id];
+    });
+
+    setSectionAssignments(next);
+  }, [clauses, selectedClauseIds]);
+
   const selectedClauses = clauses.filter(c => selectedClauseIds.includes(c._id));
   const availableClauses = clauses.filter(c =>
     !selectedClauseIds.includes(c._id) &&
     (!categoryFilter || c.category === categoryFilter) &&
-    (!search || c.title.toLowerCase().includes(search.toLowerCase()))
+    (!search || `${c.title} ${c.body}`.toLowerCase().includes(search.toLowerCase()))
   );
   const categories = [...new Set(clauses.map(c => c.category))].sort();
 
-  const handleDragStart = (idx) => { dragItem.current = idx; };
-  const handleDragEnter = (idx) => { dragOverItem.current = idx; };
-  const handleDragEnd = () => {
-    if (dragItem.current === null || dragOverItem.current === null) return;
-    const reordered = [...selectedClauses];
-    const [moved] = reordered.splice(dragItem.current, 1);
-    reordered.splice(dragOverItem.current, 0, moved);
-    dragItem.current = null;
-    dragOverItem.current = null;
-    onReorder(reordered.map(c => c._id));
+  const clausesById = new Map(clauses.map(c => [c._id, c]));
+
+  const pushUpdate = (nextAssignments) => {
+    setSectionAssignments(nextAssignments);
+    const flattened = CLAUSE_SECTION_CONFIG.flatMap(section => nextAssignments[section.key] || []);
+    onReorder(flattened);
+  };
+
+  const removeClauseFromAssignments = (currentAssignments, clauseId) => {
+    const next = { ...currentAssignments };
+    for (const section of CLAUSE_SECTION_CONFIG) {
+      next[section.key] = (next[section.key] || []).filter(id => id !== clauseId);
+    }
+    return next;
+  };
+
+  const addClauseToSection = (sectionKey, clauseId) => {
+    const next = removeClauseFromAssignments(sectionAssignments, clauseId);
+    next[sectionKey] = [...(next[sectionKey] || []), clauseId];
+    pushUpdate(next);
+  };
+
+  const handleDragStart = (clauseId, origin) => {
+    setDragState({ clauseId, origin });
+  };
+
+  const handleDropToSection = (sectionKey) => {
+    if (!dragState?.clauseId) return;
+    addClauseToSection(sectionKey, dragState.clauseId);
+    setHoveredSection('');
+    setDragState(null);
+  };
+
+  const handleRemoveClause = (clauseId) => {
+    const next = removeClauseFromAssignments(sectionAssignments, clauseId);
+    pushUpdate(next);
+  };
+
+  const moveClauseWithinSection = (sectionKey, fromIndex, toIndex) => {
+    const current = [...(sectionAssignments[sectionKey] || [])];
+    if (fromIndex === toIndex || fromIndex < 0 || toIndex < 0 || fromIndex >= current.length || toIndex >= current.length) return;
+    const [moved] = current.splice(fromIndex, 1);
+    current.splice(toIndex, 0, moved);
+    const next = { ...sectionAssignments, [sectionKey]: current };
+    pushUpdate(next);
   };
 
   if (loading) return (
@@ -355,52 +429,19 @@ function ClausePicker({ selectedClauseIds, onToggle, onReorder, offerData, formD
   );
 
   return (
-    <div className="space-y-4">
-      {selectedClauses.length > 0 && (
+    <div className="grid grid-cols-1 xl:grid-cols-[360px_1fr] gap-5">
+      <div className="bg-white border border-gray-200 rounded-xl p-4 space-y-4 h-fit xl:sticky xl:top-4">
         <div>
-          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2 flex items-center gap-1">
-            <GripVertical className="w-3 h-3" /> Selected Clauses — drag to reorder
-          </p>
-          <div className="space-y-1.5">
-            {selectedClauses.map((clause, idx) => (
-              <div
-                key={clause._id}
-                draggable
-                onDragStart={() => handleDragStart(idx)}
-                onDragEnter={() => handleDragEnter(idx)}
-                onDragEnd={handleDragEnd}
-                className="flex items-center gap-3 bg-blue-50 border border-blue-200 rounded-lg px-3 py-2.5 cursor-grab active:cursor-grabbing group"
-              >
-                <GripVertical className="w-4 h-4 text-blue-300 flex-shrink-0" />
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-blue-800 truncate">{clause.title}</p>
-                  <p className="text-xs text-blue-500 capitalize">{clause.category?.replace(/_/g, ' ')}</p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => onToggle(clause._id)}
-                  className="text-blue-400 hover:text-red-500 transition flex-shrink-0"
-                  title="Remove clause"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
-            ))}
-          </div>
+          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Clause Library</p>
+          <p className="text-xs text-gray-400">Drag clauses directly onto live agreement section drop zones.</p>
         </div>
-      )}
 
-      <div>
-        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
-          Clause Library {selectedClauses.length > 0 ? '— click to add' : ''}
-        </p>
-
-        <div className="space-y-2 mb-3">
+        <div className="space-y-2">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
             <input
               type="text"
-              placeholder="Search clauses…"
+              placeholder="Search title or content..."
               value={search}
               onChange={e => setSearch(e.target.value)}
               className="w-full pl-8 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -420,60 +461,153 @@ function ClausePicker({ selectedClauseIds, onToggle, onReorder, offerData, formD
           </div>
         </div>
 
-        <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
+        <div className="space-y-2 max-h-[60vh] overflow-y-auto pr-1">
           {availableClauses.length === 0 && (
             <p className="text-sm text-gray-400 py-3 text-center italic">No matching clauses found.</p>
           )}
-          {availableClauses.map((clause) => {
-            const open = expanded[clause._id];
-            return (
-              <div key={clause._id} className="border rounded-lg border-gray-200 hover:border-blue-300 transition">
-                <div className="flex items-start gap-3 p-3">
-                  <button type="button" onClick={() => onToggle(clause._id)} className="mt-0.5 flex-shrink-0">
-                    <Square className="w-4 h-4 text-gray-400 hover:text-blue-600 transition" />
-                  </button>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-medium text-sm text-gray-900">{clause.title}</span>
-                      <span className="text-xs px-2 py-0.5 bg-gray-100 text-gray-500 rounded-full capitalize">
-                        {clause.category?.replace(/_/g, ' ')}
-                      </span>
-                      {clause.jurisdiction && (
-                        <span className="text-xs px-2 py-0.5 bg-blue-50 text-blue-600 rounded-full">
-                          {clause.jurisdiction}
-                        </span>
-                      )}
-                      {clause.isDefault && (
-                        <span className="text-xs px-2 py-0.5 bg-green-100 text-green-700 rounded-full">Recommended</span>
-                      )}
-                    </div>
+          {availableClauses.map((clause) => (
+            <div
+              key={clause._id}
+              draggable
+              onDragStart={() => handleDragStart(clause._id, 'library')}
+              className="border rounded-lg border-gray-200 hover:border-blue-300 transition bg-white p-3 cursor-grab active:cursor-grabbing"
+            >
+              <div className="flex items-start justify-between gap-2">
+                <div className="min-w-0">
+                  <p className="font-medium text-sm text-gray-900 truncate">{clause.title}</p>
+                  <div className="mt-1 flex flex-wrap gap-1.5">
+                    <span className="text-xs px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full capitalize">
+                      {clause.category?.replace(/_/g, ' ')}
+                    </span>
+                    {clause.isDefault && (
+                      <span className="text-xs px-2 py-0.5 bg-green-100 text-green-700 rounded-full">Recommended</span>
+                    )}
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => setExpanded(prev => ({ ...prev, [clause._id]: !prev[clause._id] }))}
-                    className="flex-shrink-0 text-gray-400 hover:text-gray-600"
-                  >
-                    {open ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-                  </button>
                 </div>
-                {open && (
-                  <div className="px-11 pb-3">
-                    <p
-                      className="text-xs text-gray-600 leading-relaxed whitespace-pre-line"
-                      dangerouslySetInnerHTML={{ __html: substituteVariables(clause.body, offerData, formData) }}
-                    />
-                  </div>
+                <GripVertical className="w-4 h-4 text-gray-400 flex-shrink-0" />
+              </div>
+              <p className="mt-2 text-xs text-gray-500 line-clamp-2">{clause.body}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="bg-white border border-gray-200 rounded-xl p-5">
+        <div className="flex items-center justify-between mb-3">
+          <div>
+            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Live Agreement</p>
+            <p className="text-sm text-gray-500">All changes are reflected immediately in this draft.</p>
+          </div>
+          <span className="text-xs px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-100 font-semibold">
+            {selectedClauseIds.length} draggable clause{selectedClauseIds.length !== 1 ? 's' : ''}
+          </span>
+        </div>
+
+        <div className="rounded-xl border border-gray-200 bg-gray-50 p-4 space-y-4">
+          <div className="rounded-lg bg-white border border-gray-200 p-4">
+            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Permanent Section: Parties and Property</p>
+            <p className="text-sm text-gray-700"><strong>Landlord:</strong> {offerData?.property?.landlord?.name || 'Landlord'}</p>
+            <p className="text-sm text-gray-700"><strong>Tenant:</strong> {offerData?.tenant?.name || 'Tenant'}</p>
+            <p className="text-sm text-gray-700"><strong>Premises:</strong> {offerData?.property?.title || 'Property'}{offerData?.property?.address?.street ? `, ${offerData.property.address.street}, ${offerData.property.address.city}` : ''}</p>
+          </div>
+
+          <div className="rounded-lg bg-white border border-gray-200 p-4">
+            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Permanent Section: Core Lease Terms</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-gray-700">
+              <p><strong>Start Date:</strong> {formData?.startDate || 'N/A'}</p>
+              <p><strong>End Date:</strong> {formData?.endDate || 'N/A'}</p>
+              <p><strong>Monthly Rent:</strong> ${Number(formData?.rentAmount || 0).toLocaleString()}</p>
+              <p><strong>Security Deposit:</strong> ${Number(formData?.depositAmount || 0).toLocaleString()}</p>
+              <p><strong>Late Fee:</strong> ${Number(formData?.lateFeeAmount || 0).toLocaleString()}</p>
+              <p><strong>Grace Period:</strong> {formData?.lateFeeGracePeriodDays || '0'} days</p>
+            </div>
+          </div>
+
+          <div className="rounded-lg bg-white border border-gray-200 p-4">
+            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Permanent Section: Policies</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-gray-700">
+              <p><strong>Pets:</strong> {formData?.petAllowed ? 'Allowed' : 'Not allowed'}</p>
+              <p><strong>Pet Deposit:</strong> {formData?.petAllowed ? `$${Number(formData?.petDeposit || 0).toLocaleString()}` : 'N/A'}</p>
+              <p><strong>Utilities Included:</strong> {formData?.utilitiesIncluded ? 'Yes' : 'No'}</p>
+              <p><strong>Utilities Details:</strong> {formData?.utilitiesIncluded ? (formData?.utilitiesDetails || 'Not specified') : 'N/A'}</p>
+              <p className="md:col-span-2"><strong>Termination Policy:</strong> {formData?.terminationPolicy || 'Default policy applies.'}</p>
+            </div>
+          </div>
+
+          {CLAUSE_SECTION_CONFIG.map((section) => {
+            const ids = sectionAssignments[section.key] || [];
+            const isHovered = hoveredSection === section.key;
+            return (
+              <div
+                key={section.key}
+                onDragOver={(e) => { e.preventDefault(); setHoveredSection(section.key); }}
+                onDragLeave={() => setHoveredSection('')}
+                onDrop={(e) => { e.preventDefault(); handleDropToSection(section.key); }}
+                className={`rounded-lg border-2 p-4 transition ${isHovered ? 'border-blue-400 bg-blue-50' : 'border-dashed border-gray-300 bg-white'}`}
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-sm font-semibold text-gray-800">{section.title}</p>
+                  <span className="text-xs text-gray-400">Drop zone</span>
+                </div>
+
+                {ids.length === 0 && (
+                  <p className="text-xs text-gray-400 italic">Drag clauses here from the clause library.</p>
                 )}
+
+                <div className="space-y-2">
+                  {ids.map((id, idx) => {
+                    const clause = clausesById.get(id);
+                    if (!clause) return null;
+                    return (
+                      <div
+                        key={id}
+                        draggable
+                        onDragStart={() => handleDragStart(id, section.key)}
+                        className="rounded-lg border border-blue-100 bg-blue-50 p-3 cursor-grab active:cursor-grabbing"
+                      >
+                        <div className="flex items-start gap-2">
+                          <GripVertical className="w-4 h-4 text-blue-400 mt-0.5 flex-shrink-0" />
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center justify-between gap-2">
+                              <p className="text-sm font-semibold text-blue-900 truncate">{clause.title}</p>
+                              <div className="flex items-center gap-1">
+                                <button
+                                  type="button"
+                                  className="text-xs px-2 py-0.5 rounded border border-blue-200 text-blue-700 hover:bg-blue-100"
+                                  onClick={() => moveClauseWithinSection(section.key, idx, Math.max(0, idx - 1))}
+                                >
+                                  Up
+                                </button>
+                                <button
+                                  type="button"
+                                  className="text-xs px-2 py-0.5 rounded border border-blue-200 text-blue-700 hover:bg-blue-100"
+                                  onClick={() => moveClauseWithinSection(section.key, idx, Math.min(ids.length - 1, idx + 1))}
+                                >
+                                  Down
+                                </button>
+                                <button
+                                  type="button"
+                                  className="text-xs px-2 py-0.5 rounded border border-red-200 text-red-600 hover:bg-red-50"
+                                  onClick={() => handleRemoveClause(id)}
+                                >
+                                  Remove
+                                </button>
+                              </div>
+                            </div>
+                            <p
+                              className="mt-2 text-xs text-gray-700 leading-relaxed whitespace-pre-line"
+                              dangerouslySetInnerHTML={{ __html: substituteVariables(clause.body, offerData, formData) }}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
             );
           })}
         </div>
-
-        {selectedClauseIds.length > 0 && (
-          <p className="text-xs text-blue-600 font-medium">
-            {selectedClauseIds.length} clause{selectedClauseIds.length !== 1 ? 's' : ''} selected
-          </p>
-        )}
       </div>
     </div>
   );
@@ -593,7 +727,6 @@ function AgreementForm() {
     setStep(2);
   };
 
-  const handleToggleClause = (clauseId) => setSelectedClauseIds(prev => prev.includes(clauseId) ? prev.filter(id => id !== clauseId) : [...prev, clauseId]);
   const handleReorderClauses = (reorderedIds) => setSelectedClauseIds(reorderedIds);
   const handleApplyTemplate = (clauseIds, templateName) => { setSelectedClauseIds(clauseIds); setAppliedTemplate(templateName); setShowTemplatePicker(false); };
 
@@ -965,12 +1098,11 @@ function AgreementForm() {
                     )}
 
                     <p className="text-sm text-gray-500 mb-4">
-                      Select approved clauses to include. Drag to reorder. Or start from a template above.
+                      Build the agreement visually. Drag clauses from the library and drop them onto the live agreement section where they belong.
                     </p>
 
-                    <ClausePicker
+                    <AgreementComposer
                       selectedClauseIds={selectedClauseIds}
-                      onToggle={handleToggleClause}
                       onReorder={handleReorderClauses}
                       offerData={offerData}
                       formData={formData}
