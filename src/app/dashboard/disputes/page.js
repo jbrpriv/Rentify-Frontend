@@ -10,11 +10,11 @@ import {
 } from 'lucide-react';
 
 const STATUS_CONFIG = {
-  open: { label: 'Open', color: 'bg-blue-100 text-blue-700', dot: 'bg-blue-500' },
-  under_review: { label: 'Under Review', color: 'bg-amber-100 text-amber-700', dot: 'bg-amber-500' },
-  mediation: { label: 'Mediation', color: 'bg-purple-100 text-purple-700', dot: 'bg-purple-500' },
-  resolved: { label: 'Resolved', color: 'bg-green-100 text-green-700', dot: 'bg-green-500' },
-  closed: { label: 'Closed', color: 'bg-gray-100 text-gray-500', dot: 'bg-gray-400' },
+  open: { label: 'Open', color: 'bg-[#E6EAF2] text-[#0B2D72] border border-[#CBD5E1]', dot: 'bg-[#0B2D72]' },
+  under_review: { label: 'Under Review', color: 'bg-[#E6EAF2] text-[#0B2D72] border border-[#CBD5E1]', dot: 'bg-[#0B2D72]' },
+  mediation: { label: 'Mediation', color: 'bg-[#E6EAF2] text-[#0B2D72] border border-[#CBD5E1]', dot: 'bg-[#0B2D72]' },
+  resolved: { label: 'Resolved', color: 'bg-[#0B2D72] text-[#E6EAF2]', dot: 'bg-[#0B2D72]' },
+  closed: { label: 'Closed', color: 'bg-[#CBD5E1] text-[#1F2933]', dot: 'bg-gray-400' },
 };
 
 const CATEGORIES = ['rent', 'deposit', 'maintenance', 'noise', 'damage', 'lease_violation', 'other'];
@@ -107,14 +107,14 @@ export default function DisputesPage() {
 
       {/* File Form */}
       {showForm && canFile && (
-        <form onSubmit={handleSubmit} className="bg-white rounded-2xl border border-blue-100 shadow-sm p-6 space-y-4">
+        <form onSubmit={handleSubmit} className="bg-white rounded-2xl border border-[#CBD5E1] shadow-sm p-6 space-y-4">
           <h3 className="font-black text-gray-900">File a Dispute</h3>
 
           <select
             required
             value={form.agreementId}
             onChange={e => setForm(f => ({ ...f, agreementId: e.target.value }))}
-            className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#0B2D72]"
           >
             <option value="">Select Agreement / Property</option>
             {agreements.map(a => (
@@ -129,7 +129,7 @@ export default function DisputesPage() {
             placeholder="Dispute title (e.g. Landlord refusing deposit refund)"
             value={form.title}
             onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
-            className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#0B2D72]"
           />
 
           <textarea
@@ -138,7 +138,7 @@ export default function DisputesPage() {
             value={form.description}
             onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
             rows={4}
-            className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#0B2D72]"
           />
 
           <select
@@ -160,7 +160,7 @@ export default function DisputesPage() {
 
       {/* Disputes List */}
       {loading ? (
-        <div className="flex justify-center py-16"><Loader2 className="animate-spin h-8 w-8 text-blue-600" /></div>
+        <div className="flex justify-center py-16"><Loader2 className="animate-spin h-8 w-8 text-[#0B2D72]" /></div>
       ) : disputes.length === 0 ? (
         <div className="text-center py-20 bg-white rounded-3xl border border-dashed border-gray-200">
           <Scale className="w-12 h-12 mx-auto text-gray-300 mb-3" />
@@ -180,7 +180,7 @@ export default function DisputesPage() {
                 <div className="flex items-center justify-between p-5">
                   <div className="flex items-center gap-3 flex-1 min-w-0">
                     <span className={`text-[10px] font-black uppercase px-2 py-1 rounded-full shrink-0 ${sc.color}`}>{sc.label}</span>
-                    <span className="text-[10px] font-black uppercase px-2 py-1 rounded-full bg-gray-100 text-gray-500 shrink-0">{d.category?.replace('_', ' ')}</span>
+                    <span className="text-[10px] font-black uppercase px-2 py-1 rounded-full bg-[#E6EAF2] text-[#0B2D72] border border-[#CBD5E1] shrink-0">{d.category?.replace('_', ' ')}</span>
                     <div className="min-w-0">
                       <p className="font-bold text-gray-900 truncate">{d.title}</p>
                       <p className="text-xs text-gray-400">
@@ -214,10 +214,10 @@ export default function DisputesPage() {
 
                     {/* Resolution note */}
                     {d.resolutionNote && (
-                      <div className="bg-green-50 rounded-xl p-4">
-                        <p className="text-xs font-black uppercase tracking-widest text-green-600 mb-1">Admin Resolution</p>
-                        <p className="text-sm text-green-900">{d.resolutionNote}</p>
-                        {d.resolvedBy && <p className="text-xs text-green-600 mt-1">— {d.resolvedBy.name} on {new Date(d.resolvedAt).toLocaleDateString()}</p>}
+                      <div className="bg-[#E6EAF2] rounded-xl p-4 border border-[#CBD5E1]">
+                        <p className="text-xs font-black uppercase tracking-widest text-[#0B2D72] mb-1">Admin Resolution</p>
+                        <p className="text-sm text-[#0B2D72]">{d.resolutionNote}</p>
+                        {d.resolvedBy && <p className="text-xs text-[#0B2D72] opacity-70 mt-1">— {d.resolvedBy.name} on {new Date(d.resolvedAt).toLocaleDateString()}</p>}
                       </div>
                     )}
 
@@ -232,11 +232,11 @@ export default function DisputesPage() {
                       <div className="space-y-3 mb-4">
                         {(d.comments || []).map((c, i) => (
                           <div key={i} className={`flex gap-3 ${c.author?._id === myId ? 'flex-row-reverse' : ''}`}>
-                            <div className="w-7 h-7 rounded-full bg-gray-200 flex items-center justify-center text-xs font-bold text-gray-600 shrink-0">
-                              {c.author?.name?.[0] || '?'}
+                            <div className="w-7 h-7 rounded-full bg-[#E6EAF2] flex items-center justify-center text-xs font-bold text-[#0B2D72] shrink-0">
+                              {(typeof c.author === 'object' ? c.author?.name?.[0] : '?') || '?'}
                             </div>
                             <div className={`max-w-sm rounded-2xl px-4 py-2.5 ${c.author?._id === myId ? 'bg-[#0B2D72] text-[#E6EAF2] rounded-br-sm' : 'bg-gray-100 text-gray-900 rounded-bl-sm'}`}>
-                              <p className="text-xs font-semibold mb-0.5 opacity-70">{c.author?.name} · {c.author?.role}</p>
+                              <p className="text-xs font-semibold mb-0.5 opacity-70">{typeof c.author === 'object' ? c.author?.name : 'User'} · {typeof c.author === 'object' ? c.author?.role : ''}</p>
                               <p className="text-sm">{c.content}</p>
                               <p className={`text-[10px] mt-1 ${c.author?._id === myId ? 'text-[#DBE2ED]' : 'text-gray-400'}`}>
                                 {new Date(c.createdAt).toLocaleDateString()}
@@ -253,7 +253,7 @@ export default function DisputesPage() {
                             value={comment[d._id] || ''}
                             onChange={e => setComment(c => ({ ...c, [d._id]: e.target.value }))}
                             placeholder="Add a comment..."
-                            className="flex-1 border border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="flex-1 border border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#0B2D72]"
                             onKeyDown={e => e.key === 'Enter' && handleComment(d._id)}
                           />
                           <button
@@ -282,13 +282,13 @@ function AdminControls({ dispute, onUpdate }) {
   const [note, setNote] = useState(dispute.resolutionNote || '');
 
   return (
-    <div className="bg-amber-50 rounded-xl p-4 space-y-3 border border-amber-200">
-      <p className="text-xs font-black uppercase tracking-widest text-amber-700">Admin — Update Dispute</p>
+    <div className="bg-[#E6EAF2] rounded-xl p-4 space-y-3 border border-[#CBD5E1]">
+      <p className="text-xs font-black uppercase tracking-widest text-[#0B2D72]">Admin — Update Dispute</p>
       <div className="flex flex-wrap gap-3">
         <select
           value={status}
           onChange={e => setStatus(e.target.value)}
-          className="border border-amber-200 rounded-xl px-3 py-2 text-sm bg-white"
+          className="border border-[#CBD5E1] rounded-xl px-3 py-2 text-sm bg-white"
         >
           <option value="open">Open</option>
           <option value="under_review">Under Review</option>
@@ -302,11 +302,11 @@ function AdminControls({ dispute, onUpdate }) {
         onChange={e => setNote(e.target.value)}
         placeholder="Resolution note (shown to both parties)..."
         rows={2}
-        className="w-full border border-amber-200 rounded-xl px-3 py-2 text-sm bg-white"
+        className="w-full border border-[#CBD5E1] rounded-xl px-3 py-2 text-sm bg-white"
       />
       <button
         onClick={() => onUpdate(dispute._id, status, note)}
-        className="bg-amber-600 text-white px-5 py-2 rounded-xl text-sm font-black hover:bg-amber-700 transition"
+        className="bg-[#0B2D72] text-[#E6EAF2] px-5 py-2 rounded-xl text-sm font-black hover:opacity-90 transition"
       >
         Save Update
       </button>

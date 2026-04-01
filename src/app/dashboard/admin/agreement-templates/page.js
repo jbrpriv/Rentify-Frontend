@@ -10,9 +10,9 @@ import {
 } from 'lucide-react';
 
 const STATUS_META = {
-  pending:  { label: 'Pending Review', color: '#D97706', bg: '#FFFBEB', border: '#FDE68A' },
-  approved: { label: 'Approved',       color: '#16A34A', bg: '#F0FDF4', border: '#BBF7D0' },
-  rejected: { label: 'Rejected',       color: '#DC2626', bg: '#FFF7F7', border: '#FECACA' },
+  pending:  { label: 'Pending Review', color: '#0B2D72', bg: '#E6EAF2', border: '#CBD5E1' },
+  approved: { label: 'Approved',       color: '#E6EAF2', bg: '#0B2D72', border: '#0B2D72' },
+  rejected: { label: 'Rejected',       color: '#1F2933', bg: '#CBD5E1', border: '#94A3B8' },
 };
 
 function TemplateRow({ template, onReview, onDelete, actionId }) {
@@ -24,8 +24,8 @@ function TemplateRow({ template, onReview, onDelete, actionId }) {
     <div style={{ background:'white', borderRadius:16, border:'1.5px solid #E2E8F0', overflow:'hidden', boxShadow:'0 1px 4px rgba(15,23,42,0.04)' }}>
       {/* Header row */}
       <div style={{ display:'flex', alignItems:'center', gap:14, padding:'16px 20px', cursor:'pointer' }} onClick={() => setExpanded(e => !e)}>
-        <div style={{ width:40, height:40, borderRadius:12, background:'#EFF6FF', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
-          <FileText size={17} color="#2563EB"/>
+        <div style={{ width:40, height:40, borderRadius:12, background:'#E6EAF2', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+          <FileText size={17} color="#0B2D72"/>
         </div>
 
         <div style={{ flex:1, minWidth:0 }}>
@@ -46,7 +46,7 @@ function TemplateRow({ template, onReview, onDelete, actionId }) {
             <button
               onClick={() => onReview(template._id, true)}
               disabled={busy}
-              style={{ display:'flex', alignItems:'center', gap:5, padding:'7px 14px', background:'#F0FDF4', color:'#16A34A', border:'1.5px solid #BBF7D0', borderRadius:9, fontSize:'0.78rem', fontWeight:700, cursor:'pointer', opacity: busy ? 0.6 : 1 }}
+              style={{ display:'flex', alignItems:'center', gap:5, padding:'7px 14px', background:'#0B2D72', color:'#E6EAF2', border:'1.5px solid #0B2D72', borderRadius:9, fontSize:'0.78rem', fontWeight:700, cursor:'pointer', opacity: busy ? 0.6 : 1 }}
             >
               {busy ? <Loader2 size={12} className="animate-spin"/> : <CheckCircle size={13}/>} Approve
             </button>
@@ -55,7 +55,7 @@ function TemplateRow({ template, onReview, onDelete, actionId }) {
             <button
               onClick={() => onReview(template._id, false)}
               disabled={busy}
-              style={{ display:'flex', alignItems:'center', gap:5, padding:'7px 14px', background:'#FFF7F7', color:'#DC2626', border:'1.5px solid #FECACA', borderRadius:9, fontSize:'0.78rem', fontWeight:700, cursor:'pointer', opacity: busy ? 0.6 : 1 }}
+              style={{ display:'flex', alignItems:'center', gap:5, padding:'7px 14px', background:'#E6EAF2', color:'#1F2933', border:'1.5px solid #CBD5E1', borderRadius:9, fontSize:'0.78rem', fontWeight:700, cursor:'pointer', opacity: busy ? 0.6 : 1 }}
             >
               {busy ? <Loader2 size={12} className="animate-spin"/> : <XCircle size={13}/>} Reject
             </button>
@@ -79,7 +79,7 @@ function TemplateRow({ template, onReview, onDelete, actionId }) {
             <p style={{ fontSize:'0.82rem', color:'#475569', fontStyle:'italic', marginBottom:12 }}>{template.description}</p>
           )}
           {template.rejectionReason && (
-            <div style={{ padding:'10px 14px', background:'#FFF7F7', border:'1px solid #FECACA', borderRadius:10, marginBottom:12, fontSize:'0.8rem', color:'#DC2626' }}>
+            <div style={{ padding:'10px 14px', background:'#E6EAF2', border:'1px solid #CBD5E1', borderRadius:10, marginBottom:12, fontSize:'0.8rem', color:'#0B2D72' }}>
               <strong>Rejection reason:</strong> {template.rejectionReason}
             </div>
           )}
@@ -95,9 +95,9 @@ function TemplateRow({ template, onReview, onDelete, actionId }) {
               {template.clauseIds.map(c => (
                 <div key={c._id} style={{ padding:'10px 14px', background:'#F8FAFC', borderRadius:10, border:'1px solid #F1F5F9' }}>
                   <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:4 }}>
-                    <Tag size={12} color="#2563EB"/>
+                    <Tag size={12} color="#0B2D72"/>
                     <span style={{ fontWeight:700, fontSize:'0.85rem', color:'#0F172A' }}>{c.title}</span>
-                    <span style={{ fontSize:'0.65rem', padding:'2px 7px', borderRadius:20, background: c.isApproved ? '#F0FDF4' : '#FFFBEB', color: c.isApproved ? '#16A34A' : '#D97706', fontWeight:700, border:`1px solid ${c.isApproved ? '#BBF7D0' : '#FDE68A'}` }}>
+                    <span style={{ fontSize:'0.65rem', padding:'2px 7px', borderRadius:20, background: c.isApproved ? '#0B2D72' : '#E6EAF2', color: c.isApproved ? '#E6EAF2' : '#0B2D72', fontWeight:700, border:`1px solid ${c.isApproved ? '#0B2D72' : '#CBD5E1'}` }}>
                       {c.isApproved ? 'Approved' : 'Pending Clause'}
                     </span>
                   </div>
@@ -192,7 +192,7 @@ export default function AdminAgreementTemplatesPage() {
 
       {/* Toast */}
       {toast && (
-        <div style={{ padding:'12px 16px', borderRadius:10, fontSize:'0.85rem', fontWeight:600, display:'flex', alignItems:'center', gap:8, marginBottom:16, background: toast.ok ? '#F0FDF4' : '#FFF7F7', color: toast.ok ? '#16A34A' : '#DC2626', border:`1px solid ${toast.ok ? '#BBF7D0' : '#FECACA'}` }}>
+        <div style={{ padding:'12px 16px', borderRadius:10, fontSize:'0.85rem', fontWeight:600, display:'flex', alignItems:'center', gap:8, marginBottom:16, background: toast.ok ? '#E6EAF2' : '#E6EAF2', color: toast.ok ? '#0B2D72' : '#1F2933', border:`1px solid ${toast.ok ? '#CBD5E1' : '#CBD5E1'}` }}>
           {toast.ok ? <CheckCircle size={15}/> : <XCircle size={15}/>} {toast.msg}
         </div>
       )}
@@ -201,12 +201,12 @@ export default function AdminAgreementTemplatesPage() {
       <div style={{ display:'flex', gap:6, marginBottom:20, flexWrap:'wrap' }}>
         {[
           { key:'',         label:`All (${counts.all})` },
-          { key:'pending',  label:`Pending (${counts.pending})`,  color:'#D97706' },
-          { key:'approved', label:`Approved (${counts.approved})`, color:'#16A34A' },
-          { key:'rejected', label:`Rejected (${counts.rejected})`, color:'#DC2626' },
+          { key:'pending',  label:`Pending (${counts.pending})`,  color:'#0B2D72' },
+          { key:'approved', label:`Approved (${counts.approved})`, color:'#0B2D72' },
+          { key:'rejected', label:`Rejected (${counts.rejected})`, color:'#1F2933' },
         ].map(f => (
           <button key={f.key} onClick={() => setFilter(f.key)}
-            style={{ padding:'7px 16px', borderRadius:20, fontWeight:700, fontSize:'0.78rem', cursor:'pointer', border:`1.5px solid ${statusFilter===f.key ? (f.color||'#2563EB') : '#E2E8F0'}`, background: statusFilter===f.key ? (f.color||'#2563EB') : 'white', color: statusFilter===f.key ? 'white' : (f.color||'#64748B'), transition:'all 0.15s' }}>
+            style={{ padding:'7px 16px', borderRadius:20, fontWeight:700, fontSize:'0.78rem', cursor:'pointer', border:`1.5px solid ${statusFilter===f.key ? (f.color||'#0B2D72') : '#E2E8F0'}`, background: statusFilter===f.key ? (f.color||'#0B2D72') : 'white', color: statusFilter===f.key ? '#E6EAF2' : (f.color||'#64748B'), transition:'all 0.15s' }}>
             {f.label}
           </button>
         ))}
@@ -215,7 +215,7 @@ export default function AdminAgreementTemplatesPage() {
       {/* List */}
       {loading ? (
         <div style={{ display:'flex', justifyContent:'center', padding:60 }}>
-          <Loader2 className="animate-spin" size={28} color="#2563EB"/>
+          <Loader2 className="animate-spin" size={28} color="#0B2D72"/>
         </div>
       ) : templates.length === 0 ? (
         <div style={{ textAlign:'center', padding:'64px 20px', background:'white', borderRadius:16, border:'2px dashed #E2E8F0' }}>
