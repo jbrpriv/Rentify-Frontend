@@ -770,7 +770,7 @@ function AgreementForm() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto py-8">
+    <div className="max-w-[1400px] mx-auto py-8 px-2 sm:px-4">
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Accept Offer & Draft Agreement</h1>
         <p className="text-gray-500">Review the negotiated terms, add clauses, and finalise the agreement.</p>
