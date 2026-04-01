@@ -11,9 +11,9 @@ import {
 } from 'lucide-react';
 
 const STATUS_META = {
-  pending: { label: 'Pending Review', color: '#D97706', bg: '#FFFBEB', border: '#FDE68A' },
-  approved: { label: 'Approved', color: '#16A34A', bg: '#F0FDF4', border: '#BBF7D0' },
-  rejected: { label: 'Rejected', color: '#DC2626', bg: '#FFF7F7', border: '#FECACA' },
+  pending: { label: 'Pending Review', color: '#0B2D72', bg: '#F1F5F9', border: '#E2E8F0' },
+  approved: { label: 'Approved', color: '#0B2D72', bg: '#F1F5F9', border: '#E2E8F0' },
+  rejected: { label: 'Rejected', color: '#0B2D72', bg: '#F1F5F9', border: '#E2E8F0' },
 };
 
 const CATEGORIES = ['general', 'rent', 'deposit', 'maintenance', 'utilities', 'pets', 'termination', 'renewal', 'late_fee', 'subletting', 'noise'];
@@ -55,9 +55,9 @@ function ClausePickerModal({ selected, onSave, onClose }) {
 
         {/* Category filter */}
         <div style={{ padding: '12px 24px', display: 'flex', gap: 6, flexWrap: 'wrap', borderBottom: '1px solid #F8FAFC' }}>
-          <button onClick={() => setCat('')} style={{ padding: '4px 12px', borderRadius: 20, fontSize: '0.72rem', fontWeight: 700, border: `1.5px solid ${!catFilter ? '#2563EB' : '#E2E8F0'}`, background: !catFilter ? '#2563EB' : 'white', color: !catFilter ? 'white' : '#64748B', cursor: 'pointer' }}>All</button>
+          <button onClick={() => setCat('')} className="bg-action-bg text-action-text border border-action-border hover:bg-action-hover transition-colors" style={{ padding: '4px 12px', borderRadius: 20, fontSize: '0.72rem', fontWeight: 700, cursor: 'pointer' }}>All</button>
           {categories.map(c => (
-            <button key={c} onClick={() => setCat(c)} style={{ padding: '4px 12px', borderRadius: 20, fontSize: '0.72rem', fontWeight: 700, border: `1.5px solid ${catFilter === c ? '#2563EB' : '#E2E8F0'}`, background: catFilter === c ? '#2563EB' : 'white', color: catFilter === c ? 'white' : '#64748B', cursor: 'pointer', textTransform: 'capitalize' }}>{c.replace('_', ' ')}</button>
+            <button key={c} onClick={() => setCat(c)} className="bg-action-bg text-action-text border border-action-border hover:bg-action-hover transition-colors" style={{ padding: '4px 12px', borderRadius: 20, fontSize: '0.72rem', fontWeight: 700, cursor: 'pointer', textTransform: 'capitalize' }}>{c.replace('_', ' ')}</button>
           ))}
         </div>
 
@@ -71,14 +71,14 @@ function ClausePickerModal({ selected, onSave, onClose }) {
             filtered.map(clause => {
               const isSelected = picked.has(clause._id);
               return (
-                <div key={clause._id} onClick={() => toggle(clause._id)} style={{ display: 'flex', alignItems: 'flex-start', gap: 12, padding: '12px', borderRadius: 12, border: `1.5px solid ${isSelected ? '#2563EB' : '#F1F5F9'}`, background: isSelected ? '#EFF6FF' : 'white', marginBottom: 8, cursor: 'pointer', transition: 'all 0.15s' }}>
-                  <div style={{ width: 20, height: 20, borderRadius: 5, border: `2px solid ${isSelected ? '#2563EB' : '#CBD5E1'}`, background: isSelected ? '#2563EB' : 'white', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: 1 }}>
+                <div key={clause._id} onClick={() => toggle(clause._id)} className="hover:bg-action-hover" style={{ display: 'flex', alignItems: 'flex-start', gap: 12, padding: '12px', borderRadius: 12, border: `1.5px solid ${isSelected ? '#0B2D72' : '#F1F5F9'}`, background: isSelected ? '#F1F5F9' : 'white', marginBottom: 8, cursor: 'pointer', transition: 'all 0.15s' }}>
+                  <div style={{ width: 20, height: 20, borderRadius: 5, border: `2px solid ${isSelected ? '#0B2D72' : '#CBD5E1'}`, background: isSelected ? '#0B2D72' : 'white', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: 1 }}>
                     {isSelected && <CheckCircle size={12} color="white" />}
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
                       <span style={{ fontWeight: 700, fontSize: '0.88rem', color: '#0F172A' }}>{clause.title}</span>
-                      <span style={{ fontSize: '0.65rem', padding: '2px 8px', borderRadius: 20, background: '#F0FDF4', color: '#16A34A', fontWeight: 700, border: '1px solid #BBF7D0' }}>
+                      <span className="bg-action-bg text-action-text border border-action-border" style={{ fontSize: '0.65rem', padding: '2px 8px', borderRadius: 20, fontWeight: 700 }}>
                         Approved
                       </span>
                     </div>
@@ -93,8 +93,8 @@ function ClausePickerModal({ selected, onSave, onClose }) {
 
         {/* Footer */}
         <div style={{ padding: '16px 24px', borderTop: '1px solid #F1F5F9', display: 'flex', gap: 10 }}>
-          <button onClick={onClose} style={{ flex: 1, padding: '10px', border: '1.5px solid #E2E8F0', borderRadius: 10, fontWeight: 700, fontSize: '0.85rem', color: '#64748B', background: 'white', cursor: 'pointer' }}>Cancel</button>
-          <button onClick={() => onSave(clauses.filter(c => picked.has(c._id)))} style={{ flex: 2, padding: '10px', background: '#2563EB', color: 'white', border: 'none', borderRadius: 10, fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer' }}>
+          <button onClick={onClose} className="bg-white text-action-text border border-action-border hover:bg-action-hover transition-colors" style={{ flex: 1, padding: '10px', borderRadius: 10, fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer' }}>Cancel</button>
+          <button onClick={() => onSave(clauses.filter(c => picked.has(c._id)))} className="bg-action-bg text-action-text border border-action-border hover:bg-action-hover transition-colors" style={{ flex: 2, padding: '10px', borderRadius: 10, fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer' }}>
             Attach {picked.size} Clause{picked.size !== 1 ? 's' : ''}
           </button>
         </div>
@@ -147,17 +147,17 @@ function TemplateForm({ initial, onSave, onCancel, saving }) {
           <div>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
               <label style={{ fontSize: '0.75rem', fontWeight: 700, color: '#64748B' }}>Clauses ({clauses.length})</label>
-              <button onClick={() => setShowPicker(true)} style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: '0.75rem', fontWeight: 700, color: '#2563EB', background: 'none', border: 'none', cursor: 'pointer' }}>
-                <Tag size={13} /> {clauses.length > 0 ? 'Edit Clauses' : 'Add Clauses'}
+              <button onClick={() => setShowPicker(true)} className="text-action-text" style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: '0.75rem', fontWeight: 700, background: 'none', border: 'none', cursor: 'pointer' }}>
+                <Tag size={13} className="text-action-text" /> {clauses.length > 0 ? 'Edit Clauses' : 'Add Clauses'}
               </button>
             </div>
             {clauses.length > 0 ? (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                 {clauses.map(c => (
                   <div key={c._id} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', background: '#F8FAFC', borderRadius: 8, border: '1px solid #F1F5F9' }}>
-                    <Tag size={12} color="#2563EB" />
+                    <Tag size={12} className="text-action-text" />
                     <span style={{ fontSize: '0.82rem', fontWeight: 600, color: '#0F172A', flex: 1 }}>{c.title}</span>
-                    <span style={{ fontSize: '0.65rem', color: c.isApproved ? '#16A34A' : '#D97706', fontWeight: 700 }}>
+                    <span className="text-action-text" style={{ fontSize: '0.65rem', fontWeight: 700 }}>
                       {c.isApproved ? '✓ Approved' : '⏳ Pending'}
                     </span>
                   </div>
@@ -171,8 +171,8 @@ function TemplateForm({ initial, onSave, onCancel, saving }) {
           </div>
 
           <div style={{ display: 'flex', gap: 10, paddingTop: 4 }}>
-            <button onClick={onCancel} style={{ flex: 1, padding: '10px', border: '1.5px solid #E2E8F0', borderRadius: 10, fontWeight: 700, fontSize: '0.85rem', color: '#64748B', background: 'white', cursor: 'pointer' }}>Cancel</button>
-            <button onClick={handleSubmit} disabled={saving} style={{ flex: 2, padding: '10px', background: '#2563EB', color: 'white', border: 'none', borderRadius: 10, fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, opacity: saving ? 0.7 : 1 }}>
+            <button onClick={onCancel} className="bg-white text-action-text border border-action-border hover:bg-action-hover transition-colors" style={{ flex: 1, padding: '10px', borderRadius: 10, fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer' }}>Cancel</button>
+            <button onClick={handleSubmit} disabled={saving} className="bg-action-bg text-action-text border border-action-border hover:bg-action-hover transition-colors" style={{ flex: 2, padding: '10px', borderRadius: 10, fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, opacity: saving ? 0.7 : 1 }}>
               {saving ? <Loader2 size={15} className="animate-spin" /> : <Save size={15} />}
               {initial ? 'Save Changes' : 'Create Template'}
             </button>
@@ -192,8 +192,8 @@ function TemplateCard({ template, onEdit, onDelete, deleting }) {
     <div style={{ background: 'white', borderRadius: 16, border: '1.5px solid #E2E8F0', overflow: 'hidden', boxShadow: '0 1px 4px rgba(15,23,42,0.04)' }}>
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '16px 20px', cursor: 'pointer' }} onClick={() => setExpanded(e => !e)}>
-        <div style={{ width: 42, height: 42, borderRadius: 12, background: '#EFF6FF', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-          <FileText size={18} color="#2563EB" />
+        <div style={{ width: 42, height: 42, borderRadius: 12, background: '#F1F5F9', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+          <FileText size={18} className="text-action-text" />
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
@@ -206,10 +206,10 @@ function TemplateCard({ template, onEdit, onDelete, deleting }) {
           </p>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
-          <button onClick={e => { e.stopPropagation(); onEdit(template); }} style={{ padding: '7px 12px', background: '#F8FAFC', border: '1.5px solid #E2E8F0', borderRadius: 8, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5, fontSize: '0.75rem', fontWeight: 700, color: '#475569' }}>
+          <button onClick={e => { e.stopPropagation(); onEdit(template); }} className="bg-action-bg text-action-text border border-action-border hover:bg-action-hover transition-colors" style={{ padding: '7px 12px', borderRadius: 8, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5, fontSize: '0.75rem', fontWeight: 700 }}>
             <Pencil size={12} /> Edit
           </button>
-          <button onClick={e => { e.stopPropagation(); onDelete(template._id); }} disabled={deleting === template._id} style={{ padding: '7px 12px', background: '#FFF7F7', border: '1.5px solid #FECACA', borderRadius: 8, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5, fontSize: '0.75rem', fontWeight: 700, color: '#DC2626', opacity: deleting === template._id ? 0.5 : 1 }}>
+          <button onClick={e => { e.stopPropagation(); onDelete(template._id); }} disabled={deleting === template._id} className="bg-action-bg text-action-text border border-action-border hover:bg-action-hover transition-colors" style={{ padding: '7px 12px', borderRadius: 8, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5, fontSize: '0.75rem', fontWeight: 700, opacity: deleting === template._id ? 0.5 : 1 }}>
             {deleting === template._id ? <Loader2 size={12} className="animate-spin" /> : <Trash2 size={12} />}
           </button>
           {expanded ? <ChevronUp size={16} color="#94A3B8" /> : <ChevronDown size={16} color="#94A3B8" />}
@@ -236,9 +236,9 @@ function TemplateCard({ template, onEdit, onDelete, deleting }) {
               {template.clauseIds.map(c => (
                 <div key={c._id} style={{ padding: '10px 14px', background: '#F8FAFC', borderRadius: 10, border: '1px solid #F1F5F9' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-                    <Tag size={12} color="#2563EB" />
+                    <Tag size={12} className="text-action-text" />
                     <span style={{ fontWeight: 700, fontSize: '0.85rem', color: '#0F172A' }}>{c.title}</span>
-                    <span style={{ fontSize: '0.65rem', padding: '2px 7px', borderRadius: 20, background: c.isApproved ? '#F0FDF4' : '#FFFBEB', color: c.isApproved ? '#16A34A' : '#D97706', fontWeight: 700, border: `1px solid ${c.isApproved ? '#BBF7D0' : '#FDE68A'}` }}>
+                    <span className="bg-action-bg text-action-text border border-action-border" style={{ fontSize: '0.65rem', padding: '2px 7px', borderRadius: 20, fontWeight: 700 }}>
                       {c.isApproved ? 'Approved' : 'Pending Review'}
                     </span>
                   </div>
@@ -344,7 +344,7 @@ export default function AgreementTemplatesPage() {
           </p>
         </div>
         {!showForm && (
-          <button onClick={startCreate} style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '10px 18px', background: '#2563EB', color: 'white', border: 'none', borderRadius: 12, fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer' }}>
+          <button onClick={startCreate} className="bg-action-bg text-action-text border border-action-border hover:bg-action-hover transition-colors" style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '10px 18px', borderRadius: 12, fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer' }}>
             <Plus size={16} /> New Template
           </button>
         )}
@@ -367,7 +367,7 @@ export default function AgreementTemplatesPage() {
           <FileText size={48} color="#CBD5E1" style={{ margin: '0 auto 12px' }} />
           <h3 style={{ fontWeight: 700, color: '#475569', fontSize: '1.05rem', marginBottom: 6 }}>No templates yet</h3>
           <p style={{ color: '#94A3B8', fontSize: '0.85rem', marginBottom: 20 }}>Create your first agreement template to speed up the lease creation process.</p>
-          <button onClick={startCreate} style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '10px 20px', background: '#2563EB', color: 'white', border: 'none', borderRadius: 12, fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer' }}>
+          <button onClick={startCreate} className="bg-action-bg text-action-text border border-action-border hover:bg-action-hover transition-colors" style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '10px 20px', borderRadius: 12, fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer' }}>
             <Plus size={15} /> Create Template
           </button>
         </div>

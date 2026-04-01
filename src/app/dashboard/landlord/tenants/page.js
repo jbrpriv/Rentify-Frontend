@@ -76,16 +76,19 @@ export default function LandlordTenantsPage() {
       ))}
 
       {/* Filter */}
-      <div className="flex gap-2 flex-wrap">
+      <div style={{ display: 'flex', gap: 4, background: '#F1F5F9', borderRadius: 10, padding: 4, alignSelf: 'flex-start', width: 'fit-content', flexWrap: 'wrap' }}>
         {['active','payment_pending','expired','all'].map(s => (
           <button
             key={s}
             onClick={() => setFilter(s)}
-            className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition ${
-              filter === s ? 'bg-blue-600 text-white' : 'bg-white border border-gray-200 text-gray-500 hover:border-blue-300'
-            }`}
+            style={{
+              padding: '6px 16px', borderRadius: 7, fontSize: '0.82rem', fontWeight: 700, border: 'none', cursor: 'pointer',
+              background: filter === s ? 'white' : 'transparent', color: filter === s ? '#0F172A' : '#94A3B8',
+              boxShadow: filter === s ? '0 1px 4px rgba(0,0,0,0.08)' : 'none',
+              textTransform: 'uppercase', letterSpacing: '0.05em'
+            }}
           >
-            {s === 'payment_pending' ? 'Payment Pending' : s}
+            {s === 'payment_pending' ? 'Payment Pending' : s.replace('_', ' ')}
           </button>
         ))}
       </div>
@@ -134,12 +137,7 @@ export default function LandlordTenantsPage() {
                       </div>
                     </td>
                     <td className="px-4 py-4">
-                      <span className={`text-[10px] font-black uppercase px-2 py-1 rounded-full ${
-                        a.status === 'active'  ? 'bg-green-100 text-green-700' :
-                        a.status === 'expired' ? 'bg-red-100 text-red-600' :
-                        (a.status === 'signed' || a.status === 'sent') ? 'bg-amber-100 text-amber-700' :
-                        'bg-gray-100 text-gray-500'
-                      }`}>
+                      <span className="bg-action-bg text-action-text border border-action-border text-[10px] font-black uppercase px-2 py-1 rounded-full">
                         {(a.status === 'signed' || a.status === 'sent') ? 'Payment Pending' : a.status}
                       </span>
                     </td>
@@ -158,7 +156,7 @@ export default function LandlordTenantsPage() {
                         {a.tenant?._id && (
                           <Link
                             href={`/dashboard/landlord/tenant-documents?tenantId=${a.tenant._id}&name=${encodeURIComponent(a.tenant.name || 'Tenant')}`}
-                            className="text-[10px] font-bold uppercase tracking-widest text-indigo-600 hover:text-indigo-800 border border-indigo-200 px-2.5 py-1 rounded-lg hover:bg-indigo-50 transition"
+                            className="text-[10px] font-bold uppercase tracking-widest bg-action-bg text-action-text border border-action-border px-2.5 py-1 rounded-lg hover:bg-action-hover transition"
                             title="View tenant documents (secure, view-only)"
                           >
                             Docs

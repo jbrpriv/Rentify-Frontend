@@ -8,15 +8,15 @@ import { Wrench, Plus, Loader2, ChevronDown, ChevronUp, CheckCircle, Clock, Aler
 import { motion } from 'framer-motion';
 
 const STATUS_CONFIG = {
-  open: { label: 'Open', color: 'bg-blue-100 text-blue-700' },
-  in_progress: { label: 'In Progress', color: 'bg-amber-100 text-amber-700' },
-  resolved: { label: 'Resolved', color: 'bg-green-100 text-green-700' },
-  closed: { label: 'Closed', color: 'bg-gray-100 text-gray-500' },
+  open: { label: 'Open', color: 'bg-action-bg text-action-text border border-action-border' },
+  in_progress: { label: 'In Progress', color: 'bg-action-bg text-action-text border border-action-border' },
+  resolved: { label: 'Resolved', color: 'bg-action-bg text-action-text border border-action-border' },
+  closed: { label: 'Closed', color: 'bg-action-bg text-action-text border border-action-border' },
 };
 const PRIORITY_CONFIG = {
-  low: { color: 'bg-gray-100 text-gray-500' },
-  medium: { color: 'bg-amber-100 text-amber-700' },
-  urgent: { color: 'bg-red-100 text-red-700' },
+  low: { color: 'bg-action-bg text-action-text border border-action-border' },
+  medium: { color: 'bg-action-bg text-action-text border border-action-border' },
+  urgent: { color: 'bg-action-bg text-action-text border border-action-border' },
 };
 const CATEGORIES = ['plumbing', 'electrical', 'hvac', 'appliance', 'structural', 'pest', 'other'];
 
@@ -121,7 +121,7 @@ export default function MaintenancePage() {
             onClick={() => setShowForm(v => !v)}
             whileHover={{ y: -1 }}
             whileTap={{ scale: 0.97 }}
-            className="flex items-center gap-2 bg-blue-600 text-white px-5 py-2.5 rounded-xl text-sm font-black hover:bg-blue-700 transition"
+            className="flex items-center gap-2 bg-action-bg text-action-text border border-action-border px-5 py-2.5 rounded-xl text-sm font-black hover:bg-action-hover transition-colors"
           >
             <Plus className="w-4 h-4" /> New Request
           </motion.button>
@@ -187,7 +187,7 @@ export default function MaintenancePage() {
 
           <div className="flex gap-3">
             <button type="button" onClick={() => setShowForm(false)} className="flex-1 border border-gray-200 rounded-xl py-2.5 text-sm hover:bg-gray-50">Cancel</button>
-            <button type="submit" disabled={submitting} className="flex-1 bg-blue-600 text-white rounded-xl py-2.5 text-sm font-black hover:bg-blue-700 disabled:bg-blue-400">
+            <button type="submit" disabled={submitting} className="flex-1 bg-action-bg text-action-text border border-action-border rounded-xl py-2.5 text-sm font-black hover:bg-action-hover disabled:opacity-50 transition-colors">
               {submitting ? <Loader2 className="animate-spin w-4 h-4 mx-auto" /> : 'Submit Request'}
             </button>
           </div>
@@ -255,7 +255,7 @@ export default function MaintenancePage() {
                   <div className="px-5 pb-5 border-t border-gray-50 space-y-4">
                     <p className="text-sm text-gray-700 mt-4">{r.description}</p>
                     {r.resolutionNotes && (
-                      <div className="bg-green-50 rounded-xl p-3 text-sm text-green-800">
+                      <div className="bg-action-bg text-action-text border border-action-border rounded-xl p-3 text-sm">
                         <strong>Resolution notes:</strong> {r.resolutionNotes}
                       </div>
                     )}
@@ -309,7 +309,7 @@ export default function MaintenancePage() {
                         <button
                           onClick={() => handleUpdate(r._id)}
                           disabled={actionId === r._id}
-                          className="bg-blue-600 text-white px-5 py-2 rounded-xl text-sm font-black hover:bg-blue-700 disabled:bg-blue-400 transition"
+                          className="bg-action-bg text-action-text border border-action-border px-5 py-2 rounded-xl text-sm font-black hover:bg-action-hover disabled:opacity-50 transition-colors"
                         >
                           {actionId === r._id ? <Loader2 className="animate-spin w-4 h-4 mx-auto" /> : 'Save Update'}
                         </button>

@@ -17,7 +17,7 @@ import {
 } from 'recharts';
 
 // ─── Palette ──────────────────────────────────────────────────────────────────
-const COLORS = ['#0B2D72', '#0992C2', '#0AC4E0', '#F59E0B', '#10B981', '#EF4444'];
+const COLORS = ['#0B2D72', '#F1F5F9', '#E2E8F0', '#CBD5E1', '#94A3B8', '#64748B'];
 const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -79,10 +79,10 @@ function Skeleton() {
 }
 
 const PAYMENT_STATUS = {
-  paid: { label: 'Paid', color: 'bg-green-100 text-green-700' },
-  pending: { label: 'Pending', color: 'bg-blue-100 text-blue-700' },
-  failed: { label: 'Failed', color: 'bg-red-100 text-red-700' },
-  retry_scheduled: { label: 'Retrying', color: 'bg-orange-100 text-orange-700' },
+  paid: { label: 'Paid', color: 'bg-action-bg text-action-text border border-action-border' },
+  pending: { label: 'Pending', color: 'bg-action-bg text-action-text border border-action-border' },
+  failed: { label: 'Failed', color: 'bg-action-bg text-action-text border border-action-border' },
+  retry_scheduled: { label: 'Retrying', color: 'bg-action-bg text-action-text border border-action-border' },
 };
 
 // ─── Shared receipt download helper ──────────────────────────────────────────
@@ -152,9 +152,9 @@ function LandlordAnalytics({ data }) {
   }));
 
   const healthData = [
-    { name: 'Paid', value: paymentHealth.paid, color: '#10B981' },
-    { name: 'Pending', value: paymentHealth.pending, color: '#0992C2' },
-    { name: 'Overdue', value: paymentHealth.overdue, color: '#EF4444' },
+    { name: 'Paid', value: paymentHealth.paid, color: '#0B2D72' },
+    { name: 'Pending', value: paymentHealth.pending, color: '#E2E8F0' },
+    { name: 'Overdue', value: paymentHealth.overdue, color: '#F1F5F9' },
   ].filter(d => d.value > 0);
 
   const statusData = Object.entries(agreementStatus).map(([k, v]) => ({
@@ -171,15 +171,15 @@ function LandlordAnalytics({ data }) {
       <div>
         <SectionTitle>Portfolio Overview</SectionTitle>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <KpiCard label="Lifetime Revenue" value={formatMoneyCompact(lifetimeRevenue)} icon={TrendingUp} color="text-blue-600" bg="bg-blue-50" />
-          <KpiCard label="Active Tenants" value={activeTenantsCount} icon={Users} color="text-cyan-600" bg="bg-cyan-50" />
+          <KpiCard label="Lifetime Revenue" value={formatMoneyCompact(lifetimeRevenue)} icon={TrendingUp} color="text-action-text" bg="bg-action-bg" />
+          <KpiCard label="Active Tenants" value={activeTenantsCount} icon={Users} color="text-action-text" bg="bg-action-bg" />
           <KpiCard label="Occupancy Rate" value={`${occupancyPct}%`}
             sub={`${occupancy.leased} / ${occupancy.total} units`}
             icon={Building2}
-            color={occupancyPct >= 75 ? 'text-green-600' : 'text-orange-500'}
-            bg={occupancyPct >= 75 ? 'bg-green-50' : 'bg-orange-50'}
+            color="text-action-text"
+            bg="bg-action-bg"
           />
-          <KpiCard label="Late Fees Collected" value={formatMoney(lateFeeCollected)} icon={AlertCircle} color="text-orange-600" bg="bg-orange-50" />
+          <KpiCard label="Late Fees Collected" value={formatMoney(lateFeeCollected)} icon={AlertCircle} color="text-action-text" bg="bg-action-bg" />
         </div>
       </div>
 
@@ -194,7 +194,7 @@ function LandlordAnalytics({ data }) {
               <Tooltip formatter={v => formatMoney(v)} />
               <Legend wrapperStyle={{ fontSize: 11 }} />
               <Bar dataKey="Revenue" fill="#0B2D72" radius={[4, 4, 0, 0]} />
-              <Bar dataKey="Late Fees" fill="#F59E0B" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="Late Fees" fill="#E2E8F0" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </ChartCard>
@@ -260,13 +260,13 @@ function LandlordAnalytics({ data }) {
               {expiringLeases.map(lease => {
                 const daysLeft = Math.ceil((new Date(lease.term.endDate) - new Date()) / 86400000);
                 return (
-                  <div key={lease._id} className="flex items-center justify-between p-3 rounded-xl bg-gray-50 hover:bg-blue-50 transition">
+                  <div key={lease._id} className="flex items-center justify-between p-3 rounded-xl bg-gray-50 hover:bg-action-hover transition">
                     <div>
                       <p className="text-sm font-bold text-gray-900">{lease.property?.title}</p>
                       <p className="text-xs text-gray-400 mt-0.5">{lease.tenant?.name} · {formatMoney(lease.financials?.rentAmount)}/mo</p>
                     </div>
                     <div className={`text-right`}>
-                      <span className={`text-xs font-black px-2 py-1 rounded-lg ${daysLeft <= 30 ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700'}`}>
+                      <span className="text-xs font-black px-2 py-1 rounded-lg bg-action-bg text-action-text border border-action-border">
                         {daysLeft}d left
                       </span>
                     </div>
@@ -320,7 +320,7 @@ function LandlordAnalytics({ data }) {
                         {p.property?.title || '—'}
                       </td>
                       <td className="py-3 pr-4">
-                        <span className="text-[10px] font-bold uppercase px-2 py-1 rounded-full bg-gray-100 text-gray-600">
+                        <span className="text-[10px] font-bold uppercase px-2 py-1 rounded-full bg-action-bg text-action-text border border-action-border">
                           {(p.type || '—').replace('_', ' ')}
                         </span>
                       </td>
@@ -345,7 +345,7 @@ function LandlordAnalytics({ data }) {
                           <button
                             onClick={() => handleDownloadReceipt(p._id)}
                             disabled={downloading === p._id}
-                            className="flex items-center gap-1 text-[10px] font-black uppercase px-2.5 py-1.5 rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 disabled:opacity-50 transition whitespace-nowrap"
+                            className="flex items-center gap-1 text-[10px] font-black uppercase px-2.5 py-1.5 rounded-lg bg-action-bg text-action-text border border-action-border hover:bg-action-hover disabled:opacity-50 transition whitespace-nowrap"
                           >
                             {downloading === p._id
                               ? <Loader2 className="w-3 h-3 animate-spin" />
@@ -413,32 +413,32 @@ function AdminAnalytics({ data, templateData }) {
             value={formatMoneyCompact(totalRentRevenue)}
             sub="All time, all landlords"
             icon={TrendingUp}
-            color="text-blue-600"
-            bg="bg-blue-50"
+            color="text-action-text"
+            bg="bg-action-bg"
           />
           <KpiCard
             label="Churn Rate (6mo)"
             value={`${churnRate}%`}
             sub={`${expiredLast6} expired / ${createdLast6} created`}
             icon={ArrowDownRight}
-            color={churnRate > 30 ? 'text-red-600' : 'text-green-600'}
-            bg={churnRate > 30 ? 'bg-red-50' : 'bg-green-50'}
+            color="text-action-text"
+            bg="bg-action-bg"
           />
           <KpiCard
             label="Template Usage"
             value={templateData?.totalUsage || 0}
             sub={`${templateData?.totalTemplates || 0} templates`}
             icon={FileText}
-            color="text-indigo-600"
-            bg="bg-indigo-50"
+            color="text-action-text"
+            bg="bg-action-bg"
           />
           <KpiCard
             label="Open Disputes"
             value={(disputeStats.open || 0) + (disputeStats.under_review || 0)}
             sub={`${disputeStats.resolved || 0} resolved`}
             icon={Scale}
-            color="text-orange-600"
-            bg="bg-orange-50"
+            color="text-action-text"
+            bg="bg-action-bg"
           />
         </div>
       </div>
@@ -464,7 +464,7 @@ function AdminAnalytics({ data, templateData }) {
               <XAxis dataKey="name" tick={{ fontSize: 11 }} />
               <YAxis tick={{ fontSize: 11 }} />
               <Tooltip />
-              <Line type="monotone" dataKey="Users" stroke="#0992C2" strokeWidth={2.5} dot={{ r: 4, fill: '#0992C2' }} />
+              <Line type="monotone" dataKey="Users" stroke="#0B2D72" strokeWidth={2.5} dot={{ r: 4, fill: '#0B2D72' }} />
             </LineChart>
           </ResponsiveContainer>
         </ChartCard>
@@ -550,7 +550,7 @@ function AdminAnalytics({ data, templateData }) {
                 </div>
                 <div className="w-24 h-1.5 bg-gray-100 rounded-full overflow-hidden">
                   <div
-                    className="h-full bg-blue-500 rounded-full"
+                    className="h-full bg-action-text rounded-full"
                     style={{ width: `${Math.min(100, (t.usageCount / (topTemplates[0]?.usageCount || 1)) * 100)}%` }}
                   />
                 </div>
