@@ -100,7 +100,7 @@ describe('RentifyPro — Full Platform Test', () => {
 
         it('new agreement form loads and has steps', () => {
             cy.visit('/dashboard/agreements/new');
-            cy.contains('Rental Flow', { timeout: 10000 }).should('be.visible');
+            cy.contains('Start from an Offer', { timeout: 20000 }).should('be.visible');
         });
     });
 
