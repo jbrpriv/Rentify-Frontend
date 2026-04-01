@@ -417,18 +417,6 @@ function AgreementComposer({ selectedClauseIds, onReorder, offerData, formData, 
     pushUpdate(next);
   };
 
-  if (loading) return (
-    <div className="flex items-center gap-2 text-gray-400 text-sm py-4">
-      <Loader2 className="animate-spin w-4 h-4" /> Loading clauses…
-    </div>
-  );
-
-  if (clauses.length === 0) return (
-    <p className="text-sm text-gray-400 italic py-2">
-      No approved clauses available yet. Ask an admin to add clauses from the template library.
-    </p>
-  );
-
   return (
     <div className="relative rounded-2xl border border-gray-200 bg-[#eef1ef] overflow-hidden min-h-[75vh]">
       <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_10%_10%,rgba(37,99,235,0.10),transparent_45%),radial-gradient(circle_at_85%_80%,rgba(22,163,74,0.08),transparent_40%)]" />
@@ -622,10 +610,20 @@ function AgreementComposer({ selectedClauseIds, onReorder, offerData, formData, 
                 </div>
 
                 <div className="space-y-2">
-                  {availableClauses.length === 0 && (
+                  {loading && (
+                    <div className="flex items-center justify-center gap-2 text-xs text-gray-400 py-6">
+                      <Loader2 className="animate-spin w-3.5 h-3.5" /> Loading clauses...
+                    </div>
+                  )}
+                  {!loading && clauses.length === 0 && (
+                    <p className="text-xs text-gray-400 py-3 text-center italic">
+                      No approved clauses available yet. Ask admin to approve clauses.
+                    </p>
+                  )}
+                  {!loading && clauses.length > 0 && availableClauses.length === 0 && (
                     <p className="text-sm text-gray-400 py-3 text-center italic">No matching clauses found.</p>
                   )}
-                  {availableClauses.map((clause) => (
+                  {!loading && availableClauses.map((clause) => (
                     <div
                       key={clause._id}
                       draggable
