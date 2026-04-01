@@ -131,7 +131,7 @@ export default function TenantDocumentsPage() {
         {error && <div className="flex items-center gap-2 text-red-600 text-sm bg-red-50 px-4 py-2.5 rounded-xl border border-red-100"><AlertCircle className="w-4 h-4 flex-shrink-0" /> {error}</div>}
         {success && <div className="flex items-center gap-2 text-green-700 text-sm bg-green-50 px-4 py-2.5 rounded-xl border border-green-100"><CheckCircle className="w-4 h-4 flex-shrink-0" /> {success}</div>}
         <button type="button" onClick={handleUpload} disabled={uploading || !files.length}
-          className="w-full flex justify-center items-center gap-2 px-4 py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 disabled:opacity-50 transition">
+          className="w-full flex justify-center items-center gap-2 px-4 py-3 bg-[#E6EAF2] text-[#0B2D72] border border-[#CBD5E1] rounded-xl font-bold hover:bg-[#DBE2ED] disabled:opacity-50 transition">
           {uploading ? <Loader2 className="animate-spin w-4 h-4" /> : <Upload className="w-4 h-4" />}
           {uploading ? 'Uploading…' : `Upload ${files.length ? files.length + ' ' : ''}Document${files.length !== 1 ? 's' : ''}`}
         </button>
@@ -190,7 +190,7 @@ export default function TenantDocumentsPage() {
         )}
       </div>
 
-      <div className="rounded-xl bg-blue-50 border border-blue-100 p-4 text-sm text-blue-700">
+      <div className="rounded-xl bg-[#E6EAF2]/50 border border-[#CBD5E1] p-4 text-sm text-[#0B2D72]">
         <FileText className="w-4 h-4 inline mr-1.5" />
         <strong>Tip:</strong> Uploading complete documents (CNIC, salary slip, bank statements) speeds up landlord review and increases your approval chances.
       </div>

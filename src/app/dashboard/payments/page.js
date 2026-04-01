@@ -165,10 +165,10 @@ export default function PaymentsPage() {
             <>
               {/* Summary Stats */}
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                <SummaryCard label="Months Paid" value={paid} icon={CheckCircle} color="text-green-600" bg="bg-green-50" />
-                <SummaryCard label="Pending" value={pending} icon={Clock} color="text-blue-600" bg="bg-blue-50" />
-                <SummaryCard label="Overdue" value={overdue} icon={AlertCircle} color="text-red-600" bg="bg-red-50" />
-                <SummaryCard label="Total Paid" value={formatMoney(totalPaid)} icon={CreditCard} color="text-indigo-600" bg="bg-indigo-50" />
+                <SummaryCard label="Months Paid" value={paid} icon={CheckCircle} color="text-[#0B2D72]" bg="bg-[#E6EAF2]" />
+                <SummaryCard label="Pending" value={pending} icon={Clock} color="text-[#0B2D72]" bg="bg-[#E6EAF2]" />
+                <SummaryCard label="Overdue" value={overdue} icon={AlertCircle} color="text-[#0B2D72]" bg="bg-[#E6EAF2]" />
+                <SummaryCard label="Total Paid" value={formatMoney(totalPaid)} icon={CreditCard} color="text-[#0B2D72]" bg="bg-[#E6EAF2]" />
               </div>
 
               {/* Lease Info */}
