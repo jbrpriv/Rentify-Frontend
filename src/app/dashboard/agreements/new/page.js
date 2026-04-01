@@ -346,6 +346,7 @@ function AgreementComposer({
   saving = false,
   onCancel = () => {},
   appliedTemplate = '',
+  onRemoveTemplate = () => {},
 }) {
   const [clauses, setClauses] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -355,6 +356,11 @@ function AgreementComposer({
   const [dragState, setDragState] = useState(null);
   const [sectionAssignments, setSectionAssignments] = useState(EMPTY_SECTION_MAP);
   const [hoveredSection, setHoveredSection] = useState('');
+  const [panelPosition, setPanelPosition] = useState({ x: 16, y: 16 });
+  const [draggingPanel, setDraggingPanel] = useState(false);
+  const containerRef = useRef(null);
+  const panelRef = useRef(null);
+  const panelDragOffsetRef = useRef({ x: 0, y: 0 });
 
   useEffect(() => {
     api.get('/agreements/clauses')
@@ -432,11 +438,55 @@ function AgreementComposer({
     pushUpdate(next);
   };
 
+  const handlePanelMouseDown = (e) => {
+    if (e.button !== 0) return;
+    const containerRect = containerRef.current?.getBoundingClientRect();
+    const panelRect = panelRef.current?.getBoundingClientRect();
+    if (!containerRect || !panelRect) return;
+
+    panelDragOffsetRef.current = {
+      x: e.clientX - panelRect.left,
+      y: e.clientY - panelRect.top,
+    };
+    setDraggingPanel(true);
+  };
+
+  useEffect(() => {
+    if (!draggingPanel) return;
+
+    const handleMouseMove = (e) => {
+      const containerRect = containerRef.current?.getBoundingClientRect();
+      const panelRect = panelRef.current?.getBoundingClientRect();
+      if (!containerRect || !panelRect) return;
+
+      const rawX = e.clientX - containerRect.left - panelDragOffsetRef.current.x;
+      const rawY = e.clientY - containerRect.top - panelDragOffsetRef.current.y;
+
+      const maxX = Math.max(8, containerRect.width - panelRect.width - 8);
+      const maxY = Math.max(8, containerRect.height - panelRect.height - 8);
+
+      setPanelPosition({
+        x: Math.min(Math.max(8, rawX), maxX),
+        y: Math.min(Math.max(8, rawY), maxY),
+      });
+    };
+
+    const handleMouseUp = () => setDraggingPanel(false);
+
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mouseup', handleMouseUp);
+
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [draggingPanel]);
+
   return (
-    <div className="relative rounded-2xl border border-gray-200 bg-[#eef1ef] overflow-hidden min-h-[75vh]">
+    <div ref={containerRef} className="relative rounded-2xl border border-gray-200 bg-[#eef1ef] overflow-hidden min-h-[75vh]">
       <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_10%_10%,rgba(37,99,235,0.10),transparent_45%),radial-gradient(circle_at_85%_80%,rgba(22,163,74,0.08),transparent_40%)]" />
 
-      <div className={`relative z-10 h-[75vh] overflow-y-auto p-4 sm:p-6 lg:p-8 ${showEditor ? 'lg:pl-[360px]' : 'xl:pl-8'}`}>
+      <div className="relative z-10 h-[75vh] overflow-y-auto p-4 sm:p-6 lg:p-8 xl:pl-8">
         <div className="max-w-4xl mx-auto">
           <div className="sticky top-0 z-10 mb-3 bg-white/80 backdrop-blur border border-gray-200 rounded-xl px-4 py-3 flex items-center justify-between">
             <div>
@@ -570,11 +620,18 @@ function AgreementComposer({
       </div>
 
       {showEditor && (
-      <div className="absolute z-30 top-4 left-4 w-[330px] max-w-[calc(100%-2rem)]">
+      <div
+        ref={panelRef}
+        className="absolute z-30 w-[330px] max-w-[calc(100%-1rem)]"
+        style={{ left: panelPosition.x, top: panelPosition.y }}
+      >
         <div className="bg-white/95 backdrop-blur border border-gray-200 rounded-2xl shadow-xl overflow-hidden">
-          <div className="px-4 py-3 border-b bg-gray-50">
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Editor</p>
-            <p className="text-sm font-semibold text-gray-800">Clause Library</p>
+          <div onMouseDown={handlePanelMouseDown} className="px-4 py-3 border-b bg-gray-50 cursor-move select-none flex items-center justify-between">
+            <div>
+              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Editor</p>
+              <p className="text-sm font-semibold text-gray-800">Clause Library</p>
+            </div>
+            <GripVertical className="w-4 h-4 text-gray-400" />
           </div>
 
           <div className="px-3 py-2 border-b bg-white">
@@ -804,8 +861,15 @@ function AgreementComposer({
             )}
 
             {canUseClauses && appliedTemplate && (
-              <div className="rounded-lg border border-green-200 bg-green-50 p-2.5 text-[11px] text-green-700">
-                Template applied: <strong>{appliedTemplate}</strong>
+              <div className="rounded-lg border border-green-200 bg-green-50 p-2.5 text-[11px] text-green-700 flex items-center justify-between gap-2">
+                <span>Template applied: <strong>{appliedTemplate}</strong></span>
+                <button
+                  type="button"
+                  onClick={onRemoveTemplate}
+                  className="px-2 py-0.5 rounded border border-red-200 bg-white text-red-600 hover:bg-red-50"
+                >
+                  Remove
+                </button>
               </div>
             )}
           </div>
