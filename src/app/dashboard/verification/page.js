@@ -21,8 +21,8 @@ const DOC_TYPES = [
 function FileIcon({ name }) {
     const ext = name?.split('.').pop()?.toLowerCase();
     if (['jpg', 'jpeg', 'png', 'webp'].includes(ext))
-        return <FileImage className="w-5 h-5 text-purple-500" />;
-    return <FileText className="w-5 h-5 text-blue-500" />;
+        return <FileImage className="w-5 h-5 text-[#0B2D72]" />;
+    return <FileText className="w-5 h-5 text-[#0B2D72]" />;
 }
 
 export default function VerificationPage() {
@@ -97,7 +97,7 @@ export default function VerificationPage() {
 
     if (loading) return (
         <div className="flex justify-center items-center py-20">
-            <Loader2 className="animate-spin h-10 w-10 text-blue-600" />
+            <Loader2 className="animate-spin h-10 w-10 text-[#0B2D72]" />
         </div>
     );
 
@@ -106,7 +106,7 @@ export default function VerificationPage() {
 
             {/* Toast */}
             {toast.msg && (
-                <div className={`fixed top-6 right-6 z-50 border rounded-2xl px-5 py-3 shadow-xl text-sm font-medium animate-in fade-in slide-in-from-top-2 ${toast.type === 'error' ? 'bg-red-50 border-red-200 text-red-800' : 'bg-white border-blue-200 text-blue-800'
+                <div className={`fixed top-6 right-6 z-50 border rounded-2xl px-5 py-3 shadow-xl text-sm font-medium animate-in fade-in slide-in-from-top-2 ${toast.type === 'error' ? 'bg-[#E6EAF2] border-[#CBD5E1] text-[#1F2933]' : 'bg-[#E6EAF2] border-[#CBD5E1] text-[#0B2D72]'
                     }`}>
                     {toast.msg}
                 </div>
@@ -115,7 +115,7 @@ export default function VerificationPage() {
             {/* Header */}
             <div>
                 <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-                    <BadgeCheck className="h-6 w-6 text-blue-600" />
+                    <BadgeCheck className="h-6 w-6 text-[#0B2D72]" />
                     Document Verification
                 </h1>
                 <p className="text-sm text-gray-500 mt-1">Submit your identity or ownership documents to get verified.</p>
@@ -123,31 +123,31 @@ export default function VerificationPage() {
 
             {/* Status banners */}
             {status === 'approved' && (
-                <div className="flex items-center gap-3 bg-green-50 border border-green-200 rounded-2xl px-5 py-4">
-                    <CheckCircle className="h-8 w-8 text-green-600 shrink-0" />
+                <div className="flex items-center gap-3 bg-[#E6EAF2] border border-[#CBD5E1] rounded-2xl px-5 py-4">
+                    <CheckCircle className="h-8 w-8 text-[#0B2D72] shrink-0" />
                     <div>
-                        <p className="font-bold text-green-800">Documents Verified ✓</p>
-                        <p className="text-sm text-green-700 mt-0.5">Your documents have been approved. Your profile now shows as a verified landlord.</p>
+                        <p className="font-bold text-[#0B2D72]">Documents Verified ✓</p>
+                        <p className="text-sm text-[#0B2D72] opacity-80 mt-0.5">Your documents have been approved. Your profile now shows as a verified landlord.</p>
                     </div>
                 </div>
             )}
 
             {status === 'pending' && (
-                <div className="flex items-center gap-3 bg-amber-50 border border-amber-200 rounded-2xl px-5 py-4">
-                    <Clock className="h-8 w-8 text-amber-600 shrink-0" />
+                <div className="flex items-center gap-3 bg-[#E6EAF2] border border-[#CBD5E1] rounded-2xl px-5 py-4">
+                    <Clock className="h-8 w-8 text-[#0B2D72] shrink-0" />
                     <div>
-                        <p className="font-bold text-amber-800">Under Review</p>
-                        <p className="text-sm text-amber-700 mt-0.5">Your documents have been submitted and are awaiting admin review. This usually takes 1–2 business days.</p>
+                        <p className="font-bold text-[#0B2D72]">Under Review</p>
+                        <p className="text-sm text-[#0B2D72] opacity-80 mt-0.5">Your documents have been submitted and are awaiting admin review. This usually takes 1–2 business days.</p>
                     </div>
                 </div>
             )}
 
             {status === 'rejected' && (
-                <div className="flex items-center gap-3 bg-red-50 border border-red-200 rounded-2xl px-5 py-4">
-                    <AlertCircle className="h-8 w-8 text-red-600 shrink-0" />
+                <div className="flex items-center gap-3 bg-[#E6EAF2] border border-[#CBD5E1] rounded-2xl px-5 py-4">
+                    <AlertCircle className="h-8 w-8 text-[#0B2D72] shrink-0" />
                     <div>
-                        <p className="font-bold text-red-800">Documents Rejected</p>
-                        <p className="text-sm text-red-700 mt-0.5">Your documents were not accepted. Please re-submit clearer or correct documents below.</p>
+                        <p className="font-bold text-[#1F2933]">Documents Rejected</p>
+                        <p className="text-sm text-[#1F2933] opacity-80 mt-0.5">Your documents were not accepted. Please re-submit clearer or correct documents below.</p>
                     </div>
                 </div>
             )}
@@ -168,7 +168,7 @@ export default function VerificationPage() {
                         <select
                             value={docType}
                             onChange={e => setDocType(e.target.value)}
-                            className="mt-1.5 w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="mt-1.5 w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#0B2D72]"
                         >
                             {DOC_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
                         </select>
@@ -180,7 +180,7 @@ export default function VerificationPage() {
                         <button
                             type="button"
                             onClick={() => inputRef.current?.click()}
-                            className="w-full flex flex-col items-center justify-center gap-2 border-2 border-dashed border-gray-200 hover:border-blue-400 hover:bg-blue-50/40 rounded-2xl py-8 transition-colors cursor-pointer"
+                            className="w-full flex flex-col items-center justify-center gap-2 border-2 border-dashed border-gray-200 hover:border-[#0B2D72] hover:bg-[#E6EAF2]/40 rounded-2xl py-8 transition-colors cursor-pointer"
                         >
                             <Upload className="h-7 w-7 text-gray-400" />
                             <p className="text-sm font-semibold text-gray-600">Click to select files</p>
@@ -206,12 +206,12 @@ export default function VerificationPage() {
                                         <p className="text-sm font-medium text-gray-700 truncate">{f.name}</p>
                                         <p className="text-xs text-gray-400">{(f.size / 1024).toFixed(0)} KB</p>
                                     </div>
-                                    <button type="button" onClick={() => removeFile(i)} className="text-gray-400 hover:text-red-500 transition-colors">
+                                    <button type="button" onClick={() => removeFile(i)} className="text-gray-400 hover:text-[#0B2D72] transition-colors">
                                         <X className="h-4 w-4" />
                                     </button>
                                 </div>
                             ))}
-                            <button type="button" onClick={() => inputRef.current?.click()} className="flex items-center gap-1.5 text-sm font-semibold text-blue-600 hover:text-blue-700 mt-1">
+                            <button type="button" onClick={() => inputRef.current?.click()} className="flex items-center gap-1.5 text-sm font-semibold text-[#0B2D72] hover:opacity-80 mt-1">
                                 <Plus className="h-4 w-4" /> Add more files
                             </button>
                         </div>
@@ -220,7 +220,7 @@ export default function VerificationPage() {
                     <button
                         type="submit"
                         disabled={uploading || files.length === 0}
-                        className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-2xl transition-colors disabled:opacity-50"
+                        className="w-full flex items-center justify-center gap-2 bg-[#0B2D72] hover:opacity-90 text-[#E6EAF2] font-bold py-3 rounded-2xl transition-colors disabled:opacity-50"
                     >
                         {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
                         {uploading ? 'Uploading…' : 'Submit Documents'}
@@ -229,11 +229,11 @@ export default function VerificationPage() {
             )}
 
             {/* Info */}
-            <div className="bg-blue-50 border border-blue-100 rounded-2xl px-5 py-4">
-                <p className="text-xs font-semibold text-blue-700 mb-2 flex items-center gap-1.5">
+            <div className="bg-[#E6EAF2] border border-[#CBD5E1] rounded-2xl px-5 py-4">
+                <p className="text-xs font-semibold text-[#0B2D72] mb-2 flex items-center gap-1.5">
                     <FileText className="h-3.5 w-3.5" /> What happens after submission?
                 </p>
-                <ul className="text-xs text-blue-700 space-y-1 list-disc list-inside">
+                <ul className="text-xs text-[#0B2D72] space-y-1 list-disc list-inside">
                     <li>The admin will review your documents from the S3 vault</li>
                     <li>Once approved, your profile shows a <strong>Verified Landlord</strong> badge</li>
                     <li>Verified listings build trust with tenants</li>
