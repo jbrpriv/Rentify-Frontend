@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import api from '@/utils/api';
 import { useToast } from '@/context/ToastContext';
 import { useCurrency } from '@/context/CurrencyContext';
+import MapPicker from '@/components/MapPicker';
 import {
   Home, Loader2, X, ImagePlus, AlertCircle,
   MapPin, DollarSign, Layers, CheckCircle2, ArrowLeft, Upload
@@ -140,6 +141,12 @@ export default function AddPropertyPage() {
     amenities: [],
   });
 
+  const [mapVisible, setMapVisible] = useState(false);
+  const [mapCenter, setMapCenter] = useState(null);
+  const [mapMarker, setMapMarker] = useState(null);
+  const [mapQuery, setMapQuery] = useState('');
+  const [mapSearching, setMapSearching] = useState(false);
+
   // ── Helpers ────────────────────────────────────────────────────────────────
   const set = (path, value) => {
     setForm(f => {
@@ -163,6 +170,60 @@ export default function AddPropertyPage() {
         ? f.amenities.filter(x => x !== key)
         : [...f.amenities, key],
     }));
+  };
+
+  const buildAddressQuery = () => {
+    const { street, unitNumber, city, state, zip, country } = form.address;
+    return [street, unitNumber, city, state, zip, country].filter(Boolean).join(', ');
+  };
+
+  const geocodeAddress = async (query) => {
+    const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(query)}`;
+    const resp = await fetch(url, { headers: { 'Accept-Language': 'en' } });
+    const results = await resp.json();
+    if (!Array.isArray(results) || results.length === 0) return null;
+    const first = results[0];
+    return { lat: Number(first.lat), lng: Number(first.lon) };
+  };
+
+  const handleMarkOnMap = async () => {
+    const addressQuery = buildAddressQuery();
+    if (!addressQuery) {
+      toast('Please enter a full address before marking on the map.', 'error');
+      return;
+    }
+    setMapVisible(true);
+    setMapQuery(addressQuery);
+    setMapSearching(true);
+    try {
+      const coords = await geocodeAddress(addressQuery);
+      if (!coords) {
+        toast('Unable to find that address. Try a more specific address.', 'error');
+      } else {
+        setMapCenter(coords);
+      }
+    } catch {
+      toast('Failed to search that address. Please try again.', 'error');
+    } finally {
+      setMapSearching(false);
+    }
+  };
+
+  const handleSearchMap = async () => {
+    if (!mapQuery.trim()) return;
+    setMapSearching(true);
+    try {
+      const coords = await geocodeAddress(mapQuery.trim());
+      if (!coords) {
+        toast('No results found for that search.', 'error');
+      } else {
+        setMapCenter(coords);
+      }
+    } catch {
+      toast('Map search failed. Please try again.', 'error');
+    } finally {
+      setMapSearching(false);
+    }
   };
 
   // ── Upload ─────────────────────────────────────────────────────────────────
@@ -209,11 +270,19 @@ export default function AddPropertyPage() {
   // ── Submit ─────────────────────────────────────────────────────────────────
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!mapMarker) {
+      toast('Please mark the property location on the map before saving.', 'error');
+      return;
+    }
     setLoading(true);
     try {
       // Convert financial values from selected currency to USD before saving
       const dataToSave = {
         ...form,
+        location: {
+          type: 'Point',
+          coordinates: [mapMarker.lng, mapMarker.lat],
+        },
         financials: {
           ...form.financials,
           monthlyRent: convertToUSD(Number(form.financials.monthlyRent) || 0),
@@ -419,6 +488,90 @@ export default function AddPropertyPage() {
                   value={form.address.zip} onChange={e => set('address.zip', e.target.value)} />
               </F>
             </Row>
+
+            <div style={{ marginTop: 16, paddingTop: 16, borderTop: '1px dashed #E2E8F0' }}>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, alignItems: 'center', marginBottom: 10 }}>
+                <button
+                  type="button"
+                  onClick={handleMarkOnMap}
+                  style={{
+                    padding: '10px 14px',
+                    borderRadius: 12,
+                    border: '1.5px solid #2563EB',
+                    background: '#EFF6FF',
+                    color: '#1D4ED8',
+                    fontSize: '0.8rem',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                  }}
+                >
+                  {mapSearching ? 'Finding address...' : 'Mark on Map (Required)'}
+                </button>
+                {mapMarker && (
+                  <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#16A34A' }}>
+                    Location marked
+                  </span>
+                )}
+                {mapMarker && (
+                  <button
+                    type="button"
+                    onClick={() => setMapMarker(null)}
+                    style={{
+                      padding: '8px 12px',
+                      borderRadius: 10,
+                      border: '1.5px solid #FCA5A5',
+                      background: '#FEF2F2',
+                      color: '#DC2626',
+                      fontSize: '0.75rem',
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    Remove Mark
+                  </button>
+                )}
+              </div>
+
+              {mapVisible && (
+                <>
+                  <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 10 }}>
+                    <input
+                      className="np-input"
+                      style={{ ...inputStyle, flex: '1 1 240px' }}
+                      placeholder="Search a place or address"
+                      value={mapQuery}
+                      onChange={(e) => setMapQuery(e.target.value)}
+                    />
+                    <button
+                      type="button"
+                      onClick={handleSearchMap}
+                      style={{
+                        padding: '10px 14px',
+                        borderRadius: 12,
+                        border: '1.5px solid #CBD5E1',
+                        background: 'white',
+                        color: '#334155',
+                        fontSize: '0.8rem',
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                      }}
+                    >
+                      Search
+                    </button>
+                  </div>
+
+                  <MapPicker
+                    center={mapCenter}
+                    marker={mapMarker}
+                    onMarkerChange={setMapMarker}
+                    height={320}
+                  />
+                  <p style={{ marginTop: 8, fontSize: '0.74rem', color: '#64748B' }}>
+                    Click anywhere on the map to drop a single pin. You can zoom and pan to refine the location.
+                  </p>
+                </>
+              )}
+            </div>
           </Card>
 
           {/* ── Specifications ───────────────────────────────────────────── */}

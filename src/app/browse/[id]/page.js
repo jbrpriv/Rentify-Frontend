@@ -7,6 +7,7 @@ import { useUser } from '@/context/UserContext';
 import { useCurrency } from '@/context/CurrencyContext';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import MapPicker from '@/components/MapPicker';
 import {
   MapPin, Bed, Bath, SquareCode, ShieldCheck, ArrowLeft,
   Loader2, FileText, ChevronLeft, ChevronRight,
@@ -347,6 +348,10 @@ function ListingDetailContent() {
   const deposit = listing.financials?.securityDeposit;
   const address = [listing.address?.street, listing.address?.city, listing.address?.state].filter(Boolean).join(', ');
   const listedDate = listing.createdAt ? new Date(listing.createdAt).toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: '2-digit' }) : '—';
+  const locationCoords = listing.location?.coordinates;
+  const locationMarker = Array.isArray(locationCoords) && locationCoords.length === 2
+    ? { lng: locationCoords[0], lat: locationCoords[1] }
+    : null;
 
   const breadcrumbs = [
     { label: 'Home', href: '/' },
@@ -493,6 +498,17 @@ function ListingDetailContent() {
                   <div className="info-card">
                     <p className="section-title">About This Property</p>
                     <p style={{ color: '#475569', lineHeight: 1.75, fontSize: '0.9rem' }}>{listing.listingDescription}</p>
+                  </div>
+                )}
+
+                {/* Location */}
+                {locationMarker && (
+                  <div className="info-card">
+                    <p className="section-title">Location</p>
+                    <MapPicker center={locationMarker} marker={locationMarker} readOnly height={260} />
+                    <p style={{ marginTop: 10, fontSize: '0.8rem', color: '#64748B' }}>
+                      {address || 'Address available on request'}
+                    </p>
                   </div>
                 )}
 
