@@ -15,16 +15,16 @@ import api from '@/utils/api';
 import { useCurrency } from '@/context/CurrencyContext';
 
 const TIER_BADGE = {
-  free: 'bg-gray-100 text-gray-700',
-  pro: 'bg-blue-100 text-blue-700',
-  enterprise: 'bg-purple-100 text-purple-700',
+  free: 'bg-[#E6EAF2] text-[#0B2D72] border border-[#CBD5E1]',
+  pro: 'bg-[#E6EAF2] text-[#0B2D72] border border-[#CBD5E1]',
+  enterprise: 'bg-[#E6EAF2] text-[#0B2D72] border border-[#CBD5E1]',
 };
 
 const STATUS_BADGE = {
-  active: 'bg-green-100 text-green-700',
-  trialing: 'bg-yellow-100 text-yellow-700',
-  past_due: 'bg-red-100 text-red-700',
-  canceled: 'bg-gray-100 text-gray-500',
+  active: 'bg-[#0B2D72] text-[#E6EAF2]',
+  trialing: 'bg-[#E6EAF2] text-[#0B2D72] border border-[#CBD5E1]',
+  past_due: 'bg-[#CBD5E1] text-[#1F2933]',
+  canceled: 'bg-[#CBD5E1] text-[#1F2933]',
 };
 
 export default function AdminBillingPage() {
@@ -79,10 +79,10 @@ export default function AdminBillingPage() {
       {data?.summary && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
           {[
-            { label: 'Free', value: data.summary.free, color: 'bg-gray-50  border-gray-200', badge: 'text-gray-700' },
-            { label: 'Pro', value: data.summary.pro, color: 'bg-blue-50  border-blue-200', badge: 'text-blue-700' },
-            { label: 'Enterprise', value: data.summary.enterprise, color: 'bg-purple-50 border-purple-200', badge: 'text-purple-700' },
-            { label: 'Monthly MRR', value: formatMoney(data.summary.totalMRR), color: 'bg-green-50 border-green-200', badge: 'text-green-700' },
+            { label: 'Free', value: data.summary.free, color: 'bg-[#E6EAF2] border-[#CBD5E1]', badge: 'text-[#0B2D72]' },
+            { label: 'Pro', value: data.summary.pro, color: 'bg-[#E6EAF2] border-[#CBD5E1]', badge: 'text-[#0B2D72]' },
+            { label: 'Enterprise', value: data.summary.enterprise, color: 'bg-[#E6EAF2] border-[#CBD5E1]', badge: 'text-[#0B2D72]' },
+            { label: 'Monthly MRR', value: formatMoney(data.summary.totalMRR), color: 'bg-[#E6EAF2] border-[#CBD5E1]', badge: 'text-[#0B2D72]' },
           ].map(({ label, value, color, badge }) => (
             <div key={label} className={`rounded-xl border p-4 ${color}`}>
               <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">{label}</p>
@@ -102,8 +102,8 @@ export default function AdminBillingPage() {
               onClick={() => handleTierChange(t)}
               className={`px-3 py-1.5 rounded-full text-sm font-medium border transition-colors
                 ${tier === t
-                  ? 'bg-indigo-600 text-white border-indigo-600'
-                  : 'bg-white text-gray-600 border-gray-300 hover:border-indigo-400'}`}
+                  ? 'bg-[#0B2D72] text-[#E6EAF2] border-[#0B2D72]'
+                  : 'bg-white text-gray-600 border-gray-300 hover:border-[#0B2D72]'}`}
             >
               {t.charAt(0).toUpperCase() + t.slice(1)}
             </button>
@@ -117,11 +117,11 @@ export default function AdminBillingPage() {
             placeholder="Search name or email…"
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
-            className="border border-gray-300 rounded-lg px-3 py-1.5 text-sm w-60 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+            className="border border-gray-300 rounded-lg px-3 py-1.5 text-sm w-60 focus:outline-none focus:ring-2 focus:ring-[#0B2D72]"
           />
           <button
             type="submit"
-            className="bg-indigo-600 text-white px-4 py-1.5 rounded-lg text-sm hover:bg-indigo-700 transition-colors"
+            className="bg-[#0B2D72] text-[#E6EAF2] px-4 py-1.5 rounded-lg text-sm hover:opacity-90 transition-colors"
           >
             Search
           </button>
@@ -139,7 +139,7 @@ export default function AdminBillingPage() {
 
       {/* ─── Table ───────────────────────────────────────────────────── */}
       {error ? (
-        <div className="text-red-600 bg-red-50 border border-red-200 rounded-lg p-4">{error}</div>
+        <div className="text-[#1F2933] bg-[#E6EAF2] border border-[#CBD5E1] rounded-lg p-4">{error}</div>
       ) : (
         <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
           <div className="overflow-x-auto">
@@ -178,7 +178,7 @@ export default function AdminBillingPage() {
                           <p className="font-medium text-gray-900">{user.name}</p>
                           <p className="text-gray-400 text-xs">{user.email}</p>
                           {!user.isActive && (
-                            <span className="text-xs bg-red-100 text-red-600 px-1.5 py-0.5 rounded">Banned</span>
+                            <span className="text-xs bg-[#CBD5E1] text-[#1F2933] px-1.5 py-0.5 rounded">Banned</span>
                           )}
                         </td>
 

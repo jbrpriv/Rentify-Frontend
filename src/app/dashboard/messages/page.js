@@ -141,8 +141,8 @@ function ChatModal({ active, user, onClose, onNewMessage }) {
         <div className="flex items-center gap-3 px-5 py-4 border-b border-gray-100 flex-shrink-0">
           <Avatar src={active?.otherProfilePhoto} name={active?.otherName} size="md" />
           <div className="flex-1 min-w-0">
-            <p className="font-black text-gray-900 leading-tight">{active?.otherName}</p>
-            <p className="text-xs text-gray-400 truncate">{active?.propertyTitle || 'Direct Message'}</p>
+            <p className="font-black text-gray-900 leading-tight truncate">{active?.propertyTitle || 'Direct Message'}</p>
+            <p className="text-xs text-gray-400 truncate">{active?.otherName}</p>
           </div>
           <button onClick={close} className="w-8 h-8 rounded-xl bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors">
             <X className="w-4 h-4 text-gray-500" />
@@ -271,8 +271,8 @@ function ContactsPanel({ contacts, onSelect, onClose }) {
                 className="w-full flex items-center gap-3 px-4 py-3 hover:bg-[#DBE2ED] transition-colors text-left">
                 <Avatar src={c.user?.profilePhoto} name={c.user?.name} size="md" />
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-bold text-gray-900 truncate">{c.user?.name}</p>
-                  <p className="text-[10px] text-gray-400 truncate">{c.propertyTitle}</p>
+                  <p className="text-sm font-bold text-gray-900 truncate">{c.propertyTitle || 'General Context'}</p>
+                  <p className="text-[10px] text-gray-400 truncate">{c.user?.name}</p>
                 </div>
                 <span className={`text-[10px] font-black px-2 py-0.5 rounded-full flex-shrink-0 ${ctxColor}`}>
                   {c.context}
@@ -497,19 +497,17 @@ export default function MessagesPage() {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between gap-2 mb-0.5">
                           <p className={`text-sm truncate ${unread ? 'font-black text-gray-900' : 'font-semibold text-gray-700'}`}>
-                            {other?.name || 'Unknown'}
+                            {conv.property?.title || 'General Context'}
                           </p>
                           <span className="text-[11px] text-gray-400 flex-shrink-0">{timeAgo(conv.createdAt)}</span>
                         </div>
+                        <p className="text-[10px] text-gray-400 truncate font-medium">{other?.name || 'Unknown'}</p>
                         <div className="flex items-center gap-1">
                           {isMine && <CheckCheck className="w-3 h-3 text-gray-300 flex-shrink-0" />}
                           <p className={`text-xs truncate ${unread ? 'font-semibold text-gray-700' : 'text-gray-400'}`}>
                             {isMine ? 'You: ' : ''}{conv.content}
                           </p>
                         </div>
-                        {conv.property?.title && (
-                          <p className="text-[10px] text-gray-300 truncate mt-0.5">{conv.property.title}</p>
-                        )}
                       </div>
                       {unread && (
                         <span className="w-5 h-5 bg-[#0B2D72] text-[#E6EAF2] rounded-full text-[10px] font-black flex items-center justify-center flex-shrink-0">

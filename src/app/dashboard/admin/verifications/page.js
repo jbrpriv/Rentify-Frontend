@@ -25,8 +25,8 @@ function Toast({ msg, type }) {
 function FileIcon({ name }) {
     const ext = name?.split('.').pop()?.toLowerCase();
     if (['jpg', 'jpeg', 'png', 'webp'].includes(ext))
-        return <FileImage className="h-3.5 w-3.5 text-purple-500" />;
-    return <FileText className="h-3.5 w-3.5 text-blue-500" />;
+        return <FileImage className="h-3.5 w-3.5 text-[#0B2D72]" />;
+    return <FileText className="h-3.5 w-3.5 text-[#0B2D72]" />;
 }
 
 export default function AdminVerificationsPage() {
@@ -109,7 +109,7 @@ export default function AdminVerificationsPage() {
     if (loading) {
         return (
             <div className="flex justify-center items-center py-20">
-                <Loader2 className="animate-spin h-10 w-10 text-blue-600" />
+                <Loader2 className="animate-spin h-10 w-10 text-[#0B2D72]" />
             </div>
         );
     }
@@ -122,16 +122,16 @@ export default function AdminVerificationsPage() {
             <div className="flex items-center justify-between">
                 <div>
                     <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-                        <BadgeCheck className="h-6 w-6 text-blue-600" />
+                        <BadgeCheck className="h-6 w-6 text-[#0B2D72]" />
                         Document Verifications
                     </h1>
                     <p className="text-sm text-gray-500 mt-1">Review and approve landlord & property manager documents</p>
                 </div>
                 <div className="flex gap-2">
-                    <span className="bg-amber-100 text-amber-700 text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1">
+                    <span className="bg-[#E6EAF2] text-[#1F2933] border border-[#CBD5E1] text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1">
                         <Clock className="h-3 w-3" /> {pending.length} pending
                     </span>
-                    <span className="bg-green-100 text-green-700 text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1">
+                    <span className="bg-[#0B2D72] text-[#E6EAF2] text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1">
                         <CheckCircle className="h-3 w-3" /> {approved.length} approved
                     </span>
                 </div>
@@ -144,7 +144,7 @@ export default function AdminVerificationsPage() {
                         key={t}
                         onClick={() => setTab(t)}
                         className={`px-4 py-2.5 text-sm font-semibold rounded-t-xl transition-colors capitalize ${tab === t
-                                ? 'bg-white border border-b-white border-gray-100 text-blue-600 -mb-px'
+                                ? 'bg-white border border-b-white border-gray-100 text-[#0B2D72] -mb-px'
                                 : 'text-gray-500 hover:text-gray-700'
                             }`}
                     >
@@ -166,13 +166,13 @@ export default function AdminVerificationsPage() {
                             <div className="flex items-start justify-between gap-4">
                                 {/* User info */}
                                 <div className="flex items-center gap-3">
-                                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center text-white font-bold text-lg shrink-0">
+                                    <div className="w-12 h-12 rounded-2xl bg-[#0B2D72] flex items-center justify-center text-white font-bold text-lg shrink-0">
                                         {u.name?.charAt(0)?.toUpperCase() || '?'}
                                     </div>
                                     <div>
                                         <p className="font-bold text-gray-900">{u.name}</p>
                                         <p className="text-xs text-gray-500">{u.email}</p>
-                                        <span className="mt-1 inline-block bg-blue-50 border border-blue-200 text-blue-700 text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full">
+                                        <span className="mt-1 inline-block bg-[#E6EAF2] border border-[#CBD5E1] text-[#0B2D72] text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full">
                                             {u.role?.replace('_', ' ')}
                                         </span>
                                     </div>
@@ -184,7 +184,7 @@ export default function AdminVerificationsPage() {
                                         <button
                                             onClick={() => handleApprove(u._id)}
                                             disabled={!!actionLoading}
-                                            className="flex items-center gap-1.5 bg-green-600 hover:bg-green-700 text-white text-xs font-bold px-4 py-2 rounded-xl transition-colors disabled:opacity-50"
+                                            className="flex items-center gap-1.5 bg-[#0B2D72] hover:opacity-90 text-[#E6EAF2] text-xs font-bold px-4 py-2 rounded-xl transition-colors disabled:opacity-50"
                                         >
                                             {actionLoading === u._id + '_approve' ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <CheckCircle className="h-3.5 w-3.5" />}
                                             Approve
@@ -192,7 +192,7 @@ export default function AdminVerificationsPage() {
                                         <button
                                             onClick={() => handleReject(u._id)}
                                             disabled={!!actionLoading}
-                                            className="flex items-center gap-1.5 bg-red-100 hover:bg-red-200 text-red-700 text-xs font-bold px-4 py-2 rounded-xl transition-colors disabled:opacity-50"
+                                            className="flex items-center gap-1.5 bg-[#E6EAF2] hover:bg-[#CBD5E1] text-[#1F2933] text-xs font-bold px-4 py-2 rounded-xl transition-colors disabled:opacity-50"
                                         >
                                             {actionLoading === u._id + '_reject' ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <XCircle className="h-3.5 w-3.5" />}
                                             Reject
@@ -201,7 +201,7 @@ export default function AdminVerificationsPage() {
                                 )}
 
                                 {tab === 'approved' && (
-                                    <span className="flex items-center gap-1.5 bg-green-50 text-green-700 text-xs font-bold px-4 py-2 rounded-xl border border-green-200">
+                                    <span className="flex items-center gap-1.5 bg-[#DBE2ED] text-[#0B2D72] text-xs font-bold px-4 py-2 rounded-xl border border-[#CBD5E1]">
                                         <CheckCircle className="h-3.5 w-3.5" /> Approved
                                     </span>
                                 )}
@@ -226,7 +226,7 @@ export default function AdminVerificationsPage() {
                                                     </div>
                                                     <button
                                                         onClick={() => handleViewDoc(u._id, i)}
-                                                        className="flex items-center gap-1 text-blue-600 hover:text-blue-700 text-xs font-semibold shrink-0"
+                                                        className="flex items-center gap-1 text-[#0B2D72] hover:opacity-80 text-xs font-semibold shrink-0"
                                                     >
                                                         <Eye className="h-3.5 w-3.5" /> View <ExternalLink className="h-3 w-3" />
                                                     </button>

@@ -12,11 +12,11 @@ import {
 
 const ROLES = ['', 'landlord', 'tenant', 'admin', 'property_manager', 'law_reviewer'];
 const ROLE_COLORS = {
-  admin: 'bg-red-100 text-red-700',
-  landlord: 'bg-indigo-100 text-indigo-700',
-  property_manager: 'bg-amber-100 text-amber-700',
-  tenant: 'bg-green-100 text-green-700',
-  law_reviewer: 'bg-purple-100 text-purple-700',
+  admin: 'bg-[#E6EAF2] text-[#0B2D72] border border-[#CBD5E1]',
+  landlord: 'bg-[#E6EAF2] text-[#0B2D72] border border-[#CBD5E1]',
+  property_manager: 'bg-[#E6EAF2] text-[#0B2D72] border border-[#CBD5E1]',
+  tenant: 'bg-[#E6EAF2] text-[#0B2D72] border border-[#CBD5E1]',
+  law_reviewer: 'bg-[#E6EAF2] text-[#0B2D72] border border-[#CBD5E1]',
 };
 
 export default function AdminUsersPage() {
@@ -94,7 +94,7 @@ export default function AdminUsersPage() {
           <h1 className="text-3xl font-black text-gray-900 tracking-tighter">User Management</h1>
           <p className="text-gray-400 text-sm mt-1">{pagination.total} total users</p>
         </div>
-        <button onClick={() => fetchUsers(pagination.page)} className="flex items-center gap-2 text-sm text-gray-500 hover:text-blue-600 transition">
+        <button onClick={() => fetchUsers(pagination.page)} className="flex items-center gap-2 text-sm text-gray-500 hover:text-[#0B2D72] transition">
           <RefreshCw className="w-4 h-4" /> Refresh
         </button>
       </div>
@@ -104,7 +104,7 @@ export default function AdminUsersPage() {
         <div className="relative">
           <Search className="absolute left-3 top-2.5 w-4 h-4 text-gray-400" />
           <input
-            className="pl-9 pr-4 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-64"
+            className="pl-9 pr-4 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#0B2D72] w-64"
             placeholder="Search name or email..."
             value={search}
             onChange={e => setSearch(e.target.value)}
@@ -113,7 +113,7 @@ export default function AdminUsersPage() {
         <select
           value={roleFilter}
           onChange={e => setRole(e.target.value)}
-          className="border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#0B2D72]"
         >
           <option value="">All Roles</option>
           {ROLES.filter(Boolean).map(r => (
@@ -123,7 +123,7 @@ export default function AdminUsersPage() {
         <select
           value={activeFilter}
           onChange={e => setActive(e.target.value)}
-          className="border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#0B2D72]"
         >
           <option value="">All Status</option>
           <option value="true">Active</option>
@@ -134,7 +134,7 @@ export default function AdminUsersPage() {
       {/* Table */}
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
         {loading ? (
-          <div className="flex justify-center py-16"><Loader2 className="animate-spin h-8 w-8 text-blue-600" /></div>
+          <div className="flex justify-center py-16"><Loader2 className="animate-spin h-8 w-8 text-[#0B2D72]" /></div>
         ) : (
           <table className="w-full text-sm">
             <thead>
@@ -159,7 +159,7 @@ export default function AdminUsersPage() {
                     </span>
                   </td>
                   <td className="px-4 py-4">
-                    <span className={`text-[10px] font-black uppercase px-2 py-1 rounded-full ${u.isActive ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                    <span className={`text-[10px] font-black uppercase px-2 py-1 rounded-full ${u.isActive ? 'bg-[#0B2D72] text-[#E6EAF2]' : 'bg-[#CBD5E1] text-[#1F2933]'}`}>
                       {u.isActive ? 'Active' : 'Banned'}
                     </span>
                   </td>
@@ -170,7 +170,7 @@ export default function AdminUsersPage() {
                     <div className="flex justify-end gap-2">
                       <button
                         onClick={() => { setSelectedUser(u); setNewRole(u.role); }}
-                        className="text-xs border border-gray-200 px-3 py-1.5 rounded-lg hover:border-blue-400 hover:text-blue-600 transition"
+                        className="text-xs border border-gray-200 px-3 py-1.5 rounded-lg hover:border-[#0B2D72] hover:text-[#0B2D72] transition"
                       >
                         Change Role
                       </button>
@@ -178,8 +178,8 @@ export default function AdminUsersPage() {
                         onClick={() => handleBan(u._id, u.name)}
                         disabled={actionLoading === u._id + '-ban'}
                         className={`text-xs px-3 py-1.5 rounded-lg transition flex items-center gap-1 ${u.isActive
-                            ? 'bg-red-50 text-red-600 hover:bg-red-100'
-                            : 'bg-green-50 text-green-600 hover:bg-green-100'
+                            ? 'bg-[#E6EAF2] text-[#1F2933] hover:bg-[#CBD5E1] border border-[#CBD5E1]'
+                            : 'bg-[#0B2D72] text-[#E6EAF2] hover:opacity-90'
                           }`}
                       >
                         {actionLoading === u._id + '-ban' ? (
@@ -208,14 +208,14 @@ export default function AdminUsersPage() {
               <button
                 disabled={pagination.page <= 1}
                 onClick={() => fetchUsers(pagination.page - 1)}
-                className="p-2 border border-gray-200 rounded-lg disabled:opacity-40 hover:border-blue-400 transition"
+                className="p-2 border border-gray-200 rounded-lg disabled:opacity-40 hover:border-[#0B2D72] transition"
               >
                 <ChevronLeft className="w-4 h-4" />
               </button>
               <button
                 disabled={pagination.page >= pagination.pages}
                 onClick={() => fetchUsers(pagination.page + 1)}
-                className="p-2 border border-gray-200 rounded-lg disabled:opacity-40 hover:border-blue-400 transition"
+                className="p-2 border border-gray-200 rounded-lg disabled:opacity-40 hover:border-[#0B2D72] transition"
               >
                 <ChevronRight className="w-4 h-4" />
               </button>
@@ -233,7 +233,7 @@ export default function AdminUsersPage() {
             <select
               value={newRole}
               onChange={e => setNewRole(e.target.value)}
-              className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 mb-6"
+              className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#0B2D72] mb-6"
             >
               {ROLES.filter(Boolean).map(r => (
                 <option key={r} value={r}>{r.replace('_', ' ')}</option>
@@ -244,7 +244,7 @@ export default function AdminUsersPage() {
               <button
                 onClick={handleRoleChange}
                 disabled={actionLoading === selectedUser._id + '-role'}
-                className="flex-1 bg-blue-600 text-white rounded-xl py-3 text-sm font-black hover:bg-blue-700 disabled:bg-blue-400 transition"
+                className="flex-1 bg-[#0B2D72] text-white rounded-xl py-3 text-sm font-black hover:opacity-90 disabled:opacity-50 transition"
               >
                 {actionLoading === selectedUser._id + '-role' ? <Loader2 className="animate-spin w-4 h-4 mx-auto" /> : 'Save'}
               </button>

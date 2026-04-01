@@ -13,12 +13,12 @@ import {
 const CATEGORIES = ['general', 'rent', 'deposit', 'maintenance', 'utilities', 'pets', 'termination', 'renewal', 'late_fee', 'subletting', 'noise'];
 
 const GROUP_COLORS = {
-  Parties: { bg: 'bg-violet-50', text: 'text-violet-700', border: 'border-violet-200', dot: 'bg-violet-400' },
-  Property: { bg: 'bg-blue-50', text: 'text-blue-700', border: 'border-blue-200', dot: 'bg-blue-400' },
-  Financials: { bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200', dot: 'bg-emerald-400' },
-  Term: { bg: 'bg-amber-50', text: 'text-amber-700', border: 'border-amber-200', dot: 'bg-amber-400' },
-  Policies: { bg: 'bg-rose-50', text: 'text-rose-700', border: 'border-rose-200', dot: 'bg-rose-400' },
-  System: { bg: 'bg-gray-50', text: 'text-gray-600', border: 'border-gray-200', dot: 'bg-gray-400' },
+  Parties: { bg: 'bg-[#E6EAF2]', text: 'text-[#0B2D72]', border: 'border-[#CBD5E1]', dot: 'bg-[#0B2D72]' },
+  Property: { bg: 'bg-[#E6EAF2]', text: 'text-[#0B2D72]', border: 'border-[#CBD5E1]', dot: 'bg-[#0B2D72]' },
+  Financials: { bg: 'bg-[#E6EAF2]', text: 'text-[#0B2D72]', border: 'border-[#CBD5E1]', dot: 'bg-[#0B2D72]' },
+  Term: { bg: 'bg-[#E6EAF2]', text: 'text-[#0B2D72]', border: 'border-[#CBD5E1]', dot: 'bg-[#0B2D72]' },
+  Policies: { bg: 'bg-[#E6EAF2]', text: 'text-[#0B2D72]', border: 'border-[#CBD5E1]', dot: 'bg-[#0B2D72]' },
+  System: { bg: 'bg-gray-100', text: 'text-gray-600', border: 'border-gray-200', dot: 'bg-gray-400' },
 };
 
 // ─── Confirm Modal ────────────────────────────────────────────────────────────
@@ -27,8 +27,8 @@ function ConfirmModal({ title, message, confirmLabel = 'Confirm', danger = false
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40" onClick={e => e.target === e.currentTarget && onClose()}>
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6">
         <div className="flex items-start gap-3 mb-4">
-          <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${danger ? 'bg-red-100' : 'bg-yellow-100'}`}>
-            <AlertTriangle className={`w-5 h-5 ${danger ? 'text-red-600' : 'text-yellow-600'}`} />
+          <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 bg-[#E6EAF2]`}>
+            <AlertTriangle className={`w-5 h-5 text-[#0B2D72]`} />
           </div>
           <div>
             <h3 className="font-black text-gray-900">{title}</h3>
@@ -40,7 +40,7 @@ function ConfirmModal({ title, message, confirmLabel = 'Confirm', danger = false
           <button onClick={onClose} className="flex-1 px-4 py-2 rounded-xl border border-gray-200 text-sm font-bold text-gray-600 hover:bg-gray-50 transition">
             Cancel
           </button>
-          <button onClick={onConfirm} className={`flex-1 px-4 py-2 rounded-xl text-sm font-bold text-white transition ${danger ? 'bg-red-600 hover:bg-red-700' : 'bg-blue-600 hover:bg-blue-700'}`}>
+          <button onClick={onConfirm} className="flex-1 px-4 py-2 rounded-xl text-sm font-bold text-white transition bg-[#0B2D72] hover:opacity-90">
             {confirmLabel}
           </button>
         </div>
@@ -156,7 +156,7 @@ function ClauseBodyEditor({ value, onChange, variables }) {
         {/* Header */}
         <div className="flex items-center justify-between px-3 pt-3 pb-2">
           <div className="flex items-center gap-2">
-            <Sparkles className="w-3.5 h-3.5 text-blue-500" />
+            <Sparkles className="w-3.5 h-3.5 text-[#0B2D72]" />
             <span className="text-xs font-black text-gray-700 uppercase tracking-wide">Available Variables</span>
           </div>
           <span className="text-[10px] text-gray-400 font-medium">drag into text · or click to insert</span>
@@ -244,7 +244,7 @@ function ClauseBodyEditor({ value, onChange, variables }) {
         />
         {isDragOver && (
           <div className="pointer-events-none absolute inset-0 flex items-center justify-center rounded-xl">
-            <div className="bg-blue-600 text-white text-xs font-black px-3 py-1.5 rounded-lg shadow-lg">
+            <div className="bg-[#0B2D72] text-white text-xs font-black px-3 py-1.5 rounded-lg shadow-lg">
               Drop to insert variable
             </div>
           </div>
@@ -406,7 +406,7 @@ export default function TemplatesPage() {
         {(isAdmin || isReviewer) && (
           <button
             onClick={() => setShowForm(v => !v)}
-            className="flex items-center gap-2 bg-blue-600 text-white px-5 py-2.5 rounded-xl text-sm font-black hover:bg-blue-700 transition"
+            className="flex items-center gap-2 bg-[#0B2D72] text-white px-5 py-2.5 rounded-xl text-sm font-black hover:opacity-90 transition"
           >
             {showForm ? <X className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
             {showForm ? 'Cancel' : 'New Clause'}
@@ -418,10 +418,10 @@ export default function TemplatesPage() {
       {showForm && (
         <form
           onSubmit={handleCreate}
-          className="bg-white rounded-2xl border border-blue-100 shadow-sm p-6 space-y-5"
+          className="bg-white rounded-2xl border border-[#CBD5E1] shadow-sm p-6 space-y-5"
         >
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-lg bg-[#0B2D72] flex items-center justify-center">
               <Scale className="w-4 h-4 text-white" />
             </div>
             <h3 className="font-black text-gray-900">New Clause Template</h3>
@@ -433,7 +433,7 @@ export default function TemplatesPage() {
             placeholder="Clause title (e.g. Late Payment Penalty)"
             value={form.title}
             onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
-            className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#0B2D72]"
           />
 
           {/* Drag-and-drop clause body editor */}
@@ -453,7 +453,7 @@ export default function TemplatesPage() {
             <select
               value={form.category}
               onChange={e => setForm(f => ({ ...f, category: e.target.value }))}
-              className="border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#0B2D72]"
             >
               {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
             </select>
@@ -461,7 +461,7 @@ export default function TemplatesPage() {
               placeholder="Jurisdiction (e.g. Punjab)"
               value={form.jurisdiction}
               onChange={e => setForm(f => ({ ...f, jurisdiction: e.target.value }))}
-              className="border border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="border border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#0B2D72]"
             />
             <label className="flex items-center gap-2 text-sm text-gray-600 cursor-pointer select-none">
               <input
@@ -475,10 +475,10 @@ export default function TemplatesPage() {
           </div>
 
           {/* Info banner */}
-          <div className="flex items-start gap-2 bg-blue-50 border border-blue-100 rounded-xl px-4 py-3">
-            <Info className="w-4 h-4 text-blue-500 mt-0.5 shrink-0" />
-            <p className="text-xs text-blue-700 leading-relaxed">
-              Variables like <code className="font-mono bg-blue-100 px-1 rounded">{'{{tenantName}}'}</code> are substituted with real data when the PDF is generated.
+          <div className="flex items-start gap-2 bg-[#E6EAF2] border border-[#CBD5E1] rounded-xl px-4 py-3">
+            <Info className="w-4 h-4 text-[#0B2D72] mt-0.5 shrink-0" />
+            <p className="text-xs text-[#0B2D72] leading-relaxed">
+              Variables like <code className="font-mono bg-[#DBE2ED] px-1 rounded">{'{{tenantName}}'}</code> are substituted with real data when the PDF is generated.
               Drag variables from the palette into the clause body, or click them to insert at the cursor.
             </p>
           </div>
@@ -498,7 +498,7 @@ export default function TemplatesPage() {
             <button
               type="submit"
               disabled={saving}
-              className="flex-1 bg-blue-600 text-white rounded-xl py-2.5 text-sm font-black hover:bg-blue-700 disabled:bg-blue-400 transition"
+              className="flex-1 bg-[#0B2D72] text-white rounded-xl py-2.5 text-sm font-black hover:opacity-90 disabled:opacity-50 transition"
             >
               {saving ? <Loader2 className="animate-spin w-4 h-4 mx-auto" /> : 'Create Clause'}
             </button>
@@ -511,7 +511,7 @@ export default function TemplatesPage() {
         <select
           value={catFilter}
           onChange={e => setCat(e.target.value)}
-          className="border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#0B2D72]"
         >
           <option value="">All Categories</option>
           {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
@@ -519,7 +519,7 @@ export default function TemplatesPage() {
         <select
           value={approvedFilter}
           onChange={e => setApproved(e.target.value)}
-          className="border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#0B2D72]"
         >
           <option value="">All Status</option>
           <option value="true">Approved</option>
@@ -530,7 +530,7 @@ export default function TemplatesPage() {
       {/* ── Clause List ──────────────────────────────────────────────────────── */}
       {loading ? (
         <div className="flex justify-center py-16">
-          <Loader2 className="animate-spin h-8 w-8 text-blue-600" />
+          <Loader2 className="animate-spin h-8 w-8 text-[#0B2D72]" />
         </div>
       ) : clauses.length === 0 ? (
         <div className="text-center py-16 text-gray-400">
@@ -543,11 +543,11 @@ export default function TemplatesPage() {
             <div key={c._id} className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
               <div className="flex items-center justify-between p-5">
                 <div className="flex items-center gap-3 flex-1 min-w-0">
-                  <span className={`text-[10px] font-black uppercase px-2 py-1 rounded-full shrink-0 ${c.isApproved ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}`}>
+                  <span className={`text-[10px] font-black uppercase px-2 py-1 rounded-full shrink-0 ${c.isApproved ? 'bg-[#0B2D72] text-[#E6EAF2]' : 'bg-[#E6EAF2] text-[#1F2933]'}`}>
                     {c.isApproved ? 'Approved' : 'Pending'}
                   </span>
                   {c.isDefault && (
-                    <span className="text-[10px] font-black uppercase px-2 py-1 rounded-full bg-blue-100 text-blue-700 shrink-0">
+                    <span className="text-[10px] font-black uppercase px-2 py-1 rounded-full bg-[#DBE2ED] text-[#0B2D72] border border-[#CBD5E1] shrink-0">
                       Default
                     </span>
                   )}
@@ -555,7 +555,7 @@ export default function TemplatesPage() {
                     <p className="font-bold text-gray-900 truncate" title={c.title}>{c.title}</p>
                     <p className="text-xs text-gray-400 mt-0.5">
                       <span className="capitalize">{c.category?.replace(/_/g, ' ')}</span>
-                      {c.jurisdiction && <span> · <span className="text-blue-500">{c.jurisdiction}</span></span>}
+                      {c.jurisdiction && <span> · <span className="text-[#0B2D72]">{c.jurisdiction}</span></span>}
                       <span> · v{c.version}</span>
                       <span> · Used {c.usageCount}×</span>
                     </p>
@@ -572,7 +572,7 @@ export default function TemplatesPage() {
                     <button
                       onClick={() => handleApprove(c._id)}
                       disabled={actionId === c._id}
-                      className="flex items-center gap-1 text-xs bg-green-50 text-green-700 px-3 py-1.5 rounded-lg hover:bg-green-100 transition"
+                      className="flex items-center gap-1 text-xs bg-[#0B2D72] text-[#E6EAF2] px-3 py-1.5 rounded-lg hover:opacity-90 transition"
                     >
                       {actionId === c._id
                         ? <Loader2 className="w-3 h-3 animate-spin" />
@@ -584,7 +584,7 @@ export default function TemplatesPage() {
                     <button
                       onClick={() => { setRejectTarget(c._id); setRejectionReason(''); }}
                       disabled={actionId === c._id}
-                      className="flex items-center gap-1 text-xs bg-red-50 text-red-600 px-3 py-1.5 rounded-lg hover:bg-red-100 transition"
+                      className="flex items-center gap-1 text-xs bg-[#E6EAF2] text-[#1F2933] px-3 py-1.5 rounded-lg hover:bg-[#CBD5E1] border border-[#CBD5E1] transition"
                     >
                       <XCircle className="w-3 h-3" /> Reject
                     </button>
@@ -608,7 +608,7 @@ export default function TemplatesPage() {
                     {variables.length > 0 ? renderClauseBody(c.body) : c.body}
                   </div>
                   {c.rejectionReason && (
-                    <p className="mt-3 text-xs text-red-600 bg-red-50 rounded-xl px-4 py-2">
+                    <p className="mt-3 text-xs text-[#0B2D72] bg-[#E6EAF2] rounded-xl px-4 py-2 border border-[#CBD5E1]">
                       Rejection reason: {c.rejectionReason}
                     </p>
                   )}
@@ -650,7 +650,7 @@ export default function TemplatesPage() {
             placeholder="Rejection reason (optional)"
             value={rejectionReason}
             onChange={e => setRejectionReason(e.target.value)}
-            className="w-full mt-2 rounded-xl border border-gray-200 px-3 py-2 text-sm focus:ring-2 focus:ring-red-300 focus:border-red-400 outline-none resize-none"
+            className="w-full mt-2 rounded-xl border border-gray-200 px-3 py-2 text-sm focus:ring-2 focus:ring-[#0B2D72] outline-none resize-none"
           />
         </ConfirmModal>
       )}

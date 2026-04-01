@@ -7,13 +7,13 @@ import { useUser } from '@/context/UserContext';
 import { ShieldCheck, Loader2, ChevronLeft, ChevronRight, Filter } from 'lucide-react';
 
 const ACTION_COLORS = {
-  CREATED: 'bg-blue-100 text-blue-700',
-  SIGNED: 'bg-green-100 text-green-700',
-  REMINDER_SENT: 'bg-indigo-100 text-indigo-700',
-  LATE_FEE_APPLIED: 'bg-red-100 text-red-700',
-  AUTO_EXPIRED: 'bg-gray-100 text-gray-600',
-  OVERDUE_NOTICE_SENT: 'bg-orange-100 text-orange-700',
-  PAYMENT_RECEIVED: 'bg-emerald-100 text-emerald-700',
+  CREATED: 'bg-[#E6EAF2] text-[#0B2D72] border border-[#CBD5E1]',
+  SIGNED: 'bg-[#E6EAF2] text-[#0B2D72] border border-[#CBD5E1]',
+  REMINDER_SENT: 'bg-[#E6EAF2] text-[#0B2D72] border border-[#CBD5E1]',
+  LATE_FEE_APPLIED: 'bg-[#E6EAF2] text-[#0B2D72] border border-[#CBD5E1]',
+  AUTO_EXPIRED: 'bg-[#E6EAF2] text-[#0B2D72] border border-[#CBD5E1]',
+  OVERDUE_NOTICE_SENT: 'bg-[#E6EAF2] text-[#0B2D72] border border-[#CBD5E1]',
+  PAYMENT_RECEIVED: 'bg-[#E6EAF2] text-[#0B2D72] border border-[#CBD5E1]',
 };
 
 export default function AuditLogsPage() {
@@ -65,7 +65,7 @@ export default function AuditLogsPage() {
         <select
           value={action}
           onChange={e => { setAction(e.target.value); setPage(1); }}
-          className="border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#0B2D72]"
         >
           <option value="">All Actions</option>
           <option value="CREATED">Created</option>
@@ -81,7 +81,7 @@ export default function AuditLogsPage() {
       {/* Log Table */}
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
         {loading ? (
-          <div className="flex justify-center py-16"><Loader2 className="animate-spin h-8 w-8 text-blue-600" /></div>
+          <div className="flex justify-center py-16"><Loader2 className="animate-spin h-8 w-8 text-[#0B2D72]" /></div>
         ) : (
           <table className="w-full text-sm">
             <thead>
@@ -109,7 +109,7 @@ export default function AuditLogsPage() {
                     {new Date(log.timestamp).toLocaleString()}
                   </td>
                   <td className="px-4 py-3">
-                    <span className={`text-[10px] font-black uppercase px-2 py-1 rounded-full ${ACTION_COLORS[log.action] || 'bg-gray-100 text-gray-600'}`}>
+                    <span className={`text-[10px] font-black uppercase px-2 py-1 rounded-full ${ACTION_COLORS[log.action] || 'bg-[#E6EAF2] text-[#1F2933]'}`}>
                       {log.action?.replace(/_/g, ' ')}
                     </span>
                   </td>
@@ -131,14 +131,14 @@ export default function AuditLogsPage() {
               <button
                 disabled={page <= 1}
                 onClick={() => setPage(p => p - 1)}
-                className="p-2 border border-gray-200 rounded-lg disabled:opacity-40 hover:border-blue-400 transition"
+                className="p-2 border border-gray-200 rounded-lg disabled:opacity-40 hover:border-[#0B2D72] transition"
               >
                 <ChevronLeft className="w-4 h-4" />
               </button>
               <button
                 disabled={page >= totalPages}
                 onClick={() => setPage(p => p + 1)}
-                className="p-2 border border-gray-200 rounded-lg disabled:opacity-40 hover:border-blue-400 transition"
+                className="p-2 border border-gray-200 rounded-lg disabled:opacity-40 hover:border-[#0B2D72] transition"
               >
                 <ChevronRight className="w-4 h-4" />
               </button>

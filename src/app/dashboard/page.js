@@ -22,7 +22,7 @@ const ROLE_THEME = {
   landlord: { accent: '#0B2D72', light: '#E6EAF2', text: '#0B2D72', dot: '#0B2D72' }, // Deep Blue
   tenant: { accent: '#0B2D72', light: '#E6EAF2', text: '#0B2D72', dot: '#0B2D72' }, // Deep Blue
   property_manager: { accent: '#0B2D72', light: '#E6EAF2', text: '#0B2D72', dot: '#0B2D72' }, // Deep Blue
-  admin: { accent: '#DC2626', light: '#FEE2E2', text: '#991B1B', dot: '#EF4444' }, // Kept semantic red for admin alerts
+  admin: { accent: '#0B2D72', light: '#E6EAF2', text: '#0B2D72', dot: '#0B2D72' }, // Deep Blue
   law_reviewer: { accent: '#1F2933', light: '#F3F4F6', text: '#1F2933', dot: '#4B5563' }, // Neutral Slate
 };
 

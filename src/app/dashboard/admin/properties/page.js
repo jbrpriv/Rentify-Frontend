@@ -10,10 +10,10 @@ import {
 } from 'lucide-react';
 
 const STATUS_STYLES = {
-  available: { bg: 'bg-green-100', text: 'text-green-700', label: 'Available' },
-  occupied: { bg: 'bg-blue-100', text: 'text-blue-700', label: 'Occupied' },
-  maintenance: { bg: 'bg-amber-100', text: 'text-amber-700', label: 'Maintenance' },
-  inactive: { bg: 'bg-gray-100', text: 'text-gray-500', label: 'Inactive' },
+  available: { bg: 'bg-[#E6EAF2]', text: 'text-[#0B2D72]', label: 'Available' },
+  occupied: { bg: 'bg-[#E6EAF2]', text: 'text-[#0B2D72]', label: 'Occupied' },
+  maintenance: { bg: 'bg-[#E6EAF2]', text: 'text-[#0B2D72]', label: 'Maintenance' },
+  inactive: { bg: 'bg-[#CBD5E1]', text: 'text-[#1F2933]', label: 'Inactive' },
 };
 
 export default function AdminPropertiesPage() {
@@ -78,7 +78,7 @@ export default function AdminPropertiesPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-            <Building2 className="h-6 w-6 text-blue-600" />
+            <Building2 className="h-6 w-6 text-[#0B2D72]" />
             Property Management
           </h1>
           <p className="text-sm text-gray-500 mt-1">Manage all platform properties and tenants</p>
@@ -87,7 +87,7 @@ export default function AdminPropertiesPage() {
           <span className="text-sm font-semibold text-gray-600 bg-gray-100 px-3 py-1.5 rounded-full">
             {properties.length} total
           </span>
-          <span className="text-sm font-semibold text-blue-600 bg-blue-50 px-3 py-1.5 rounded-full">
+          <span className="text-sm font-semibold text-[#E6EAF2] bg-[#0B2D72] px-3 py-1.5 rounded-full">
             {occupied} occupied
           </span>
         </div>
@@ -95,7 +95,7 @@ export default function AdminPropertiesPage() {
 
       {/* Message */}
       {msg && (
-        <div className={`flex items-center gap-3 px-4 py-3 rounded-xl ${msg.type === 'success' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
+        <div className={`flex items-center gap-3 px-4 py-3 rounded-xl ${msg.type === 'success' ? 'bg-[#DBE2ED] text-[#0B2D72]' : 'bg-[#E6EAF2] text-[#1F2933] border border-[#CBD5E1]'}`}>
           {msg.type === 'success' ? <CheckCircle className="h-4 w-4" /> : <AlertCircle className="h-4 w-4" />}
           <span className="text-sm font-semibold">{msg.text}</span>
           <button onClick={() => setMsg(null)} className="ml-auto"><X className="h-4 w-4" /></button>
@@ -110,7 +110,7 @@ export default function AdminPropertiesPage() {
           placeholder="Search by property, landlord or tenant name..."
           value={search}
           onChange={e => handleSearchChange(e.target.value)}
-          className="w-full pl-9 pr-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full pl-9 pr-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#0B2D72]"
         />
       </div>
 
@@ -128,7 +128,7 @@ export default function AdminPropertiesPage() {
               value={kickReason}
               onChange={e => setKickReason(e.target.value)}
               rows={3}
-              className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
+              className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#0B2D72]"
             />
             <div className="flex gap-3">
               <button
@@ -140,7 +140,7 @@ export default function AdminPropertiesPage() {
               <button
                 onClick={handleKickTenant}
                 disabled={!!kicking}
-                className="flex-1 bg-red-600 text-white rounded-xl py-2.5 text-sm font-black hover:bg-red-700 disabled:bg-red-400 flex items-center justify-center gap-2"
+                className="flex-1 bg-[#0B2D72] text-[#E6EAF2] rounded-xl py-2.5 text-sm font-black hover:opacity-90 disabled:opacity-50 flex items-center justify-center gap-2 transition"
               >
                 {kicking ? <Loader2 className="animate-spin w-4 h-4" /> : <UserMinus className="w-4 h-4" />}
                 Remove Tenant
@@ -153,7 +153,7 @@ export default function AdminPropertiesPage() {
       {/* Table */}
       {loading ? (
         <div className="flex justify-center items-center py-20">
-          <Loader2 className="animate-spin h-10 w-10 text-blue-600" />
+          <Loader2 className="animate-spin h-10 w-10 text-[#0B2D72]" />
         </div>
       ) : properties.length === 0 ? (
         <div className="text-center py-16 bg-white rounded-xl border-2 border-dashed border-gray-200">
@@ -214,7 +214,7 @@ export default function AdminPropertiesPage() {
                         {tenant ? (
                           <button
                             onClick={() => setConfirmProp(p)}
-                            className="inline-flex items-center gap-1.5 text-xs bg-red-50 text-red-600 hover:bg-red-100 font-bold px-3 py-1.5 rounded-lg transition"
+                            className="inline-flex items-center gap-1.5 text-xs bg-[#E6EAF2] text-[#1F2933] border border-[#CBD5E1] hover:bg-[#CBD5E1] font-bold px-3 py-1.5 rounded-lg transition"
                           >
                             <UserMinus className="h-3.5 w-3.5" /> Kick Tenant
                           </button>

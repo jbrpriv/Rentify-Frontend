@@ -12,12 +12,12 @@ import {
 } from 'lucide-react';
 
 const STATUS_STYLES = {
-  draft: { bg: 'bg-gray-100', text: 'text-gray-700', icon: Clock, label: 'Draft' },
-  sent: { bg: 'bg-blue-100', text: 'text-blue-700', icon: Clock, label: 'Sent' },
-  signed: { bg: 'bg-indigo-100', text: 'text-indigo-700', icon: CheckCircle, label: 'Signed' },
-  active: { bg: 'bg-green-100', text: 'text-green-700', icon: CheckCircle, label: 'Active' },
-  expired: { bg: 'bg-amber-100', text: 'text-amber-700', icon: AlertCircle, label: 'Expired' },
-  terminated: { bg: 'bg-red-100', text: 'text-red-700', icon: XCircle, label: 'Terminated' },
+  draft: { bg: 'bg-[#E6EAF2]', text: 'text-[#0B2D72]', icon: Clock, label: 'Draft' },
+  sent: { bg: 'bg-[#E6EAF2]', text: 'text-[#0B2D72]', icon: Clock, label: 'Sent' },
+  signed: { bg: 'bg-[#0B2D72]', text: 'text-[#E6EAF2]', icon: CheckCircle, label: 'Signed' },
+  active: { bg: 'bg-[#0B2D72]', text: 'text-[#E6EAF2]', icon: CheckCircle, label: 'Active' },
+  expired: { bg: 'bg-[#CBD5E1]', text: 'text-[#1F2933]', icon: AlertCircle, label: 'Expired' },
+  terminated: { bg: 'bg-[#CBD5E1]', text: 'text-[#1F2933]', icon: XCircle, label: 'Terminated' },
 };
 
 function StatusBadge({ status }) {
@@ -88,7 +88,7 @@ export default function AdminAgreementsPage() {
   if (loading) {
     return (
       <div className="flex justify-center items-center py-20">
-        <Loader2 className="animate-spin h-10 w-10 text-blue-600" />
+        <Loader2 className="animate-spin h-10 w-10 text-[#0B2D72]" />
       </div>
     );
   }
@@ -100,7 +100,7 @@ export default function AdminAgreementsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-            <FileText className="h-6 w-6 text-blue-600" />
+            <FileText className="h-6 w-6 text-[#0B2D72]" />
             All Agreements
           </h1>
           <p className="text-sm text-gray-500 mt-1">Platform-wide agreement monitor</p>
@@ -119,7 +119,7 @@ export default function AdminAgreementsPage() {
               key={status}
               onClick={() => setStatusFilter(statusFilter === status ? '' : status)}
               className={`p-3 rounded-xl border-2 text-left transition-all ${statusFilter === status
-                ? 'border-blue-500 ring-2 ring-blue-200'
+                ? 'border-[#0B2D72] ring-2 ring-[#CBD5E1]'
                 : 'border-transparent bg-white hover:border-gray-200'
                 } shadow-sm`}
             >
@@ -142,7 +142,7 @@ export default function AdminAgreementsPage() {
             placeholder="Search by landlord, tenant or property..."
             value={search}
             onChange={(e) => handleSearchChange(e.target.value)}
-            className="w-full pl-9 pr-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full pl-9 pr-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#0B2D72]"
           />
         </div>
         <div className="relative">
@@ -150,7 +150,7 @@ export default function AdminAgreementsPage() {
           <select
             value={statusFilter}
             onChange={(e) => handleStatusChange(e.target.value)}
-            className="pl-9 pr-8 py-2.5 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none"
+            className="pl-9 pr-8 py-2.5 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#0B2D72] appearance-none"
           >
             <option value="">All statuses</option>
             {Object.entries(STATUS_STYLES).map(([s, v]) => (
@@ -163,7 +163,7 @@ export default function AdminAgreementsPage() {
       {/* Table */}
       {loading ? (
         <div className="flex justify-center items-center py-20">
-          <Loader2 className="animate-spin h-10 w-10 text-blue-600" />
+          <Loader2 className="animate-spin h-10 w-10 text-[#0B2D72]" />
         </div>
       ) : agreements.length === 0 ? (
         <div className="text-center py-16 bg-white rounded-xl border-2 border-dashed border-gray-200">
@@ -227,7 +227,7 @@ export default function AdminAgreementsPage() {
                             toast('Failed to download PDF. Please try again.', 'error');
                           }
                         }}
-                        className="inline-flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 font-semibold"
+                        className="inline-flex items-center gap-1 text-xs text-[#0B2D72] hover:opacity-80 font-semibold"
                       >
                         <Eye className="h-3.5 w-3.5" /> Download PDF
                       </button>

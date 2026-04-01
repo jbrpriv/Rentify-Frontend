@@ -15,8 +15,8 @@ import {
   PieChart, Pie, Cell, LineChart, Line, Legend,
 } from 'recharts';
 
-const TIER_COLORS = { free: '#94a3b8', pro: '#3b82f6', enterprise: '#8b5cf6' };
-const PIE_FALLBACK = ['#3b82f6', '#6366f1', '#f59e0b', '#10b981', '#8b5cf6'];
+const TIER_COLORS = { free: '#CBD5E1', pro: '#0992C2', enterprise: '#0B2D72' };
+const PIE_FALLBACK = ['#0B2D72', '#0992C2', '#0AC4E0', '#CBD5E1', '#E6EAF2'];
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 function monthLabel({ year, month }) {
@@ -62,7 +62,7 @@ export default function AdminStatsPage() {
     <div className="text-center py-20">
       <AlertCircle className="mx-auto h-10 w-10 text-red-400 mb-3" />
       <p className="text-gray-500 font-semibold">Failed to load platform data</p>
-      <button onClick={loadData} className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-xl text-sm font-semibold hover:bg-blue-700">
+      <button onClick={loadData} className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-[#E6EAF2] text-[#0B2D72] border border-[#CBD5E1] rounded-xl text-sm font-bold hover:bg-[#DBE2ED]">
         <RefreshCw className="w-4 h-4" /> Retry
       </button>
     </div>
@@ -106,20 +106,20 @@ export default function AdminStatsPage() {
       <div>
         <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-3">Users &amp; Subscriptions</p>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <KpiCard label="Total Users" value={totals.users} icon={Users} color="text-blue-600" bg="bg-blue-50" />
-          <KpiCard label="Pro Subscribers" value={totals.pro} icon={Zap} color="text-blue-600" bg="bg-blue-50" />
-          <KpiCard label="Enterprise Subscribers" value={totals.enterprise} icon={Crown} color="text-purple-600" bg="bg-purple-50" />
-          <KpiCard label="Monthly Sub Revenue" value={formatMoneyCompact(monthlySubscriptionRevenue || 0)} icon={TrendingUp} color="text-green-600" bg="bg-green-50" />
+          <KpiCard label="Total Users" value={totals.users} icon={Users} color="text-[#0B2D72]" bg="bg-[#E6EAF2]" />
+          <KpiCard label="Pro Subscribers" value={totals.pro} icon={Zap} color="text-[#0B2D72]" bg="bg-[#E6EAF2]" />
+          <KpiCard label="Enterprise Subscribers" value={totals.enterprise} icon={Crown} color="text-[#0B2D72]" bg="bg-[#E6EAF2]" />
+          <KpiCard label="Monthly Sub Revenue" value={formatMoneyCompact(monthlySubscriptionRevenue || 0)} icon={TrendingUp} color="text-[#0B2D72]" bg="bg-[#E6EAF2]" />
         </div>
       </div>
 
       <div>
         <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-3">Platform Health</p>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <KpiCard label="Active Leases" value={totals.activeAgreements} icon={CheckCircle} color="text-indigo-600" bg="bg-indigo-50" />
-          <KpiCard label="Pending Agreements" value={totals.pendingAgreements} icon={Clock} color="text-amber-600" bg="bg-amber-50" />
-          <KpiCard label="Total Properties" value={totals.properties} icon={Building2} color="text-slate-600" bg="bg-slate-50" />
-          <KpiCard label="Open Maintenance" value={totals.openMaintenanceRequests} icon={Wrench} color="text-orange-600" bg="bg-orange-50" />
+          <KpiCard label="Active Leases" value={totals.activeAgreements} icon={CheckCircle} color="text-[#0B2D72]" bg="bg-[#E6EAF2]" />
+          <KpiCard label="Pending Agreements" value={totals.pendingAgreements} icon={Clock} color="text-[#0B2D72]" bg="bg-[#E6EAF2]" />
+          <KpiCard label="Total Properties" value={totals.properties} icon={Building2} color="text-[#0B2D72]" bg="bg-[#E6EAF2]" />
+          <KpiCard label="Open Maintenance" value={totals.openMaintenanceRequests} icon={Wrench} color="text-[#0B2D72]" bg="bg-[#E6EAF2]" />
         </div>
       </div>
 
@@ -127,10 +127,10 @@ export default function AdminStatsPage() {
         <div>
           <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-3">Revenue &amp; Churn</p>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <KpiCard label="Total Rent Collected" value={formatMoneyCompact(analytics.totalRentRevenue || 0)} icon={DollarSign} color="text-green-600" bg="bg-green-50" />
-            <KpiCard label="Agreements Created (6m)" value={analytics.createdLast6 ?? 0} icon={FileText} color="text-blue-600" bg="bg-blue-50" />
-            <KpiCard label="Expired / Churned (6m)" value={analytics.expiredLast6 ?? 0} icon={AlertCircle} color="text-red-600" bg="bg-red-50" />
-            <KpiCard label="Churn Rate" value={`${analytics.churnRate ?? 0}%`} icon={BarChart2} color="text-orange-600" bg="bg-orange-50" />
+            <KpiCard label="Total Rent Collected" value={formatMoneyCompact(analytics.totalRentRevenue || 0)} icon={DollarSign} color="text-[#0B2D72]" bg="bg-[#E6EAF2]" />
+            <KpiCard label="Agreements Created (6m)" value={analytics.createdLast6 ?? 0} icon={FileText} color="text-[#0B2D72]" bg="bg-[#E6EAF2]" />
+            <KpiCard label="Expired / Churned (6m)" value={analytics.expiredLast6 ?? 0} icon={AlertCircle} color="text-[#0B2D72]" bg="bg-[#E6EAF2]" />
+            <KpiCard label="Churn Rate" value={`${analytics.churnRate ?? 0}%`} icon={BarChart2} color="text-[#0B2D72]" bg="bg-[#E6EAF2]" />
           </div>
         </div>
       )}
@@ -144,7 +144,7 @@ export default function AdminStatsPage() {
                 <XAxis dataKey="name" tick={{ fontSize: 11 }} />
                 <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
                 <Tooltip />
-                <Bar dataKey="count" fill="#3b82f6" radius={[6, 6, 0, 0]} />
+                <Bar dataKey="count" fill="#0B2D72" radius={[6, 6, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           ) : <p className="text-gray-400 text-sm text-center py-16">No data yet</p>}
@@ -188,7 +188,7 @@ export default function AdminStatsPage() {
                   <XAxis dataKey="name" tick={{ fontSize: 11 }} />
                   <YAxis tick={{ fontSize: 11 }} tickFormatter={v => `${(v / 1000).toFixed(0)}k`} />
                   <Tooltip formatter={(v) => [formatMoney(v), 'Revenue']} />
-                  <Bar dataKey="revenue" fill="#10b981" radius={[6, 6, 0, 0]} />
+                  <Bar dataKey="revenue" fill="#0B2D72" radius={[6, 6, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             ) : <p className="text-gray-400 text-sm text-center py-16">No payment data yet</p>}
@@ -203,7 +203,7 @@ export default function AdminStatsPage() {
                   <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
                   <Tooltip />
                   <Legend />
-                  <Line type="monotone" dataKey="users" stroke="#6366f1" strokeWidth={2} dot={{ r: 4 }} />
+                  <Line type="monotone" dataKey="users" stroke="#0B2D72" strokeWidth={2} dot={{ r: 4 }} />
                 </LineChart>
               </ResponsiveContainer>
             ) : <p className="text-gray-400 text-sm text-center py-16">No user growth data yet</p>}
@@ -215,7 +215,7 @@ export default function AdminStatsPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-6">
             <h2 className="text-base font-black text-gray-900 uppercase tracking-widest mb-4 flex items-center gap-2">
-              <ShieldAlert className="w-4 h-4 text-red-500" /> Disputes by Status
+              <ShieldAlert className="w-4 h-4 text-[#0B2D72]" /> Disputes by Status
             </h2>
             {disputeData.length > 0 ? (
               <div className="space-y-3">
@@ -231,7 +231,7 @@ export default function AdminStatsPage() {
 
           <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-6">
             <h2 className="text-base font-black text-gray-900 uppercase tracking-widest mb-4 flex items-center gap-2">
-              <Wrench className="w-4 h-4 text-orange-500" /> Maintenance by Status
+              <Wrench className="w-4 h-4 text-[#0B2D72]" /> Maintenance by Status
             </h2>
             {maintenanceData.length > 0 ? (
               <div className="space-y-3">
