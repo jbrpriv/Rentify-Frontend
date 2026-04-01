@@ -928,6 +928,7 @@ function AgreementForm() {
   const [offerData, setOfferData] = useState(null);
   const [showTemplatePicker, setShowTemplatePicker] = useState(false);
   const [appliedTemplate, setAppliedTemplate] = useState('');
+  const [templateClauseIds, setTemplateClauseIds] = useState([]);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => { setMounted(true); }, []);
@@ -1006,8 +1007,34 @@ function AgreementForm() {
     return Object.keys(errors).length === 0;
   };
 
-  const handleReorderClauses = (reorderedIds) => setSelectedClauseIds(reorderedIds);
-  const handleApplyTemplate = (clauseIds, templateName) => { setSelectedClauseIds(clauseIds); setAppliedTemplate(templateName); setShowTemplatePicker(false); };
+  const handleReorderClauses = (reorderedIds) => {
+    setSelectedClauseIds(reorderedIds);
+
+    if (appliedTemplate && templateClauseIds.length > 0) {
+      const idSet = new Set(reorderedIds);
+      const stillContainsTemplate = templateClauseIds.every((id) => idSet.has(id));
+      if (!stillContainsTemplate) {
+        setAppliedTemplate('');
+        setTemplateClauseIds([]);
+      }
+    }
+  };
+
+  const handleApplyTemplate = (clauseIds, templateName) => {
+    setSelectedClauseIds(clauseIds);
+    setTemplateClauseIds(clauseIds);
+    setAppliedTemplate(templateName);
+    setShowTemplatePicker(false);
+  };
+
+  const handleRemoveTemplate = () => {
+    if (templateClauseIds.length > 0) {
+      const templateIdSet = new Set(templateClauseIds);
+      setSelectedClauseIds((prev) => prev.filter((id) => !templateIdSet.has(id)));
+    }
+    setAppliedTemplate('');
+    setTemplateClauseIds([]);
+  };
 
   const handleSaveClauses = async () => {
     if (!validateAgreementForm()) {
@@ -1104,6 +1131,7 @@ function AgreementForm() {
               saving={savingClauses}
               onCancel={() => router.push('/dashboard/agreements')}
               appliedTemplate={appliedTemplate}
+              onRemoveTemplate={handleRemoveTemplate}
             />
           </div>
 
