@@ -6,6 +6,7 @@ import Link from 'next/link';
 import api from '@/utils/api';
 import { useUser } from '@/context/UserContext';
 import { useToast } from '@/context/ToastContext';
+import { useCurrency } from '@/context/CurrencyContext';
 import {
   Building2, MapPin, Plus, FileText, Loader2, UserPlus,
   CheckCircle, Clock, Eye, EyeOff, Trash2, Archive, ArchiveRestore,
@@ -45,6 +46,7 @@ export default function PropertiesPage() {
   const router = useRouter();
   const { user: parsed } = useUser();
   const { toast } = useToast();
+  const { formatMoney } = useCurrency();
   useEffect(() => {
     if (!parsed) return;
     if (!['landlord', 'admin'].includes(parsed.role)) { router.push('/dashboard'); return; }
@@ -423,7 +425,7 @@ export default function PropertiesPage() {
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 14, paddingTop: 14, borderTop: '1px solid #F1F5F9' }}>
                       <div>
                         <p style={{ fontSize: '0.67rem', fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 2 }}>Monthly Rent</p>
-                        <p style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 800, fontSize: '1.05rem', color: '#0F172A' }}>$ {property.financials?.monthlyRent?.toLocaleString()}</p>
+                        <p style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 800, fontSize: '1.05rem', color: '#0F172A' }}>{formatMoney(property.financials?.monthlyRent)}</p>
                       </div>
                       <div>
                         <p style={{ fontSize: '0.67rem', fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 2 }}>Type</p>

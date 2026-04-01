@@ -172,7 +172,7 @@ function Lightbox({ images, startIndex, onClose }) {
 
 /* ─── Offer form ──────────────────────────────────────────────────── */
 function OfferForm({ listing, user, router, listingId }) {
-  const { formatMoney } = useCurrency();
+  const { formatMoney, currency } = useCurrency();
   const defaultDuration = String(listing.leaseTerms?.defaultDurationMonths || 12);
   const [form, setForm] = useState({ monthlyRent: '', securityDeposit: '', leaseDurationMonths: defaultDuration });
   const [submitting, setSubmitting] = useState(false);
@@ -181,8 +181,8 @@ function OfferForm({ listing, user, router, listingId }) {
   const set = (k) => (e) => setForm(f => ({ ...f, [k]: e.target.value }));
 
   const fields = [
-    { key: 'monthlyRent', label: 'Monthly Rent', prefix: '$', listedVal: listing.financials?.monthlyRent },
-    { key: 'securityDeposit', label: 'Security Deposit', prefix: '$', listedVal: listing.financials?.securityDeposit },
+    { key: 'monthlyRent', label: 'Monthly Rent', prefix: currency, listedVal: listing.financials?.monthlyRent },
+    { key: 'securityDeposit', label: 'Security Deposit', prefix: currency, listedVal: listing.financials?.securityDeposit },
     { key: 'leaseDurationMonths', label: 'Lease Duration', prefix: 'mo', listedVal: listing.leaseTerms?.defaultDurationMonths || 12 },
   ];
 

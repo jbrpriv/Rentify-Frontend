@@ -12,6 +12,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import api from '@/utils/api';
+import { useCurrency } from '@/context/CurrencyContext';
 
 const TIER_BADGE = {
   free: 'bg-gray-100 text-gray-700',
@@ -27,6 +28,7 @@ const STATUS_BADGE = {
 };
 
 export default function AdminBillingPage() {
+  const { formatMoney } = useCurrency();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -67,7 +69,6 @@ export default function AdminBillingPage() {
     setTier(t === tier ? '' : t);
   };
 
-  const fmt = (n) => `$${(n ?? 0).toLocaleString('en-US')}`;
   const fmtDate = (d) => d ? new Date(d).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : '—';
 
   return (
@@ -81,7 +82,7 @@ export default function AdminBillingPage() {
             { label: 'Free', value: data.summary.free, color: 'bg-gray-50  border-gray-200', badge: 'text-gray-700' },
             { label: 'Pro', value: data.summary.pro, color: 'bg-blue-50  border-blue-200', badge: 'text-blue-700' },
             { label: 'Enterprise', value: data.summary.enterprise, color: 'bg-purple-50 border-purple-200', badge: 'text-purple-700' },
-            { label: 'Monthly MRR', value: fmt(data.summary.totalMRR), color: 'bg-green-50 border-green-200', badge: 'text-green-700' },
+            { label: 'Monthly MRR', value: formatMoney(data.summary.totalMRR), color: 'bg-green-50 border-green-200', badge: 'text-green-700' },
           ].map(({ label, value, color, badge }) => (
             <div key={label} className={`rounded-xl border p-4 ${color}`}>
               <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">{label}</p>

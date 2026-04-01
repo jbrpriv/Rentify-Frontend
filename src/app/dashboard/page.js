@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import api from '@/utils/api';
 import { useUser } from '@/context/UserContext';
+import { useCurrency } from '@/context/CurrencyContext';
 import {
   Building2, FileText, CreditCard, Wrench, Tag, Scale,
   TrendingUp, CheckCircle, Clock, AlertCircle, ArrowRight,
@@ -87,6 +88,7 @@ function AlertBanner({ tasks, role, theme }) {
 
 /* ─── Lease row ──────────────────────────────────────────────────────────── */
 function LeaseRow({ lease, role }) {
+  const { formatMoney } = useCurrency();
   return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 18px', borderBottom: '1px solid rgba(11, 45, 114, 0.08)', gap: 12 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
@@ -101,7 +103,7 @@ function LeaseRow({ lease, role }) {
         </div>
       </div>
       <div style={{ textAlign: 'right' }}>
-        <p style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 700, fontSize: '0.95rem', color: '#1F2933' }}>${(lease.financials?.rentAmount || 0).toLocaleString()}</p>
+        <p style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 700, fontSize: '0.95rem', color: '#1F2933' }}>{formatMoney(lease.financials?.rentAmount)}</p>
         <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#0992C2', background: '#E6F4F8', padding: '2px 8px', borderRadius: 20 }}>Active</span>
       </div>
     </div>
@@ -111,6 +113,7 @@ function LeaseRow({ lease, role }) {
 /* ─── Main ───────────────────────────────────────────────────────────────── */
 export default function DashboardHome() {
   const { user } = useUser();
+  const { formatMoney } = useCurrency();
   const [agreements, setAgreements] = useState([]);
   const [properties, setProperties] = useState([]);
   const [payments, setPayments] = useState([]);
@@ -332,8 +335,8 @@ export default function DashboardHome() {
         >
           {user.role === 'landlord' && (
             <>
-              <StatCard label="Monthly Income" value={`$${totalRevenue.toLocaleString()}`} icon={TrendingUp} theme={theme} sub={`${activeLeases.length} active lease(s)`} />
-              <StatCard label="Late Fees" value={`$${payments.reduce((s, p) => s + (p.lateFeeAmount || 0), 0).toLocaleString()}`} icon={AlertCircle} theme={ROLE_THEME.admin} sub={`${payments.filter(p => p.status === 'late_fee_applied').length} pending fee(s)`} />
+              <StatCard label="Monthly Income" value={formatMoney(totalRevenue)} icon={TrendingUp} theme={theme} sub={`${activeLeases.length} active lease(s)`} />
+              <StatCard label="Late Fees" value={formatMoney(payments.reduce((s, p) => s + (p.lateFeeAmount || 0), 0))} icon={AlertCircle} theme={ROLE_THEME.admin} sub={`${payments.filter(p => p.status === 'late_fee_applied').length} pending fee(s)`} />
               <StatCard label="Properties" value={properties.length} icon={Building2} theme={ROLE_THEME.property_manager} />
               <StatCard label="Agreements" value={agreements.length} icon={FileText} theme={theme} />
               <StatCard label="Active Offers" value={pendingOffers.length} icon={Tag} theme={ROLE_THEME.tenant} />
@@ -394,7 +397,7 @@ export default function DashboardHome() {
                 <BarChart data={monthlyData} margin={{ top: 0, right: 0, left: -24, bottom: 0 }}>
                   <XAxis dataKey="month" tick={{ fontSize: 10, fontWeight: 600 }} />
                   <YAxis tick={{ fontSize: 10 }} />
-                  <Tooltip formatter={v => [`$${v.toLocaleString()}`, 'Amount']} />
+                  <Tooltip formatter={v => [formatMoney(v), 'Amount']} />
                   <Bar dataKey="amount" fill={theme.accent} radius={[6, 6, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>

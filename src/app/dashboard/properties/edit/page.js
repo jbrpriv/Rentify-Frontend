@@ -3,6 +3,7 @@
 import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import api from '@/utils/api';
+import { useCurrency } from '@/context/CurrencyContext';
 import { Loader2, Save, ArrowLeft, UserCheck, UserX, Search } from 'lucide-react';
 import Link from 'next/link';
 
@@ -16,6 +17,7 @@ function EditPropertyContent() {
   const router        = useRouter();
   const searchParams  = useSearchParams();
   const id            = searchParams.get('id');
+  const { currency } = useCurrency();
 
   const [form, setForm]   = useState(null);
   const [loading, setLoading] = useState(true);
@@ -219,9 +221,9 @@ function EditPropertyContent() {
         {/* Financials */}
         <Section title="Financials">
           <div className="grid grid-cols-2 gap-4">
-            <InputField label="Monthly Rent ($)"     type="number" value={form.financials.monthlyRent}     onChange={v => set('financials.monthlyRent', v)}     required />
-            <InputField label="Security Deposit ($)" type="number" value={form.financials.securityDeposit} onChange={v => set('financials.securityDeposit', v)} required />
-            <InputField label="Late Fee Amount ($)"  type="number" value={form.financials.lateFeeAmount}   onChange={v => set('financials.lateFeeAmount', v)} />
+            <InputField label={`Monthly Rent (${currency})`}     type="number" value={form.financials.monthlyRent}     onChange={v => set('financials.monthlyRent', v)}     required />
+            <InputField label={`Security Deposit (${currency})`} type="number" value={form.financials.securityDeposit} onChange={v => set('financials.securityDeposit', v)} required />
+            <InputField label={`Late Fee Amount (${currency})`}  type="number" value={form.financials.lateFeeAmount}   onChange={v => set('financials.lateFeeAmount', v)} />
             <InputField label="Grace Period (days)"    type="number" value={form.financials.lateFeeGracePeriodDays} onChange={v => set('financials.lateFeeGracePeriodDays', v)} />
             <div className="col-span-2">
               <InputField label="Tax / NTN ID" value={form.financials.taxId} onChange={v => set('financials.taxId', v)} placeholder="Optional landlord tax ID" />

@@ -4,6 +4,7 @@ import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import api from '@/utils/api';
 import { useToast } from '@/context/ToastContext';
+import { useCurrency } from '@/context/CurrencyContext';
 import {
   Home, Loader2, X, ImagePlus, AlertCircle,
   MapPin, DollarSign, Layers, CheckCircle2, ArrowLeft, Upload
@@ -117,6 +118,7 @@ function F({ label, req, half, children }) {
 export default function AddPropertyPage() {
   const router = useRouter();
   const { toast } = useToast();
+  const { currency } = useCurrency();
 
   // ── State ──────────────────────────────────────────────────────────────────
   const [loading, setLoading] = useState(false);
@@ -446,19 +448,19 @@ export default function AddPropertyPage() {
           {/* ── Financials ───────────────────────────────────────────────── */}
           <Card icon={DollarSign} color="#D97706" title="Financials & Lease Rules" sub="Rent, deposit, late fees and lease duration">
             <Row>
-              <F label="Monthly Rent ($)" req half>
+              <F label={`Monthly Rent (${currency})`} req half>
                 <input className="np-input" style={inputStyle} type="number" required placeholder="50,000"
                   value={form.financials.monthlyRent} onChange={e => set('financials.monthlyRent', e.target.value)} />
               </F>
-              <F label="Security Deposit ($)" req half>
+              <F label={`Security Deposit (${currency})`} req half>
                 <input className="np-input" style={inputStyle} type="number" required placeholder="100,000"
                   value={form.financials.securityDeposit} onChange={e => set('financials.securityDeposit', e.target.value)} />
               </F>
-              <F label="Maintenance Fee ($)" half>
+              <F label={`Maintenance Fee (${currency})`} half>
                 <input className="np-input" style={inputStyle} type="number" placeholder="0"
                   value={form.financials.maintenanceFee} onChange={e => set('financials.maintenanceFee', e.target.value)} />
               </F>
-              <F label="Late Fee Amount ($)" half>
+              <F label={`Late Fee Amount (${currency})`} half>
                 <input className="np-input" style={inputStyle} type="number" placeholder="2,000"
                   value={form.financials.lateFeeAmount} onChange={e => set('financials.lateFeeAmount', e.target.value)} />
               </F>
