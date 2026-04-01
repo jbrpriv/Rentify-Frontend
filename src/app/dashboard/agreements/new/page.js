@@ -331,7 +331,7 @@ function mapCategoryToSectionKey(category = '') {
   return 'misc';
 }
 
-function AgreementComposer({ selectedClauseIds, onReorder, offerData, formData }) {
+function AgreementComposer({ selectedClauseIds, onReorder, offerData, formData, showEditor = true }) {
   const [clauses, setClauses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [categoryFilter, setCategoryFilter] = useState('');
@@ -361,7 +361,6 @@ function AgreementComposer({ selectedClauseIds, onReorder, offerData, formData }
     setSectionAssignments(next);
   }, [clauses, selectedClauseIds]);
 
-  const selectedClauses = clauses.filter(c => selectedClauseIds.includes(c._id));
   const availableClauses = clauses.filter(c =>
     !selectedClauseIds.includes(c._id) &&
     (!categoryFilter || c.category === categoryFilter) &&
@@ -429,30 +428,37 @@ function AgreementComposer({ selectedClauseIds, onReorder, offerData, formData }
   );
 
   return (
-    <div className="relative rounded-2xl border border-gray-200 bg-gray-100/80 overflow-hidden min-h-[75vh]">
+    <div className="relative rounded-2xl border border-gray-200 bg-[#eef1ef] overflow-hidden min-h-[75vh]">
       <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_10%_10%,rgba(37,99,235,0.10),transparent_45%),radial-gradient(circle_at_85%_80%,rgba(22,163,74,0.08),transparent_40%)]" />
 
-      <div className="relative z-10 h-[75vh] overflow-y-auto p-4 sm:p-6 lg:p-8 xl:pl-[390px]">
+      <div className={`relative z-10 h-[75vh] overflow-y-auto p-4 sm:p-6 lg:p-8 ${showEditor ? 'xl:pl-[390px]' : 'xl:pl-8'}`}>
         <div className="max-w-4xl mx-auto">
           <div className="sticky top-0 z-10 mb-3 bg-white/80 backdrop-blur border border-gray-200 rounded-xl px-4 py-3 flex items-center justify-between">
             <div>
               <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Live Agreement</p>
-              <p className="text-sm text-gray-600">Drag clauses into section drop zones. Changes update instantly.</p>
+              <p className="text-sm text-gray-600">Styled as final document preview. Updates instantly as you edit.</p>
             </div>
             <span className="text-xs px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-100 font-semibold">
               {selectedClauseIds.length} clause{selectedClauseIds.length !== 1 ? 's' : ''}
             </span>
           </div>
 
-          <div className="rounded-xl border border-gray-200 bg-white/90 p-4 sm:p-5 space-y-4 shadow-sm">
-          <div className="rounded-lg bg-white border border-gray-200 p-4">
+          <div className="rounded-xl border border-[#d9ddd9] bg-[#f3f5f4] p-4 sm:p-6 shadow-sm">
+            <div className="mx-auto w-full max-w-[850px] bg-white border border-[#d7d7d7] shadow-[0_18px_38px_rgba(15,23,42,0.12)] px-8 sm:px-12 py-10 sm:py-12 space-y-6" style={{ fontFamily: 'Georgia, Times New Roman, serif' }}>
+              <div className="text-center border-b border-gray-200 pb-6">
+                <p className="text-[11px] tracking-[0.22em] text-gray-500 uppercase">Residential Lease Contract</p>
+                <h3 className="mt-2 text-2xl font-semibold text-gray-900">Rental Agreement</h3>
+                <p className="mt-1 text-sm text-gray-500">Draft Version - Live Preview</p>
+              </div>
+
+          <div className="rounded-md bg-white border border-gray-200 p-4">
             <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Permanent Section: Parties and Property</p>
             <p className="text-sm text-gray-700"><strong>Landlord:</strong> {offerData?.property?.landlord?.name || 'Landlord'}</p>
             <p className="text-sm text-gray-700"><strong>Tenant:</strong> {offerData?.tenant?.name || 'Tenant'}</p>
             <p className="text-sm text-gray-700"><strong>Premises:</strong> {offerData?.property?.title || 'Property'}{offerData?.property?.address?.street ? `, ${offerData.property.address.street}, ${offerData.property.address.city}` : ''}</p>
           </div>
 
-          <div className="rounded-lg bg-white border border-gray-200 p-4">
+          <div className="rounded-md bg-white border border-gray-200 p-4">
             <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Permanent Section: Core Lease Terms</p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-gray-700">
               <p><strong>Start Date:</strong> {formData?.startDate || 'N/A'}</p>
@@ -464,7 +470,7 @@ function AgreementComposer({ selectedClauseIds, onReorder, offerData, formData }
             </div>
           </div>
 
-          <div className="rounded-lg bg-white border border-gray-200 p-4">
+          <div className="rounded-md bg-white border border-gray-200 p-4">
             <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Permanent Section: Policies</p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-gray-700">
               <p><strong>Pets:</strong> {formData?.petAllowed ? 'Allowed' : 'Not allowed'}</p>
@@ -484,7 +490,7 @@ function AgreementComposer({ selectedClauseIds, onReorder, offerData, formData }
                   onDragOver={(e) => { e.preventDefault(); setHoveredSection(section.key); }}
                   onDragLeave={() => setHoveredSection('')}
                   onDrop={(e) => { e.preventDefault(); handleDropToSection(section.key); }}
-                  className={`rounded-lg border-2 p-4 transition ${isHovered ? 'border-blue-400 bg-blue-50' : 'border-dashed border-gray-300 bg-white'}`}
+                  className={`rounded-md border-2 p-4 transition ${isHovered ? 'border-blue-400 bg-blue-50' : 'border-dashed border-gray-300 bg-white'}`}
                 >
                   <div className="flex items-center justify-between mb-2">
                     <p className="text-sm font-semibold text-gray-800">{section.title}</p>
@@ -504,7 +510,7 @@ function AgreementComposer({ selectedClauseIds, onReorder, offerData, formData }
                           key={id}
                           draggable
                           onDragStart={() => handleDragStart(id, section.key)}
-                          className="rounded-lg border border-blue-100 bg-blue-50 p-3 cursor-grab active:cursor-grabbing"
+                          className="rounded-md border border-blue-100 bg-blue-50 p-3 cursor-grab active:cursor-grabbing"
                         >
                           <div className="flex items-start gap-2">
                             <GripVertical className="w-4 h-4 text-blue-400 mt-0.5 flex-shrink-0" />
@@ -548,10 +554,17 @@ function AgreementComposer({ selectedClauseIds, onReorder, offerData, formData }
                 </div>
               );
             })}
+
+              <div className="pt-3 border-t border-gray-200 text-xs text-gray-500 flex items-center justify-between">
+                <span>Generated by Rentify Agreement Studio</span>
+                <span>Page 1 (Live)</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
+      {showEditor && (
       <div className="relative z-20 xl:absolute xl:top-5 xl:left-5 xl:w-[350px]">
         <div className="bg-white/95 backdrop-blur border border-gray-200 rounded-2xl shadow-xl overflow-hidden">
           <div className="px-4 py-3 border-b bg-gray-50">
@@ -617,6 +630,7 @@ function AgreementComposer({ selectedClauseIds, onReorder, offerData, formData }
           </div>
         </div>
       </div>
+      )}
     </div>
   );
 }
@@ -837,10 +851,20 @@ function AgreementForm() {
             ))}
           </div>
 
+          <div className="mb-8">
+            <AgreementComposer
+              selectedClauseIds={selectedClauseIds}
+              onReorder={handleReorderClauses}
+              offerData={offerData}
+              formData={formData}
+              showEditor={step === 2 && canUseClauses}
+            />
+          </div>
+
           <div className="bg-white shadow rounded-lg overflow-hidden">
             {/* ── Step 1: Lease Terms ────────────────────────────────────────── */}
-            {step >= 1 && (
-              <div className={`p-6 border-t border-gray-100 ${step !== 1 ? 'opacity-50 pointer-events-none' : ''}`}>
+            {step === 1 && (
+              <div className="p-6 border-t border-gray-100">
                 <h2 className="text-lg font-medium text-gray-900 flex items-center mb-6">
                   <FileText className="w-5 h-5 mr-2 text-blue-500" />
                   Step 1: Lease Terms
@@ -1106,15 +1130,8 @@ function AgreementForm() {
                     )}
 
                     <p className="text-sm text-gray-500 mb-4">
-                      Build the agreement visually. Drag clauses from the library and drop them onto the live agreement section where they belong.
+                      Use the floating editor over the live agreement to drag and place clauses into each section.
                     </p>
-
-                    <AgreementComposer
-                      selectedClauseIds={selectedClauseIds}
-                      onReorder={handleReorderClauses}
-                      offerData={offerData}
-                      formData={formData}
-                    />
                   </>
                 )}
 
