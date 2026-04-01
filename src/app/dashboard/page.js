@@ -37,7 +37,7 @@ function StatCard({ label, value, icon: Icon, theme, sub }) {
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', position: 'relative' }}>
         <div>
           <p style={{ fontSize: '0.7rem', fontWeight: 700, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 8 }}>{label}</p>
-          <p style={{ fontFamily: "'Outfit',sans-serif", fontSize: '2.2rem', fontWeight: 800, color: '#1F2933', letterSpacing: '-0.03em', lineHeight: 1 }}>{value}</p>
+          <p style={{ fontFamily: "'Outfit',sans-serif", fontSize: '2.2rem', fontWeight: 800, color: '#1F2933', letterSpacing: '-0.03em', lineHeight: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{value}</p>
           {sub && <p style={{ fontSize: '0.72rem', color: '#6B7280', marginTop: 4 }}>{sub}</p>}
         </div>
         <div style={{ width: 44, height: 44, borderRadius: 14, background: theme.light, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
@@ -192,7 +192,7 @@ export default function DashboardHome() {
         </div>
 
         {/* Stat cards skeleton — 4 columns */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 16 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(230px, 1fr))', gap: 16 }}>
           {[...Array(4)].map((_, i) => (
             <div key={i} style={{ background: 'white', borderRadius: 18, padding: '22px 24px', border: '1px solid #e5e7eb' }}>
               <div className="sk" style={{ width: 44, height: 44, borderRadius: 14, marginBottom: 14 }} />
@@ -328,7 +328,7 @@ export default function DashboardHome() {
 
         {/* ── Stats ── */}
         <motion.div
-          style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(180px,1fr))', gap: 16 }}
+          style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(230px,1fr))', gap: 16 }}
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.35, delay: 0.14, ease: [0.21, 0.6, 0.35, 1] }}
