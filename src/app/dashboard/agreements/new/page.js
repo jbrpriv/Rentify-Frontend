@@ -306,14 +306,14 @@ function Toggle({ enabled, onChange, label, description }) {
 }
 
 const CLAUSE_SECTION_CONFIG = [
-  { key: 'general', title: 'Section A: General Clauses', droppable: true },
-  { key: 'payment', title: 'Section B: Payment and Fees', droppable: true },
-  { key: 'occupancy', title: 'Section C: Occupancy and Use', droppable: true },
-  { key: 'maintenance', title: 'Section D: Maintenance and Repairs', droppable: true },
-  { key: 'utilities', title: 'Section E: Utilities and Services', droppable: true },
-  { key: 'pets', title: 'Section F: Pets and Visitors', droppable: true },
-  { key: 'legal', title: 'Section G: Legal and Compliance', droppable: true },
-  { key: 'misc', title: 'Section H: Additional Terms', droppable: true },
+  { key: 'general', title: 'Clause A', droppable: true },
+  { key: 'payment', title: 'Clause B', droppable: true },
+  { key: 'occupancy', title: 'Clause C', droppable: true },
+  { key: 'maintenance', title: 'Clause D', droppable: true },
+  { key: 'utilities', title: 'Clause E', droppable: true },
+  { key: 'pets', title: 'Clause F', droppable: true },
+  { key: 'legal', title: 'Clause G', droppable: true },
+  { key: 'misc', title: 'Clause H', droppable: true },
 ];
 
 const EMPTY_SECTION_MAP = CLAUSE_SECTION_CONFIG.reduce((acc, section) => {
@@ -452,6 +452,14 @@ function AgreementComposer({
     pushUpdate(next);
   };
 
+  const moveClauseById = (sectionKey, clauseId, direction) => {
+    const current = sectionAssignments[sectionKey] || [];
+    const fromIndex = current.findIndex((id) => id === clauseId);
+    if (fromIndex < 0) return;
+    const toIndex = direction === 'up' ? fromIndex - 1 : fromIndex + 1;
+    moveClauseWithinSection(sectionKey, fromIndex, toIndex);
+  };
+
   const handlePanelMouseDown = (e) => {
     if (isMobile) return;
     if (e.button !== 0) return;
@@ -576,6 +584,8 @@ function AgreementComposer({
                     {ids.map((id, idx) => {
                       const clause = clausesById.get(id);
                       if (!clause) return null;
+                      const isFirst = idx === 0;
+                      const isLast = idx === ids.length - 1;
                       return (
                         <div
                           key={id}
@@ -591,22 +601,30 @@ function AgreementComposer({
                                 <div className="flex items-center gap-1">
                                   <button
                                     type="button"
-                                    className="text-xs px-2 py-0.5 rounded border border-blue-200 text-blue-700 hover:bg-blue-100"
-                                    onClick={() => moveClauseWithinSection(section.key, idx, Math.max(0, idx - 1))}
+                                    disabled={isFirst}
+                                    className="text-xs px-2 py-0.5 rounded border border-blue-200 text-blue-700 hover:bg-blue-100 disabled:opacity-40 disabled:cursor-not-allowed"
+                                    onMouseDown={(e) => e.stopPropagation()}
+                                    onDragStart={(e) => e.preventDefault()}
+                                    onClick={(e) => { e.stopPropagation(); moveClauseById(section.key, id, 'up'); }}
                                   >
                                     Up
                                   </button>
                                   <button
                                     type="button"
-                                    className="text-xs px-2 py-0.5 rounded border border-blue-200 text-blue-700 hover:bg-blue-100"
-                                    onClick={() => moveClauseWithinSection(section.key, idx, Math.min(ids.length - 1, idx + 1))}
+                                    disabled={isLast}
+                                    className="text-xs px-2 py-0.5 rounded border border-blue-200 text-blue-700 hover:bg-blue-100 disabled:opacity-40 disabled:cursor-not-allowed"
+                                    onMouseDown={(e) => e.stopPropagation()}
+                                    onDragStart={(e) => e.preventDefault()}
+                                    onClick={(e) => { e.stopPropagation(); moveClauseById(section.key, id, 'down'); }}
                                   >
                                     Down
                                   </button>
                                   <button
                                     type="button"
                                     className="text-xs px-2 py-0.5 rounded border border-red-200 text-red-600 hover:bg-red-50"
-                                    onClick={() => handleRemoveClause(id)}
+                                    onMouseDown={(e) => e.stopPropagation()}
+                                    onDragStart={(e) => e.preventDefault()}
+                                    onClick={(e) => { e.stopPropagation(); handleRemoveClause(id); }}
                                   >
                                     Remove
                                   </button>
@@ -662,12 +680,11 @@ function AgreementComposer({
           </div>
 
           <div className="px-3 py-2 border-b bg-white">
-            <div className="grid grid-cols-4 gap-1 bg-gray-100 p-1 rounded-lg">
+            <div className="grid grid-cols-3 gap-1 bg-gray-100 p-1 rounded-lg">
               {[
                 { key: 'terms', label: 'Terms', locked: false },
                 { key: 'library', label: 'Library', locked: !canUseClauses },
                 { key: 'selected', label: 'Selected', locked: !canUseClauses },
-                { key: 'sections', label: 'Sections', locked: !canUseClauses },
               ].map(tab => (
                 <button
                   key={tab.key}
@@ -872,22 +889,6 @@ function AgreementComposer({
                   ))}
                 </div>
               </>
-            )}
-
-            {editorTab === 'sections' && (
-              <div className="space-y-2">
-                {CLAUSE_SECTION_CONFIG.map(section => {
-                  const count = (sectionAssignments[section.key] || []).length;
-                  return (
-                    <div key={section.key} className="border border-gray-200 rounded-lg bg-white p-2.5 flex items-center justify-between">
-                      <p className="text-xs text-gray-700 font-medium">{section.title}</p>
-                      <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-100">
-                        {count}
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
             )}
 
             {!canUseClauses && (
