@@ -14,11 +14,11 @@ import { motion } from 'framer-motion';
 
 /* ─── Palette ────────────────────────────────────────────────────────────── */
 const STATUS_META = {
-  pending: { label: 'Pending', color: '#D97706', bg: '#FFFBEB', border: '#FDE68A' },
-  countered: { label: 'Countered', color: '#2563EB', bg: '#EFF6FF', border: '#BFDBFE' },
-  accepted: { label: 'Accepted', color: '#16A34A', bg: '#F0FDF4', border: '#BBF7D0' },
-  declined: { label: 'Declined', color: '#DC2626', bg: '#FFF7F7', border: '#FECACA' },
-  withdrawn: { label: 'Withdrawn', color: '#64748B', bg: '#F8FAFC', border: '#E2E8F0' },
+  pending: { label: 'Pending', color: '#0B2D72', bg: '#E6EAF2', border: 'rgba(11, 45, 114, 0.15)' },
+  countered: { label: 'Countered', color: '#0B2D72', bg: '#E6EAF2', border: 'rgba(11, 45, 114, 0.15)' },
+  accepted: { label: 'Accepted', color: '#0B2D72', bg: '#E6EAF2', border: 'rgba(11, 45, 114, 0.15)' },
+  declined: { label: 'Declined', color: '#0B2D72', bg: '#E6EAF2', border: 'rgba(11, 45, 114, 0.15)' },
+  withdrawn: { label: 'Withdrawn', color: '#0B2D72', bg: '#E6EAF2', border: 'rgba(11, 45, 114, 0.15)' },
 };
 
 /* ─── Diff badge ─────────────────────────────────────────────────────────── */
@@ -46,21 +46,21 @@ function NegotiationHistory({ history, listedTerms }) {
         return (
           <div key={i} style={{
             display: 'flex', gap: 10, padding: '12px 14px',
-            background: isLatest ? (byLandlord ? '#EFF6FF' : '#F0FDF4') : '#F8FAFC',
-            borderRadius: 10, border: isLatest ? `1.5px solid ${byLandlord ? '#BFDBFE' : '#BBF7D0'}` : '1.5px solid #F1F5F9',
+            background: isLatest ? '#E6EAF2' : '#F8FAFC',
+            borderRadius: 10, border: isLatest ? `1.5px solid rgba(11, 45, 114, 0.15)` : '1.5px solid #F1F5F9',
             alignItems: 'flex-start',
           }}>
             <div style={{
               width: 28, height: 28, borderRadius: 8, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
-              background: byLandlord ? '#DBEAFE' : '#D1FAE5',
-              color: byLandlord ? '#1D4ED8' : '#059669',
+              background: '#0B2D72',
+              color: 'white',
               fontSize: '0.65rem', fontWeight: 800,
             }}>
               {byLandlord ? 'LL' : 'T'}
             </div>
             <div style={{ flex: 1 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
-                <span style={{ fontSize: '0.72rem', fontWeight: 700, color: byLandlord ? '#1D4ED8' : '#059669' }}>
+                <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#0B2D72' }}>
                   Round {round.round} — {byLandlord ? 'Landlord' : 'Tenant'}
                 </span>
                 {isLatest && <span style={{ fontSize: '0.65rem', background: '#F1F5F9', color: '#64748B', borderRadius: 4, padding: '1px 6px', fontWeight: 600 }}>Latest</span>}
@@ -79,7 +79,7 @@ function NegotiationHistory({ history, listedTerms }) {
                 ))}
               </div>
               {round.note && (
-                <p style={{ marginTop: 6, fontSize: '0.78rem', color: '#475569', fontStyle: 'italic', background: '#F8FAFC', borderRadius: 6, padding: '6px 10px', borderLeft: '3px solid #BFDBFE' }}>
+                <p style={{ marginTop: 6, fontSize: '0.78rem', color: '#475569', fontStyle: 'italic', background: '#F8FAFC', borderRadius: 6, padding: '6px 10px', borderLeft: '3px solid rgba(11, 45, 114, 0.3)' }}>
                   "{round.note}"
                 </p>
               )}
@@ -104,8 +104,8 @@ function CounterForm({ offer, onSubmit, onCancel, loading }) {
   const set = (k) => (e) => setForm(f => ({ ...f, [k]: e.target.value }));
 
   return (
-    <div style={{ background: '#EFF6FF', border: '1.5px solid #BFDBFE', borderRadius: 12, padding: '16px 18px', marginTop: 12 }}>
-      <p style={{ fontSize: '0.78rem', fontWeight: 700, color: '#1D4ED8', marginBottom: 12 }}>Your Counter-Offer</p>
+    <div style={{ background: '#E6EAF2', border: '1.5px solid rgba(11, 45, 114, 0.15)', borderRadius: 12, padding: '16px 18px', marginTop: 12 }}>
+      <p style={{ fontSize: '0.78rem', fontWeight: 700, color: '#0B2D72', marginBottom: 12 }}>Your Counter-Offer</p>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10, marginBottom: 10 }}>
         {[
           { label: `Monthly Rent (${currency})`, key: 'monthlyRent' },
@@ -116,7 +116,7 @@ function CounterForm({ offer, onSubmit, onCancel, loading }) {
             <label style={{ fontSize: '0.68rem', fontWeight: 700, color: '#64748B', display: 'block', marginBottom: 4 }}>{label}</label>
             <input
               type="number" value={form[key]} onChange={set(key)} min={0}
-              style={{ width: '100%', padding: '8px 10px', border: '1.5px solid #BFDBFE', borderRadius: 8, fontSize: '0.88rem', fontWeight: 600, outline: 'none', boxSizing: 'border-box' }}
+              style={{ width: '100%', padding: '8px 10px', border: '1.5px solid rgba(11, 45, 114, 0.15)', borderRadius: 8, fontSize: '0.88rem', fontWeight: 600, outline: 'none', boxSizing: 'border-box' }}
             />
           </div>
         ))}
@@ -124,16 +124,16 @@ function CounterForm({ offer, onSubmit, onCancel, loading }) {
       <div style={{ marginBottom: 12 }}>
         <label style={{ fontSize: '0.68rem', fontWeight: 700, color: '#64748B', display: 'block', marginBottom: 4 }}>Note (optional)</label>
         <input type="text" value={form.note} onChange={set('note')} maxLength={300} placeholder="Add a short note to the tenant…"
-          style={{ width: '100%', padding: '8px 10px', border: '1.5px solid #BFDBFE', borderRadius: 8, fontSize: '0.85rem', outline: 'none', boxSizing: 'border-box' }}
+          style={{ width: '100%', padding: '8px 10px', border: '1.5px solid rgba(11, 45, 114, 0.15)', borderRadius: 8, fontSize: '0.85rem', outline: 'none', boxSizing: 'border-box' }}
         />
       </div>
       <div style={{ display: 'flex', gap: 8 }}>
         <button onClick={() => onSubmit(form)} disabled={loading}
-          style={{ flex: 1, padding: '9px', background: '#1D4ED8', color: 'white', border: 'none', borderRadius: 8, fontSize: '0.82rem', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+          style={{ flex: 1, padding: '9px', background: '#0B2D72', color: 'white', border: 'none', borderRadius: 8, fontSize: '0.82rem', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
           {loading ? <Loader2 size={14} className="animate-spin" /> : <ArrowLeftRight size={14} />}
           Send Counter
         </button>
-        <button onClick={onCancel} style={{ padding: '9px 16px', border: '1.5px solid #BFDBFE', borderRadius: 8, fontSize: '0.82rem', fontWeight: 600, color: '#64748B', background: 'white', cursor: 'pointer' }}>
+        <button onClick={onCancel} style={{ padding: '9px 16px', border: '1.5px solid rgba(11, 45, 114, 0.15)', borderRadius: 8, fontSize: '0.82rem', fontWeight: 600, color: '#64748B', background: 'white', cursor: 'pointer' }}>
           Cancel
         </button>
       </div>
@@ -204,7 +204,7 @@ function TenantOfferForm({ properties, onSubmit, loading }) {
             ))}
           </div>
 
-          <button
+            <button
             onClick={() => onSubmit({ 
               propertyId: selectedProp, 
               monthlyRent: convertToUSD(Number(form.monthlyRent) || 0),
@@ -212,7 +212,7 @@ function TenantOfferForm({ properties, onSubmit, loading }) {
             })}
             disabled={loading || !form.monthlyRent || !form.securityDeposit}
             style={{
-              width: '100%', padding: '11px', background: 'linear-gradient(135deg,#1D4ED8,#4F46E5)', color: 'white',
+              width: '100%', padding: '11px', background: '#0B2D72', color: 'white',
               border: 'none', borderRadius: 10, fontSize: '0.9rem', fontWeight: 700, cursor: 'pointer',
               display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, opacity: loading ? 0.8 : 1,
             }}>
@@ -354,10 +354,10 @@ function OfferCard({ offer, user, onAction, actionLoading }) {
       {/* Header row */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '16px 18px', cursor: 'pointer' }} onClick={() => setExpanded(e => !e)}>
         {/* Property thumb */}
-        <div style={{ width: 48, height: 48, borderRadius: 10, overflow: 'hidden', flexShrink: 0, background: '#EFF6FF', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ width: 48, height: 48, borderRadius: 10, overflow: 'hidden', flexShrink: 0, background: '#E6EAF2', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           {offer.property?.images?.[0]
             ? <img src={offer.property.images[0]} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-            : <Building2 size={20} color="#93C5FD" />}
+            : <Building2 size={20} color="#0B2D72" />}
         </div>
 
         <div style={{ flex: 1, minWidth: 0 }}>
@@ -400,7 +400,7 @@ function OfferCard({ offer, user, onAction, actionLoading }) {
                         Accept & Draft Agreement
                       </button>
                       <button onClick={() => setCountering(true)}
-                        style={{ padding: '9px 16px', background: '#EFF6FF', color: '#1D4ED8', border: '1.5px solid #BFDBFE', borderRadius: 9, fontSize: '0.82rem', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
+                        style={{ padding: '9px 16px', background: '#E6EAF2', color: '#0B2D72', border: '1.5px solid rgba(11, 45, 114, 0.15)', borderRadius: 9, fontSize: '0.82rem', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
                         <ArrowLeftRight size={13} /> Counter
                       </button>
                       <button onClick={() => onAction('decline', offer._id)} disabled={!!actionLoading}
@@ -438,7 +438,7 @@ function OfferCard({ offer, user, onAction, actionLoading }) {
                     !countering && (
                       <>
                         <button onClick={() => setCountering(true)}
-                          style={{ padding: '9px 16px', background: '#EFF6FF', color: '#1D4ED8', border: '1.5px solid #BFDBFE', borderRadius: 9, fontSize: '0.82rem', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
+                          style={{ padding: '9px 16px', background: '#E6EAF2', color: '#0B2D72', border: '1.5px solid rgba(11, 45, 114, 0.15)', borderRadius: 9, fontSize: '0.82rem', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
                           <ArrowLeftRight size={13} /> Counter Back
                         </button>
                         <button onClick={() => onAction('withdraw', offer._id)} disabled={!!actionLoading}

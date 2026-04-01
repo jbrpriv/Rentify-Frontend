@@ -336,35 +336,35 @@ export default function DashboardHome() {
           {user.role === 'landlord' && (
             <>
               <StatCard label="Monthly Income" value={formatMoneyCompact(totalRevenue)} icon={TrendingUp} theme={theme} sub={`${activeLeases.length} active lease(s)`} />
-              <StatCard label="Late Fees" value={formatMoneyCompact(payments.reduce((s, p) => s + (p.lateFeeAmount || 0), 0))} icon={AlertCircle} theme={ROLE_THEME.admin} sub={`${payments.filter(p => p.status === 'late_fee_applied').length} pending fee(s)`} />
-              <StatCard label="Properties" value={properties.length} icon={Building2} theme={ROLE_THEME.property_manager} />
+              <StatCard label="Late Fees" value={formatMoneyCompact(payments.reduce((s, p) => s + (p.lateFeeAmount || 0), 0))} icon={AlertCircle} theme={theme} sub={`${payments.filter(p => p.status === 'late_fee_applied').length} pending fee(s)`} />
+              <StatCard label="Properties" value={properties.length} icon={Building2} theme={theme} />
               <StatCard label="Agreements" value={agreements.length} icon={FileText} theme={theme} />
-              <StatCard label="Active Offers" value={pendingOffers.length} icon={Tag} theme={ROLE_THEME.tenant} />
-              <StatCard label="Maintenance" value={pendingMaint} icon={Wrench} theme={ROLE_THEME.admin} sub="pending" />
+              <StatCard label="Active Offers" value={pendingOffers.length} icon={Tag} theme={theme} />
+              <StatCard label="Maintenance" value={pendingMaint} icon={Wrench} theme={theme} sub="pending" />
             </>
           )}
           {user.role === 'tenant' && (
             <>
               <StatCard label="Active Leases" value={activeLeases.length} icon={Key} theme={theme} />
-              <StatCard label="My Offers" value={offers.length} icon={Tag} theme={ROLE_THEME.property_manager} />
-              <StatCard label="Payments Made" value={payments.filter(p => p.status === 'paid').length} icon={CreditCard} theme={ROLE_THEME.admin} />
-              <StatCard label="Open Disputes" value={pendingDisputes} icon={Scale} theme={ROLE_THEME.landlord} />
+              <StatCard label="My Offers" value={offers.length} icon={Tag} theme={theme} />
+              <StatCard label="Payments Made" value={payments.filter(p => p.status === 'paid').length} icon={CreditCard} theme={theme} />
+              <StatCard label="Open Disputes" value={pendingDisputes} icon={Scale} theme={theme} />
             </>
           )}
           {user.role === 'property_manager' && (
             <>
               <StatCard label="Properties" value={properties.length} icon={Building2} theme={theme} />
-              <StatCard label="Active Tenants" value={activeLeases.length} icon={Users} theme={ROLE_THEME.tenant} />
-              <StatCard label="Maintenance" value={pendingMaint} icon={Wrench} theme={ROLE_THEME.admin} sub="pending" />
-              <StatCard label="Open Disputes" value={pendingDisputes} icon={Scale} theme={ROLE_THEME.landlord} />
+              <StatCard label="Active Tenants" value={activeLeases.length} icon={Users} theme={theme} />
+              <StatCard label="Maintenance" value={pendingMaint} icon={Wrench} theme={theme} sub="pending" />
+              <StatCard label="Open Disputes" value={pendingDisputes} icon={Scale} theme={theme} />
             </>
           )}
           {(user.role === 'admin' || user.role === 'law_reviewer') && (
             <>
               <StatCard label="Agreements" value={agreements.length} icon={FileText} theme={theme} />
-              <StatCard label="Active Leases" value={activeLeases.length} icon={CheckCircle} theme={ROLE_THEME.tenant} />
-              <StatCard label="Open Disputes" value={pendingDisputes} icon={Scale} theme={ROLE_THEME.admin} />
-              <StatCard label="Maintenance" value={pendingMaint} icon={Wrench} theme={ROLE_THEME.property_manager} />
+              <StatCard label="Active Leases" value={activeLeases.length} icon={CheckCircle} theme={theme} />
+              <StatCard label="Open Disputes" value={pendingDisputes} icon={Scale} theme={theme} />
+              <StatCard label="Maintenance" value={pendingMaint} icon={Wrench} theme={theme} />
             </>
           )}
         </motion.div>
