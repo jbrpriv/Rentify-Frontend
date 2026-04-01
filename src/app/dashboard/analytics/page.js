@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import api from '@/utils/api';
 import { useUser } from '@/context/UserContext';
 import { useToast } from '@/context/ToastContext';
+import { useCurrency } from '@/context/CurrencyContext';
 import {
   TrendingUp, Building2, CreditCard, AlertCircle, CheckCircle,
   Clock, Users, FileText, Wrench, Scale, Zap, BarChart2,
@@ -87,10 +88,11 @@ const PAYMENT_STATUS = {
 // ─── Shared receipt download helper ──────────────────────────────────────────
 // Use responseType:'blob' so Axios never tries to JSON-parse a binary PDF stream.
 // Branch on content-type: JSON means S3 signed URL, otherwise trigger inline download.
-async function downloadReceipt(paymentId, setDownloading, toast) {
+async function downloadReceipt(paymentId, setDownloading, toast, currency) {
   setDownloading(paymentId);
   try {
     const response = await api.get(`/payments/${paymentId}/receipt`, {
+      params: { currency },
       responseType: 'blob',
     });
     const contentType = response.headers['content-type'] || '';
@@ -116,6 +118,7 @@ async function downloadReceipt(paymentId, setDownloading, toast) {
 // ─── LANDLORD VIEW ────────────────────────────────────────────────────────────
 function LandlordAnalytics({ data }) {
   const { toast } = useToast();
+  const { formatMoney, currency } = useCurrency();
   const { monthlyRevenue, paymentHealth, lateFeeCollected, occupancy,
     expiringLeases, agreementStatus, lifetimeRevenue, activeTenantsCount } = data;
 
@@ -132,8 +135,8 @@ function LandlordAnalytics({ data }) {
   }, []);
 
   const handleDownloadReceipt = useCallback(async (paymentId) => {
-    await downloadReceipt(paymentId, setDownloading, toast);
-  }, [toast]);
+    await downloadReceipt(paymentId, setDownloading, toast, currency);
+  }, [toast, currency]);
 
   const filteredPayments = tenantFilter.trim()
     ? recentPayments.filter(p =>
@@ -168,7 +171,7 @@ function LandlordAnalytics({ data }) {
       <div>
         <SectionTitle>Portfolio Overview</SectionTitle>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <KpiCard label="Lifetime Revenue" value={`$${lifetimeRevenue.toLocaleString()}`} icon={TrendingUp} color="text-blue-600" bg="bg-blue-50" />
+          <KpiCard label="Lifetime Revenue" value={formatMoney(lifetimeRevenue)} icon={TrendingUp} color="text-blue-600" bg="bg-blue-50" />
           <KpiCard label="Active Tenants" value={activeTenantsCount} icon={Users} color="text-cyan-600" bg="bg-cyan-50" />
           <KpiCard label="Occupancy Rate" value={`${occupancyPct}%`}
             sub={`${occupancy.leased} / ${occupancy.total} units`}
@@ -176,7 +179,7 @@ function LandlordAnalytics({ data }) {
             color={occupancyPct >= 75 ? 'text-green-600' : 'text-orange-500'}
             bg={occupancyPct >= 75 ? 'bg-green-50' : 'bg-orange-50'}
           />
-          <KpiCard label="Late Fees Collected" value={`$${lateFeeCollected.toLocaleString()}`} icon={AlertCircle} color="text-orange-600" bg="bg-orange-50" />
+          <KpiCard label="Late Fees Collected" value={formatMoney(lateFeeCollected)} icon={AlertCircle} color="text-orange-600" bg="bg-orange-50" />
         </div>
       </div>
 
@@ -188,7 +191,7 @@ function LandlordAnalytics({ data }) {
               <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
               <XAxis dataKey="name" tick={{ fontSize: 11 }} />
               <YAxis tick={{ fontSize: 11 }} tickFormatter={v => `${(v / 1000).toFixed(0)}k`} />
-              <Tooltip formatter={v => `$${v.toLocaleString()}`} />
+              <Tooltip formatter={v => formatMoney(v)} />
               <Legend wrapperStyle={{ fontSize: 11 }} />
               <Bar dataKey="Revenue" fill="#0B2D72" radius={[4, 4, 0, 0]} />
               <Bar dataKey="Late Fees" fill="#F59E0B" radius={[4, 4, 0, 0]} />
@@ -260,7 +263,7 @@ function LandlordAnalytics({ data }) {
                   <div key={lease._id} className="flex items-center justify-between p-3 rounded-xl bg-gray-50 hover:bg-blue-50 transition">
                     <div>
                       <p className="text-sm font-bold text-gray-900">{lease.property?.title}</p>
-                      <p className="text-xs text-gray-400 mt-0.5">{lease.tenant?.name} · ${lease.financials?.rentAmount?.toLocaleString()}/mo</p>
+                      <p className="text-xs text-gray-400 mt-0.5">{lease.tenant?.name} · {formatMoney(lease.financials?.rentAmount)}/mo</p>
                     </div>
                     <div className={`text-right`}>
                       <span className={`text-xs font-black px-2 py-1 rounded-lg ${daysLeft <= 30 ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700'}`}>
@@ -322,10 +325,10 @@ function LandlordAnalytics({ data }) {
                         </span>
                       </td>
                       <td className="py-3 pr-4 font-black text-gray-900 text-xs whitespace-nowrap">
-                        ${Number(p.amount).toLocaleString()}
+                        {formatMoney(Number(p.amount))}
                         {p.lateFeeIncluded && p.lateFeeAmount > 0 && (
                           <span className="block text-[10px] font-normal text-orange-500">
-                            +${Number(p.lateFeeAmount).toLocaleString()} late fee
+                            +{formatMoney(Number(p.lateFeeAmount))} late fee
                           </span>
                         )}
                       </td>
@@ -367,6 +370,7 @@ function LandlordAnalytics({ data }) {
 
 // ─── ADMIN VIEW ───────────────────────────────────────────────────────────────
 function AdminAnalytics({ data, templateData }) {
+  const { formatMoney } = useCurrency();
   const { monthlyRentRevenue, totalRentRevenue, revenueByGateway,
     churnRate, expiredLast6, createdLast6, userGrowth,
     disputeStats, maintenanceStats } = data;
@@ -406,7 +410,7 @@ function AdminAnalytics({ data, templateData }) {
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           <KpiCard
             label="Total Rent Revenue"
-            value={`$${(totalRentRevenue / 100000).toFixed(1)}L`}
+            value={`${formatMoney(totalRentRevenue / 100000, { maximumFractionDigits: 1, minimumFractionDigits: 1 })}L`}
             sub="All time, all landlords"
             icon={TrendingUp}
             color="text-blue-600"
@@ -447,7 +451,7 @@ function AdminAnalytics({ data, templateData }) {
               <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
               <XAxis dataKey="name" tick={{ fontSize: 11 }} />
               <YAxis tick={{ fontSize: 11 }} tickFormatter={v => `${(v / 1000).toFixed(0)}k`} />
-              <Tooltip formatter={(v, n) => n === 'Revenue' ? `$${v.toLocaleString()}` : v} />
+              <Tooltip formatter={(v, n) => n === 'Revenue' ? formatMoney(v) : v} />
               <Bar dataKey="Revenue" fill="#0B2D72" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
@@ -474,7 +478,7 @@ function AdminAnalytics({ data, templateData }) {
               <Pie data={gatewayData} cx="50%" cy="50%" outerRadius={70} dataKey="value" paddingAngle={3}>
                 {gatewayData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
               </Pie>
-              <Tooltip formatter={v => `$${v.toLocaleString()}`} />
+              <Tooltip formatter={v => formatMoney(v)} />
               <Legend wrapperStyle={{ fontSize: 11 }} />
             </PieChart>
           </ResponsiveContainer>

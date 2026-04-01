@@ -2,14 +2,70 @@
 
 import Link from 'next/link';
 import { useUser } from '@/context/UserContext';
+import { useCurrency } from '@/context/CurrencyContext';
 import {
   Building2, LayoutDashboard, Tag, User, LogOut,
-  Settings, Menu, X, Home, DollarSign, Bell, Search,
+  Settings, Menu, X, Home, DollarSign, Bell, Search, Globe,
   HeadphonesIcon, ChevronDown,
 } from 'lucide-react';
 import { useEffect, useState, useRef } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
+
+function CurrencyPicker({ isTransparent = false, compact = false }) {
+  const { currency, supportedCurrencies, selectCurrency } = useCurrency();
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+
+  useEffect(() => {
+    const handler = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        onClick={() => setOpen(v => !v)}
+        className={`
+          ${compact ? 'h-9 px-2.5 gap-1.5 text-[0.7rem]' : 'h-8 px-2 gap-1 text-[0.68rem]'}
+          inline-flex items-center justify-center rounded-full font-bold tracking-wide border transition-all duration-200
+          ${isTransparent
+            ? 'text-white/90 border-white/30 hover:bg-white/15'
+            : 'text-slate-600 border-slate-200 bg-slate-100/80 hover:bg-[#0992C2]/8 hover:text-[#0992C2]'
+          }
+        `}
+        aria-label="Select currency"
+      >
+        <Globe className={compact ? 'h-4 w-4' : 'h-3.5 w-3.5'} />
+        <span>{currency}</span>
+        <ChevronDown className={`h-3 w-3 transition-transform ${open ? 'rotate-180' : ''}`} />
+      </button>
+
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ opacity: 0, y: 6, scale: 0.97 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 4, scale: 0.97 }}
+            transition={{ duration: 0.15, ease: 'easeOut' }}
+            className="absolute right-0 top-10 z-50 w-28 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg"
+          >
+            {supportedCurrencies.map((code) => (
+              <button
+                key={code}
+                onClick={() => { selectCurrency(code); setOpen(false); }}
+                className={`w-full px-3 py-2 text-left text-xs font-semibold transition-colors ${currency === code ? 'bg-[#E6F4F8] text-[#0B2D72]' : 'text-slate-600 hover:bg-slate-50'}`}
+              >
+                {code}
+              </button>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
 
 // ─── Desktop Avatar Dropdown ──────────────────────────────────────────────────
 function AvatarDropdown({ user, logout }) {
@@ -165,6 +221,10 @@ function MobileDrawer({ user, logout, isOpen, onClose, navLinks, publicNavLinks,
 
             {/* Nav links */}
             <nav className="flex-1 px-4 py-4 space-y-1">
+              <div className="px-1 pb-3">
+                <CurrencyPicker compact />
+              </div>
+
               {linksToRender.map(({ href, label, icon: Icon }) => {
                 const isActive = href === '/' ? pathname === '/' : pathname?.startsWith(href);
                 return (
@@ -377,6 +437,8 @@ export default function Navbar() {
           <div className="flex items-center gap-2 shrink-0">
             {user ? (
               <>
+                <CurrencyPicker isTransparent={isTransparent} />
+
                 {/* Notification bell */}
                 <Link
                   href="/dashboard/notifications"

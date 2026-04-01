@@ -29,6 +29,10 @@ const api = axios.create({
 // Attach access token to every request
 api.interceptors.request.use((config) => {
   if (_accessToken) config.headers.Authorization = `Bearer ${_accessToken}`;
+  if (typeof window !== 'undefined') {
+    const selectedCurrency = window.localStorage.getItem('rentify:currency') || 'USD';
+    config.headers['X-Currency'] = selectedCurrency;
+  }
   return config;
 });
 

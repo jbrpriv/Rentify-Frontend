@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import api from '@/utils/api';
 import { useUser } from '@/context/UserContext';
+import { useCurrency } from '@/context/CurrencyContext';
 import { Building2, Loader2, MapPin, Users, CheckCircle, XCircle, Clock, Bell } from 'lucide-react';
 
 const STATUS_COLORS = {
@@ -15,6 +16,7 @@ const STATUS_COLORS = {
 export default function PMPropertiesPage() {
   const router = useRouter();
   const { user } = useUser();
+  const { formatMoney } = useCurrency();
 
   useEffect(() => {
     if (!user) return;
@@ -130,7 +132,7 @@ export default function PMPropertiesPage() {
                 </div>
                 <div className="flex items-center justify-between text-xs text-gray-500">
                   <span className="flex items-center gap-1"><Users className="w-3 h-3" /> {p.landlord?.name || 'Landlord'}</span>
-                  <span className="font-bold text-gray-900">${p.financials?.monthlyRent?.toLocaleString()}/mo</span>
+                  <span className="font-bold text-gray-900">{formatMoney(p.financials?.monthlyRent)}/mo</span>
                 </div>
               </div>
             </div>

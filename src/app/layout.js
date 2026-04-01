@@ -3,6 +3,7 @@ import Script from "next/script";
 import "./globals.css";
 import { UserProvider } from '@/context/UserContext';
 import { ToastProvider } from '@/context/ToastContext';
+import { CurrencyProvider } from '@/context/CurrencyContext';
 import { Toaster } from 'react-hot-toast';
 import FCMListener from '@/components/FCMListener';
 
@@ -26,11 +27,13 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased rf-shell`}>
         <UserProvider>
-          <ToastProvider>
-            {children}
-            <FCMListener />
-            <Toaster />
-          </ToastProvider>
+          <CurrencyProvider>
+            <ToastProvider>
+              {children}
+              <FCMListener />
+              <Toaster />
+            </ToastProvider>
+          </CurrencyProvider>
           {/* reCAPTCHA v3 — loaded site-wide, used on login and register */}
           {process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY && (
             <Script

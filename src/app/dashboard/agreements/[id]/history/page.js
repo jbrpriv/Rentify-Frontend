@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import api from '@/utils/api';
+import { useCurrency } from '@/context/CurrencyContext';
 import {
   Clock, ArrowLeft, ChevronDown, ChevronUp, FileText, User,
   Shield, GitBranch, AlertTriangle, Loader2, Eye, Camera,
@@ -42,6 +43,7 @@ const ACTION_ICONS = {
 
 // ─── Version Card ─────────────────────────────────────────────────────────────
 function VersionCard({ version }) {
+  const { formatMoney } = useCurrency();
   const [expanded, setExpanded] = useState(false);
   return (
     <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
@@ -80,13 +82,13 @@ function VersionCard({ version }) {
               <div className="bg-gray-50 rounded-lg p-3">
                 <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">Monthly Rent</p>
                 <p className="font-semibold text-gray-800">
-                  {version.snapshot.financials.rentAmount?.toLocaleString() || '—'}
+                  {version.snapshot.financials.rentAmount != null ? formatMoney(version.snapshot.financials.rentAmount) : '—'}
                 </p>
               </div>
               <div className="bg-gray-50 rounded-lg p-3">
                 <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">Deposit</p>
                 <p className="font-semibold text-gray-800">
-                  {version.snapshot.financials.depositAmount?.toLocaleString() || '—'}
+                  {version.snapshot.financials.depositAmount != null ? formatMoney(version.snapshot.financials.depositAmount) : '—'}
                 </p>
               </div>
             </div>

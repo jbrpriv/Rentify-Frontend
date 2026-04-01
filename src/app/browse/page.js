@@ -10,13 +10,14 @@ import {
 } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import { useCurrency } from '@/context/CurrencyContext';
 
 const PRICE_RANGES = [
-  { label: 'Any Price', min: '', max: '' },
-  { label: 'Under $30K', min: '', max: '30000' },
-  { label: '$30K – 60K', min: '30000', max: '60000' },
-  { label: '$60K – 100K', min: '60000', max: '100000' },
-  { label: '$100K+', min: '100000', max: '' },
+  { key: 'Any Price', min: '', max: '' },
+  { key: 'Under 30K', min: '', max: '30000' },
+  { key: '30K - 60K', min: '30000', max: '60000' },
+  { key: '60K - 100K', min: '60000', max: '100000' },
+  { key: '100K+', min: '100000', max: '' },
 ];
 const TYPES = ['apartment', 'house', 'studio', 'commercial'];
 const BEDS = ['1', '2', '3', '4', '5+'];
@@ -97,6 +98,7 @@ function Dropdown({ label, options, value, onChange, wide }) {
 }
 
 function BrowseContent() {
+  const { formatMoney } = useCurrency();
   const searchParams = useSearchParams();
   const [listings, setListings] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -108,7 +110,15 @@ function BrowseContent() {
   const [beds, setBeds] = useState('');
   const [searchInput, setSearchInput] = useState(searchParams?.get('city') || '');
 
-  const selectedPrice = PRICE_RANGES.find(r => r.label === priceKey) || PRICE_RANGES[0];
+  const selectedPrice = PRICE_RANGES.find(r => r.key === priceKey) || PRICE_RANGES[0];
+
+  const priceLabel = useCallback((range) => {
+    if (range.key === 'Any Price') return 'Any Price';
+    if (!range.min && range.max) return `Under ${formatMoney(Number(range.max), { maximumFractionDigits: 0 })}`;
+    if (range.min && range.max) return `${formatMoney(Number(range.min), { maximumFractionDigits: 0 })} - ${formatMoney(Number(range.max), { maximumFractionDigits: 0 })}`;
+    if (range.min && !range.max) return `${formatMoney(Number(range.min), { maximumFractionDigits: 0 })}+`;
+    return range.key;
+  }, [formatMoney]);
 
   const fetchListings = useCallback(async () => {
     setLoading(true);
@@ -163,7 +173,7 @@ function BrowseContent() {
               placeholder="City or address…"
               className="min-w-0 flex-1 bg-transparent py-0 text-sm text-neutral-700 outline-none placeholder:text-neutral-400" />
           </form>
-          <Dropdown label={priceKey === 'Any Price' ? 'Price' : priceKey} value={priceKey} onChange={setPriceKey} wide options={PRICE_RANGES.map(r => ({ label: r.label, value: r.label }))} />
+          <Dropdown label={priceKey === 'Any Price' ? 'Price' : priceLabel(selectedPrice)} value={priceKey} onChange={setPriceKey} wide options={PRICE_RANGES.map(r => ({ label: priceLabel(r), value: r.key }))} />
           <Dropdown label={type ? type[0].toUpperCase() + type.slice(1) : 'Type'} value={type} onChange={setType} options={[{ label: 'All Types', value: '' }, ...TYPES.map(t => ({ label: t[0].toUpperCase() + t.slice(1), value: t }))]} />
           <Dropdown label={beds ? `${beds} Beds` : 'Beds'} value={beds} onChange={setBeds} options={[{ label: 'Any Beds', value: '' }, ...BEDS.map(b => ({ label: `${b} bed${b === '1' ? '' : 's'}`, value: b }))]} />
           <div className="ml-auto flex items-center gap-4 flex-shrink-0">
@@ -231,7 +241,7 @@ function BrowseContent() {
                           {listing.title}
                         </span>
                         <span className="text-[0.95rem] font-bold text-[#0992C2]">
-                          ${(listing.financials?.monthlyRent || 0).toLocaleString()}
+                          {formatMoney(listing.financials?.monthlyRent || 0)}
                         </span>
                       </div>
                       <button

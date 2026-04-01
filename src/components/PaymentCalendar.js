@@ -4,8 +4,10 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, CheckCircle, Clock, X, Bell, Loader2, AlertCircle, Download } from 'lucide-react';
 import api from '@/utils/api';
+import { useCurrency } from '@/context/CurrencyContext';
 
 const PaymentCalendar = ({ theme, agreements = [], payments = [] }) => {
+    const { formatMoney, currency } = useCurrency();
     const [currentDate, setCurrentDate] = useState(new Date());
     const [selectedDayInfo, setSelectedDayInfo] = useState(null);
     const [sendingReminder, setSendingReminder] = useState(null);
@@ -133,7 +135,7 @@ const PaymentCalendar = ({ theme, agreements = [], payments = [] }) => {
         }
         setDownloadingReceipt(paymentId);
         try {
-            const { data } = await api.get(`/payments/${paymentId}/receipt`);
+            const { data } = await api.get(`/payments/${paymentId}/receipt`, { params: { currency } });
             if (data?.url) {
                 window.open(data.url, '_blank', 'noopener,noreferrer');
             }
@@ -306,7 +308,7 @@ const PaymentCalendar = ({ theme, agreements = [], payments = [] }) => {
                                         <div key={pid || idx} className={`p-3 rounded-xl border ${isPaid ? 'bg-green-50 border-green-100' : isOverdue ? 'bg-red-50 border-red-100' : 'bg-orange-50 border-orange-100'}`}>
                                             <div className="flex justify-between items-start">
                                                 <div>
-                                                    <p className="text-sm font-bold text-gray-800">${displayAmount.toLocaleString()}</p>
+                                                    <p className="text-sm font-bold text-gray-800">{formatMoney(displayAmount)}</p>
                                                     {propertyTitle && (
                                                         <p className="text-xs text-gray-500 mt-0.5 truncate max-w-[150px]">{propertyTitle}</p>
                                                     )}

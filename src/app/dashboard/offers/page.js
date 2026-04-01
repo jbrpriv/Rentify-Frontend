@@ -4,6 +4,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import api from '@/utils/api';
 import { useUser } from '@/context/UserContext';
+import { useCurrency } from '@/context/CurrencyContext';
 import {
   Tag, Building2, ChevronDown, ChevronUp, Check, X, ArrowLeftRight,
   Loader2, Clock, CheckCircle, XCircle, AlertCircle, Plus, RefreshCw,
@@ -19,8 +20,6 @@ const STATUS_META = {
   declined: { label: 'Declined', color: '#DC2626', bg: '#FFF7F7', border: '#FECACA' },
   withdrawn: { label: 'Withdrawn', color: '#64748B', bg: '#F8FAFC', border: '#E2E8F0' },
 };
-
-const fmt = (n) => `$${Number(n).toLocaleString()}`;
 
 /* ─── Diff badge ─────────────────────────────────────────────────────────── */
 function DiffBadge({ listed, proposed }) {
@@ -38,6 +37,7 @@ function DiffBadge({ listed, proposed }) {
 
 /* ─── History timeline ───────────────────────────────────────────────────── */
 function NegotiationHistory({ history, listedTerms }) {
+  const { formatMoney } = useCurrency();
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 12 }}>
       {history.map((round, i) => {
@@ -73,7 +73,7 @@ function NegotiationHistory({ history, listedTerms }) {
                 ].map(({ label, val, listed }) => (
                   <div key={label}>
                     <p style={{ fontSize: '0.65rem', color: '#94A3B8', fontWeight: 600, marginBottom: 1 }}>{label}</p>
-                    <p style={{ fontSize: '0.82rem', fontWeight: 700, color: '#0F172A' }}>{typeof val === 'number' ? fmt(val) : val}</p>
+                    <p style={{ fontSize: '0.82rem', fontWeight: 700, color: '#0F172A' }}>{typeof val === 'number' ? formatMoney(val) : val}</p>
                     {listed && typeof val === 'number' && <DiffBadge listed={listed} proposed={val} />}
                   </div>
                 ))}
@@ -142,6 +142,7 @@ function CounterForm({ offer, onSubmit, onCancel, loading }) {
 
 /* ─── Tenant: New offer form ─────────────────────────────────────────────── */
 function TenantOfferForm({ properties, onSubmit, loading }) {
+  const { formatMoney } = useCurrency();
   const [selectedProp, setSelectedProp] = useState('');
   const [form, setForm] = useState({ monthlyRent: '', securityDeposit: '', leaseDurationMonths: '12' });
   const prop = properties.find(p => p._id === selectedProp);
@@ -169,7 +170,7 @@ function TenantOfferForm({ properties, onSubmit, loading }) {
           style={{ width: '100%', padding: '10px 12px', border: '1.5px solid #E2E8F0', borderRadius: 10, fontSize: '0.9rem', outline: 'none', background: 'white', boxSizing: 'border-box' }}>
           <option value="">— Choose a listed property —</option>
           {properties.map(p => (
-            <option key={p._id} value={p._id}>{p.title} — {p.address?.city} (${p.financials?.monthlyRent?.toLocaleString()}/mo)</option>
+            <option key={p._id} value={p._id}>{p.title} — {p.address?.city} ({formatMoney(p.financials?.monthlyRent)}/mo)</option>
           ))}
         </select>
       </div>
@@ -179,8 +180,8 @@ function TenantOfferForm({ properties, onSubmit, loading }) {
           <div style={{ background: '#F8FAFC', borderRadius: 10, padding: '12px 14px', marginBottom: 16, border: '1px solid #E2E8F0' }}>
             <p style={{ fontSize: '0.7rem', fontWeight: 700, color: '#94A3B8', marginBottom: 6 }}>LANDLORD'S LISTED TERMS</p>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 10 }}>
-              <div><p style={{ fontSize: '0.68rem', color: '#94A3B8' }}>Monthly Rent</p><p style={{ fontWeight: 700, color: '#0F172A' }}>{fmt(prop.financials.monthlyRent)}</p></div>
-              <div><p style={{ fontSize: '0.68rem', color: '#94A3B8' }}>Security Deposit</p><p style={{ fontWeight: 700, color: '#0F172A' }}>{fmt(prop.financials.securityDeposit)}</p></div>
+              <div><p style={{ fontSize: '0.68rem', color: '#94A3B8' }}>Monthly Rent</p><p style={{ fontWeight: 700, color: '#0F172A' }}>{formatMoney(prop.financials.monthlyRent)}</p></div>
+              <div><p style={{ fontSize: '0.68rem', color: '#94A3B8' }}>Security Deposit</p><p style={{ fontWeight: 700, color: '#0F172A' }}>{formatMoney(prop.financials.securityDeposit)}</p></div>
               <div><p style={{ fontSize: '0.68rem', color: '#94A3B8' }}>Duration</p><p style={{ fontWeight: 700, color: '#0F172A' }}>{prop.leaseTerms?.defaultDurationMonths || 12} months</p></div>
             </div>
           </div>
@@ -222,6 +223,7 @@ function TenantOfferForm({ properties, onSubmit, loading }) {
 
 /* ─── Accept modal — pick template + start date ─────────────────────────── */
 function AcceptModal({ offer, onConfirm, onClose, loading }) {
+  const { formatMoney } = useCurrency();
   const [templates, setTemplates] = React.useState([]);
   const [tmplLoading, setTmplLoad] = React.useState(true);
   const [templateId, setTemplateId] = React.useState('');
@@ -252,7 +254,7 @@ function AcceptModal({ offer, onConfirm, onClose, loading }) {
             <p style={{ fontSize: '0.72rem', fontWeight: 700, color: '#94A3B8', margin: '0 0 6px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Agreed Terms</p>
             <p style={{ fontWeight: 700, color: '#0F172A', margin: 0 }}>{offer.property?.title}</p>
             <p style={{ fontSize: '0.82rem', color: '#64748B', margin: '4px 0 0' }}>
-              ${(offer.history[offer.history.length - 1]?.monthlyRent || 0).toLocaleString()}/mo · Deposit ${(offer.history[offer.history.length - 1]?.securityDeposit || 0).toLocaleString()} · {offer.history[offer.history.length - 1]?.leaseDurationMonths} months
+              {formatMoney(offer.history[offer.history.length - 1]?.monthlyRent || 0)}/mo · Deposit {formatMoney(offer.history[offer.history.length - 1]?.securityDeposit || 0)} · {offer.history[offer.history.length - 1]?.leaseDurationMonths} months
             </p>
           </div>
 
@@ -320,6 +322,7 @@ function AcceptModal({ offer, onConfirm, onClose, loading }) {
 
 /* ─── Single offer card ───────────────────────────────────────────────────── */
 function OfferCard({ offer, user, onAction, actionLoading }) {
+  const { formatMoney } = useCurrency();
   const [expanded, setExpanded] = useState(false);
   const [countering, setCountering] = useState(false);
 
@@ -363,7 +366,7 @@ function OfferCard({ offer, user, onAction, actionLoading }) {
         </div>
 
         <div style={{ textAlign: 'right', flexShrink: 0, marginRight: 8 }}>
-          <p style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 800, fontSize: '1rem', color: '#0F172A' }}>{fmt(last?.monthlyRent || 0)}/mo</p>
+          <p style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 800, fontSize: '1rem', color: '#0F172A' }}>{formatMoney(last?.monthlyRent || 0)}/mo</p>
           <p style={{ fontSize: '0.72rem', color: '#64748B' }}>Round {offer.history.length}</p>
         </div>
 

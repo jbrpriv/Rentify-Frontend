@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import api from '@/utils/api';
 import { useUser } from '@/context/UserContext';
 import { useToast } from '@/context/ToastContext';
+import { useCurrency } from '@/context/CurrencyContext';
 import { FileText, Download, Calendar, User, Loader2, CheckCircle, Clock, PenLine, GitBranch, Mail, Eye, TrendingUp } from 'lucide-react';
 import { motion } from 'framer-motion';
 import SignatureModal from '@/components/SignatureModal';
@@ -14,6 +15,7 @@ export default function AgreementsPage() {
   const router = useRouter();
   const { user: parsed } = useUser();
   const { toast } = useToast();
+  const { currency } = useCurrency();
   const [agreements, setAgreements] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('active'); // 'active' | 'history'
@@ -72,7 +74,7 @@ export default function AgreementsPage() {
 
   const handleDownload = async (id, title) => {
     try {
-      const response = await api.get(`/agreements/${id}/pdf`, { responseType: 'blob' });
+      const response = await api.get(`/agreements/${id}/pdf`, { responseType: 'blob', params: { currency } });
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
       link.href = url;

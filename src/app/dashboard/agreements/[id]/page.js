@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import api from '@/utils/api';
 import { useToast } from '@/context/ToastContext';
 import { useUser } from '@/context/UserContext';
+import { useCurrency } from '@/context/CurrencyContext';
 import {
     ArrowLeft, FileText, User, Building2, Calendar, DollarSign,
     CheckCircle, Clock, AlertCircle, PenLine, Download, GitBranch,
@@ -86,6 +87,7 @@ export default function AgreementDetailPage() {
     const router = useRouter();
     const { toast } = useToast();
     const { user } = useUser();
+    const { formatMoney, currency } = useCurrency();
 
     const [agreement, setAgreement] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -113,7 +115,7 @@ export default function AgreementDetailPage() {
     const handleDownload = async () => {
         setDownloading(true);
         try {
-            const response = await api.get(`/agreements/${id}/pdf`, { responseType: 'blob' });
+            const response = await api.get(`/agreements/${id}/pdf`, { responseType: 'blob', params: { currency } });
             const url = window.URL.createObjectURL(new Blob([response.data]));
             const link = document.createElement('a');
             link.href = url;
@@ -243,7 +245,7 @@ export default function AgreementDetailPage() {
                         <p className="text-sm font-semibold text-purple-800">
                             Renewal proposal sent — awaiting tenant response.
                             New end date: <strong>{renewalProposal.newEndDate ? new Date(renewalProposal.newEndDate).toLocaleDateString() : '—'}</strong>{' '}·{' '}
-                            Rent: <strong>${renewalProposal.newRentAmount ? Number(renewalProposal.newRentAmount).toLocaleString() : '—'}/mo</strong>
+                            Rent: <strong>{renewalProposal.newRentAmount ? formatMoney(Number(renewalProposal.newRentAmount)) : '—'}/mo</strong>
                         </p>
                     </div>
                 )}
@@ -273,7 +275,7 @@ export default function AgreementDetailPage() {
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">New Monthly Rent ($) *</label>
+                                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">New Monthly Rent *</label>
                                     <input
                                         type="number"
                                         required
@@ -419,10 +421,10 @@ export default function AgreementDetailPage() {
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <InfoRow label="Start Date" value={startDate} icon={Calendar} />
                                 <InfoRow label="End Date" value={endDate} icon={Calendar} />
-                                <InfoRow label="Monthly Rent" value={`$${financials?.rentAmount?.toLocaleString()}`} icon={DollarSign} />
-                                <InfoRow label="Security Deposit" value={`$${financials?.depositAmount?.toLocaleString()}`} icon={Shield} />
+                                <InfoRow label="Monthly Rent" value={formatMoney(financials?.rentAmount)} icon={DollarSign} />
+                                <InfoRow label="Security Deposit" value={formatMoney(financials?.depositAmount)} icon={Shield} />
                                 {financials?.lateFeeAmount > 0 && (
-                                    <InfoRow label="Late Fee" value={`$${financials.lateFeeAmount} after ${financials.lateFeeGracePeriodDays} days`} icon={AlertCircle} />
+                                    <InfoRow label="Late Fee" value={`${formatMoney(financials.lateFeeAmount)} after ${financials.lateFeeGracePeriodDays} days`} icon={AlertCircle} />
                                 )}
                             </div>
 

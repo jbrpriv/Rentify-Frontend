@@ -3,6 +3,7 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import api from '@/utils/api';
+import { useCurrency } from '@/context/CurrencyContext';
 import {
   Check, Loader2, Zap, Building2, Crown, AlertTriangle,
   CreditCard, ArrowUpRight,
@@ -30,6 +31,7 @@ const BTN_STYLE = {
 // ── Main page content ──────────────────────────────────────────────────────────
 function BillingContent() {
   const searchParams = useSearchParams();
+  const { formatMoney } = useCurrency();
 
   const [plans, setPlans] = useState([]);
   const [currentTier, setCurrentTier] = useState(null);
@@ -227,7 +229,7 @@ function BillingContent() {
 
                 <div className="mb-5">
                   <span className="text-3xl font-black text-gray-900 tracking-tighter">
-                    {plan.price === 0 ? 'Free' : `$${plan.price.toLocaleString()}`}
+                    {plan.price === 0 ? 'Free' : formatMoney(plan.price)}
                   </span>
                   {plan.price > 0 && <span className="text-gray-400 text-sm">/month</span>}
                 </div>

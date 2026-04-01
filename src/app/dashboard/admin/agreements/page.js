@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import api from '@/utils/api';
 import { useUser } from '@/context/UserContext';
 import { useToast } from '@/context/ToastContext';
+import { useCurrency } from '@/context/CurrencyContext';
 import {
   FileText, Search, Filter, Loader2, AlertCircle,
   CheckCircle, Clock, XCircle, Eye,
@@ -34,6 +35,7 @@ export default function AdminAgreementsPage() {
   const router = useRouter();
   const { user } = useUser();
   const { toast } = useToast();
+  const { formatMoney, currency } = useCurrency();
 
   useEffect(() => {
     if (!user) return;
@@ -200,7 +202,7 @@ export default function AdminAgreementsPage() {
                     </td>
                     <td className="px-4 py-3 text-gray-700 font-semibold whitespace-nowrap">
                       {a.financials?.rentAmount
-                        ? `$${a.financials.rentAmount.toLocaleString()}`
+                        ? formatMoney(a.financials.rentAmount)
                         : '—'}
                     </td>
                     <td className="px-4 py-3">
@@ -213,7 +215,7 @@ export default function AdminAgreementsPage() {
                             // Use api instance with blob responseType — token handled by interceptor
                             const response = await api.get(
                               `/agreements/${a._id}/pdf`,
-                              { responseType: 'blob' }
+                              { responseType: 'blob', params: { currency } }
                             );
                             const bUrl = URL.createObjectURL(response.data);
                             const link = document.createElement('a');

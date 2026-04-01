@@ -5,6 +5,7 @@ import Link from 'next/link';
 import api from '@/utils/api';
 import { useUser } from '@/context/UserContext';
 import { useToast } from '@/context/ToastContext';
+import { useCurrency } from '@/context/CurrencyContext';
 import {
   FileText, Download, CheckCircle, Clock, PenLine, Loader2,
   Building2, User, Calendar, DollarSign, CreditCard,
@@ -17,6 +18,7 @@ import SignatureModal from '@/components/SignatureModal';
 // ─── Main Page ────────────────────────────────────────────────────────────────
 export default function MyLeasePage() {
   const { toast } = useToast();
+  const { formatMoney, currency } = useCurrency();
 
   const [agreements, setAgreements] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -103,7 +105,7 @@ export default function MyLeasePage() {
 
   const handleDownload = async (id, title) => {
     try {
-      const response = await api.get(`/agreements/${id}/pdf`, { responseType: 'blob' });
+      const response = await api.get(`/agreements/${id}/pdf`, { responseType: 'blob', params: { currency } });
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
       link.href = url;
@@ -200,7 +202,7 @@ export default function MyLeasePage() {
                           <p className="text-sm font-bold text-purple-900">Your landlord has proposed a lease renewal</p>
                           <p className="text-xs text-purple-700 mt-0.5">
                             New end date: <strong>{ag.renewalProposal.newEndDate ? new Date(ag.renewalProposal.newEndDate).toLocaleDateString() : '—'}</strong>
-                            {' · '}New rent: <strong>${ag.renewalProposal.newRentAmount ? Number(ag.renewalProposal.newRentAmount).toLocaleString() : '—'}/mo</strong>
+                            {' · '}New rent: <strong>{ag.renewalProposal.newRentAmount ? formatMoney(Number(ag.renewalProposal.newRentAmount)) : '—'}/mo</strong>
                             {ag.renewalProposal.notes && <span className="ml-1">· &quot;{ag.renewalProposal.notes}&quot;</span>}
                           </p>
                         </div>
@@ -284,9 +286,9 @@ export default function MyLeasePage() {
                         <span className="text-xs font-semibold uppercase tracking-wider">Financials</span>
                       </div>
                       <p className="font-bold text-gray-900">
-                        ${rent.toLocaleString()} <span className="text-xs font-normal text-gray-500">/mo</span>
+                        {formatMoney(rent)} <span className="text-xs font-normal text-gray-500">/mo</span>
                       </p>
-                      <p className="text-xs text-gray-500 mt-1">Deposit: ${deposit.toLocaleString()}</p>
+                      <p className="text-xs text-gray-500 mt-1">Deposit: {formatMoney(deposit)}</p>
                       {ag.rentEscalation?.enabled && (
                         <p className="text-xs text-purple-600 font-medium mt-1.5 flex items-center">
                           <TrendingUp className="h-3 w-3 mr-1" />
@@ -399,7 +401,7 @@ export default function MyLeasePage() {
                           {initiatingPayment
                             ? <Loader2 className="animate-spin h-5 w-5 mr-2" />
                             : <CreditCard className="h-5 w-5 mr-2" />}
-                          Pay Total: ${totalDueAtSigning.toLocaleString()}
+                          Pay Total: {formatMoney(totalDueAtSigning)}
                         </button>
                       </div>
                     )}

@@ -4,6 +4,7 @@ import { useEffect, useState, Suspense, useCallback } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import api from '@/utils/api';
 import { useUser } from '@/context/UserContext';
+import { useCurrency } from '@/context/CurrencyContext';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import {
@@ -13,8 +14,6 @@ import {
   Tag, ArrowRight, TrendingDown, TrendingUp, X,
 } from 'lucide-react';
 import { MotionFadeIn } from '@/components/ui/Motion';
-
-const fmt = (n) => `$${Number(n || 0).toLocaleString()}`;
 
 /* ─── Diff badge ──────────────────────────────────────────────────── */
 function DiffBadge({ listed, proposed }) {
@@ -173,6 +172,7 @@ function Lightbox({ images, startIndex, onClose }) {
 
 /* ─── Offer form ──────────────────────────────────────────────────── */
 function OfferForm({ listing, user, router, listingId }) {
+  const { formatMoney } = useCurrency();
   const defaultDuration = String(listing.leaseTerms?.defaultDurationMonths || 12);
   const [form, setForm] = useState({ monthlyRent: '', securityDeposit: '', leaseDurationMonths: defaultDuration });
   const [submitting, setSubmitting] = useState(false);
@@ -241,7 +241,7 @@ function OfferForm({ listing, user, router, listingId }) {
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
               <label style={{ fontSize: '0.68rem', fontWeight: 700, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{label}</label>
               <span style={{ fontSize: '0.66rem', color: '#64748B', background: 'white', border: '1px solid #E2E8F0', borderRadius: 5, padding: '2px 7px', whiteSpace: 'nowrap' }}>
-                Landlord: <strong style={{ color: '#0F172A' }}>{prefix === 'mo' ? `${listedVal} mo` : fmt(listedVal)}</strong>
+                Landlord: <strong style={{ color: '#0F172A' }}>{prefix === 'mo' ? `${listedVal} mo` : formatMoney(listedVal)}</strong>
               </span>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -298,6 +298,7 @@ function ListingDetailContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user } = useUser();
+  const { formatMoney } = useCurrency();
   const isViewOnly = searchParams.get('viewOnly') === 'true';
 
   const [listing, setListing] = useState(null);
@@ -427,7 +428,7 @@ function ListingDetailContent() {
                       <div className="stat-chip"><Bath size={17} style={{ color: 'rgba(255,255,255,.7)' }} /><span className="stat-val">{listing.specs?.bathrooms ?? '—'}</span><span className="stat-label">Baths</span></div>
                       <div className="stat-chip"><SquareCode size={17} style={{ color: 'rgba(255,255,255,.7)' }} /><span className="stat-val">{listing.specs?.sizeSqFt || '—'}</span><span className="stat-label">Sq Ft</span></div>
                       <div className="stat-chip"><PawPrint size={17} style={{ color: 'rgba(255,255,255,.7)' }} /><span className="stat-val" style={{ fontSize: '0.82rem' }}>{listing.amenities?.includes('pets allowed') ? 'Pets OK' : 'No Pets'}</span><span className="stat-label">Policy</span></div>
-                      <div className="stat-chip"><ShieldCheck size={17} style={{ color: 'rgba(255,255,255,.7)' }} /><span className="stat-val" style={{ fontSize: '0.82rem' }}>${deposit?.toLocaleString() || '—'}</span><span className="stat-label">Deposit</span></div>
+                      <div className="stat-chip"><ShieldCheck size={17} style={{ color: 'rgba(255,255,255,.7)' }} /><span className="stat-val" style={{ fontSize: '0.82rem' }}>{deposit ? formatMoney(deposit) : '—'}</span><span className="stat-label">Deposit</span></div>
                     </div>
                   </div>
                   <div style={{ background: 'rgba(255,255,255,.12)', backdropFilter: 'blur(12px)', border: '1px solid rgba(255,255,255,.2)', color: 'white', borderRadius: 40, padding: '8px 20px', fontSize: '0.8rem', fontWeight: 500, display: 'flex', alignItems: 'center', gap: 6, alignSelf: 'flex-end' }}>
@@ -500,9 +501,9 @@ function ListingDetailContent() {
                   <p className="section-title">Financial Details</p>
                   <div className="grid grid-cols-3 gap-3">
                     {[
-                      { label: 'Monthly Rent', value: fmt(rent), color: '#5B21B6', bg: '#F5F3FF', border: '#DDD6FE' },
-                      { label: 'Security Deposit', value: fmt(deposit), color: '#0F172A', bg: '#F8FAFC', border: '#E2E8F0' },
-                      { label: 'Maintenance Fee', value: fmt(listing.financials?.maintenanceFee), color: '#0F172A', bg: '#F8FAFC', border: '#E2E8F0' },
+                      { label: 'Monthly Rent', value: formatMoney(rent), color: '#5B21B6', bg: '#F5F3FF', border: '#DDD6FE' },
+                      { label: 'Security Deposit', value: formatMoney(deposit), color: '#0F172A', bg: '#F8FAFC', border: '#E2E8F0' },
+                      { label: 'Maintenance Fee', value: formatMoney(listing.financials?.maintenanceFee), color: '#0F172A', bg: '#F8FAFC', border: '#E2E8F0' },
                     ].map(f => (
                       <div key={f.label} style={{ background: f.bg, border: `1px solid ${f.border}`, borderRadius: 12, padding: '14px 16px' }}>
                         <p style={{ color: '#64748B', fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>{f.label}</p>
@@ -566,7 +567,7 @@ function ListingDetailContent() {
                     </div>
                     <div style={{ textAlign: 'center' }}>
                       <p style={{ color: '#94A3B8', fontSize: '0.7rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 4 }}>Monthly Rent</p>
-                      <p style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 800, fontSize: '2rem', color: '#0F172A', lineHeight: 1 }}>${rent?.toLocaleString() || '—'}</p>
+                      <p style={{ fontFamily: "'Outfit',sans-serif", fontWeight: 800, fontSize: '2rem', color: '#0F172A', lineHeight: 1 }}>{rent ? formatMoney(rent) : '—'}</p>
                       <p style={{ fontSize: '0.75rem', color: '#16A34A', fontWeight: 600, marginTop: 4 }}>Available Now</p>
                     </div>
                   </div>

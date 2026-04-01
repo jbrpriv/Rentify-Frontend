@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import api from '@/utils/api';
 import { useToast } from '@/context/ToastContext';
 import { useUser } from '@/context/UserContext';
+import { useCurrency } from '@/context/CurrencyContext';
 import {
   Search, UserCheck, Calendar, FileText, Loader2,
   CheckSquare, Square, ChevronDown, ChevronUp, Tag,
@@ -14,6 +15,7 @@ import {
 
 // ─── Flow Tracker ─────────────────────────────────────────────────────────────
 function FlowTracker({ offerData }) {
+  const { formatMoney } = useCurrency();
   const steps = [
     {
       key: 'browse',
@@ -25,7 +27,7 @@ function FlowTracker({ offerData }) {
       key: 'offer',
       label: 'Offer Negotiated',
       sublabel: offerData
-        ? `${offerData.history?.length} round${offerData.history?.length !== 1 ? 's' : ''} · $${offerData.history?.[offerData.history.length - 1]?.monthlyRent?.toLocaleString()}/mo`
+        ? `${offerData.history?.length} round${offerData.history?.length !== 1 ? 's' : ''} · ${formatMoney(offerData.history?.[offerData.history.length - 1]?.monthlyRent || 0)}/mo`
         : 'Offer accepted',
       done: true,
     },
@@ -235,13 +237,13 @@ function InlinePDFPreview({ agreementId, onClose }) {
 // Used for the inline clause preview only (not the final PDF).
 // Supports both camelCase ({{tenantName}}) and snake_case ({{tenant_name}}) tokens
 // since older clauses may use either convention.
-function substituteVariables(text, offer, form) {
+function substituteVariables(text, offer, form, formatMoney) {
   if (!text) return '';
   let replaced = text;
 
   const petLabel = form?.petAllowed ? 'Pets allowed' : 'No pets';
   const petDeposit = form?.petAllowed && form?.petDeposit
-    ? `$${Number(form.petDeposit).toLocaleString()}`
+    ? formatMoney(Number(form.petDeposit))
     : 'N/A';
   const utilities = form?.utilitiesIncluded ? 'Utilities included' : 'Utilities not included';
   const utilDetails = form?.utilitiesDetails || '';
@@ -255,9 +257,9 @@ function substituteVariables(text, offer, form) {
     '{{propertyAddress}}': offer?.property?.address ? `${offer.property.address.street}, ${offer.property.address.city}` : '[Property Address]',
     '{{startDate}}': form?.startDate ? new Date(form.startDate).toLocaleDateString() : '[Start Date]',
     '{{endDate}}': form?.endDate ? new Date(form.endDate).toLocaleDateString() : '[End Date]',
-    '{{rentAmount}}': form?.rentAmount ? `$${Number(form.rentAmount).toLocaleString()}` : '[Rent Amount]',
-    '{{depositAmount}}': form?.depositAmount ? `$${Number(form.depositAmount).toLocaleString()}` : '[Deposit Amount]',
-    '{{lateFeeAmount}}': form?.lateFeeAmount ? `$${Number(form.lateFeeAmount).toLocaleString()}` : '[Late Fee]',
+    '{{rentAmount}}': form?.rentAmount ? formatMoney(Number(form.rentAmount)) : '[Rent Amount]',
+    '{{depositAmount}}': form?.depositAmount ? formatMoney(Number(form.depositAmount)) : '[Deposit Amount]',
+    '{{lateFeeAmount}}': form?.lateFeeAmount ? formatMoney(Number(form.lateFeeAmount)) : '[Late Fee]',
     '{{lateFeeGraceDays}}': form?.lateFeeGracePeriodDays ? `${form.lateFeeGracePeriodDays} days` : '[Grace Period]',
     '{{petPolicy}}': petLabel,
     '{{petDeposit}}': petDeposit,
@@ -271,9 +273,9 @@ function substituteVariables(text, offer, form) {
     '{{property_address}}': offer?.property?.address ? `${offer.property.address.street}, ${offer.property.address.city}` : '[Property Address]',
     '{{start_date}}': form?.startDate ? new Date(form.startDate).toLocaleDateString() : '[Start Date]',
     '{{end_date}}': form?.endDate ? new Date(form.endDate).toLocaleDateString() : '[End Date]',
-    '{{rent_amount}}': form?.rentAmount ? `$${Number(form.rentAmount).toLocaleString()}` : '[Rent Amount]',
-    '{{deposit_amount}}': form?.depositAmount ? `$${Number(form.depositAmount).toLocaleString()}` : '[Deposit Amount]',
-    '{{late_fee_amount}}': form?.lateFeeAmount ? `$${Number(form.lateFeeAmount).toLocaleString()}` : '[Late Fee]',
+    '{{rent_amount}}': form?.rentAmount ? formatMoney(Number(form.rentAmount)) : '[Rent Amount]',
+    '{{deposit_amount}}': form?.depositAmount ? formatMoney(Number(form.depositAmount)) : '[Deposit Amount]',
+    '{{late_fee_amount}}': form?.lateFeeAmount ? formatMoney(Number(form.lateFeeAmount)) : '[Late Fee]',
     '{{grace_period}}': form?.lateFeeGracePeriodDays ? `${form.lateFeeGracePeriodDays} days` : '[Grace Period]',
   };
 
@@ -335,6 +337,7 @@ function AgreementComposer({
   appliedTemplate = '',
   onRemoveTemplate = () => {},
 }) {
+  const { formatMoney } = useCurrency();
   const [clauses, setClauses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [categoryFilter, setCategoryFilter] = useState('');
@@ -530,9 +533,9 @@ function AgreementComposer({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-gray-700">
               <p><strong>Start Date:</strong> {formData?.startDate || 'N/A'}</p>
               <p><strong>End Date:</strong> {formData?.endDate || 'N/A'}</p>
-              <p><strong>Monthly Rent:</strong> ${Number(formData?.rentAmount || 0).toLocaleString()}</p>
-              <p><strong>Security Deposit:</strong> ${Number(formData?.depositAmount || 0).toLocaleString()}</p>
-              <p><strong>Late Fee:</strong> ${Number(formData?.lateFeeAmount || 0).toLocaleString()}</p>
+              <p><strong>Monthly Rent:</strong> {formatMoney(Number(formData?.rentAmount || 0))}</p>
+              <p><strong>Security Deposit:</strong> {formatMoney(Number(formData?.depositAmount || 0))}</p>
+              <p><strong>Late Fee:</strong> {formatMoney(Number(formData?.lateFeeAmount || 0))}</p>
               <p><strong>Grace Period:</strong> {formData?.lateFeeGracePeriodDays || '0'} days</p>
             </div>
           </div>
@@ -541,7 +544,7 @@ function AgreementComposer({
             <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Permanent Section: Policies</p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-gray-700">
               <p><strong>Pets:</strong> {formData?.petAllowed ? 'Allowed' : 'Not allowed'}</p>
-              <p><strong>Pet Deposit:</strong> {formData?.petAllowed ? `$${Number(formData?.petDeposit || 0).toLocaleString()}` : 'N/A'}</p>
+              <p><strong>Pet Deposit:</strong> {formData?.petAllowed ? formatMoney(Number(formData?.petDeposit || 0)) : 'N/A'}</p>
               <p><strong>Utilities Included:</strong> {formData?.utilitiesIncluded ? 'Yes' : 'No'}</p>
               <p><strong>Utilities Details:</strong> {formData?.utilitiesIncluded ? (formData?.utilitiesDetails || 'Not specified') : 'N/A'}</p>
               <p className="md:col-span-2"><strong>Termination Policy:</strong> {formData?.terminationPolicy || 'Default policy applies.'}</p>
@@ -625,7 +628,7 @@ function AgreementComposer({
                           </div>
                           <p
                             className="mt-2 text-xs text-gray-700 leading-relaxed whitespace-pre-line"
-                            dangerouslySetInnerHTML={{ __html: substituteVariables(clause.body, offerData, formData) }}
+                            dangerouslySetInnerHTML={{ __html: substituteVariables(clause.body, offerData, formData, formatMoney) }}
                           />
                         </div>
                       </div>
@@ -689,7 +692,7 @@ function AgreementComposer({
             </div>
 
             <div className="mt-2 rounded-lg border border-green-200 bg-green-50 px-2.5 py-2 text-[11px] text-green-800">
-              <p className="font-semibold">Offer: {offerData?.tenant?.name || 'Tenant'} · ${Number(formData?.rentAmount || 0).toLocaleString()}/mo</p>
+              <p className="font-semibold">Offer: {offerData?.tenant?.name || 'Tenant'} · {formatMoney(Number(formData?.rentAmount || 0))}/mo</p>
               <p className="text-green-700">{offerData?.property?.title || 'Property'} · {leaseDurationMonths || '—'} months</p>
             </div>
           </div>
