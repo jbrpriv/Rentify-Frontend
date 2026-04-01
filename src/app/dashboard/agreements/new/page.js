@@ -361,7 +361,7 @@ function AgreementComposer({
   const [panelPosition, setPanelPosition] = useState({ x: 24, y: 110 });
   const [draggingPanel, setDraggingPanel] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
-  const [mobilePanelOpen, setMobilePanelOpen] = useState(true);
+  const [mobilePanelOpen, setMobilePanelOpen] = useState(false);
   const panelRef = useRef(null);
   const panelDragOffsetRef = useRef({ x: 0, y: 0 });
 
@@ -371,6 +371,10 @@ function AgreementComposer({
     window.addEventListener('resize', onResize);
     return () => window.removeEventListener('resize', onResize);
   }, []);
+
+  useEffect(() => {
+    if (!isMobile) setMobilePanelOpen(true);
+  }, [isMobile]);
 
   useEffect(() => {
     api.get('/agreements/clauses')
@@ -634,10 +638,10 @@ function AgreementComposer({
       {showEditor && (
       <div
         ref={panelRef}
-        className={isMobile ? 'fixed z-[70] left-2 right-2 bottom-2' : 'fixed z-[70] w-[330px] max-w-[calc(100%-1rem)]'}
+        className={isMobile ? `fixed z-[70] left-2 right-2 bottom-2 ${mobilePanelOpen ? 'max-h-[72vh]' : 'max-h-[170px]'}` : 'fixed z-[70] w-[330px] max-w-[calc(100%-1rem)]'}
         style={isMobile ? undefined : { left: panelPosition.x, top: panelPosition.y }}
       >
-        <div className="bg-white/95 backdrop-blur border border-gray-200 rounded-2xl shadow-xl overflow-hidden">
+        <div className="bg-white/95 backdrop-blur border border-gray-200 rounded-2xl shadow-xl overflow-hidden h-full">
           <div onMouseDown={handlePanelMouseDown} className="px-4 py-3 border-b bg-gray-50 cursor-move select-none flex items-center justify-between">
             <div>
               <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Editor</p>
@@ -657,19 +661,19 @@ function AgreementComposer({
             </div>
           </div>
 
-          {(!isMobile || mobilePanelOpen) && (
-          <>
           <div className="px-3 py-2 border-b bg-white">
             <div className="grid grid-cols-4 gap-1 bg-gray-100 p-1 rounded-lg">
               {[
-                { key: 'terms', label: 'Terms' },
-                ...(canUseClauses ? [{ key: 'library', label: 'Library' }, { key: 'selected', label: 'Selected' }, { key: 'sections', label: 'Sections' }] : []),
+                { key: 'terms', label: 'Terms', locked: false },
+                { key: 'library', label: 'Library', locked: !canUseClauses },
+                { key: 'selected', label: 'Selected', locked: !canUseClauses },
+                { key: 'sections', label: 'Sections', locked: !canUseClauses },
               ].map(tab => (
                 <button
                   key={tab.key}
                   type="button"
-                  onClick={() => setEditorTab(tab.key)}
-                  className={`text-[11px] py-1.5 rounded-md font-semibold transition ${editorTab === tab.key ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                  onClick={() => { if (!tab.locked) setEditorTab(tab.key); }}
+                  className={`text-[11px] py-1.5 rounded-md font-semibold transition ${editorTab === tab.key ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'} ${tab.locked ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
                   {tab.label}
                 </button>
@@ -682,7 +686,9 @@ function AgreementComposer({
             </div>
           </div>
 
-          <div className="p-3 space-y-3 max-h-[62vh] overflow-y-auto">
+          {(!isMobile || mobilePanelOpen) && (
+          <>
+          <div className={`p-3 space-y-3 overflow-y-auto ${isMobile ? 'max-h-[38vh]' : 'max-h-[62vh]'}`}>
             {editorTab === 'terms' && (
               <div className="space-y-3">
                 <div className="grid grid-cols-2 gap-2">
@@ -906,6 +912,7 @@ function AgreementComposer({
           </>
           )}
 
+          {(!isMobile || mobilePanelOpen) && (
           <div className="px-3 py-2.5 border-t bg-gray-50 flex items-center gap-2">
             {canUseClauses && (
               <button
@@ -932,6 +939,7 @@ function AgreementComposer({
               {saving ? 'Saving...' : 'Finish Draft'}
             </button>
           </div>
+          )}
         </div>
       </div>
       )}
