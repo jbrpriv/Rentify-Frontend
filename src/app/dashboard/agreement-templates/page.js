@@ -55,9 +55,9 @@ function ClausePickerModal({ selected, onSave, onClose }) {
 
         {/* Category filter */}
         <div style={{ padding: '12px 24px', display: 'flex', gap: 6, flexWrap: 'wrap', borderBottom: '1px solid #F8FAFC' }}>
-          <button onClick={() => setCat('')} className="bg-action-bg text-action-text border border-action-border hover:bg-action-hover transition-colors" style={{ padding: '4px 12px', borderRadius: 20, fontSize: '0.72rem', fontWeight: 700, cursor: 'pointer' }}>All</button>
+          <button onClick={() => setCat('')} className="bg-[#E6EAF2] text-[#0B2D72] border border-[#CBD5E1] hover:bg-[#DBE2ED] transition-colors" style={{ padding: '4px 12px', borderRadius: 20, fontSize: '0.72rem', fontWeight: 700, cursor: 'pointer' }}>All</button>
           {categories.map(c => (
-            <button key={c} onClick={() => setCat(c)} className="bg-action-bg text-action-text border border-action-border hover:bg-action-hover transition-colors" style={{ padding: '4px 12px', borderRadius: 20, fontSize: '0.72rem', fontWeight: 700, cursor: 'pointer', textTransform: 'capitalize' }}>{c.replace('_', ' ')}</button>
+            <button key={c} onClick={() => setCat(c)} className="bg-[#E6EAF2] text-[#0B2D72] border border-[#CBD5E1] hover:bg-[#DBE2ED] transition-colors" style={{ padding: '4px 12px', borderRadius: 20, fontSize: '0.72rem', fontWeight: 700, cursor: 'pointer', textTransform: 'capitalize' }}>{c.replace('_', ' ')}</button>
           ))}
         </div>
 
@@ -71,14 +71,14 @@ function ClausePickerModal({ selected, onSave, onClose }) {
             filtered.map(clause => {
               const isSelected = picked.has(clause._id);
               return (
-                <div key={clause._id} onClick={() => toggle(clause._id)} className="hover:bg-action-hover" style={{ display: 'flex', alignItems: 'flex-start', gap: 12, padding: '12px', borderRadius: 12, border: `1.5px solid ${isSelected ? '#0B2D72' : '#F1F5F9'}`, background: isSelected ? '#F1F5F9' : 'white', marginBottom: 8, cursor: 'pointer', transition: 'all 0.15s' }}>
+                <div key={clause._id} onClick={() => toggle(clause._id)} className="hover:bg-[#DBE2ED]" style={{ display: 'flex', alignItems: 'flex-start', gap: 12, padding: '12px', borderRadius: 12, border: `1.5px solid ${isSelected ? '#0B2D72' : '#F1F5F9'}`, background: isSelected ? '#F1F5F9' : 'white', marginBottom: 8, cursor: 'pointer', transition: 'all 0.15s' }}>
                   <div style={{ width: 20, height: 20, borderRadius: 5, border: `2px solid ${isSelected ? '#0B2D72' : '#CBD5E1'}`, background: isSelected ? '#0B2D72' : 'white', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: 1 }}>
                     {isSelected && <CheckCircle size={12} color="white" />}
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
                       <span style={{ fontWeight: 700, fontSize: '0.88rem', color: '#0F172A' }}>{clause.title}</span>
-                      <span className="bg-action-bg text-action-text border border-action-border" style={{ fontSize: '0.65rem', padding: '2px 8px', borderRadius: 20, fontWeight: 700 }}>
+                      <span className="bg-[#E6EAF2] text-[#0B2D72] border border-[#CBD5E1]" style={{ fontSize: '0.65rem', padding: '2px 8px', borderRadius: 20, fontWeight: 700 }}>
                         Approved
                       </span>
                     </div>
@@ -93,8 +93,8 @@ function ClausePickerModal({ selected, onSave, onClose }) {
 
         {/* Footer */}
         <div style={{ padding: '16px 24px', borderTop: '1px solid #F1F5F9', display: 'flex', gap: 10 }}>
-          <button onClick={onClose} className="bg-white text-action-text border border-action-border hover:bg-action-hover transition-colors" style={{ flex: 1, padding: '10px', borderRadius: 10, fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer' }}>Cancel</button>
-          <button onClick={() => onSave(clauses.filter(c => picked.has(c._id)))} className="bg-action-bg text-action-text border border-action-border hover:bg-action-hover transition-colors" style={{ flex: 2, padding: '10px', borderRadius: 10, fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer' }}>
+          <button onClick={onClose} className="bg-white text-[#0B2D72] border border-[#CBD5E1] hover:bg-[#DBE2ED] transition-colors" style={{ flex: 1, padding: '10px', borderRadius: 10, fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer' }}>Cancel</button>
+          <button onClick={() => onSave(clauses.filter(c => picked.has(c._id)))} className="bg-[#E6EAF2] text-[#0B2D72] border border-[#CBD5E1] hover:bg-[#DBE2ED] transition-colors" style={{ flex: 2, padding: '10px', borderRadius: 10, fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer' }}>
             Attach {picked.size} Clause{picked.size !== 1 ? 's' : ''}
           </button>
         </div>
@@ -147,17 +147,17 @@ function TemplateForm({ initial, onSave, onCancel, saving }) {
           <div>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
               <label style={{ fontSize: '0.75rem', fontWeight: 700, color: '#64748B' }}>Clauses ({clauses.length})</label>
-              <button onClick={() => setShowPicker(true)} className="text-action-text" style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: '0.75rem', fontWeight: 700, background: 'none', border: 'none', cursor: 'pointer' }}>
-                <Tag size={13} className="text-action-text" /> {clauses.length > 0 ? 'Edit Clauses' : 'Add Clauses'}
+              <button onClick={() => setShowPicker(true)} className="text-[#0B2D72]" style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: '0.75rem', fontWeight: 700, background: 'none', border: 'none', cursor: 'pointer' }}>
+                <Tag size={13} className="text-[#0B2D72]" /> {clauses.length > 0 ? 'Edit Clauses' : 'Add Clauses'}
               </button>
             </div>
             {clauses.length > 0 ? (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                 {clauses.map(c => (
                   <div key={c._id} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', background: '#F8FAFC', borderRadius: 8, border: '1px solid #F1F5F9' }}>
-                    <Tag size={12} className="text-action-text" />
+                    <Tag size={12} className="text-[#0B2D72]" />
                     <span style={{ fontSize: '0.82rem', fontWeight: 600, color: '#0F172A', flex: 1 }}>{c.title}</span>
-                    <span className="text-action-text" style={{ fontSize: '0.65rem', fontWeight: 700 }}>
+                    <span className="text-[#0B2D72]" style={{ fontSize: '0.65rem', fontWeight: 700 }}>
                       {c.isApproved ? '✓ Approved' : '⏳ Pending'}
                     </span>
                   </div>
@@ -171,8 +171,8 @@ function TemplateForm({ initial, onSave, onCancel, saving }) {
           </div>
 
           <div style={{ display: 'flex', gap: 10, paddingTop: 4 }}>
-            <button onClick={onCancel} className="bg-white text-action-text border border-action-border hover:bg-action-hover transition-colors" style={{ flex: 1, padding: '10px', borderRadius: 10, fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer' }}>Cancel</button>
-            <button onClick={handleSubmit} disabled={saving} className="bg-action-bg text-action-text border border-action-border hover:bg-action-hover transition-colors" style={{ flex: 2, padding: '10px', borderRadius: 10, fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, opacity: saving ? 0.7 : 1 }}>
+            <button onClick={onCancel} className="bg-white text-[#0B2D72] border border-[#CBD5E1] hover:bg-[#DBE2ED] transition-colors" style={{ flex: 1, padding: '10px', borderRadius: 10, fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer' }}>Cancel</button>
+            <button onClick={handleSubmit} disabled={saving} className="bg-[#E6EAF2] text-[#0B2D72] border border-[#CBD5E1] hover:bg-[#DBE2ED] transition-colors" style={{ flex: 2, padding: '10px', borderRadius: 10, fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, opacity: saving ? 0.7 : 1 }}>
               {saving ? <Loader2 size={15} className="animate-spin" /> : <Save size={15} />}
               {initial ? 'Save Changes' : 'Create Template'}
             </button>
@@ -193,7 +193,7 @@ function TemplateCard({ template, onEdit, onDelete, deleting }) {
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '16px 20px', cursor: 'pointer' }} onClick={() => setExpanded(e => !e)}>
         <div style={{ width: 42, height: 42, borderRadius: 12, background: '#F1F5F9', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-          <FileText size={18} className="text-action-text" />
+          <FileText size={18} className="text-[#0B2D72]" />
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
@@ -206,10 +206,10 @@ function TemplateCard({ template, onEdit, onDelete, deleting }) {
           </p>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
-          <button onClick={e => { e.stopPropagation(); onEdit(template); }} className="bg-action-bg text-action-text border border-action-border hover:bg-action-hover transition-colors" style={{ padding: '7px 12px', borderRadius: 8, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5, fontSize: '0.75rem', fontWeight: 700 }}>
+          <button onClick={e => { e.stopPropagation(); onEdit(template); }} className="bg-[#E6EAF2] text-[#0B2D72] border border-[#CBD5E1] hover:bg-[#DBE2ED] transition-colors" style={{ padding: '7px 12px', borderRadius: 8, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5, fontSize: '0.75rem', fontWeight: 700 }}>
             <Pencil size={12} /> Edit
           </button>
-          <button onClick={e => { e.stopPropagation(); onDelete(template._id); }} disabled={deleting === template._id} className="bg-action-bg text-action-text border border-action-border hover:bg-action-hover transition-colors" style={{ padding: '7px 12px', borderRadius: 8, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5, fontSize: '0.75rem', fontWeight: 700, opacity: deleting === template._id ? 0.5 : 1 }}>
+          <button onClick={e => { e.stopPropagation(); onDelete(template._id); }} disabled={deleting === template._id} className="bg-[#E6EAF2] text-[#0B2D72] border border-[#CBD5E1] hover:bg-[#DBE2ED] transition-colors" style={{ padding: '7px 12px', borderRadius: 8, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5, fontSize: '0.75rem', fontWeight: 700, opacity: deleting === template._id ? 0.5 : 1 }}>
             {deleting === template._id ? <Loader2 size={12} className="animate-spin" /> : <Trash2 size={12} />}
           </button>
           {expanded ? <ChevronUp size={16} color="#94A3B8" /> : <ChevronDown size={16} color="#94A3B8" />}
@@ -236,9 +236,9 @@ function TemplateCard({ template, onEdit, onDelete, deleting }) {
               {template.clauseIds.map(c => (
                 <div key={c._id} style={{ padding: '10px 14px', background: '#F8FAFC', borderRadius: 10, border: '1px solid #F1F5F9' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-                    <Tag size={12} className="text-action-text" />
+                    <Tag size={12} className="text-[#0B2D72]" />
                     <span style={{ fontWeight: 700, fontSize: '0.85rem', color: '#0F172A' }}>{c.title}</span>
-                    <span className="bg-action-bg text-action-text border border-action-border" style={{ fontSize: '0.65rem', padding: '2px 7px', borderRadius: 20, fontWeight: 700 }}>
+                    <span className="bg-[#E6EAF2] text-[#0B2D72] border border-[#CBD5E1]" style={{ fontSize: '0.65rem', padding: '2px 7px', borderRadius: 20, fontWeight: 700 }}>
                       {c.isApproved ? 'Approved' : 'Pending Review'}
                     </span>
                   </div>
@@ -344,7 +344,7 @@ export default function AgreementTemplatesPage() {
           </p>
         </div>
         {!showForm && (
-          <button onClick={startCreate} className="bg-action-bg text-action-text border border-action-border hover:bg-action-hover transition-colors" style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '10px 18px', borderRadius: 12, fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer' }}>
+          <button onClick={startCreate} className="bg-[#E6EAF2] text-[#0B2D72] border border-[#CBD5E1] hover:bg-[#DBE2ED] transition-colors" style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '10px 18px', borderRadius: 12, fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer' }}>
             <Plus size={16} /> New Template
           </button>
         )}
@@ -367,7 +367,7 @@ export default function AgreementTemplatesPage() {
           <FileText size={48} color="#CBD5E1" style={{ margin: '0 auto 12px' }} />
           <h3 style={{ fontWeight: 700, color: '#475569', fontSize: '1.05rem', marginBottom: 6 }}>No templates yet</h3>
           <p style={{ color: '#94A3B8', fontSize: '0.85rem', marginBottom: 20 }}>Create your first agreement template to speed up the lease creation process.</p>
-          <button onClick={startCreate} className="bg-action-bg text-action-text border border-action-border hover:bg-action-hover transition-colors" style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '10px 20px', borderRadius: 12, fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer' }}>
+          <button onClick={startCreate} className="bg-[#E6EAF2] text-[#0B2D72] border border-[#CBD5E1] hover:bg-[#DBE2ED] transition-colors" style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '10px 20px', borderRadius: 12, fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer' }}>
             <Plus size={15} /> Create Template
           </button>
         </div>

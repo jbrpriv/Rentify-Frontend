@@ -137,7 +137,7 @@ export default function LandlordTenantsPage() {
                       </div>
                     </td>
                     <td className="px-4 py-4">
-                      <span className="bg-action-bg text-action-text border border-action-border text-[10px] font-black uppercase px-2 py-1 rounded-full">
+                      <span className="bg-[#E6EAF2] text-[#0B2D72] border border-[#CBD5E1] text-[10px] font-black uppercase px-2 py-1 rounded-full">
                         {(a.status === 'signed' || a.status === 'sent') ? 'Payment Pending' : a.status}
                       </span>
                     </td>
@@ -156,7 +156,7 @@ export default function LandlordTenantsPage() {
                         {a.tenant?._id && (
                           <Link
                             href={`/dashboard/landlord/tenant-documents?tenantId=${a.tenant._id}&name=${encodeURIComponent(a.tenant.name || 'Tenant')}`}
-                            className="text-[10px] font-bold uppercase tracking-widest bg-action-bg text-action-text border border-action-border px-2.5 py-1 rounded-lg hover:bg-action-hover transition"
+                            className="text-[10px] font-bold uppercase tracking-widest bg-[#E6EAF2] text-[#0B2D72] border border-[#CBD5E1] px-2.5 py-1 rounded-lg hover:bg-[#DBE2ED] transition"
                             title="View tenant documents (secure, view-only)"
                           >
                             Docs
