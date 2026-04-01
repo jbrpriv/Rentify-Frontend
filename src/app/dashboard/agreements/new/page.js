@@ -429,81 +429,22 @@ function AgreementComposer({ selectedClauseIds, onReorder, offerData, formData }
   );
 
   return (
-    <div className="grid grid-cols-1 xl:grid-cols-[360px_1fr] gap-5">
-      <div className="bg-white border border-gray-200 rounded-xl p-4 space-y-4 h-fit xl:sticky xl:top-4">
-        <div>
-          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Clause Library</p>
-          <p className="text-xs text-gray-400">Drag clauses directly onto live agreement section drop zones.</p>
-        </div>
+    <div className="relative rounded-2xl border border-gray-200 bg-gray-100/80 overflow-hidden min-h-[75vh]">
+      <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_10%_10%,rgba(37,99,235,0.10),transparent_45%),radial-gradient(circle_at_85%_80%,rgba(22,163,74,0.08),transparent_40%)]" />
 
-        <div className="space-y-2">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Search title or content..."
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              className="w-full pl-8 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-          <div className="flex gap-2 flex-wrap">
-            <button type="button" onClick={() => setCategoryFilter('')}
-              className={`text-xs px-3 py-1 rounded-full border ${!categoryFilter ? 'bg-blue-600 text-white border-blue-600' : 'border-gray-300 text-gray-600 hover:bg-gray-50'}`}>
-              All
-            </button>
-            {categories.map(cat => (
-              <button key={cat} type="button" onClick={() => setCategoryFilter(cat)}
-                className={`text-xs px-3 py-1 rounded-full border capitalize ${categoryFilter === cat ? 'bg-blue-600 text-white border-blue-600' : 'border-gray-300 text-gray-600 hover:bg-gray-50'}`}>
-                {cat.replace(/_/g, ' ')}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div className="space-y-2 max-h-[60vh] overflow-y-auto pr-1">
-          {availableClauses.length === 0 && (
-            <p className="text-sm text-gray-400 py-3 text-center italic">No matching clauses found.</p>
-          )}
-          {availableClauses.map((clause) => (
-            <div
-              key={clause._id}
-              draggable
-              onDragStart={() => handleDragStart(clause._id, 'library')}
-              className="border rounded-lg border-gray-200 hover:border-blue-300 transition bg-white p-3 cursor-grab active:cursor-grabbing"
-            >
-              <div className="flex items-start justify-between gap-2">
-                <div className="min-w-0">
-                  <p className="font-medium text-sm text-gray-900 truncate">{clause.title}</p>
-                  <div className="mt-1 flex flex-wrap gap-1.5">
-                    <span className="text-xs px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full capitalize">
-                      {clause.category?.replace(/_/g, ' ')}
-                    </span>
-                    {clause.isDefault && (
-                      <span className="text-xs px-2 py-0.5 bg-green-100 text-green-700 rounded-full">Recommended</span>
-                    )}
-                  </div>
-                </div>
-                <GripVertical className="w-4 h-4 text-gray-400 flex-shrink-0" />
-              </div>
-              <p className="mt-2 text-xs text-gray-500 line-clamp-2">{clause.body}</p>
+      <div className="relative z-10 h-[75vh] overflow-y-auto p-4 sm:p-6 lg:p-8 xl:pl-[390px]">
+        <div className="max-w-4xl mx-auto">
+          <div className="sticky top-0 z-10 mb-3 bg-white/80 backdrop-blur border border-gray-200 rounded-xl px-4 py-3 flex items-center justify-between">
+            <div>
+              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Live Agreement</p>
+              <p className="text-sm text-gray-600">Drag clauses into section drop zones. Changes update instantly.</p>
             </div>
-          ))}
-        </div>
-      </div>
-
-      <div className="bg-white border border-gray-200 rounded-xl p-5">
-        <div className="flex items-center justify-between mb-3">
-          <div>
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Live Agreement</p>
-            <p className="text-sm text-gray-500">All changes are reflected immediately in this draft.</p>
+            <span className="text-xs px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-100 font-semibold">
+              {selectedClauseIds.length} clause{selectedClauseIds.length !== 1 ? 's' : ''}
+            </span>
           </div>
-          <span className="text-xs px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-100 font-semibold">
-            {selectedClauseIds.length} draggable clause{selectedClauseIds.length !== 1 ? 's' : ''}
-          </span>
-        </div>
 
-        <div className="rounded-xl border border-gray-200 bg-gray-50 p-4 space-y-4">
+          <div className="rounded-xl border border-gray-200 bg-white/90 p-4 sm:p-5 space-y-4 shadow-sm">
           <div className="rounded-lg bg-white border border-gray-200 p-4">
             <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Permanent Section: Parties and Property</p>
             <p className="text-sm text-gray-700"><strong>Landlord:</strong> {offerData?.property?.landlord?.name || 'Landlord'}</p>
@@ -534,79 +475,146 @@ function AgreementComposer({ selectedClauseIds, onReorder, offerData, formData }
             </div>
           </div>
 
-          {CLAUSE_SECTION_CONFIG.map((section) => {
-            const ids = sectionAssignments[section.key] || [];
-            const isHovered = hoveredSection === section.key;
-            return (
-              <div
-                key={section.key}
-                onDragOver={(e) => { e.preventDefault(); setHoveredSection(section.key); }}
-                onDragLeave={() => setHoveredSection('')}
-                onDrop={(e) => { e.preventDefault(); handleDropToSection(section.key); }}
-                className={`rounded-lg border-2 p-4 transition ${isHovered ? 'border-blue-400 bg-blue-50' : 'border-dashed border-gray-300 bg-white'}`}
-              >
-                <div className="flex items-center justify-between mb-2">
-                  <p className="text-sm font-semibold text-gray-800">{section.title}</p>
-                  <span className="text-xs text-gray-400">Drop zone</span>
-                </div>
+            {CLAUSE_SECTION_CONFIG.map((section) => {
+              const ids = sectionAssignments[section.key] || [];
+              const isHovered = hoveredSection === section.key;
+              return (
+                <div
+                  key={section.key}
+                  onDragOver={(e) => { e.preventDefault(); setHoveredSection(section.key); }}
+                  onDragLeave={() => setHoveredSection('')}
+                  onDrop={(e) => { e.preventDefault(); handleDropToSection(section.key); }}
+                  className={`rounded-lg border-2 p-4 transition ${isHovered ? 'border-blue-400 bg-blue-50' : 'border-dashed border-gray-300 bg-white'}`}
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-sm font-semibold text-gray-800">{section.title}</p>
+                    <span className="text-xs text-gray-400">Drop zone</span>
+                  </div>
 
-                {ids.length === 0 && (
-                  <p className="text-xs text-gray-400 italic">Drag clauses here from the clause library.</p>
-                )}
+                  {ids.length === 0 && (
+                    <p className="text-xs text-gray-400 italic">Drag clauses here from the floating editor.</p>
+                  )}
 
-                <div className="space-y-2">
-                  {ids.map((id, idx) => {
-                    const clause = clausesById.get(id);
-                    if (!clause) return null;
-                    return (
-                      <div
-                        key={id}
-                        draggable
-                        onDragStart={() => handleDragStart(id, section.key)}
-                        className="rounded-lg border border-blue-100 bg-blue-50 p-3 cursor-grab active:cursor-grabbing"
-                      >
-                        <div className="flex items-start gap-2">
-                          <GripVertical className="w-4 h-4 text-blue-400 mt-0.5 flex-shrink-0" />
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center justify-between gap-2">
-                              <p className="text-sm font-semibold text-blue-900 truncate">{clause.title}</p>
-                              <div className="flex items-center gap-1">
-                                <button
-                                  type="button"
-                                  className="text-xs px-2 py-0.5 rounded border border-blue-200 text-blue-700 hover:bg-blue-100"
-                                  onClick={() => moveClauseWithinSection(section.key, idx, Math.max(0, idx - 1))}
-                                >
-                                  Up
-                                </button>
-                                <button
-                                  type="button"
-                                  className="text-xs px-2 py-0.5 rounded border border-blue-200 text-blue-700 hover:bg-blue-100"
-                                  onClick={() => moveClauseWithinSection(section.key, idx, Math.min(ids.length - 1, idx + 1))}
-                                >
-                                  Down
-                                </button>
-                                <button
-                                  type="button"
-                                  className="text-xs px-2 py-0.5 rounded border border-red-200 text-red-600 hover:bg-red-50"
-                                  onClick={() => handleRemoveClause(id)}
-                                >
-                                  Remove
-                                </button>
+                  <div className="space-y-2">
+                    {ids.map((id, idx) => {
+                      const clause = clausesById.get(id);
+                      if (!clause) return null;
+                      return (
+                        <div
+                          key={id}
+                          draggable
+                          onDragStart={() => handleDragStart(id, section.key)}
+                          className="rounded-lg border border-blue-100 bg-blue-50 p-3 cursor-grab active:cursor-grabbing"
+                        >
+                          <div className="flex items-start gap-2">
+                            <GripVertical className="w-4 h-4 text-blue-400 mt-0.5 flex-shrink-0" />
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center justify-between gap-2">
+                                <p className="text-sm font-semibold text-blue-900 truncate">{clause.title}</p>
+                                <div className="flex items-center gap-1">
+                                  <button
+                                    type="button"
+                                    className="text-xs px-2 py-0.5 rounded border border-blue-200 text-blue-700 hover:bg-blue-100"
+                                    onClick={() => moveClauseWithinSection(section.key, idx, Math.max(0, idx - 1))}
+                                  >
+                                    Up
+                                  </button>
+                                  <button
+                                    type="button"
+                                    className="text-xs px-2 py-0.5 rounded border border-blue-200 text-blue-700 hover:bg-blue-100"
+                                    onClick={() => moveClauseWithinSection(section.key, idx, Math.min(ids.length - 1, idx + 1))}
+                                  >
+                                    Down
+                                  </button>
+                                  <button
+                                    type="button"
+                                    className="text-xs px-2 py-0.5 rounded border border-red-200 text-red-600 hover:bg-red-50"
+                                    onClick={() => handleRemoveClause(id)}
+                                  >
+                                    Remove
+                                  </button>
+                                </div>
                               </div>
+                              <p
+                                className="mt-2 text-xs text-gray-700 leading-relaxed whitespace-pre-line"
+                                dangerouslySetInnerHTML={{ __html: substituteVariables(clause.body, offerData, formData) }}
+                              />
                             </div>
-                            <p
-                              className="mt-2 text-xs text-gray-700 leading-relaxed whitespace-pre-line"
-                              dangerouslySetInnerHTML={{ __html: substituteVariables(clause.body, offerData, formData) }}
-                            />
                           </div>
                         </div>
-                      </div>
-                    );
-                  })}
+                      );
+                    })}
+                  </div>
                 </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
+      <div className="relative z-20 xl:absolute xl:top-5 xl:left-5 xl:w-[350px]">
+        <div className="bg-white/95 backdrop-blur border border-gray-200 rounded-2xl shadow-xl overflow-hidden">
+          <div className="px-4 py-3 border-b bg-gray-50">
+            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Editor</p>
+            <p className="text-sm font-semibold text-gray-800">Clause Library</p>
+          </div>
+
+          <div className="p-4 space-y-4">
+            <div className="space-y-2">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder="Search title or content..."
+                  value={search}
+                  onChange={e => setSearch(e.target.value)}
+                  className="w-full pl-8 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
               </div>
-            );
-          })}
+              <div className="flex gap-2 flex-wrap">
+                <button type="button" onClick={() => setCategoryFilter('')}
+                  className={`text-xs px-3 py-1 rounded-full border ${!categoryFilter ? 'bg-blue-600 text-white border-blue-600' : 'border-gray-300 text-gray-600 hover:bg-gray-50'}`}>
+                  All
+                </button>
+                {categories.map(cat => (
+                  <button key={cat} type="button" onClick={() => setCategoryFilter(cat)}
+                    className={`text-xs px-3 py-1 rounded-full border capitalize ${categoryFilter === cat ? 'bg-blue-600 text-white border-blue-600' : 'border-gray-300 text-gray-600 hover:bg-gray-50'}`}>
+                    {cat.replace(/_/g, ' ')}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-2 max-h-[52vh] overflow-y-auto pr-1">
+              {availableClauses.length === 0 && (
+                <p className="text-sm text-gray-400 py-3 text-center italic">No matching clauses found.</p>
+              )}
+              {availableClauses.map((clause) => (
+                <div
+                  key={clause._id}
+                  draggable
+                  onDragStart={() => handleDragStart(clause._id, 'library')}
+                  className="border rounded-lg border-gray-200 hover:border-blue-300 transition bg-white p-3 cursor-grab active:cursor-grabbing"
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <p className="font-medium text-sm text-gray-900 truncate">{clause.title}</p>
+                      <div className="mt-1 flex flex-wrap gap-1.5">
+                        <span className="text-xs px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full capitalize">
+                          {clause.category?.replace(/_/g, ' ')}
+                        </span>
+                        {clause.isDefault && (
+                          <span className="text-xs px-2 py-0.5 bg-green-100 text-green-700 rounded-full">Recommended</span>
+                        )}
+                      </div>
+                    </div>
+                    <GripVertical className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                  </div>
+                  <p className="mt-2 text-xs text-gray-500 line-clamp-2">{clause.body}</p>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     </div>
