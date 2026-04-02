@@ -34,6 +34,7 @@ export default function AdminPdfEditorPage() {
           fontSizeScale: chosen.fontSizeScale || 1,
           description: chosen.description || '',
           isDefault: !!chosen.isDefault,
+          isReceiptDefault: !!chosen.isReceiptDefault,
         });
       }
     } catch (err) {
@@ -92,6 +93,10 @@ export default function AdminPdfEditorPage() {
         await api.put(`/pdf-themes/${activeId}/set-default`);
       }
 
+      if (form.isReceiptDefault && !activeTheme?.isReceiptDefault) {
+        await api.put(`/pdf-themes/${activeId}/set-receipt-default`);
+      }
+
       toast('Theme saved', 'success');
       await loadThemes();
     } catch (err) {
@@ -129,13 +134,18 @@ export default function AdminPdfEditorPage() {
                     fontSizeScale: theme.fontSizeScale || 1,
                     description: theme.description || '',
                     isDefault: !!theme.isDefault,
+                    isReceiptDefault: !!theme.isReceiptDefault,
                   });
                 }}
                 className="w-full text-left rounded-lg border px-3 py-2"
                 style={theme._id === activeId ? { borderColor: 'var(--brand-primary)', background: 'var(--brand-primary-soft)' } : { borderColor: '#E2E8F0' }}
               >
                 <p className="text-sm font-bold text-slate-900">{theme.name}</p>
-                <p className="text-xs text-slate-500">{theme.layoutStyle}</p>
+                <p className="text-xs text-slate-500">
+                  {theme.layoutStyle}
+                  {theme.isDefault ? ' • agreement default' : ''}
+                  {theme.isReceiptDefault ? ' • receipt default' : ''}
+                </p>
               </button>
             ))}
           </div>
@@ -177,6 +187,15 @@ export default function AdminPdfEditorPage() {
             <label className="inline-flex items-center gap-2 text-sm text-slate-700">
               <input type="checkbox" checked={form.isDefault} onChange={(e) => setForm((p) => ({ ...p, isDefault: e.target.checked }))} />
               Set as Global Default
+            </label>
+
+            <label className="inline-flex items-center gap-2 text-sm text-slate-700">
+              <input
+                type="checkbox"
+                checked={form.isReceiptDefault}
+                onChange={(e) => setForm((p) => ({ ...p, isReceiptDefault: e.target.checked }))}
+              />
+              Set as Receipt Default
             </label>
 
             <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
