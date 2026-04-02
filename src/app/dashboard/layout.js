@@ -10,7 +10,7 @@ import { useUser } from '@/context/UserContext';
 import {
   LayoutDashboard, Building2, FileText, Users, Key, User, Loader2, FolderOpen, Zap,
   ShieldCheck, Wrench, MessageSquare, CreditCard, BarChart2, Scale, TrendingUp,
-  ClipboardList, X, Tag, BookOpen, Menu, BadgeCheck,
+  ClipboardList, X, Tag, BookOpen, Menu, BadgeCheck, Brush,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -50,6 +50,7 @@ const NAV_BY_ROLE = {
     { name: 'Properties', href: '/dashboard/admin/properties', icon: Building2 },
     { name: 'Clause Management', href: '/dashboard/admin/templates', icon: ClipboardList },
     { name: 'Agr. Templates', href: '/dashboard/admin/agreement-templates', icon: BookOpen },
+    { name: 'PDF Branding', href: '/dashboard/admin/pdf-editor', icon: Brush },
     { name: 'Verifications', href: '/dashboard/admin/verifications', icon: BadgeCheck },
     { name: 'Billing', href: '/dashboard/admin/billing', icon: CreditCard },
     { name: 'Disputes', href: '/dashboard/disputes', icon: Scale },

@@ -1,396 +1,278 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import {
+  AlertCircle,
+  Brush,
+  CheckCircle2,
+  Clock3,
+  FileDown,
+  Layers,
+  Palette,
+  Plus,
+  Trash2,
+  XCircle,
+} from 'lucide-react';
 import api from '@/utils/api';
 import { useUser } from '@/context/UserContext';
 import { useToast } from '@/context/ToastContext';
-import {
-  Plus, ChevronDown, ChevronUp, Loader2, Trash2, Pencil,
-  CheckCircle, Clock, XCircle, Tag, FileText, X, Save,
-} from 'lucide-react';
+import useGlobalPdfTheme from '@/hooks/useGlobalPdfTheme';
 
 const STATUS_META = {
-  pending: { label: 'Pending Review', color: '#0B2D72', bg: '#F1F5F9', border: '#E2E8F0' },
-  approved: { label: 'Approved', color: '#0B2D72', bg: '#F1F5F9', border: '#E2E8F0' },
-  rejected: { label: 'Rejected', color: '#0B2D72', bg: '#F1F5F9', border: '#E2E8F0' },
+  pending: { label: 'Pending', icon: Clock3, color: '#A16207', bg: '#FEF3C7' },
+  approved: { label: 'Approved', icon: CheckCircle2, color: '#166534', bg: '#DCFCE7' },
+  rejected: { label: 'Rejected', icon: XCircle, color: '#991B1B', bg: '#FEE2E2' },
 };
 
-const CATEGORIES = ['general', 'rent', 'deposit', 'maintenance', 'utilities', 'pets', 'termination', 'renewal', 'late_fee', 'subletting', 'noise'];
-
-// ─── Clause picker modal ──────────────────────────────────────────────────────
-function ClausePickerModal({ selected, onSave, onClose }) {
-  const [clauses, setClauses] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [picked, setPicked] = useState(new Set(selected.map(c => c._id)));
-  const [catFilter, setCat] = useState('');
-
-  useEffect(() => {
-    api.get('/agreements/clauses')
-      .then(({ data }) => setClauses(data))
-      .catch(() => { })
-      .finally(() => setLoading(false));
-  }, []);
-
-  const toggle = (id) => setPicked(prev => {
-    const next = new Set(prev);
-    next.has(id) ? next.delete(id) : next.add(id);
-    return next;
-  });
-
-  const filtered = catFilter ? clauses.filter(c => c.category === catFilter) : clauses;
-  const categories = [...new Set(clauses.map(c => c.category))].sort();
+function ThemePickerModal({ open, themes, onClose, onPick }) {
+  if (!open) return null;
 
   return (
-    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
-      <div style={{ background: 'white', borderRadius: 20, width: '100%', maxWidth: 620, maxHeight: '80vh', display: 'flex', flexDirection: 'column', overflow: 'hidden', boxShadow: '0 24px 80px rgba(0,0,0,0.18)' }}>
-        {/* Header */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 24px 16px', borderBottom: '1px solid #F1F5F9' }}>
+    <div className="fixed inset-0 z-50 bg-black/50 p-4 sm:p-8 flex items-center justify-center" onClick={(e) => e.target === e.currentTarget && onClose()}>
+      <div className="w-full max-w-5xl max-h-[88vh] bg-white rounded-2xl overflow-hidden border border-slate-200 shadow-2xl">
+        <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
           <div>
-            <h3 style={{ fontWeight: 800, fontSize: '1.05rem', color: '#0F172A', margin: 0 }}>Select Clauses</h3>
-            <p style={{ fontSize: '0.78rem', color: '#94A3B8', margin: '3px 0 0' }}>{picked.size} selected</p>
+            <h2 className="text-xl font-extrabold text-slate-900">Choose Base Layout</h2>
+            <p className="text-sm text-slate-500">Pick a global theme to start your branded PDF template.</p>
           </div>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#94A3B8' }}><X size={20} /></button>
+          <button onClick={onClose} className="text-sm font-semibold text-slate-500 hover:text-slate-700">Close</button>
         </div>
 
-        {/* Category filter */}
-        <div style={{ padding: '12px 24px', display: 'flex', gap: 6, flexWrap: 'wrap', borderBottom: '1px solid #F8FAFC' }}>
-          <button onClick={() => setCat('')} className="bg-[#E6EAF2] text-[#0B2D72] border border-[#CBD5E1] hover:bg-[#DBE2ED] transition-colors" style={{ padding: '4px 12px', borderRadius: 20, fontSize: '0.72rem', fontWeight: 700, cursor: 'pointer' }}>All</button>
-          {categories.map(c => (
-            <button key={c} onClick={() => setCat(c)} className="bg-[#E6EAF2] text-[#0B2D72] border border-[#CBD5E1] hover:bg-[#DBE2ED] transition-colors" style={{ padding: '4px 12px', borderRadius: 20, fontSize: '0.72rem', fontWeight: 700, cursor: 'pointer', textTransform: 'capitalize' }}>{c.replace('_', ' ')}</button>
-          ))}
-        </div>
+        <div className="p-6 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 overflow-y-auto max-h-[72vh]">
+          {themes.map((theme) => (
+            <div key={theme._id} className="rounded-xl border border-slate-200 bg-white p-4 hover:border-slate-400 transition">
+              <div className="flex items-center justify-between">
+                <p className="text-sm font-bold text-slate-900">{theme.name}</p>
+                {theme.isDefault && <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-900 text-white font-bold">Default</span>}
+              </div>
+              <p className="text-xs text-slate-500 mt-1 min-h-8">{theme.description || 'Global branding preset'}</p>
 
-        {/* List */}
-        <div style={{ overflowY: 'auto', flex: 1, padding: '12px 24px' }}>
-          {loading ? (
-            <div style={{ display: 'flex', justifyContent: 'center', padding: 32 }}><Loader2 className="animate-spin" size={24} color="#2563EB" /></div>
-          ) : filtered.length === 0 ? (
-            <p style={{ textAlign: 'center', color: '#94A3B8', padding: 32, fontSize: '0.85rem' }}>No clauses found</p>
-          ) : (
-            filtered.map(clause => {
-              const isSelected = picked.has(clause._id);
-              return (
-                <div key={clause._id} onClick={() => toggle(clause._id)} className="hover:bg-[#DBE2ED]" style={{ display: 'flex', alignItems: 'flex-start', gap: 12, padding: '12px', borderRadius: 12, border: `1.5px solid ${isSelected ? '#0B2D72' : '#F1F5F9'}`, background: isSelected ? '#F1F5F9' : 'white', marginBottom: 8, cursor: 'pointer', transition: 'all 0.15s' }}>
-                  <div style={{ width: 20, height: 20, borderRadius: 5, border: `2px solid ${isSelected ? '#0B2D72' : '#CBD5E1'}`, background: isSelected ? '#0B2D72' : 'white', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: 1 }}>
-                    {isSelected && <CheckCircle size={12} color="white" />}
-                  </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                      <span style={{ fontWeight: 700, fontSize: '0.88rem', color: '#0F172A' }}>{clause.title}</span>
-                      <span className="bg-[#E6EAF2] text-[#0B2D72] border border-[#CBD5E1]" style={{ fontSize: '0.65rem', padding: '2px 8px', borderRadius: 20, fontWeight: 700 }}>
-                        Approved
-                      </span>
-                    </div>
-                    <p style={{ fontSize: '0.75rem', color: '#64748B', margin: '4px 0 0', textTransform: 'capitalize' }}>{clause.category?.replace('_', ' ')}</p>
-                    <p style={{ fontSize: '0.75rem', color: '#94A3B8', margin: '4px 0 0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{clause.body}</p>
-                  </div>
-                </div>
-              );
-            })
-          )}
-        </div>
+              <div className="mt-3 flex items-center gap-2">
+                <span className="w-5 h-5 rounded-full border border-slate-200" style={{ background: theme.primaryColor }} />
+                <span className="w-5 h-5 rounded-full border border-slate-200" style={{ background: theme.accentColor }} />
+                <span className="w-5 h-5 rounded-full border border-slate-200" style={{ background: theme.backgroundColor }} />
+              </div>
 
-        {/* Footer */}
-        <div style={{ padding: '16px 24px', borderTop: '1px solid #F1F5F9', display: 'flex', gap: 10 }}>
-          <button onClick={onClose} className="bg-white text-[#0B2D72] border border-[#CBD5E1] hover:bg-[#DBE2ED] transition-colors" style={{ flex: 1, padding: '10px', borderRadius: 10, fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer' }}>Cancel</button>
-          <button onClick={() => onSave(clauses.filter(c => picked.has(c._id)))} className="bg-[#E6EAF2] text-[#0B2D72] border border-[#CBD5E1] hover:bg-[#DBE2ED] transition-colors" style={{ flex: 2, padding: '10px', borderRadius: 10, fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer' }}>
-            Attach {picked.size} Clause{picked.size !== 1 ? 's' : ''}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
+              <div className="mt-4 h-24 rounded-lg border border-slate-200 p-3" style={{ background: theme.backgroundColor || '#fff' }}>
+                <div className="h-2.5 rounded-full" style={{ background: theme.primaryColor }} />
+                <div className="h-2 rounded-full mt-2 w-3/4" style={{ background: theme.accentColor }} />
+                <div className="h-2 rounded-full mt-2 w-1/2 bg-slate-200" />
+              </div>
 
-// ─── Template form (create / edit) ───────────────────────────────────────────
-function TemplateForm({ initial, onSave, onCancel, saving }) {
-  const { toast } = useToast();
-  const [name, setName] = useState(initial?.name || '');
-  const [desc, setDesc] = useState(initial?.description || '');
-  const [clauses, setClauses] = useState(initial?.clauseIds || []);
-  const [showPicker, setShowPicker] = useState(false);
-
-  const handleSubmit = () => {
-    if (!name.trim()) { toast('Template name is required', 'info'); return; }
-    onSave({ name, description: desc, clauseIds: clauses.map(c => c._id) });
-  };
-
-  return (
-    <>
-      {showPicker && (
-        <ClausePickerModal
-          selected={clauses}
-          onSave={(selected) => { setClauses(selected); setShowPicker(false); }}
-          onClose={() => setShowPicker(false)}
-        />
-      )}
-
-      <div style={{ background: 'white', border: '1.5px solid #E2E8F0', borderRadius: 16, padding: 24, marginBottom: 20 }}>
-        <h3 style={{ fontWeight: 800, fontSize: '1rem', color: '#0F172A', margin: '0 0 16px' }}>
-          {initial ? 'Edit Template' : 'New Agreement Template'}
-        </h3>
-
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-          <div>
-            <label style={{ fontSize: '0.75rem', fontWeight: 700, color: '#64748B', display: 'block', marginBottom: 5 }}>Template Name *</label>
-            <input value={name} onChange={e => setName(e.target.value)} placeholder='e.g. "Standard 1-Year Residential"'
-              style={{ width: '100%', padding: '10px 12px', border: '1.5px solid #E2E8F0', borderRadius: 10, fontSize: '0.9rem', outline: 'none', boxSizing: 'border-box' }} />
-          </div>
-
-          <div>
-            <label style={{ fontSize: '0.75rem', fontWeight: 700, color: '#64748B', display: 'block', marginBottom: 5 }}>Description (optional)</label>
-            <textarea value={desc} onChange={e => setDesc(e.target.value)} rows={2} placeholder="What kind of lease is this template for?"
-              style={{ width: '100%', padding: '10px 12px', border: '1.5px solid #E2E8F0', borderRadius: 10, fontSize: '0.85rem', outline: 'none', resize: 'vertical', boxSizing: 'border-box' }} />
-          </div>
-
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-              <label style={{ fontSize: '0.75rem', fontWeight: 700, color: '#64748B' }}>Clauses ({clauses.length})</label>
-              <button onClick={() => setShowPicker(true)} className="text-[#0B2D72]" style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: '0.75rem', fontWeight: 700, background: 'none', border: 'none', cursor: 'pointer' }}>
-                <Tag size={13} className="text-[#0B2D72]" /> {clauses.length > 0 ? 'Edit Clauses' : 'Add Clauses'}
+              <button
+                onClick={() => onPick(theme)}
+                className="mt-4 w-full rounded-lg px-3 py-2 text-sm font-bold border"
+                style={{ borderColor: theme.primaryColor, color: theme.primaryColor, background: 'white' }}
+              >
+                Choose
               </button>
             </div>
-            {clauses.length > 0 ? (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                {clauses.map(c => (
-                  <div key={c._id} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', background: '#F8FAFC', borderRadius: 8, border: '1px solid #F1F5F9' }}>
-                    <Tag size={12} className="text-[#0B2D72]" />
-                    <span style={{ fontSize: '0.82rem', fontWeight: 600, color: '#0F172A', flex: 1 }}>{c.title}</span>
-                    <span className="text-[#0B2D72]" style={{ fontSize: '0.65rem', fontWeight: 700 }}>
-                      {c.isApproved ? '✓ Approved' : '⏳ Pending'}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div style={{ padding: '16px', background: '#F8FAFC', borderRadius: 10, border: '2px dashed #E2E8F0', textAlign: 'center', fontSize: '0.8rem', color: '#94A3B8' }}>
-                No clauses added yet. Click "Add Clauses" to pick from the library.
-              </div>
-            )}
-          </div>
-
-          <div style={{ display: 'flex', gap: 10, paddingTop: 4 }}>
-            <button onClick={onCancel} className="bg-white text-[#0B2D72] border border-[#CBD5E1] hover:bg-[#DBE2ED] transition-colors" style={{ flex: 1, padding: '10px', borderRadius: 10, fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer' }}>Cancel</button>
-            <button onClick={handleSubmit} disabled={saving} className="bg-[#E6EAF2] text-[#0B2D72] border border-[#CBD5E1] hover:bg-[#DBE2ED] transition-colors" style={{ flex: 2, padding: '10px', borderRadius: 10, fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, opacity: saving ? 0.7 : 1 }}>
-              {saving ? <Loader2 size={15} className="animate-spin" /> : <Save size={15} />}
-              {initial ? 'Save Changes' : 'Create Template'}
-            </button>
-          </div>
+          ))}
         </div>
       </div>
-    </>
-  );
-}
-
-// ─── Template card ────────────────────────────────────────────────────────────
-function TemplateCard({ template, onEdit, onDelete, deleting }) {
-  const [expanded, setExpanded] = useState(false);
-  const meta = STATUS_META[template.status] || STATUS_META.pending;
-
-  return (
-    <div style={{ background: 'white', borderRadius: 16, border: '1.5px solid #E2E8F0', overflow: 'hidden', boxShadow: '0 1px 4px rgba(15,23,42,0.04)' }}>
-      {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '16px 20px', cursor: 'pointer' }} onClick={() => setExpanded(e => !e)}>
-        <div style={{ width: 42, height: 42, borderRadius: 12, background: '#F1F5F9', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-          <FileText size={18} className="text-[#0B2D72]" />
-        </div>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-            <span style={{ fontWeight: 800, fontSize: '0.95rem', color: '#0F172A' }}>{template.name}</span>
-            <span style={{ padding: '3px 10px', borderRadius: 20, fontSize: '0.68rem', fontWeight: 700, background: meta.bg, color: meta.color, border: `1px solid ${meta.border}` }}>{meta.label}</span>
-          </div>
-          <p style={{ fontSize: '0.76rem', color: '#64748B', margin: '3px 0 0' }}>
-            {template.clauseIds?.length || 0} clause{template.clauseIds?.length !== 1 ? 's' : ''}
-            {template.description ? ` · ${template.description}` : ''}
-          </p>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
-          <button onClick={e => { e.stopPropagation(); onEdit(template); }} className="bg-[#E6EAF2] text-[#0B2D72] border border-[#CBD5E1] hover:bg-[#DBE2ED] transition-colors" style={{ padding: '7px 12px', borderRadius: 8, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5, fontSize: '0.75rem', fontWeight: 700 }}>
-            <Pencil size={12} /> Edit
-          </button>
-          <button onClick={e => { e.stopPropagation(); onDelete(template._id); }} disabled={deleting === template._id} className="bg-[#E6EAF2] text-[#0B2D72] border border-[#CBD5E1] hover:bg-[#DBE2ED] transition-colors" style={{ padding: '7px 12px', borderRadius: 8, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5, fontSize: '0.75rem', fontWeight: 700, opacity: deleting === template._id ? 0.5 : 1 }}>
-            {deleting === template._id ? <Loader2 size={12} className="animate-spin" /> : <Trash2 size={12} />}
-          </button>
-          {expanded ? <ChevronUp size={16} color="#94A3B8" /> : <ChevronDown size={16} color="#94A3B8" />}
-        </div>
-      </div>
-
-      {/* Expanded clauses */}
-      {expanded && (
-        <div style={{ borderTop: '1px solid #F8FAFC', padding: '14px 20px' }}>
-          {template.status === 'rejected' && template.rejectionReason && (
-            <div style={{ padding: '10px 14px', background: '#FFF7F7', border: '1px solid #FECACA', borderRadius: 10, marginBottom: 12, fontSize: '0.8rem', color: '#DC2626' }}>
-              <strong>Rejected:</strong> {template.rejectionReason}
-            </div>
-          )}
-          {template.status === 'pending' && (
-            <div style={{ padding: '10px 14px', background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: 10, marginBottom: 12, fontSize: '0.8rem', color: '#92400E' }}>
-              ⏳ This template is awaiting admin review. Your clauses are approved — the template itself needs a one-time admin sign-off before it can be used in lease creation.
-            </div>
-          )}
-          {(!template.clauseIds || template.clauseIds.length === 0) ? (
-            <p style={{ fontSize: '0.82rem', color: '#94A3B8', fontStyle: 'italic' }}>No clauses in this template.</p>
-          ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              {template.clauseIds.map(c => (
-                <div key={c._id} style={{ padding: '10px 14px', background: '#F8FAFC', borderRadius: 10, border: '1px solid #F1F5F9' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-                    <Tag size={12} className="text-[#0B2D72]" />
-                    <span style={{ fontWeight: 700, fontSize: '0.85rem', color: '#0F172A' }}>{c.title}</span>
-                    <span className="bg-[#E6EAF2] text-[#0B2D72] border border-[#CBD5E1]" style={{ fontSize: '0.65rem', padding: '2px 7px', borderRadius: 20, fontWeight: 700 }}>
-                      {c.isApproved ? 'Approved' : 'Pending Review'}
-                    </span>
-                  </div>
-                  <p style={{ fontSize: '0.75rem', color: '#64748B', margin: 0, fontStyle: 'italic' }}>{c.body?.slice(0, 140)}{c.body?.length > 140 ? '…' : ''}</p>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
     </div>
   );
 }
 
-// ─── Main page ────────────────────────────────────────────────────────────────
+function StatusBadge({ status }) {
+  const meta = STATUS_META[status] || STATUS_META.pending;
+  const Icon = meta.icon;
+
+  return (
+    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold" style={{ color: meta.color, background: meta.bg }}>
+      <Icon size={12} /> {meta.label}
+    </span>
+  );
+}
+
 export default function AgreementTemplatesPage() {
   const router = useRouter();
-  const { user: parsed } = useUser();
+  const { user } = useUser();
   const { toast } = useToast();
+  const { themes, cssVars } = useGlobalPdfTheme();
+
   const [templates, setTemplates] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [showForm, setShowForm] = useState(false);
-  const [editing, setEditing] = useState(null);
-  const [saving, setSaving] = useState(false);
-  const [deleting, setDeleting] = useState(null);
+  const [showThemePicker, setShowThemePicker] = useState(false);
+  const [deleting, setDeleting] = useState('');
 
   const fetchTemplates = useCallback(async () => {
     try {
       const { data } = await api.get('/agreement-templates');
-      // Backend returns { templates: [...], jurisdictions: [...] }
-      setTemplates(Array.isArray(data) ? data : (data.templates || []));
-    } catch { /* silent */ }
-    finally { setLoading(false); }
-  }, []);
+      setTemplates(Array.isArray(data) ? data : []);
+    } catch (err) {
+      toast(err.response?.data?.message || 'Failed to load templates', 'error');
+    } finally {
+      setLoading(false);
+    }
+  }, [toast]);
 
   useEffect(() => {
-    if (!['landlord', 'property_manager'].includes(parsed?.role)) { router.push('/dashboard'); return; }
-    // Landlords need enterprise plan for agreement templates
-    if (parsed?.role === 'landlord' && parsed?.subscriptionTier !== 'enterprise') {
-      router.push('/dashboard/billing');
+    if (!['landlord', 'property_manager'].includes(user?.role)) {
+      router.push('/dashboard');
       return;
     }
     fetchTemplates();
-  }, []); // eslint-disable-line
+  }, [user, router, fetchTemplates]);
 
-  const handleSave = async (form) => {
-    setSaving(true);
-    try {
-      if (editing) {
-        await api.put(`/agreement-templates/${editing._id}`, form);
-        toast('Template updated — pending admin review', 'success');
-      } else {
-        await api.post('/agreement-templates', form);
-        toast('Template created — pending admin review', 'success');
-      }
-      setShowForm(false);
-      setEditing(null);
-      fetchTemplates();
-    } catch (err) {
-      toast(err.response?.data?.message || 'Save failed', 'error');
-    } finally {
-      setSaving(false);
-    }
-  };
+  const onDelete = async (id) => {
+    if (!confirm('Archive this template?')) return;
 
-  const handleDelete = async (id) => {
-    if (!confirm('Delete this template?')) return;
     setDeleting(id);
     try {
       await api.delete(`/agreement-templates/${id}`);
-      toast('Template deleted', 'success');
-      fetchTemplates();
+      setTemplates((prev) => prev.filter((t) => t._id !== id));
+      toast('Template archived', 'success');
     } catch (err) {
-      toast(err.response?.data?.message || 'Delete failed', 'error');
+      toast(err.response?.data?.message || 'Failed to archive template', 'error');
     } finally {
-      setDeleting(null);
+      setDeleting('');
     }
   };
 
-  const startEdit = (template) => { setEditing(template); setShowForm(true); };
-  const startCreate = () => { setEditing(null); setShowForm(true); };
-  const cancelForm = () => { setShowForm(false); setEditing(null); };
+  const previewTemplate = async (template) => {
+    try {
+      const params = {
+        primaryColor: template.customizations?.primaryColor || undefined,
+        accentColor: template.customizations?.accentColor || undefined,
+        backgroundColor: template.customizations?.backgroundColor || undefined,
+        fontFamily: template.customizations?.fontFamily || undefined,
+        fontSizeScale: template.customizations?.fontSizeScale || undefined,
+      };
 
-  const approved = templates.filter(t => t.status === 'approved');
-  const pending = templates.filter(t => t.status === 'pending');
-  const rejected = templates.filter(t => t.status === 'rejected');
+      const { data } = await api.get(`/pdf-themes/${template.baseTheme?._id || template.baseTheme}/preview`, {
+        params,
+        responseType: 'blob',
+      });
 
-  if (loading) return (
-    <div style={{ display: 'flex', justifyContent: 'center', padding: 60 }}>
-      <Loader2 className="animate-spin" size={30} color="#2563EB" />
-    </div>
-  );
+      const url = URL.createObjectURL(new Blob([data], { type: 'application/pdf' }));
+      window.open(url, '_blank');
+    } catch {
+      toast('Preview unavailable for this template right now', 'error');
+    }
+  };
+
+  const grouped = useMemo(() => ({
+    pending: templates.filter((t) => t.status === 'pending'),
+    approved: templates.filter((t) => t.status === 'approved'),
+    rejected: templates.filter((t) => t.status === 'rejected'),
+  }), [templates]);
 
   return (
-    <div style={{ maxWidth: 860, margin: '0 auto', paddingBottom: 60 }}>
+    <div style={cssVars} className="max-w-6xl mx-auto pb-10">
+      <ThemePickerModal
+        open={showThemePicker}
+        themes={themes}
+        onClose={() => setShowThemePicker(false)}
+        onPick={(theme) => router.push(`/dashboard/agreement-templates/new?themeId=${theme._id}`)}
+      />
 
-      {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24, flexWrap: 'wrap', gap: 12 }}>
-        <div>
-          <h1 style={{ fontWeight: 800, fontSize: '1.7rem', color: '#0F172A', margin: 0, letterSpacing: '-0.02em' }}>Agreement Templates</h1>
-          <p style={{ color: '#64748B', fontSize: '0.85rem', marginTop: 4 }}>
-            Create reusable clause bundles. When accepting a tenant's offer, pick a template and it will be pre-attached to the agreement.
-          </p>
-        </div>
-        {!showForm && (
-          <button onClick={startCreate} className="bg-[#E6EAF2] text-[#0B2D72] border border-[#CBD5E1] hover:bg-[#DBE2ED] transition-colors" style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '10px 18px', borderRadius: 12, fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer' }}>
-            <Plus size={16} /> New Template
-          </button>
-        )}
-      </div>
-
-      {/* Form */}
-      {showForm && (
-        <TemplateForm initial={editing} onSave={handleSave} onCancel={cancelForm} saving={saving} />
-      )}
-
-      {/* Info banner */}
-      <div style={{ padding: '12px 16px', background: '#EFF6FF', border: '1px solid #BFDBFE', borderRadius: 12, marginBottom: 20, fontSize: '0.8rem', color: '#1D4ED8', display: 'flex', alignItems: 'flex-start', gap: 8 }}>
-        <Clock size={14} style={{ flexShrink: 0, marginTop: 1 }} />
-        <span>All new and edited templates require <strong>admin approval</strong> before they can be used when accepting offers. Approved templates are shown in the offer acceptance flow.</span>
-      </div>
-
-      {/* Empty state */}
-      {templates.length === 0 && !showForm && (
-        <div style={{ textAlign: 'center', padding: '60px 20px', background: 'white', borderRadius: 16, border: '2px dashed #E2E8F0' }}>
-          <FileText size={48} color="#CBD5E1" style={{ margin: '0 auto 12px' }} />
-          <h3 style={{ fontWeight: 700, color: '#475569', fontSize: '1.05rem', marginBottom: 6 }}>No templates yet</h3>
-          <p style={{ color: '#94A3B8', fontSize: '0.85rem', marginBottom: 20 }}>Create your first agreement template to speed up the lease creation process.</p>
-          <button onClick={startCreate} className="bg-[#E6EAF2] text-[#0B2D72] border border-[#CBD5E1] hover:bg-[#DBE2ED] transition-colors" style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '10px 20px', borderRadius: 12, fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer' }}>
-            <Plus size={15} /> Create Template
+      <div className="rounded-2xl p-6 border mb-6" style={{ borderColor: 'var(--brand-border)', background: 'linear-gradient(145deg, var(--brand-bg), #ffffff)' }}>
+        <div className="flex flex-wrap gap-4 items-end justify-between">
+          <div>
+            <p className="text-xs uppercase tracking-[0.16em] font-bold" style={{ color: 'var(--brand-primary)' }}>Landlord Studio</p>
+            <h1 className="text-3xl font-extrabold text-slate-900">My PDF Templates</h1>
+            <p className="text-sm text-slate-600 mt-1">Create branded agreement PDFs using global base layouts, then submit for admin approval.</p>
+          </div>
+          <button
+            onClick={() => setShowThemePicker(true)}
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold border"
+            style={{ background: 'var(--brand-primary)', color: 'white', borderColor: 'var(--brand-primary)' }}
+          >
+            <Plus size={16} /> Create New Template
           </button>
         </div>
+      </div>
+
+      {loading && <p className="text-sm text-slate-500">Loading templates...</p>}
+
+      {!loading && templates.length === 0 && (
+        <div className="rounded-2xl border-2 border-dashed p-10 text-center" style={{ borderColor: 'var(--brand-border)', background: 'white' }}>
+          <Palette size={36} className="mx-auto mb-3" style={{ color: 'var(--brand-primary)' }} />
+          <p className="text-xl font-bold text-slate-800">No templates yet</p>
+          <p className="text-sm text-slate-500 mt-1">Start by choosing a base layout and customizing colors, typography, and clause language.</p>
+          <button
+            onClick={() => setShowThemePicker(true)}
+            className="mt-4 px-4 py-2 rounded-lg text-sm font-bold border"
+            style={{ borderColor: 'var(--brand-primary)', color: 'var(--brand-primary)' }}
+          >
+            Create your first template
+          </button>
+        </div>
       )}
 
-      {/* Sections */}
-      {[
-        { list: approved, title: 'Approved', icon: <CheckCircle size={15} color="#16A34A" />, color: '#16A34A' },
-        { list: pending, title: 'Pending Review', icon: <Clock size={15} color="#D97706" />, color: '#D97706' },
-        { list: rejected, title: 'Rejected', icon: <XCircle size={15} color="#DC2626" />, color: '#DC2626' },
-      ].map(({ list, title, icon, color }) => list.length > 0 && (
-        <div key={title} style={{ marginBottom: 28 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 12 }}>
-            {icon}
-            <h2 style={{ fontWeight: 800, fontSize: '0.85rem', color, margin: 0, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{title} ({list.length})</h2>
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            {list.map(t => (
-              <TemplateCard key={t._id} template={t} onEdit={startEdit} onDelete={handleDelete} deleting={deleting} />
-            ))}
-          </div>
+      {!loading && templates.length > 0 && (
+        <div className="space-y-8">
+          {Object.entries(grouped).map(([key, list]) => {
+            if (list.length === 0) return null;
+
+            return (
+              <section key={key}>
+                <h2 className="text-sm font-extrabold uppercase tracking-[0.12em] mb-3" style={{ color: 'var(--brand-primary)' }}>
+                  {key} ({list.length})
+                </h2>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                  {list.map((template) => (
+                    <article key={template._id} className="rounded-2xl border p-4 bg-white shadow-sm" style={{ borderColor: 'var(--brand-border)' }}>
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <p className="font-bold text-slate-900">{template.name}</p>
+                          <p className="text-xs text-slate-500 mt-1 line-clamp-2">{template.description || 'No description'}</p>
+                        </div>
+                        <StatusBadge status={template.status} />
+                      </div>
+
+                      <div className="mt-3 flex items-center gap-2 text-xs text-slate-600">
+                        <Layers size={13} />
+                        <span>{template.baseTheme?.name || 'Base theme'}</span>
+                      </div>
+
+                      <div className="mt-3 flex items-center gap-2">
+                        <span className="w-4 h-4 rounded-full border border-slate-200" style={{ background: template.customizations?.primaryColor || template.baseTheme?.primaryColor }} />
+                        <span className="w-4 h-4 rounded-full border border-slate-200" style={{ background: template.customizations?.accentColor || template.baseTheme?.accentColor }} />
+                        <span className="w-4 h-4 rounded-full border border-slate-200" style={{ background: template.customizations?.backgroundColor || template.baseTheme?.backgroundColor }} />
+                      </div>
+
+                      {template.status === 'rejected' && template.rejectionReason && (
+                        <div className="mt-3 rounded-lg border px-3 py-2 text-xs" style={{ borderColor: '#FCA5A5', background: '#FEF2F2', color: '#991B1B' }}>
+                          <p className="font-bold inline-flex items-center gap-1"><AlertCircle size={12} /> Rejection feedback</p>
+                          <p className="mt-1">{template.rejectionReason}</p>
+                        </div>
+                      )}
+
+                      <div className="mt-4 flex items-center gap-2">
+                        <button
+                          onClick={() => router.push(`/dashboard/agreement-templates/${template._id}/edit`)}
+                          className="flex-1 px-3 py-2 rounded-lg text-xs font-bold border"
+                          style={{ borderColor: 'var(--brand-primary)', color: 'var(--brand-primary)' }}
+                        >
+                          <span className="inline-flex items-center gap-1"><Brush size={12} /> {template.status === 'approved' ? 'View' : 'Edit'}</span>
+                        </button>
+                        <button
+                          onClick={() => previewTemplate(template)}
+                          className="flex-1 px-3 py-2 rounded-lg text-xs font-bold border"
+                          style={{ borderColor: 'var(--brand-accent)', color: 'var(--brand-accent)' }}
+                        >
+                          <span className="inline-flex items-center gap-1"><FileDown size={12} /> Preview</span>
+                        </button>
+                        <button
+                          onClick={() => onDelete(template._id)}
+                          disabled={deleting === template._id}
+                          className="px-3 py-2 rounded-lg text-xs font-bold border text-red-700 border-red-200"
+                        >
+                          <Trash2 size={12} />
+                        </button>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              </section>
+            );
+          })}
         </div>
-      ))}
+      )}
     </div>
   );
 }

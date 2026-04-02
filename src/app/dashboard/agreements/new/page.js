@@ -85,31 +85,35 @@ function FlowTracker({ offerData }) {
 // ─── Template Picker Modal ────────────────────────────────────────────────────
 function TemplatePicker({ onApply, onClose }) {
   const [templates, setTemplates] = useState([]);
+  const [themes, setThemes] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('templates');
   const [applying, setApplying] = useState(null);
 
   useEffect(() => {
-    api.get('/agreement-templates')
+    api.get('/agreement-templates/available')
       .then(({ data }) => {
-        const tpls = data.templates || data;
-        setTemplates(Array.isArray(tpls) ? tpls.filter(t => t.status === 'approved') : []);
+        setTemplates(Array.isArray(data?.templates) ? data.templates : []);
+        setThemes(Array.isArray(data?.themes) ? data.themes : []);
       })
-      .catch(() => setTemplates([]))
+      .catch(() => {
+        setTemplates([]);
+        setThemes([]);
+      })
       .finally(() => setLoading(false));
   }, []);
 
-  const handleSelect = async (tpl) => {
+  const handleSelectTemplate = async (tpl) => {
     setApplying(tpl._id);
     try {
       await api.post(`/agreement-templates/${tpl._id}/use`);
-      const clauseIds = (tpl.clauseIds || []).map(c => c._id || c);
-      onApply(clauseIds, tpl.name);
-    } catch {
-      const clauseIds = (tpl.clauseIds || []).map(c => c._id || c);
-      onApply(clauseIds, tpl.name);
-    } finally {
-      setApplying(null);
-    }
+    } catch { }
+    onApply({ type: 'template', id: tpl._id, name: tpl.name });
+    setApplying(null);
+  };
+
+  const handleSelectTheme = (theme) => {
+    onApply({ type: 'theme', id: theme._id, name: theme.name });
   };
 
   return (
@@ -117,29 +121,48 @@ function TemplatePicker({ onApply, onClose }) {
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50"
       onClick={e => e.target === e.currentTarget && onClose()}
     >
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[80vh] flex flex-col overflow-hidden">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[84vh] flex flex-col overflow-hidden">
         <div className="flex items-center justify-between px-5 py-4 border-b bg-gray-50">
           <div className="flex items-center gap-2 font-bold text-gray-800">
             <LayoutTemplate className="w-5 h-5 text-blue-600" />
-            Agreement Templates
+            PDF Template Selection
           </div>
           <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-gray-200 transition text-gray-500">
             <X className="w-5 h-5" />
           </button>
         </div>
 
+        <div className="px-5 py-3 border-b bg-white flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setActiveTab('templates')}
+            className={`px-3 py-1.5 rounded-full text-xs font-semibold border ${activeTab === 'templates' ? 'bg-blue-600 text-white border-blue-600' : 'border-gray-300 text-gray-600'}`}
+          >
+            My Templates ({templates.length})
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('themes')}
+            className={`px-3 py-1.5 rounded-full text-xs font-semibold border ${activeTab === 'themes' ? 'bg-blue-600 text-white border-blue-600' : 'border-gray-300 text-gray-600'}`}
+          >
+            Default Themes ({themes.length})
+          </button>
+        </div>
+
         <div className="flex-1 overflow-y-auto p-4 space-y-3">
           {loading && (
             <div className="flex items-center justify-center py-10 gap-2 text-gray-400">
-              <Loader2 className="animate-spin w-5 h-5" /> Loading templates…
+              <Loader2 className="animate-spin w-5 h-5" /> Loading choices...
             </div>
           )}
-          {!loading && templates.length === 0 && (
+
+          {!loading && activeTab === 'templates' && templates.length === 0 && (
             <p className="text-sm text-gray-400 text-center py-8 italic">
-              No approved templates available. Ask an admin to create and approve templates.
+              No approved personal templates available yet.
             </p>
           )}
-          {!loading && templates.map(tpl => (
+
+          {!loading && activeTab === 'templates' && templates.map(tpl => (
             <div key={tpl._id} className="border border-gray-200 rounded-xl p-4 hover:border-blue-300 hover:bg-blue-50/30 transition">
               <div className="flex items-start justify-between gap-3">
                 <div className="flex-1 min-w-0">
@@ -147,13 +170,11 @@ function TemplatePicker({ onApply, onClose }) {
                   {tpl.description && (
                     <p className="text-xs text-gray-500 mt-0.5 line-clamp-2">{tpl.description}</p>
                   )}
-                  <p className="text-xs text-blue-600 mt-1">
-                    {(tpl.clauseIds || []).length} clause{(tpl.clauseIds || []).length !== 1 ? 's' : ''} included
-                  </p>
+                  <p className="text-xs text-blue-600 mt-1">Base: {tpl.baseTheme?.name || 'Theme'} </p>
                 </div>
                 <button
                   type="button"
-                  onClick={() => handleSelect(tpl)}
+                  onClick={() => handleSelectTemplate(tpl)}
                   disabled={!!applying}
                   className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 text-white text-xs font-semibold rounded-lg hover:bg-blue-700 disabled:opacity-60 transition shrink-0"
                 >
@@ -165,11 +186,34 @@ function TemplatePicker({ onApply, onClose }) {
               </div>
             </div>
           ))}
+
+          {!loading && activeTab === 'themes' && themes.map(theme => (
+            <div key={theme._id} className="border border-gray-200 rounded-xl p-4 hover:border-blue-300 hover:bg-blue-50/30 transition">
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex-1 min-w-0">
+                  <h4 className="font-semibold text-gray-900 text-sm">{theme.name}</h4>
+                  <p className="text-xs text-gray-500 mt-0.5 line-clamp-2">{theme.description || 'Global theme option'}</p>
+                  <div className="mt-2 flex items-center gap-2">
+                    <span className="w-3.5 h-3.5 rounded-full border border-gray-300" style={{ background: theme.primaryColor }} />
+                    <span className="w-3.5 h-3.5 rounded-full border border-gray-300" style={{ background: theme.accentColor }} />
+                    <span className="w-3.5 h-3.5 rounded-full border border-gray-300" style={{ background: theme.backgroundColor }} />
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => handleSelectTheme(theme)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 text-white text-xs font-semibold rounded-lg hover:bg-blue-700 transition shrink-0"
+                >
+                  <LayoutTemplate className="w-3 h-3" /> Use
+                </button>
+              </div>
+            </div>
+          ))}
         </div>
 
         <div className="px-5 py-3 border-t bg-gray-50">
           <p className="text-xs text-gray-400">
-            Applying a template loads its clauses. You can still add or remove individual clauses after.
+            Pick either an approved custom template or a default global theme for the generated agreement PDF.
           </p>
         </div>
       </div>
@@ -334,8 +378,7 @@ function AgreementComposer({
   onFinish = () => {},
   saving = false,
   onCancel = () => {},
-  appliedTemplate = '',
-  onRemoveTemplate = () => {},
+  pdfSelection = null,
 }) {
   const { formatMoney } = useCurrency();
   const [clauses, setClauses] = useState([]);
@@ -354,15 +397,16 @@ function AgreementComposer({
   const panelDragOffsetRef = useRef({ x: 0, y: 0 });
 
   useEffect(() => {
-    const onResize = () => setIsMobile(window.innerWidth < 1024);
+    const onResize = () => {
+      const mobile = window.innerWidth < 1024;
+      setIsMobile(mobile);
+      if (!mobile) setMobilePanelOpen(true);
+    };
+
     onResize();
     window.addEventListener('resize', onResize);
     return () => window.removeEventListener('resize', onResize);
   }, []);
-
-  useEffect(() => {
-    if (!isMobile) setMobilePanelOpen(true);
-  }, [isMobile]);
 
   useEffect(() => {
     api.get('/agreements/clauses')
@@ -370,28 +414,6 @@ function AgreementComposer({
       .catch(() => setClauses([]))
       .finally(() => setLoading(false));
   }, []);
-
-  useEffect(() => {
-    setClauseBuckets((prev) => {
-      const normalized = selectedClauseIds.map((id) => String(id));
-      const currentFilledIds = prev.map((b) => b.clauseId).filter(Boolean).map((id) => String(id));
-
-      // No external change: keep bucket layout as-is (especially empty include boxes)
-      if (arraysEqual(currentFilledIds, normalized)) return prev;
-
-      const prevByClause = new Map(prev.filter((b) => b.clauseId).map((b) => [String(b.clauseId), b]));
-      const nextFilled = normalized.map((id) => {
-        const existing = prevByClause.get(id);
-        return existing ? { ...existing, clauseId: id } : makeBucket(id);
-      });
-
-      // Preserve existing empty boxes so user can keep adding include slots.
-      const emptyBuckets = prev.filter((b) => !b.clauseId);
-      const merged = [...nextFilled, ...emptyBuckets];
-
-      return merged.length ? merged : [makeBucket()];
-    });
-  }, [selectedClauseIds]);
 
   const availableClauses = clauses.filter(c =>
     !selectedClauseIds.includes(c._id) &&
@@ -891,16 +913,9 @@ function AgreementComposer({
               </div>
             )}
 
-            {canUseClauses && appliedTemplate && (
+            {pdfSelection && (
               <div className="rounded-lg border border-green-200 bg-green-50 p-2.5 text-[11px] text-green-700 flex items-center justify-between gap-2">
-                <span>Template applied: <strong>{appliedTemplate}</strong></span>
-                <button
-                  type="button"
-                  onClick={onRemoveTemplate}
-                  className="px-2 py-0.5 rounded border border-red-200 bg-white text-red-600 hover:bg-red-50"
-                >
-                  Remove
-                </button>
+                <span>PDF {pdfSelection.type === 'template' ? 'template' : 'theme'}: <strong>{pdfSelection.name}</strong></span>
               </div>
             )}
           </div>
@@ -909,15 +924,13 @@ function AgreementComposer({
 
           {(!isMobile || mobilePanelOpen) && (
           <div className="px-3 py-2.5 border-t bg-gray-50 flex items-center gap-2">
-            {canUseClauses && (
-              <button
-                type="button"
-                onClick={onOpenTemplate}
-                className="px-2.5 py-1.5 text-[11px] font-semibold text-blue-700 border border-blue-200 bg-blue-50 rounded-lg hover:bg-blue-100"
-              >
-                Use Template
-              </button>
-            )}
+            <button
+              type="button"
+              onClick={onOpenTemplate}
+              className="px-2.5 py-1.5 text-[11px] font-semibold text-blue-700 border border-blue-200 bg-blue-50 rounded-lg hover:bg-blue-100"
+            >
+              Select PDF Template
+            </button>
             <button
               type="button"
               onClick={onCancel}
@@ -962,8 +975,7 @@ function AgreementForm() {
   const [showPDFPreview, setShowPDFPreview] = useState(false);
   const [offerData, setOfferData] = useState(null);
   const [showTemplatePicker, setShowTemplatePicker] = useState(false);
-  const [appliedTemplate, setAppliedTemplate] = useState('');
-  const [templateClauseIds, setTemplateClauseIds] = useState([]);
+  const [pdfSelection, setPdfSelection] = useState(null);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => { setMounted(true); }, []);
@@ -1023,6 +1035,8 @@ function AgreementForm() {
     terminationPolicy: formData.terminationPolicy,
     rentEscalationEnabled: formData.rentEscalationEnabled,
     rentEscalationPercentage: Number(formData.rentEscalationPercentage) || 5,
+    ...(pdfSelection?.type === 'template' ? { templateId: pdfSelection.id } : {}),
+    ...(pdfSelection?.type === 'theme' ? { pdfThemeId: pdfSelection.id } : {}),
   });
 
   const validateAgreementForm = () => {
@@ -1046,32 +1060,11 @@ function AgreementForm() {
   const handleReorderClauses = (reorderedIds) => {
     const normalized = normalizeClauseIds(reorderedIds);
     setSelectedClauseIds(normalized);
-
-    if (appliedTemplate && templateClauseIds.length > 0) {
-      const idSet = new Set(normalized.map((id) => String(id)));
-      const stillContainsTemplate = templateClauseIds.every((id) => idSet.has(String(id)));
-      if (!stillContainsTemplate) {
-        setAppliedTemplate('');
-        setTemplateClauseIds([]);
-      }
-    }
   };
 
-  const handleApplyTemplate = (clauseIds, templateName) => {
-    const normalized = normalizeClauseIds(clauseIds);
-    setSelectedClauseIds(normalized);
-    setTemplateClauseIds(normalized);
-    setAppliedTemplate(templateName);
+  const handleApplyTemplate = (selection) => {
+    setPdfSelection(selection);
     setShowTemplatePicker(false);
-  };
-
-  const handleRemoveTemplate = () => {
-    if (templateClauseIds.length > 0) {
-      const templateIdSet = new Set(templateClauseIds.map((id) => String(id)));
-      setSelectedClauseIds((prev) => prev.filter((id) => !templateIdSet.has(String(id))));
-    }
-    setAppliedTemplate('');
-    setTemplateClauseIds([]);
   };
 
   const handleSaveClauses = async () => {
@@ -1148,12 +1141,11 @@ function AgreementForm() {
               onFinish={handleSaveClauses}
               saving={savingClauses}
               onCancel={() => router.push('/dashboard/agreements')}
-              appliedTemplate={appliedTemplate}
-              onRemoveTemplate={handleRemoveTemplate}
+              pdfSelection={pdfSelection}
             />
           </div>
 
-          {showTemplatePicker && canUseClauses && (
+          {showTemplatePicker && (
             <TemplatePicker
               onApply={handleApplyTemplate}
               onClose={() => setShowTemplatePicker(false)}
