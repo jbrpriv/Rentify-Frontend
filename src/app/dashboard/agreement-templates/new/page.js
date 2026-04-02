@@ -70,6 +70,11 @@ export default function CreateAgreementTemplatePage() {
             backgroundColor: form.customizations.backgroundColor,
             fontFamily: form.customizations.fontFamily,
             fontSizeScale: form.customizations.fontSizeScale,
+            maintenance: form.standardClauses.maintenance,
+            subletting: form.standardClauses.subletting,
+            entry: form.standardClauses.entry,
+            damage: form.standardClauses.damage,
+            repairs: form.standardClauses.repairs,
           },
           responseType: 'blob',
         });
@@ -85,7 +90,7 @@ export default function CreateAgreementTemplatePage() {
     }, 800);
 
     return () => clearTimeout(timer);
-  }, [themeId, form.customizations]);
+  }, [themeId, form.customizations, form.standardClauses]);
 
   const submit = async () => {
     if (!form.name.trim()) {

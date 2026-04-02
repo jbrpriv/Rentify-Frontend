@@ -69,6 +69,11 @@ export default function EditAgreementTemplatePage() {
             backgroundColor: form.customizations.backgroundColor,
             fontFamily: form.customizations.fontFamily,
             fontSizeScale: form.customizations.fontSizeScale,
+            maintenance: form.standardClauses.maintenance,
+            subletting: form.standardClauses.subletting,
+            entry: form.standardClauses.entry,
+            damage: form.standardClauses.damage,
+            repairs: form.standardClauses.repairs,
           },
           responseType: 'blob',
         });
@@ -140,6 +145,21 @@ export default function EditAgreementTemplatePage() {
                 <input disabled={readOnly} type="color" value={form.customizations[k]} onChange={(e) => setForm((p) => ({ ...p, customizations: { ...p.customizations, [k]: e.target.value } }))} className="w-16 h-8 rounded border border-slate-200" />
               </div>
             ))}
+
+            <div className="space-y-2 pt-1">
+              {Object.keys(form.standardClauses || {}).map((k) => (
+                <div key={k}>
+                  <label className="text-[11px] font-bold text-slate-500 uppercase">{k}</label>
+                  <textarea
+                    disabled={readOnly}
+                    value={form.standardClauses[k]}
+                    onChange={(e) => setForm((p) => ({ ...p, standardClauses: { ...p.standardClauses, [k]: e.target.value } }))}
+                    rows={2}
+                    className="mt-1 w-full rounded-lg border border-slate-200 px-2 py-2 text-xs"
+                  />
+                </div>
+              ))}
+            </div>
 
             {!readOnly && (
               <button onClick={submit} disabled={saving} className="w-full rounded-xl px-4 py-2.5 text-sm font-extrabold text-white" style={{ background: 'var(--brand-primary)' }}>
