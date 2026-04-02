@@ -37,13 +37,21 @@ export default function useGlobalPdfTheme() {
   useEffect(() => {
     let ignore = false;
 
+    const pickUiTheme = (list) => (
+      list.find((t) => t.isUiDefault)
+      || list.find((t) => t.layoutStyle === 'modern')
+      || list.find((t) => t.isDefault)
+      || list[0]
+      || FALLBACK_THEME
+    );
+
     api.get('/pdf-themes')
       .then(({ data }) => {
         if (ignore) return;
         const list = Array.isArray(data) ? data : [];
         setThemes(list);
 
-        const picked = list.find((t) => t.isDefault) || list[0] || FALLBACK_THEME;
+        const picked = pickUiTheme(list);
         setActiveTheme(picked);
       })
       .catch(() => {
