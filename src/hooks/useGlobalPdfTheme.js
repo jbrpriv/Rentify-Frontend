@@ -12,6 +12,12 @@ const FALLBACK_THEME = {
   fontFamily: 'Helvetica',
 };
 
+const UI_THEME = {
+  primaryColor: '#0B2D72',
+  accentColor: '#0992C2',
+  backgroundColor: '#F5FAFF',
+};
+
 function hexToRgba(hex, alpha = 1) {
   if (!hex || typeof hex !== 'string') return `rgba(11,45,114,${alpha})`;
   const normalized = hex.replace('#', '');
@@ -69,9 +75,9 @@ export default function useGlobalPdfTheme() {
   }, []);
 
   const cssVars = useMemo(() => {
-    const primary = activeTheme?.primaryColor || FALLBACK_THEME.primaryColor;
-    const accent = activeTheme?.accentColor || FALLBACK_THEME.accentColor;
-    const bg = activeTheme?.backgroundColor || FALLBACK_THEME.backgroundColor;
+    const primary = UI_THEME.primaryColor;
+    const accent = UI_THEME.accentColor;
+    const bg = UI_THEME.backgroundColor;
 
     return {
       '--brand-primary': primary,
@@ -81,7 +87,7 @@ export default function useGlobalPdfTheme() {
       '--brand-accent-soft': hexToRgba(accent, 0.12),
       '--brand-border': hexToRgba(primary, 0.22),
     };
-  }, [activeTheme]);
+  }, []);
 
   return {
     themes,
