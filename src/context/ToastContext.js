@@ -25,20 +25,20 @@ const ToastContext = createContext(null);
 
 const CONFIGS = {
   success: {
-    bg: '#F0FDF4', border: '#BBF7D0', text: '#14532D',
-    iconBg: '#DCFCE7', Icon: CheckCircle, iconColor: '#16A34A',
+    bg: '#E6EAF2', border: '#CBD5E1', text: '#0B2D72',
+    iconBg: '#DBE4F0', Icon: CheckCircle, iconColor: '#0B2D72',
   },
   error: {
-    bg: '#FFF1F2', border: '#FECDD3', text: '#881337',
-    iconBg: '#FFE4E6', Icon: XCircle, iconColor: '#DC2626',
+    bg: '#E6EAF2', border: '#CBD5E1', text: '#1F2933',
+    iconBg: '#D9E2EF', Icon: XCircle, iconColor: '#0B2D72',
   },
   info: {
-    bg: '#EFF6FF', border: '#BFDBFE', text: '#1E3A8A',
-    iconBg: '#DBEAFE', Icon: Info, iconColor: '#2563EB',
+    bg: '#E6EAF2', border: '#CBD5E1', text: '#0B2D72',
+    iconBg: '#DBE4F0', Icon: Info, iconColor: '#0B2D72',
   },
   warning: {
-    bg: '#FFFBEB', border: '#FDE68A', text: '#78350F',
-    iconBg: '#FEF3C7', Icon: AlertTriangle, iconColor: '#D97706',
+    bg: '#E6EAF2', border: '#CBD5E1', text: '#0B2D72',
+    iconBg: '#DBE4F0', Icon: AlertTriangle, iconColor: '#0B2D72',
   },
 };
 

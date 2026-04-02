@@ -63,7 +63,7 @@ function ThemePickerModal({ open, themes, onClose, onPick }) {
               <button
                 onClick={() => onPick(theme)}
                 className="mt-4 w-full rounded-lg px-3 py-2 text-sm font-bold border"
-                style={{ borderColor: theme.primaryColor, color: theme.primaryColor, background: 'white' }}
+                style={{ borderColor: 'var(--brand-primary)', color: 'white', background: 'var(--brand-primary)' }}
               >
                 Choose
               </button>
@@ -195,7 +195,7 @@ export default function AgreementTemplatesPage() {
           <button
             onClick={() => setShowThemePicker(true)}
             className="mt-4 px-4 py-2 rounded-lg text-sm font-bold border"
-            style={{ borderColor: 'var(--brand-primary)', color: 'var(--brand-primary)' }}
+            style={{ borderColor: 'var(--brand-primary)', color: 'white', background: 'var(--brand-primary)' }}
           >
             Create your first template
           </button>
@@ -246,21 +246,22 @@ export default function AgreementTemplatesPage() {
                         <button
                           onClick={() => router.push(`/dashboard/agreement-templates/${template._id}/edit`)}
                           className="flex-1 px-3 py-2 rounded-lg text-xs font-bold border"
-                          style={{ borderColor: 'var(--brand-primary)', color: 'var(--brand-primary)' }}
+                          style={{ borderColor: 'var(--brand-primary)', color: 'var(--brand-primary)', background: '#E6EAF2' }}
                         >
                           <span className="inline-flex items-center gap-1"><Brush size={12} /> {template.status === 'approved' ? 'View' : 'Edit'}</span>
                         </button>
                         <button
                           onClick={() => previewTemplate(template)}
                           className="flex-1 px-3 py-2 rounded-lg text-xs font-bold border"
-                          style={{ borderColor: 'var(--brand-accent)', color: 'var(--brand-accent)' }}
+                          style={{ borderColor: 'var(--brand-accent)', color: 'white', background: 'var(--brand-accent)' }}
                         >
                           <span className="inline-flex items-center gap-1"><FileDown size={12} /> Preview</span>
                         </button>
                         <button
                           onClick={() => onDelete(template._id)}
                           disabled={deleting === template._id}
-                          className="px-3 py-2 rounded-lg text-xs font-bold border text-red-700 border-red-200"
+                          className="px-3 py-2 rounded-lg text-xs font-bold border"
+                          style={{ color: 'var(--brand-primary)', borderColor: 'var(--brand-border)', background: '#E6EAF2' }}
                         >
                           <Trash2 size={12} />
                         </button>

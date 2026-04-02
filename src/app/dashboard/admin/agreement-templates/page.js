@@ -131,7 +131,7 @@ export default function AdminAgreementTemplatesPage() {
             className="px-3 py-1.5 rounded-full text-xs font-bold border"
             style={filter === tab.key
               ? { background: 'var(--brand-primary)', borderColor: 'var(--brand-primary)', color: 'white' }
-              : { borderColor: 'var(--brand-border)', color: 'var(--brand-primary)' }}
+              : { borderColor: 'var(--brand-border)', color: 'var(--brand-primary)', background: '#E6EAF2' }}
           >
             {tab.label}
           </button>
@@ -169,10 +169,10 @@ export default function AdminAgreementTemplatesPage() {
                 <button onClick={() => previewPdf(t._id)} className="px-2.5 py-1.5 rounded-lg border text-xs font-bold inline-flex items-center gap-1" style={{ borderColor: 'var(--brand-border)', color: 'var(--brand-primary)' }}>
                   <Download size={12} /> Preview
                 </button>
-                <button onClick={() => approve(t._id)} disabled={busyId === t._id} className="px-2.5 py-1.5 rounded-lg text-xs font-bold text-white inline-flex items-center gap-1" style={{ background: '#166534' }}>
+                <button onClick={() => approve(t._id)} disabled={busyId === t._id} className="px-2.5 py-1.5 rounded-lg text-xs font-bold text-white inline-flex items-center gap-1" style={{ background: 'var(--brand-primary)' }}>
                   <CheckCircle2 size={12} /> Approve
                 </button>
-                <button onClick={() => { setRejectTarget(t._id); setRejectionReason(''); }} disabled={busyId === t._id} className="px-2.5 py-1.5 rounded-lg text-xs font-bold text-white inline-flex items-center gap-1" style={{ background: '#B91C1C' }}>
+                <button onClick={() => { setRejectTarget(t._id); setRejectionReason(''); }} disabled={busyId === t._id} className="px-2.5 py-1.5 rounded-lg text-xs font-bold text-white inline-flex items-center gap-1" style={{ background: 'var(--brand-accent)' }}>
                   <XCircle size={12} /> Reject
                 </button>
               </div>

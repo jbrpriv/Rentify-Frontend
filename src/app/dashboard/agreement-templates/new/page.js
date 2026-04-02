@@ -136,7 +136,8 @@ export default function CreateAgreementTemplatePage() {
               <input
                 value={form.name}
                 onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))}
-                className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                className="mt-1 w-full rounded-lg border px-3 py-2 text-sm"
+                style={{ borderColor: 'var(--brand-border)' }}
                 placeholder="Classic Corporate Lease"
               />
             </div>
@@ -146,7 +147,8 @@ export default function CreateAgreementTemplatePage() {
               <textarea
                 value={form.description}
                 onChange={(e) => setForm((p) => ({ ...p, description: e.target.value }))}
-                className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                className="mt-1 w-full rounded-lg border px-3 py-2 text-sm"
+                style={{ borderColor: 'var(--brand-border)' }}
                 rows={2}
               />
             </div>
@@ -156,7 +158,8 @@ export default function CreateAgreementTemplatePage() {
               <select
                 value={themeId}
                 onChange={(e) => setThemeId(e.target.value)}
-                className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                className="mt-1 w-full rounded-lg border px-3 py-2 text-sm"
+                style={{ borderColor: 'var(--brand-border)' }}
               >
                 <option value="">Select theme</option>
                 {themes.map((t) => <option key={t._id} value={t._id}>{t.name}</option>)}
@@ -171,7 +174,8 @@ export default function CreateAgreementTemplatePage() {
                     type="color"
                     value={form.customizations[key] || '#000000'}
                     onChange={(e) => setForm((p) => ({ ...p, customizations: { ...p.customizations, [key]: e.target.value } }))}
-                    className="mt-1 w-full h-9 rounded border border-slate-200"
+                    className="mt-1 w-full h-9 rounded border"
+                    style={{ borderColor: 'var(--brand-border)' }}
                   />
                 </div>
               ))}
@@ -183,7 +187,8 @@ export default function CreateAgreementTemplatePage() {
                 <select
                   value={form.customizations.fontFamily}
                   onChange={(e) => setForm((p) => ({ ...p, customizations: { ...p.customizations, fontFamily: e.target.value } }))}
-                  className="mt-1 w-full rounded-lg border border-slate-200 px-2 py-2 text-xs"
+                    className="mt-1 w-full rounded-lg border px-2 py-2 text-xs"
+                    style={{ borderColor: 'var(--brand-border)' }}
                 >
                   <option value="Helvetica">Helvetica</option>
                   <option value="Times-Roman">Times-Roman</option>
@@ -212,7 +217,8 @@ export default function CreateAgreementTemplatePage() {
                     value={form.standardClauses[k]}
                     onChange={(e) => setForm((p) => ({ ...p, standardClauses: { ...p.standardClauses, [k]: e.target.value } }))}
                     rows={2}
-                    className="mt-1 w-full rounded-lg border border-slate-200 px-2 py-2 text-xs"
+                    className="mt-1 w-full rounded-lg border px-2 py-2 text-xs"
+                    style={{ borderColor: 'var(--brand-border)' }}
                   />
                 </div>
               ))}

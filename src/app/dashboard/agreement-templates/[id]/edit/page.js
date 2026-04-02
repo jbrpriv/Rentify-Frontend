@@ -132,17 +132,17 @@ export default function EditAgreementTemplatePage() {
       <div className="grid grid-cols-1 xl:grid-cols-[420px_1fr] gap-4 items-start">
         <aside className="rounded-2xl border p-4 bg-white sticky top-24" style={{ borderColor: 'var(--brand-border)' }}>
           <div className="space-y-3">
-            <input disabled={readOnly} value={form.name} onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))} className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm" />
-            <textarea disabled={readOnly} value={form.description} onChange={(e) => setForm((p) => ({ ...p, description: e.target.value }))} rows={2} className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm" />
+            <input disabled={readOnly} value={form.name} onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))} className="w-full rounded-lg border px-3 py-2 text-sm" style={{ borderColor: 'var(--brand-border)' }} />
+            <textarea disabled={readOnly} value={form.description} onChange={(e) => setForm((p) => ({ ...p, description: e.target.value }))} rows={2} className="w-full rounded-lg border px-3 py-2 text-sm" style={{ borderColor: 'var(--brand-border)' }} />
 
-            <select disabled={readOnly} value={form.baseTheme} onChange={(e) => setForm((p) => ({ ...p, baseTheme: e.target.value }))} className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm">
+            <select disabled={readOnly} value={form.baseTheme} onChange={(e) => setForm((p) => ({ ...p, baseTheme: e.target.value }))} className="w-full rounded-lg border px-3 py-2 text-sm" style={{ borderColor: 'var(--brand-border)' }}>
               {themeOptions.map((t) => <option key={t._id} value={t._id}>{t.name}</option>)}
             </select>
 
             {['primaryColor', 'accentColor', 'backgroundColor'].map((k) => (
               <div key={k} className="flex items-center justify-between">
                 <label className="text-xs font-bold text-slate-500 capitalize">{k.replace('Color', '')}</label>
-                <input disabled={readOnly} type="color" value={form.customizations[k]} onChange={(e) => setForm((p) => ({ ...p, customizations: { ...p.customizations, [k]: e.target.value } }))} className="w-16 h-8 rounded border border-slate-200" />
+                <input disabled={readOnly} type="color" value={form.customizations[k]} onChange={(e) => setForm((p) => ({ ...p, customizations: { ...p.customizations, [k]: e.target.value } }))} className="w-16 h-8 rounded border" style={{ borderColor: 'var(--brand-border)' }} />
               </div>
             ))}
 
@@ -155,7 +155,8 @@ export default function EditAgreementTemplatePage() {
                     value={form.standardClauses[k]}
                     onChange={(e) => setForm((p) => ({ ...p, standardClauses: { ...p.standardClauses, [k]: e.target.value } }))}
                     rows={2}
-                    className="mt-1 w-full rounded-lg border border-slate-200 px-2 py-2 text-xs"
+                    className="mt-1 w-full rounded-lg border px-2 py-2 text-xs"
+                    style={{ borderColor: 'var(--brand-border)' }}
                   />
                 </div>
               ))}

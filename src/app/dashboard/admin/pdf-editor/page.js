@@ -138,7 +138,7 @@ export default function AdminPdfEditorPage() {
                   });
                 }}
                 className="w-full text-left rounded-lg border px-3 py-2"
-                style={theme._id === activeId ? { borderColor: 'var(--brand-primary)', background: 'var(--brand-primary-soft)' } : { borderColor: '#E2E8F0' }}
+                style={theme._id === activeId ? { borderColor: 'var(--brand-primary)', background: 'var(--brand-primary-soft)' } : { borderColor: 'var(--brand-border)', background: '#E6EAF2' }}
               >
                 <p className="text-sm font-bold text-slate-900">{theme.name}</p>
                 <p className="text-xs text-slate-500">
