@@ -5,6 +5,7 @@ import "maplibre-gl/dist/maplibre-gl.css";
 import { UserProvider } from '@/context/UserContext';
 import { ToastProvider } from '@/context/ToastContext';
 import { CurrencyProvider } from '@/context/CurrencyContext';
+import { BrandingProvider } from '@/context/BrandingContext';
 import { Toaster } from 'react-hot-toast';
 import FCMListener from '@/components/FCMListener';
 
@@ -27,14 +28,15 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased rf-shell`}>
-        <UserProvider>
-          <CurrencyProvider>
-            <ToastProvider>
-              {children}
-              <FCMListener />
-              <Toaster />
-            </ToastProvider>
-          </CurrencyProvider>
+        <BrandingProvider>
+          <UserProvider>
+            <CurrencyProvider>
+              <ToastProvider>
+                {children}
+                <FCMListener />
+                <Toaster />
+              </ToastProvider>
+            </CurrencyProvider>
           {/* reCAPTCHA v3 — loaded site-wide, used on login and register */}
           {process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY && (
             <Script
@@ -42,7 +44,8 @@ export default function RootLayout({ children }) {
               strategy="afterInteractive"
             />
           )}
-        </UserProvider>
+          </UserProvider>
+        </BrandingProvider>
       </body>
     </html>
   );

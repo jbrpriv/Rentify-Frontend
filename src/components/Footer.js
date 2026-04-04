@@ -2,12 +2,14 @@
 
 import { useEffect, useState } from 'react';
 import { useUser } from '@/context/UserContext';
+import { useBranding } from '@/context/BrandingContext';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Building2 } from 'lucide-react';
 
 export default function Footer() {
   const { user } = useUser();
+  const { brandName } = useBranding();
   const pathname = usePathname();
 
   // Check auth state whenever the route changes
@@ -23,7 +25,7 @@ export default function Footer() {
           </div>
           <div className="flex flex-col">
             <span className="text-sm font-semibold text-neutral-900">
-              RentifyPro
+              {brandName}
             </span>
             <span className="text-[11px] font-medium uppercase tracking-[0.2em] text-slate-500">
               Rental platform
@@ -60,7 +62,7 @@ export default function Footer() {
 
         {/* Copyright */}
         <p className="text-[11px] text-neutral-500">
-          © {new Date().getFullYear()} RentifyPro. All rights reserved.
+          © {new Date().getFullYear()} {brandName}. All rights reserved.
         </p>
       </div>
     </footer>

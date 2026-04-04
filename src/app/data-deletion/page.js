@@ -3,11 +3,10 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { Building2, Trash2, ArrowLeft, CheckCircle, Loader2, Mail, AlertTriangle } from 'lucide-react';
-
-const CONTACT_EMAIL = 'privacy@rentifypro.com';
-const COMPANY_NAME = 'RentifyPro';
+import { useBranding } from '@/context/BrandingContext';
 
 export default function DataDeletionPage() {
+  const { brandName: COMPANY_NAME, supportEmail: CONTACT_EMAIL } = useBranding();
   const [email, setEmail]     = useState('');
   const [reason, setReason]   = useState('');
   const [loading, setLoading] = useState(false);

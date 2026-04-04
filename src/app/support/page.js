@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import api from '@/utils/api';
 import { useUser } from '@/context/UserContext';
+import { useBranding } from '@/context/BrandingContext';
 import {
   HeadphonesIcon, Mail, Phone, MessageSquare,
   CheckCircle, Loader2, ChevronDown, ChevronUp,
@@ -40,7 +41,7 @@ const FAQS = [
   },
   {
     q: 'Can I view my lease agreement without logging in?',
-    a: 'Yes — lease agreements can be viewed and signed via a unique link sent to your email. Check your inbox for the signing invitation from RentifyPro.',
+    a: 'Yes — lease agreements can be viewed and signed via a unique link sent to your email. Check your inbox for the signing invitation from our platform.',
   },
   {
     q: 'How do I update my contact details or phone number?',
@@ -53,7 +54,7 @@ const FAQS = [
 ];
 
 const CONTACT_CHANNELS = [
-  { icon: Mail, label: 'Email', value: 'support@rentifypro.com', href: 'mailto:support@rentifypro.com', accent: '#0992C2' },
+  { icon: Mail, label: 'Email', accent: '#0992C2' },
 ];
 
 // ─── Reveal wrapper ────────────────────────────────────────────────────────────
@@ -98,6 +99,7 @@ const labelStyle = {
 // ─── Page ──────────────────────────────────────────────────────────────────────
 export default function SupportPage() {
   const { user } = useUser();
+  const { supportEmail } = useBranding();
   const [form, setForm] = useState({
     name: '', email: '', phone: '', subject: '', category: 'general', message: '',
   });
@@ -186,7 +188,10 @@ export default function SupportPage() {
         <MotionRevealSection className="py-12" style={{ background: '#040C23' }}>
           <div className="mx-auto max-w-5xl px-6">
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-              {CONTACT_CHANNELS.map(({ icon: Icon, label, value, href, accent }, i) => (
+              {CONTACT_CHANNELS.map(({ icon: Icon, label, value, href, accent }, i) => {
+                const contactValue = value || supportEmail;
+                const contactHref = href || `mailto:${supportEmail}`;
+                return (
                 <RevealCard key={label} delay={i * 80}>
                   <div
                     className="flex items-center gap-4 rounded-2xl p-5 transition-all duration-200 hover:-translate-y-0.5"
@@ -199,16 +204,17 @@ export default function SupportPage() {
                     <div className="min-w-0">
                       <p className="text-[0.68rem] font-bold uppercase tracking-[0.18em]"
                         style={{ color: 'rgba(255,255,255,0.4)' }}>{label}</p>
-                      {href ? (
-                        <a href={href} className="text-[0.9rem] font-semibold transition-colors hover:opacity-80"
-                          style={{ color: accent }}>{value}</a>
+                      {contactHref ? (
+                        <a href={contactHref} className="text-[0.9rem] font-semibold transition-colors hover:opacity-80"
+                          style={{ color: accent }}>{contactValue}</a>
                       ) : (
-                        <p className="text-[0.9rem] font-semibold" style={{ color: 'rgba(255,255,255,0.75)' }}>{value}</p>
+                        <p className="text-[0.9rem] font-semibold" style={{ color: 'rgba(255,255,255,0.75)' }}>{contactValue}</p>
                       )}
                     </div>
                   </div>
                 </RevealCard>
-              ))}
+                );
+              })}
             </div>
           </div>
         </MotionRevealSection>

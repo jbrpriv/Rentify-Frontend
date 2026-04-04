@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useUser } from '@/context/UserContext';
 import { useCurrency } from '@/context/CurrencyContext';
+import { useBranding } from '@/context/BrandingContext';
 import {
   Building2, LayoutDashboard, Tag, User, LogOut,
   Settings, Menu, X, Home, DollarSign, Bell, Search, Globe,
@@ -144,7 +145,7 @@ function AvatarDropdown({ user, logout }) {
 }
 
 // ─── Mobile Drawer ────────────────────────────────────────────────────────────
-function MobileDrawer({ user, logout, isOpen, onClose, navLinks, publicNavLinks, pathname }) {
+function MobileDrawer({ user, logout, isOpen, onClose, navLinks, publicNavLinks, pathname, brandName }) {
   const router = useRouter();
 
   useEffect(() => {
@@ -178,7 +179,7 @@ function MobileDrawer({ user, logout, isOpen, onClose, navLinks, publicNavLinks,
                 <div className="flex h-7 w-7 items-center justify-center rounded-xl bg-gradient-to-tr from-[#0992C2] to-[#0B2D72]">
                   <Building2 className="h-3.5 w-3.5 text-white" />
                 </div>
-                <span className="text-sm font-extrabold text-[#0B2D72]">RentifyPro</span>
+                <span className="text-sm font-extrabold text-[#0B2D72]">{brandName}</span>
               </div>
               <button
                 onClick={onClose}
@@ -210,7 +211,7 @@ function MobileDrawer({ user, logout, isOpen, onClose, navLinks, publicNavLinks,
               </div>
             ) : (
               <div className="px-5 py-5 border-b border-gray-100 bg-gradient-to-br from-[#F0F8FA] to-[#E6F4F8]">
-                <p className="text-base font-bold text-neutral-900">Welcome to RentifyPro</p>
+                <p className="text-base font-bold text-neutral-900">Welcome to {brandName}</p>
                 <p className="text-[0.78rem] text-neutral-500 mt-1">Sign in to manage your rentals.</p>
                 <div className="mt-4 flex gap-3">
                   <button onClick={() => go('/login')} className="flex-1 rounded-xl bg-white px-3 py-2.5 text-[0.8rem] font-bold text-[#0992C2] shadow-sm border border-[#0992C2]/20 hover:bg-gray-50 transition-colors">Log In</button>
@@ -319,6 +320,7 @@ function NavLink({ href, label, icon: Icon, isTransparent, isActive }) {
 // ─── Main Navbar ──────────────────────────────────────────────────────────────
 export default function Navbar() {
   const { user, logout } = useUser();
+  const { brandName } = useBranding();
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = usePathname();
@@ -381,11 +383,9 @@ export default function Navbar() {
             </div>
             <div className="flex flex-col leading-none select-none">
               <span className={`text-[0.55rem] font-bold uppercase tracking-[0.35em] transition-colors duration-300 ${isTransparent ? 'text-white/70' : 'text-[#0992C2]'}`}>
-                Rentify
+                {brandName}
               </span>
-              <span className={`text-[0.9rem] font-extrabold transition-colors duration-300 ${isTransparent ? 'text-white' : 'text-[#0B2D72]'}`}>
-                Pro
-              </span>
+              <span className={`text-[0.9rem] font-extrabold transition-colors duration-300 ${isTransparent ? 'text-white' : 'text-[#0B2D72]'}`} />
             </div>
           </Link>
 
@@ -510,6 +510,7 @@ export default function Navbar() {
       <MobileDrawer
         user={user}
         logout={logout}
+        brandName={brandName}
         isOpen={mobileOpen}
         onClose={() => setMobileOpen(false)}
         navLinks={navLinks}

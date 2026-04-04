@@ -51,6 +51,7 @@ const NAV_BY_ROLE = {
     { name: 'Clause Management', href: '/dashboard/admin/templates', icon: ClipboardList },
     { name: 'Agr. Templates', href: '/dashboard/admin/agreement-templates', icon: BookOpen },
     { name: 'PDF Branding', href: '/dashboard/admin/pdf-editor', icon: Brush },
+    { name: 'Admin Settings', href: '/dashboard/admin/settings', icon: Settings },
     { name: 'Verifications', href: '/dashboard/admin/verifications', icon: BadgeCheck },
     { name: 'Billing', href: '/dashboard/admin/billing', icon: CreditCard },
     { name: 'Disputes', href: '/dashboard/disputes', icon: Scale },
