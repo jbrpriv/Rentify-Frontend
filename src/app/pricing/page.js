@@ -76,7 +76,7 @@ export default function PricingPage() {
   const [openFaq, setOpenFaq] = useState(null);
 
   useEffect(() => {
-    const fetches = [api.get('/billing/plans')];
+    a: 'All transactions are processed by Stripe, a PCI-DSS Level 1 certified payments provider. The platform never stores your card details.',
     const stored = getAccessToken();
     if (stored) fetches.push(api.get('/billing/status'));
 

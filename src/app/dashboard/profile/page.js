@@ -379,7 +379,7 @@ function SecurityTab({ user, twoFAEnabled, show2FASetup, qrCode, totpInput, setT
   );
 }
 
-function NotificationsTab({ prefs, setPrefs, prefSaving, onSave }) {
+function NotificationsTab({ prefs, setPrefs, prefSaving, onSave, brandName }) {
   const channels = [
     {
       key: 'emailOptIn',
@@ -819,7 +819,7 @@ export default function ProfilePage() {
 
         {activeTab === 'notifications' && (
           <motion.div key="notifications" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.2 }}>
-            <NotificationsTab prefs={prefs} setPrefs={setPrefs} prefSaving={prefSaving} onSave={handleSavePrefs} />
+            <NotificationsTab prefs={prefs} setPrefs={setPrefs} prefSaving={prefSaving} onSave={handleSavePrefs} brandName={brandName} />
           </motion.div>
         )}
       </AnimatePresence>
