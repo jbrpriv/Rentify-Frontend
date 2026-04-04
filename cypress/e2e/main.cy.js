@@ -1,5 +1,5 @@
 /**
- * RentifyPro — Main E2E Test Suite
+ * Rentify — Main E2E Test Suite
  * Runs against the real deployed app (Vercel frontend + EC2 backend).
  * Uses cy.session() to persist the HttpOnly refresh cookie + localStorage
  * across page visits so the silent token refresh works correctly.
@@ -30,13 +30,22 @@ function loginAs(role) {
 }
 
 // ─── Tests ────────────────────────────────────────────────────────────────────
-describe('RentifyPro — Full Platform Test', () => {
+describe('Rentify — Full Platform Test', () => {
 
     // ── 1. AUTH ─────────────────────────────────────────────────────────────────
     describe('Authentication', () => {
         it('login page renders correctly', () => {
             cy.visit('/login');
-            cy.contains('Sign in to RentifyPro').should('be.visible');
+            cy.get('h2', { timeout: 10000 }).first().invoke('text').then((heading) => {
+                const normalized = heading.replace(/\s+/g, ' ').trim();
+                const expectedBrand = Cypress.env('BRAND_NAME') || Cypress.env('brandName');
+
+                if (expectedBrand) {
+                    expect(normalized).to.eq(`Sign in to ${expectedBrand}`);
+                } else {
+                    expect(normalized).to.match(/^Sign in to .+/);
+                }
+            });
             cy.contains('Back to home').should('be.visible');
             cy.get('input[type="email"]').should('exist');
             cy.get('input[type="password"]').should('exist');
