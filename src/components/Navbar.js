@@ -13,6 +13,26 @@ import { useEffect, useState, useRef } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 
+function BrandMark({ brandName, logoUrl, className = '', iconClassName = 'h-4 w-4 text-white' }) {
+  const [imageFailed, setImageFailed] = useState(false);
+  const shouldShowImage = Boolean(logoUrl) && !imageFailed;
+
+  return (
+    <div className={`flex items-center justify-center overflow-hidden bg-gradient-to-tr from-[#0992C2] to-[#0B2D72] ${className}`}>
+      {shouldShowImage ? (
+        <img
+          src={logoUrl}
+          alt={`${brandName} logo`}
+          className="h-full w-full object-cover"
+          onError={() => setImageFailed(true)}
+        />
+      ) : (
+        <Building2 className={iconClassName} />
+      )}
+    </div>
+  );
+}
+
 function CurrencyPicker({ isTransparent = false, compact = false }) {
   const { currency, supportedCurrencies, selectCurrency } = useCurrency();
   const [open, setOpen] = useState(false);
@@ -145,7 +165,7 @@ function AvatarDropdown({ user, logout }) {
 }
 
 // ─── Mobile Drawer ────────────────────────────────────────────────────────────
-function MobileDrawer({ user, logout, isOpen, onClose, navLinks, publicNavLinks, pathname, brandName }) {
+function MobileDrawer({ user, logout, isOpen, onClose, navLinks, publicNavLinks, pathname, brandName, logoUrl }) {
   const router = useRouter();
 
   useEffect(() => {
@@ -176,9 +196,12 @@ function MobileDrawer({ user, logout, isOpen, onClose, navLinks, publicNavLinks,
             {/* Header */}
             <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
               <div className="flex items-center gap-2">
-                <div className="flex h-7 w-7 items-center justify-center rounded-xl bg-gradient-to-tr from-[#0992C2] to-[#0B2D72]">
-                  <Building2 className="h-3.5 w-3.5 text-white" />
-                </div>
+                <BrandMark
+                  brandName={brandName}
+                  logoUrl={logoUrl}
+                  className="h-7 w-7 rounded-xl"
+                  iconClassName="h-3.5 w-3.5 text-white"
+                />
                 <span className="text-sm font-extrabold text-[#0B2D72]">{brandName}</span>
               </div>
               <button
@@ -320,7 +343,7 @@ function NavLink({ href, label, icon: Icon, isTransparent, isActive }) {
 // ─── Main Navbar ──────────────────────────────────────────────────────────────
 export default function Navbar() {
   const { user, logout } = useUser();
-  const { brandName } = useBranding();
+  const { brandName, logoUrl } = useBranding();
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = usePathname();
@@ -378,9 +401,12 @@ export default function Navbar() {
 
           {/* ── Logo ── */}
           <Link href="/" className="flex items-center gap-2 group shrink-0">
-            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-tr from-[#0992C2] to-[#0B2D72] shadow-md shadow-[#0992C2]/30 transition-transform duration-200 group-hover:scale-105 group-hover:shadow-[#0992C2]/50">
-              <Building2 className="h-4 w-4 text-white" />
-            </div>
+            <BrandMark
+              brandName={brandName}
+              logoUrl={logoUrl}
+              className="h-8 w-8 rounded-xl shadow-md shadow-[#0992C2]/30 transition-transform duration-200 group-hover:scale-105 group-hover:shadow-[#0992C2]/50"
+              iconClassName="h-4 w-4 text-white"
+            />
             <div className="flex flex-col leading-none select-none">
               <span className={`text-[0.55rem] font-bold uppercase tracking-[0.35em] transition-colors duration-300 ${isTransparent ? 'text-white/70' : 'text-[#0992C2]'}`}>
                 {brandName}
@@ -511,6 +537,7 @@ export default function Navbar() {
         user={user}
         logout={logout}
         brandName={brandName}
+        logoUrl={logoUrl}
         isOpen={mobileOpen}
         onClose={() => setMobileOpen(false)}
         navLinks={navLinks}

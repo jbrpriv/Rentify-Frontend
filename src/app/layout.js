@@ -22,6 +22,8 @@ const geistMono = Geist_Mono({
 const DEFAULT_BRANDING = {
   brandName: 'RentifyPro',
   supportEmail: 'support@rentifypro.com',
+  logoUrl: '',
+  faviconUrl: '/favicon.ico',
 };
 
 async function getInitialBranding() {
@@ -37,6 +39,8 @@ async function getInitialBranding() {
     return {
       brandName: data?.brandName || DEFAULT_BRANDING.brandName,
       supportEmail: data?.supportEmail || DEFAULT_BRANDING.supportEmail,
+      logoUrl: data?.logoUrl || DEFAULT_BRANDING.logoUrl,
+      faviconUrl: data?.faviconUrl || DEFAULT_BRANDING.faviconUrl,
     };
   } catch {
     return DEFAULT_BRANDING;
@@ -48,6 +52,11 @@ export async function generateMetadata() {
   return {
     title: branding.brandName,
     description: 'Rental Agreement Platform',
+    icons: {
+      icon: branding.faviconUrl || '/favicon.ico',
+      shortcut: branding.faviconUrl || '/favicon.ico',
+      apple: branding.faviconUrl || '/favicon.ico',
+    },
   };
 }
 

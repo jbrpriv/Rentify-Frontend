@@ -5,6 +5,8 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState } 
 const DEFAULT_BRANDING = {
   brandName: 'RentifyPro',
   supportEmail: 'support@rentifypro.com',
+  logoUrl: '',
+  faviconUrl: '/favicon.ico',
 };
 
 const BrandingContext = createContext(null);
@@ -12,6 +14,8 @@ const BrandingContext = createContext(null);
 const normalizeBranding = (input) => ({
   brandName: input?.brandName || DEFAULT_BRANDING.brandName,
   supportEmail: input?.supportEmail || DEFAULT_BRANDING.supportEmail,
+  logoUrl: input?.logoUrl || DEFAULT_BRANDING.logoUrl,
+  faviconUrl: input?.faviconUrl || DEFAULT_BRANDING.faviconUrl,
 });
 
 export function BrandingProvider({ children, initialBranding = null }) {
@@ -41,6 +45,23 @@ export function BrandingProvider({ children, initialBranding = null }) {
     // Keep client in sync with latest admin changes after initial server hydration.
     refreshBranding();
   }, [refreshBranding, initialBranding]);
+
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
+
+    const iconHref = branding.faviconUrl || DEFAULT_BRANDING.faviconUrl;
+    const rels = ['icon', 'shortcut icon', 'apple-touch-icon'];
+
+    rels.forEach((rel) => {
+      let link = document.querySelector(`link[rel="${rel}"]`);
+      if (!link) {
+        link = document.createElement('link');
+        link.setAttribute('rel', rel);
+        document.head.appendChild(link);
+      }
+      link.setAttribute('href', iconHref);
+    });
+  }, [branding.faviconUrl]);
 
   const value = useMemo(
     () => ({ ...branding, loading, refreshBranding }),

@@ -52,7 +52,7 @@ const NAV_BY_ROLE = {
     { name: 'Clause Management', href: '/dashboard/admin/templates', icon: ClipboardList },
     { name: 'Agr. Templates', href: '/dashboard/admin/agreement-templates', icon: BookOpen },
     { name: 'PDF Branding', href: '/dashboard/admin/pdf-editor', icon: Brush },
-    { name: 'Admin Settings', href: '/dashboard/admin/settings', icon: Settings },
+    { name: 'Global Branding Settings', href: '/dashboard/admin/settings', icon: Settings },
     { name: 'Verifications', href: '/dashboard/admin/verifications', icon: BadgeCheck },
     { name: 'Billing', href: '/dashboard/admin/billing', icon: CreditCard },
     { name: 'Disputes', href: '/dashboard/disputes', icon: Scale },
@@ -216,7 +216,7 @@ export default function DashboardLayout({ children }) {
   const router = useRouter();
   const pathname = usePathname();
   const { user, logout } = useUser();
-  const { brandName } = useBranding();
+  const { brandName, logoUrl } = useBranding();
   const [badgeCounts, setBadgeCounts] = useState({});
   const [notification, setNotification] = useState(null);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -427,9 +427,11 @@ export default function DashboardLayout({ children }) {
               {/* Drawer header */}
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
-                  <div className="flex h-7 w-7 items-center justify-center rounded-xl bg-gradient-to-tr from-[#0992C2] to-[#0B2D72]">
-                    <Building2 className="h-3.5 w-3.5 text-white" />
-                  </div>
+                    <div className="flex h-7 w-7 items-center justify-center rounded-xl bg-gradient-to-tr from-[#0992C2] to-[#0B2D72] overflow-hidden">
+                      {logoUrl
+                        ? <img src={logoUrl} alt={`${brandName} logo`} className="h-full w-full object-cover" />
+                        : <Building2 className="h-3.5 w-3.5 text-white" />}
+                    </div>
                   <span className="text-sm font-extrabold text-[#0B2D72]">{brandName}</span>
                 </div>
                 <button
