@@ -83,11 +83,11 @@ function FlowTracker({ offerData }) {
 
 
 // ─── Template Picker Modal ────────────────────────────────────────────────────
-function TemplatePicker({ onApply, onClose }) {
+function TemplatePicker({ onApply, onClose, canUseTemplates = true, canUseThemes = true }) {
   const [templates, setTemplates] = useState([]);
   const [themes, setThemes] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('templates');
+  const [activeTab, setActiveTab] = useState(canUseTemplates ? 'templates' : 'themes');
   const [applying, setApplying] = useState(null);
 
   useEffect(() => {
@@ -104,6 +104,7 @@ function TemplatePicker({ onApply, onClose }) {
   }, []);
 
   const handleSelectTemplate = async (tpl) => {
+    if (!canUseTemplates) return;
     setApplying(tpl._id);
     try {
       await api.post(`/agreement-templates/${tpl._id}/use`);
@@ -113,6 +114,7 @@ function TemplatePicker({ onApply, onClose }) {
   };
 
   const handleSelectTheme = (theme) => {
+    if (!canUseThemes) return;
     onApply({ type: 'theme', id: theme._id, name: theme.name });
   };
 
@@ -135,19 +137,33 @@ function TemplatePicker({ onApply, onClose }) {
         <div className="px-5 py-3 border-b bg-white flex items-center gap-2">
           <button
             type="button"
-            onClick={() => setActiveTab('templates')}
-            className={`px-3 py-1.5 rounded-full text-xs font-semibold border ${activeTab === 'templates' ? 'bg-blue-600 text-white border-blue-600' : 'border-gray-300 text-gray-600'}`}
+            onClick={() => { if (canUseTemplates) setActiveTab('templates'); }}
+            disabled={!canUseTemplates}
+            className={`px-3 py-1.5 rounded-full text-xs font-semibold border ${activeTab === 'templates' ? 'bg-blue-600 text-white border-blue-600' : 'border-gray-300 text-gray-600'} ${!canUseTemplates ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
             My Templates ({templates.length})
           </button>
           <button
             type="button"
             onClick={() => setActiveTab('themes')}
-            className={`px-3 py-1.5 rounded-full text-xs font-semibold border ${activeTab === 'themes' ? 'bg-blue-600 text-white border-blue-600' : 'border-gray-300 text-gray-600'}`}
+            disabled={!canUseThemes}
+            className={`px-3 py-1.5 rounded-full text-xs font-semibold border ${activeTab === 'themes' ? 'bg-blue-600 text-white border-blue-600' : 'border-gray-300 text-gray-600'} ${!canUseThemes ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
             Default Themes ({themes.length})
           </button>
         </div>
+
+        {!canUseTemplates && canUseThemes && (
+          <div className="px-5 py-2 bg-amber-50 border-b border-amber-200 text-[11px] text-amber-800">
+            Agreement templates during drafting are available on Enterprise only. You can still choose a default PDF theme.
+          </div>
+        )}
+
+        {!canUseTemplates && !canUseThemes && (
+          <div className="px-5 py-2 bg-amber-50 border-b border-amber-200 text-[11px] text-amber-800">
+            Free tier uses the admin global default PDF theme during drafting.
+          </div>
+        )}
 
         <div className="flex-1 overflow-y-auto p-4 space-y-3">
           {loading && (
@@ -187,7 +203,13 @@ function TemplatePicker({ onApply, onClose }) {
             </div>
           ))}
 
-          {!loading && activeTab === 'themes' && themes.map(theme => (
+          {!loading && activeTab === 'themes' && !canUseThemes && (
+            <p className="text-sm text-gray-400 text-center py-8 italic">
+              PDF theme selection is not available on the Free plan.
+            </p>
+          )}
+
+          {!loading && activeTab === 'themes' && canUseThemes && themes.map(theme => (
             <div key={theme._id} className="border border-gray-200 rounded-xl p-4 hover:border-blue-300 hover:bg-blue-50/30 transition">
               <div className="flex items-start justify-between gap-3">
                 <div className="flex-1 min-w-0">
@@ -371,6 +393,10 @@ function AgreementComposer({
   formData,
   showEditor = true,
   canUseClauses = false,
+  clauseLimit = Number.POSITIVE_INFINITY,
+  onClauseLimitReached = () => {},
+  canUseAgreementTemplates = true,
+  canSelectPdfTheme = true,
   formErrors = {},
   setField = () => {},
   clearFieldError = () => {},
@@ -424,6 +450,8 @@ function AgreementComposer({
 
   const clausesById = new Map(clauses.map(c => [c._id, c]));
   const assignedClauses = selectedClauseIds.map(id => clausesById.get(id)).filter(Boolean);
+  const isClauseLimitFinite = Number.isFinite(clauseLimit);
+  const isClauseCapReached = isClauseLimitFinite && assignedClauses.length >= clauseLimit;
   const leaseDurationMonths = offerData?.history?.length
     ? offerData.history[offerData.history.length - 1]?.leaseDurationMonths
     : null;
@@ -445,6 +473,17 @@ function AgreementComposer({
   const handleDropToBucket = (bucketKey) => {
     if (!dragState?.clauseId) return;
     const clauseId = String(dragState.clauseId);
+
+    const currentTarget = clauseBuckets.find((b) => b.key === bucketKey);
+    const clauseAlreadyAssigned = clauseBuckets.some((b) => String(b.clauseId || '') === clauseId);
+    const wouldIncreaseAssignedCount = !clauseAlreadyAssigned && !currentTarget?.clauseId;
+    if (isClauseLimitFinite && wouldIncreaseAssignedCount && selectedClauseIds.length >= clauseLimit) {
+      onClauseLimitReached(clauseLimit);
+      setHoveredBucketKey('');
+      setDragState(null);
+      return;
+    }
+
     const next = clauseBuckets.map((b) => ({ ...b, clauseId: b.clauseId === clauseId ? null : b.clauseId }));
     const targetIndex = next.findIndex((b) => b.key === bucketKey);
     if (targetIndex >= 0) next[targetIndex] = { ...next[targetIndex], clauseId };
@@ -470,6 +509,10 @@ function AgreementComposer({
   };
 
   const addClauseBucket = () => {
+    if (isClauseLimitFinite && clauseBuckets.length >= clauseLimit) {
+      onClauseLimitReached(clauseLimit);
+      return;
+    }
     pushBucketUpdate([...clauseBuckets, makeBucket()]);
   };
 
@@ -578,7 +621,8 @@ function AgreementComposer({
               <button
                 type="button"
                 onClick={addClauseBucket}
-                className="px-2.5 py-1 text-xs font-semibold text-blue-700 border border-blue-200 bg-blue-50 rounded-lg hover:bg-blue-100"
+                disabled={isClauseLimitFinite && clauseBuckets.length >= clauseLimit}
+                className="px-2.5 py-1 text-xs font-semibold text-blue-700 border border-blue-200 bg-blue-50 rounded-lg hover:bg-blue-100 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Add Clause
               </button>
@@ -913,6 +957,12 @@ function AgreementComposer({
               </div>
             )}
 
+            {isClauseLimitFinite && (
+              <div className="rounded-lg border border-amber-200 bg-amber-50 p-2.5 text-[11px] text-amber-800">
+                Free plan limit: up to {clauseLimit} clauses per agreement. Upgrade to Pro for unlimited clauses.
+              </div>
+            )}
+
             {pdfSelection && (
               <div className="rounded-lg border border-green-200 bg-green-50 p-2.5 text-[11px] text-green-700 flex items-center justify-between gap-2">
                 <span>PDF {pdfSelection.type === 'template' ? 'template' : 'theme'}: <strong>{pdfSelection.name}</strong></span>
@@ -927,9 +977,10 @@ function AgreementComposer({
             <button
               type="button"
               onClick={onOpenTemplate}
-              className="px-2.5 py-1.5 text-[11px] font-semibold text-blue-700 border border-blue-200 bg-blue-50 rounded-lg hover:bg-blue-100"
+              disabled={!canUseAgreementTemplates && !canSelectPdfTheme}
+              className="px-2.5 py-1.5 text-[11px] font-semibold text-blue-700 border border-blue-200 bg-blue-50 rounded-lg hover:bg-blue-100 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Select PDF Template
+              {canUseAgreementTemplates ? 'Select PDF Template' : canSelectPdfTheme ? 'Select PDF Theme' : 'Using Global PDF Theme'}
             </button>
             <button
               type="button"
@@ -963,9 +1014,13 @@ function AgreementForm() {
   const { user } = useUser();
   const offerId = searchParams.get('offerId');
 
-  // Clause access: pro and enterprise only
-  const tier = user?.subscriptionTier || 'free';
-  const canUseClauses = tier === 'pro' || tier === 'enterprise';
+  const tier = ['free', 'pro', 'enterprise'].includes(user?.subscriptionTier)
+    ? user.subscriptionTier
+    : 'free';
+  const canUseAgreementTemplates = tier === 'enterprise';
+  const canSelectPdfTheme = tier !== 'free';
+  const clauseLimit = tier === 'free' ? 2 : Number.POSITIVE_INFINITY;
+  const canUseClauses = true;
 
   const [loading, setLoading] = useState(false);
   const [formErrors, setFormErrors] = useState({});
@@ -1035,8 +1090,8 @@ function AgreementForm() {
     terminationPolicy: formData.terminationPolicy,
     rentEscalationEnabled: formData.rentEscalationEnabled,
     rentEscalationPercentage: Number(formData.rentEscalationPercentage) || 5,
-    ...(pdfSelection?.type === 'template' ? { templateId: pdfSelection.id } : {}),
-    ...(pdfSelection?.type === 'theme' ? { pdfThemeId: pdfSelection.id } : {}),
+    ...(canUseAgreementTemplates && pdfSelection?.type === 'template' ? { templateId: pdfSelection.id } : {}),
+    ...(canSelectPdfTheme && pdfSelection?.type === 'theme' ? { pdfThemeId: pdfSelection.id } : {}),
   });
 
   const validateAgreementForm = () => {
@@ -1059,17 +1114,49 @@ function AgreementForm() {
 
   const handleReorderClauses = (reorderedIds) => {
     const normalized = normalizeClauseIds(reorderedIds);
+    if (Number.isFinite(clauseLimit) && normalized.length > clauseLimit) {
+      toast(`Free plan can include up to ${clauseLimit} clauses. Upgrade to Pro for unlimited clauses.`, 'error');
+      setSelectedClauseIds(normalized.slice(0, clauseLimit));
+      return;
+    }
     setSelectedClauseIds(normalized);
   };
 
   const handleApplyTemplate = (selection) => {
+    if (selection?.type === 'template' && !canUseAgreementTemplates) {
+      toast('Agreement templates in drafting are available on Enterprise only.', 'error');
+      setShowTemplatePicker(false);
+      return;
+    }
+    if (selection?.type === 'theme' && !canSelectPdfTheme) {
+      toast('Free tier uses the admin global default PDF theme.', 'error');
+      setShowTemplatePicker(false);
+      return;
+    }
     setPdfSelection(selection);
     setShowTemplatePicker(false);
+  };
+
+  useEffect(() => {
+    if (pdfSelection?.type === 'template' && !canUseAgreementTemplates) {
+      setPdfSelection(null);
+    }
+    if (pdfSelection?.type === 'theme' && !canSelectPdfTheme) {
+      setPdfSelection(null);
+    }
+  }, [canUseAgreementTemplates, canSelectPdfTheme, pdfSelection]);
+
+  const handleClauseLimitReached = (limit) => {
+    toast(`Free plan can include up to ${limit} clauses. Upgrade to Pro for unlimited clauses.`, 'error');
   };
 
   const handleSaveClauses = async () => {
     if (!validateAgreementForm()) {
       toast('Please fix lease term errors before finishing the draft.', 'error');
+      return;
+    }
+    if (Number.isFinite(clauseLimit) && selectedClauseIds.length > clauseLimit) {
+      toast(`Free plan can include up to ${clauseLimit} clauses.`, 'error');
       return;
     }
     setSavingClauses(true);
@@ -1134,10 +1221,20 @@ function AgreementForm() {
               formData={formData}
               showEditor={true}
               canUseClauses={canUseClauses}
+              clauseLimit={clauseLimit}
+              onClauseLimitReached={handleClauseLimitReached}
+              canUseAgreementTemplates={canUseAgreementTemplates}
+              canSelectPdfTheme={canSelectPdfTheme}
               formErrors={formErrors}
               setField={set}
               clearFieldError={(key) => setFormErrors((prev) => ({ ...prev, [key]: null }))}
-              onOpenTemplate={() => setShowTemplatePicker(true)}
+              onOpenTemplate={() => {
+                if (!canUseAgreementTemplates && !canSelectPdfTheme) {
+                  toast('Free tier uses the admin global default PDF theme.', 'error');
+                  return;
+                }
+                setShowTemplatePicker(true);
+              }}
               onFinish={handleSaveClauses}
               saving={savingClauses}
               onCancel={() => router.push('/dashboard/agreements')}
@@ -1149,6 +1246,8 @@ function AgreementForm() {
             <TemplatePicker
               onApply={handleApplyTemplate}
               onClose={() => setShowTemplatePicker(false)}
+              canUseTemplates={canUseAgreementTemplates}
+              canUseThemes={canSelectPdfTheme}
             />
           )}
 
