@@ -1,11 +1,11 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import api from '@/utils/api';
 import { useUser } from '@/context/UserContext';
 import { useBranding } from '@/context/BrandingContext';
-import { Loader2, Save, Shield, Sparkles, Mail, ImageIcon } from 'lucide-react';
+import { Loader2, Save, Shield, Sparkles, Mail, ImageIcon, UploadCloud } from 'lucide-react';
 
 export default function AdminSettingsPage() {
   const router = useRouter();
@@ -14,9 +14,13 @@ export default function AdminSettingsPage() {
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [logoUploading, setLogoUploading] = useState(false);
+  const [faviconUploading, setFaviconUploading] = useState(false);
   const [form, setForm] = useState({ brandName: '', supportEmail: '', logoUrl: '', faviconUrl: '/favicon.ico' });
   const [msg, setMsg] = useState('');
   const [err, setErr] = useState('');
+  const logoInputRef = useRef(null);
+  const faviconInputRef = useRef(null);
 
   useEffect(() => {
     if (!user) return;
@@ -58,6 +62,54 @@ export default function AdminSettingsPage() {
       setErr(e.response?.data?.message || 'Failed to save settings.');
     } finally {
       setSaving(false);
+    }
+  };
+
+  const uploadBrandingAsset = async (kind, file) => {
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      setErr('Please select a valid image file.');
+      return;
+    }
+
+    const maxBytes = kind === 'favicon' ? 2 * 1024 * 1024 : 5 * 1024 * 1024;
+    if (file.size > maxBytes) {
+      setErr(kind === 'favicon' ? 'Favicon must be under 2MB.' : 'Logo image must be under 5MB.');
+      return;
+    }
+
+    setErr('');
+    setMsg('');
+    if (kind === 'logo') setLogoUploading(true);
+    if (kind === 'favicon') setFaviconUploading(true);
+
+    try {
+      const formData = new FormData();
+      formData.append('image', file);
+      const endpoint = kind === 'logo' ? '/upload/branding/logo' : '/upload/branding/favicon';
+
+      const { data } = await api.post(endpoint, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+
+      const nextUrl = data?.url || '';
+      if (!nextUrl) {
+        throw new Error('Upload succeeded but no URL was returned.');
+      }
+
+      if (kind === 'logo') {
+        setForm((prev) => ({ ...prev, logoUrl: nextUrl }));
+        setMsg('Logo uploaded. Click Save Global Branding Settings to publish it.');
+      } else {
+        setForm((prev) => ({ ...prev, faviconUrl: nextUrl }));
+        setMsg('Favicon uploaded. Click Save Global Branding Settings to publish it.');
+      }
+    } catch (e) {
+      setErr(e.response?.data?.message || e.message || 'Image upload failed.');
+    } finally {
+      if (kind === 'logo') setLogoUploading(false);
+      if (kind === 'favicon') setFaviconUploading(false);
     }
   };
 
@@ -117,31 +169,89 @@ export default function AdminSettingsPage() {
           </label>
 
           <label className="block md:col-span-2">
-            <span className="text-xs font-bold text-slate-700 uppercase tracking-[0.12em]">Navbar Logo URL</span>
-            <div className="mt-1.5 relative">
-              <ImageIcon className="h-4 w-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-              <input
-                type="text"
-                value={form.logoUrl}
-                onChange={(e) => setForm((p) => ({ ...p, logoUrl: e.target.value }))}
-                className="w-full rounded-xl border border-slate-200 pl-9 pr-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#0992C2]/35"
-                placeholder="https://cdn.example.com/brand-logo.png"
-              />
+            <span className="text-xs font-bold text-slate-700 uppercase tracking-[0.12em]">Navbar Logo</span>
+            <div className="mt-2 rounded-xl border border-slate-200 p-3 bg-slate-50/70">
+              <div className="flex items-center gap-3">
+                <div className="h-12 w-12 rounded-lg border border-slate-200 bg-white overflow-hidden flex items-center justify-center">
+                  {form.logoUrl
+                    ? <img src={form.logoUrl} alt="Brand logo preview" className="h-full w-full object-cover" />
+                    : <ImageIcon className="h-5 w-5 text-slate-400" />}
+                </div>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <input
+                    ref={logoInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      void uploadBrandingAsset('logo', file);
+                      e.target.value = '';
+                    }}
+                    className="hidden"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => logoInputRef.current?.click()}
+                    disabled={logoUploading}
+                    className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-100 disabled:opacity-60"
+                  >
+                    {logoUploading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <UploadCloud className="h-3.5 w-3.5" />}
+                    Upload Logo
+                  </button>
+                  {form.logoUrl && (
+                    <button
+                      type="button"
+                      onClick={() => setForm((prev) => ({ ...prev, logoUrl: '' }))}
+                      className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-100"
+                    >
+                      Use Default Icon
+                    </button>
+                  )}
+                </div>
+              </div>
             </div>
             <p className="mt-1 text-[11px] text-slate-500">Used in navigation headers. Leave empty to use the default icon.</p>
           </label>
 
           <label className="block md:col-span-2">
-            <span className="text-xs font-bold text-slate-700 uppercase tracking-[0.12em]">Browser Tab Icon URL (Favicon)</span>
-            <div className="mt-1.5 relative">
-              <ImageIcon className="h-4 w-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-              <input
-                type="text"
-                value={form.faviconUrl}
-                onChange={(e) => setForm((p) => ({ ...p, faviconUrl: e.target.value }))}
-                className="w-full rounded-xl border border-slate-200 pl-9 pr-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#0992C2]/35"
-                placeholder="/favicon.ico or https://cdn.example.com/favicon.ico"
-              />
+            <span className="text-xs font-bold text-slate-700 uppercase tracking-[0.12em]">Browser Tab Icon (Favicon)</span>
+            <div className="mt-2 rounded-xl border border-slate-200 p-3 bg-slate-50/70">
+              <div className="flex items-center gap-3">
+                <div className="h-12 w-12 rounded-lg border border-slate-200 bg-white overflow-hidden flex items-center justify-center">
+                  {form.faviconUrl
+                    ? <img src={form.faviconUrl} alt="Favicon preview" className="h-8 w-8 object-contain" />
+                    : <ImageIcon className="h-5 w-5 text-slate-400" />}
+                </div>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <input
+                    ref={faviconInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      void uploadBrandingAsset('favicon', file);
+                      e.target.value = '';
+                    }}
+                    className="hidden"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => faviconInputRef.current?.click()}
+                    disabled={faviconUploading}
+                    className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-100 disabled:opacity-60"
+                  >
+                    {faviconUploading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <UploadCloud className="h-3.5 w-3.5" />}
+                    Upload Favicon
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setForm((prev) => ({ ...prev, faviconUrl: '/favicon.ico' }))}
+                    className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-100"
+                  >
+                    Reset Default Favicon
+                  </button>
+                </div>
+              </div>
             </div>
             <p className="mt-1 text-[11px] text-slate-500">This controls the icon shown on the browser tab.</p>
           </label>
