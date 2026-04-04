@@ -120,6 +120,10 @@ export default function AdminPdfEditorPage() {
     return <p className="text-sm text-slate-500">Loading branding editor...</p>;
   }
 
+  const scale = Number(form.fontSizeScale || 1);
+  const layoutStyle = activeTheme?.layoutStyle || 'modern';
+  const previewBrand = 'Brand Name';
+
   return (
     <div style={cssVars} className="max-w-7xl mx-auto pb-10">
       <div className="mb-4">
@@ -271,7 +275,7 @@ export default function AdminPdfEditorPage() {
                   className="mx-auto rounded-xl shadow-sm border"
                   style={{
                     maxWidth: 760,
-                    minHeight: '100%',
+                    minHeight: 980,
                     background: form.backgroundColor,
                     borderColor: form.accentColor,
                     color: '#0f172a',
@@ -279,42 +283,149 @@ export default function AdminPdfEditorPage() {
                     padding: 24,
                   }}
                 >
-                  <p style={{ fontSize: 11 * Number(form.fontSizeScale), letterSpacing: '0.08em', color: form.accentColor, textTransform: 'uppercase', marginBottom: 8 }}>
-                    Realtime Theme Preview ({previewType})
+                  <p style={{ fontSize: 10 * scale, letterSpacing: '0.08em', color: form.accentColor, textTransform: 'uppercase', marginBottom: 12 }}>
+                    Realtime {layoutStyle} {previewType} layout preview
                   </p>
-                  <h2 style={{ fontSize: 24 * Number(form.fontSizeScale), fontWeight: 700, color: form.primaryColor, marginBottom: 8 }}>
-                    {previewType === 'agreement' ? 'Residential Rental Agreement' : 'Official Rent Receipt'}
-                  </h2>
-                  <div style={{ height: 3, width: 180, background: form.primaryColor, marginBottom: 18 }} />
 
-                  {previewType === 'agreement' ? (
+                  {previewType === 'agreement' && layoutStyle === 'modern' && (
                     <>
-                      <p style={{ fontSize: 12 * Number(form.fontSizeScale), lineHeight: 1.55, marginBottom: 18 }}>
-                        This is a live style simulation. Colors, typography, and visual emphasis update instantly while you edit.
-                      </p>
-                      <div className="grid grid-cols-2 gap-3" style={{ marginBottom: 18 }}>
-                        <div className="rounded-lg p-3 border" style={{ borderColor: form.accentColor }}>
-                          <p style={{ fontSize: 10 * Number(form.fontSizeScale), textTransform: 'uppercase', color: form.accentColor }}>Landlord</p>
-                          <p style={{ fontSize: 14 * Number(form.fontSizeScale), fontWeight: 700 }}>Sample Landlord</p>
+                      <div className="rounded-xl p-5" style={{ background: form.primaryColor, color: '#fff', marginBottom: 16 }}>
+                        <p style={{ fontSize: 11 * scale, opacity: 0.9 }}>RENTAL AGREEMENT</p>
+                        <h2 style={{ fontSize: 26 * scale, fontWeight: 800, lineHeight: 1.2, marginTop: 4 }}>{previewBrand}</h2>
+                        <p style={{ fontSize: 11 * scale, opacity: 0.92, marginTop: 8 }}>Agreement ID: AG-2026-0001</p>
+                      </div>
+                      <div className="grid grid-cols-3 gap-3 mb-4">
+                        {['Start Date', 'End Date', 'Monthly Rent'].map((k, i) => (
+                          <div key={k} className="rounded-lg border p-3" style={{ borderColor: form.accentColor }}>
+                            <p style={{ fontSize: 9 * scale, color: form.accentColor, textTransform: 'uppercase' }}>{k}</p>
+                            <p style={{ fontSize: 14 * scale, fontWeight: 700 }}>{i === 0 ? 'Apr 04, 2026' : i === 1 ? 'Apr 04, 2027' : '$1,450'}</p>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="rounded-lg border p-4 mb-3" style={{ borderColor: form.accentColor }}>
+                        <p style={{ fontSize: 10 * scale, color: form.accentColor, textTransform: 'uppercase', marginBottom: 8 }}>Parties</p>
+                        <p style={{ fontSize: 12 * scale, lineHeight: 1.6 }}>Landlord: Sample Landlord</p>
+                        <p style={{ fontSize: 12 * scale, lineHeight: 1.6 }}>Tenant: Sample Tenant</p>
+                      </div>
+                      <div className="rounded-lg border p-4" style={{ borderColor: form.accentColor }}>
+                        <p style={{ fontSize: 10 * scale, color: form.accentColor, textTransform: 'uppercase', marginBottom: 8 }}>Key Clause</p>
+                        <p style={{ fontSize: 12 * scale, lineHeight: 1.7 }}>Tenant agrees to pay rent on or before the 1st of each month and maintain the property in good condition.</p>
+                      </div>
+                    </>
+                  )}
+
+                  {previewType === 'agreement' && layoutStyle === 'classic' && (
+                    <>
+                      <p style={{ fontSize: 10 * scale, textAlign: 'center', color: '#334155', marginBottom: 4 }}>{previewBrand.toUpperCase()}</p>
+                      <div style={{ borderTop: `2px solid ${form.primaryColor}`, borderBottom: `1px solid ${form.accentColor}`, paddingTop: 10, paddingBottom: 10, marginBottom: 8 }}>
+                        <h2 style={{ fontSize: 22 * scale, fontWeight: 800, textAlign: 'center' }}>RESIDENTIAL RENTAL AGREEMENT</h2>
+                      </div>
+                      <p style={{ fontSize: 10 * scale, textAlign: 'center', color: '#475569', marginBottom: 16 }}>Date of Preparation: April 04, 2026</p>
+
+                      {['I. Parties to this Agreement', 'II. Lease Term', 'III. Rent and Financial Obligations'].map((s) => (
+                        <div key={s} style={{ marginBottom: 14 }}>
+                          <p style={{ fontSize: 12 * scale, fontWeight: 700 }}>{s}</p>
+                          <div style={{ height: 1, background: form.accentColor, marginTop: 6, marginBottom: 8 }} />
+                          <p style={{ fontSize: 11 * scale, lineHeight: 1.7 }}>Lorem ipsum style legal content displayed in traditional paragraph formatting to mirror classic PDF structure.</p>
                         </div>
-                        <div className="rounded-lg p-3 border" style={{ borderColor: form.accentColor }}>
-                          <p style={{ fontSize: 10 * Number(form.fontSizeScale), textTransform: 'uppercase', color: form.accentColor }}>Tenant</p>
-                          <p style={{ fontSize: 14 * Number(form.fontSizeScale), fontWeight: 700 }}>Sample Tenant</p>
+                      ))}
+                      <div className="grid grid-cols-2 gap-8 mt-6">
+                        <div>
+                          <div style={{ borderTop: '1px solid #111827', marginTop: 28 }} />
+                          <p style={{ fontSize: 10 * scale, marginTop: 6 }}>Landlord Signature</p>
+                        </div>
+                        <div>
+                          <div style={{ borderTop: '1px solid #111827', marginTop: 28 }} />
+                          <p style={{ fontSize: 10 * scale, marginTop: 6 }}>Tenant Signature</p>
                         </div>
                       </div>
-                      <p style={{ fontSize: 12 * Number(form.fontSizeScale), lineHeight: 1.6 }}>
-                        Monthly Rent: <strong>$1,450</strong> · Security Deposit: <strong>$1,450</strong> · Term: <strong>12 months</strong>
-                      </p>
                     </>
-                  ) : (
+                  )}
+
+                  {previewType === 'agreement' && layoutStyle === 'minimalist' && (
                     <>
-                      <p style={{ fontSize: 12 * Number(form.fontSizeScale), lineHeight: 1.55, marginBottom: 12 }}>Receipt No: RCP-DEMO-001</p>
-                      <p style={{ fontSize: 34 * Number(form.fontSizeScale), fontWeight: 700, color: form.primaryColor, lineHeight: 1.1, marginBottom: 12 }}>$1,450.00</p>
-                      <p style={{ fontSize: 12 * Number(form.fontSizeScale), marginBottom: 10 }}>Amount Received</p>
-                      <div className="rounded-lg p-3 border" style={{ borderColor: form.accentColor }}>
-                        <p style={{ fontSize: 11 * Number(form.fontSizeScale), marginBottom: 6 }}>Tenant: Sample Tenant</p>
-                        <p style={{ fontSize: 11 * Number(form.fontSizeScale), marginBottom: 6 }}>Property: Sunset Apartments - Unit 3B</p>
-                        <p style={{ fontSize: 11 * Number(form.fontSizeScale) }}>Method: Stripe (Card)</p>
+                      <h2 style={{ fontSize: 34 * scale, fontWeight: 800, color: form.primaryColor, lineHeight: 1.05 }}>{previewBrand}</h2>
+                      <div style={{ height: 3, width: 220, background: form.primaryColor, marginTop: 12, marginBottom: 14 }} />
+                      <p style={{ fontSize: 11 * scale, color: '#64748b', marginBottom: 18 }}>RESIDENTIAL RENTAL AGREEMENT</p>
+                      <div className="grid grid-cols-2 gap-3 mb-4">
+                        <div className="border rounded-lg p-3" style={{ borderColor: '#cbd5e1' }}>
+                          <p style={{ fontSize: 9 * scale, textTransform: 'uppercase', color: '#64748b' }}>Landlord</p>
+                          <p style={{ fontSize: 15 * scale, fontWeight: 700 }}>Sample Landlord</p>
+                        </div>
+                        <div className="border rounded-lg p-3" style={{ borderColor: '#cbd5e1' }}>
+                          <p style={{ fontSize: 9 * scale, textTransform: 'uppercase', color: '#64748b' }}>Tenant</p>
+                          <p style={{ fontSize: 15 * scale, fontWeight: 700 }}>Sample Tenant</p>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-4 gap-2">
+                        {['Start', 'End', 'Duration', 'Rent'].map((k) => (
+                          <div key={k} className="border rounded p-2" style={{ borderColor: '#cbd5e1' }}>
+                            <p style={{ fontSize: 8 * scale, color: '#64748b', textTransform: 'uppercase' }}>{k}</p>
+                            <p style={{ fontSize: 11 * scale, fontWeight: 700 }}>{k === 'Rent' ? '$1,450' : 'Sample'}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </>
+                  )}
+
+                  {previewType === 'receipt' && layoutStyle === 'modern' && (
+                    <>
+                      <div className="rounded-xl p-5 mb-4" style={{ background: form.primaryColor, color: '#fff' }}>
+                        <p style={{ fontSize: 10 * scale, opacity: 0.9 }}>OFFICIAL RECEIPT</p>
+                        <h2 style={{ fontSize: 24 * scale, fontWeight: 800, lineHeight: 1.15 }}>Rent Payment Received</h2>
+                        <p style={{ fontSize: 11 * scale, marginTop: 8, opacity: 0.95 }}>Receipt No: RCP-DEMO-001</p>
+                      </div>
+                      <div className="rounded-lg border p-4 mb-3" style={{ borderColor: form.accentColor }}>
+                        <p style={{ fontSize: 11 * scale, color: form.accentColor }}>Amount Received</p>
+                        <p style={{ fontSize: 34 * scale, fontWeight: 800, color: form.primaryColor }}>$1,450.00</p>
+                      </div>
+                      <div className="rounded-lg border p-4" style={{ borderColor: form.accentColor }}>
+                        <p style={{ fontSize: 11 * scale, lineHeight: 1.8 }}>Tenant: Sample Tenant</p>
+                        <p style={{ fontSize: 11 * scale, lineHeight: 1.8 }}>Property: Sunset Apartments - Unit 3B</p>
+                        <p style={{ fontSize: 11 * scale, lineHeight: 1.8 }}>Method: Stripe (Card)</p>
+                      </div>
+                    </>
+                  )}
+
+                  {previewType === 'receipt' && layoutStyle === 'classic' && (
+                    <>
+                      <p style={{ fontSize: 12 * scale, textAlign: 'center', fontWeight: 700 }}>{previewBrand}</p>
+                      <div style={{ borderTop: `2px solid ${form.primaryColor}`, borderBottom: `1px solid ${form.accentColor}`, marginTop: 8, paddingTop: 10, paddingBottom: 10 }}>
+                        <h2 style={{ fontSize: 20 * scale, fontWeight: 800, textAlign: 'center' }}>OFFICIAL RENT RECEIPT</h2>
+                      </div>
+                      <div className="mt-4 mb-4">
+                        <p style={{ fontSize: 10 * scale, lineHeight: 1.8 }}>Receipt No: RCP-DEMO-001</p>
+                        <p style={{ fontSize: 10 * scale, lineHeight: 1.8 }}>Date Issued: Apr 04, 2026</p>
+                        <p style={{ fontSize: 10 * scale, lineHeight: 1.8 }}>Payment Type: RENT</p>
+                      </div>
+                      <p style={{ fontSize: 18 * scale, fontWeight: 700, textAlign: 'right', marginBottom: 14, color: form.primaryColor }}>$1,450.00</p>
+                      <div className="border rounded-lg p-4" style={{ borderColor: form.accentColor }}>
+                        <p style={{ fontSize: 11 * scale, lineHeight: 1.8 }}>Tenant: Sample Tenant</p>
+                        <p style={{ fontSize: 11 * scale, lineHeight: 1.8 }}>Property: Sunset Apartments - Unit 3B</p>
+                        <p style={{ fontSize: 11 * scale, lineHeight: 1.8 }}>Period Covered: April 2026</p>
+                      </div>
+                    </>
+                  )}
+
+                  {previewType === 'receipt' && layoutStyle === 'minimalist' && (
+                    <>
+                      <p style={{ fontSize: 9 * scale, color: '#64748b', fontWeight: 700, letterSpacing: '0.08em' }}>{previewBrand.toUpperCase()}</p>
+                      <h2 style={{ fontSize: 30 * scale, fontWeight: 800, marginTop: 8 }}>RECEIPT</h2>
+                      <div style={{ height: 2, width: 140, background: '#0f172a', marginTop: 8, marginBottom: 16 }} />
+                      <p style={{ fontSize: 36 * scale, fontWeight: 800, color: form.primaryColor, lineHeight: 1.1 }}>$1,450.00</p>
+                      <p style={{ fontSize: 10 * scale, color: '#64748b', marginBottom: 18 }}>Amount Received</p>
+                      <div className="space-y-3">
+                        {[
+                          ['Tenant', 'Sample Tenant'],
+                          ['Property', 'Sunset Apartments - Unit 3B'],
+                          ['Method', 'Stripe (Card)'],
+                          ['Transaction', 'pi_demo_receipt_preview'],
+                        ].map(([k, v]) => (
+                          <div key={k} className="grid grid-cols-[130px_1fr] gap-2">
+                            <p style={{ fontSize: 9 * scale, color: '#64748b', textTransform: 'uppercase', fontWeight: 700 }}>{k}</p>
+                            <p style={{ fontSize: 11 * scale }}>{v}</p>
+                          </div>
+                        ))}
                       </div>
                     </>
                   )}
