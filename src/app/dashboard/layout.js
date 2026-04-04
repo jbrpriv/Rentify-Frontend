@@ -427,9 +427,9 @@ export default function DashboardLayout({ children }) {
               {/* Drawer header */}
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
-                    <div className="flex h-7 w-7 items-center justify-center rounded-xl bg-gradient-to-tr from-[#0992C2] to-[#0B2D72] overflow-hidden">
+                  <div className={`flex h-7 w-7 items-center justify-center rounded-xl overflow-hidden ${logoUrl ? 'bg-transparent' : 'bg-gradient-to-tr from-[#0992C2] to-[#0B2D72]'}`}>
                       {logoUrl
-                        ? <img src={logoUrl} alt={`${brandName} logo`} className="h-full w-full object-cover" />
+                      ? <img src={logoUrl} alt={`${brandName} logo`} className="h-full w-full object-contain" />
                         : <Building2 className="h-3.5 w-3.5 text-white" />}
                     </div>
                   <span className="text-sm font-extrabold text-[#0B2D72]">{brandName}</span>

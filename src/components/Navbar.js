@@ -18,12 +18,12 @@ function BrandMark({ brandName, logoUrl, className = '', iconClassName = 'h-4 w-
   const shouldShowImage = Boolean(logoUrl) && !imageFailed;
 
   return (
-    <div className={`flex items-center justify-center overflow-hidden bg-gradient-to-tr from-[#0992C2] to-[#0B2D72] ${className}`}>
+    <div className={`flex items-center justify-center overflow-hidden ${shouldShowImage ? 'bg-transparent' : 'bg-gradient-to-tr from-[#0992C2] to-[#0B2D72]'} ${className}`}>
       {shouldShowImage ? (
         <img
           src={logoUrl}
           alt={`${brandName} logo`}
-          className="h-full w-full object-cover"
+          className="h-full w-full object-contain"
           onError={() => setImageFailed(true)}
         />
       ) : (
