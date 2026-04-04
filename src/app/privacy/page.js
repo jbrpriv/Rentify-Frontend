@@ -2,13 +2,34 @@ import Link from 'next/link';
 import { Building2, Shield, Mail, ArrowLeft } from 'lucide-react';
 
 export const metadata = {
-  title: 'Privacy Policy — RentifyPro',
-  description: 'How RentifyPro collects, uses, and protects your personal data.',
+  title: 'Privacy Policy',
+  description: 'How we collect, use, and protect your personal data.',
 };
 
 const LAST_UPDATED = 'March 2026';
-const CONTACT_EMAIL = 'privacy@rentifypro.com';
-const COMPANY_NAME = 'RentifyPro';
+const DEFAULT_BRANDING = {
+  brandName: 'RentifyPro',
+  supportEmail: 'support@rentifypro.com',
+};
+
+async function getBranding() {
+  try {
+    const apiBase = process.env.NEXT_PUBLIC_API_URL;
+    if (!apiBase) return DEFAULT_BRANDING;
+
+    const endpoint = `${apiBase.replace(/\/$/, '')}/settings/branding`;
+    const res = await fetch(endpoint, { cache: 'no-store' });
+    if (!res.ok) return DEFAULT_BRANDING;
+
+    const data = await res.json();
+    return {
+      brandName: data?.brandName || DEFAULT_BRANDING.brandName,
+      supportEmail: data?.supportEmail || DEFAULT_BRANDING.supportEmail,
+    };
+  } catch {
+    return DEFAULT_BRANDING;
+  }
+}
 
 const Section = ({ title, children }) => (
   <section className="mb-10">
@@ -19,7 +40,9 @@ const Section = ({ title, children }) => (
   </section>
 );
 
-export default function PrivacyPage() {
+export default async function PrivacyPage() {
+  const { brandName: COMPANY_NAME, supportEmail: CONTACT_EMAIL } = await getBranding();
+
   return (
     <div className="min-h-screen bg-[#F8FBFC]">
 
