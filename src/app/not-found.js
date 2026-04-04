@@ -1,7 +1,12 @@
+'use client';
+
 import Link from 'next/link';
+import { useBranding } from '@/context/BrandingContext';
 import { Building2, Home, Search, ArrowLeft } from 'lucide-react';
 
 export default function NotFound() {
+  const { brandName } = useBranding();
+
   return (
     <div className="min-h-screen bg-[#F8FBFC] flex flex-col">
       {/* Mini header */}
@@ -10,7 +15,7 @@ export default function NotFound() {
           <div className="flex h-7 w-7 items-center justify-center rounded-xl bg-gradient-to-tr from-[#0992C2] to-[#0B2D72] shadow-sm">
             <Building2 className="h-3.5 w-3.5 text-white" />
           </div>
-          <span className="text-sm font-extrabold text-[#0B2D72]">RentifyPro</span>
+          <span className="text-sm font-extrabold text-[#0B2D72]">{brandName}</span>
         </Link>
       </header>
 

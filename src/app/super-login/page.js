@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useUser } from '@/context/UserContext';
+import { useBranding } from '@/context/BrandingContext';
 import api, { setAccessToken } from '@/utils/api';
 import { requestFCMToken } from '@/utils/firebase';
 import { Lock, Mail, Loader2, Eye, EyeOff, ShieldCheck, UserPlus, LogIn, Phone, CheckCircle } from 'lucide-react';
@@ -26,6 +27,7 @@ const getRecaptchaToken = (action) =>
 export default function SuperLoginPage() {
   const router = useRouter();
   const { setUser } = useUser();
+  const { brandName } = useBranding();
   const [mode, setMode] = useState('login');
   const [formData, setFormData] = useState({ name: '', email: '', password: '', phoneNumber: '', role: 'admin' });
   const [loading, setLoading] = useState(false);
@@ -197,7 +199,7 @@ export default function SuperLoginPage() {
             Zero-trust staff access
           </div>
           <h1 className="mt-6 text-4xl font-black tracking-tight">
-            RentifyPro
+            {brandName}
           </h1>
           <p className="mt-2 text-sm text-cyan-50">
             Internal control center for agreements, risk and oversight.
@@ -250,7 +252,7 @@ export default function SuperLoginPage() {
               Staff sign-in
             </h2>
             <p className="mt-1 text-sm text-[#4B5563]">
-              Admin and legal teams sign into the secure RentifyPro console here.
+              Admin and legal teams sign into the secure {brandName} console here.
             </p>
           </div>
 

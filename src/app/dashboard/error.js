@@ -7,7 +7,7 @@ import { AlertTriangle, RefreshCw, Home } from 'lucide-react';
 export default function GlobalError({ error, reset }) {
   useEffect(() => {
     // Log to console — swap with Sentry in production
-    console.error('[RentifyPro error]', error);
+    console.error('[app error]', error);
   }, [error]);
 
   return (

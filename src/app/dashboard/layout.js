@@ -7,6 +7,7 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import api, { getAccessToken } from '@/utils/api';
 import { useUser } from '@/context/UserContext';
+import { useBranding } from '@/context/BrandingContext';
 import {
   LayoutDashboard, Building2, FileText, Users, Key, User, Loader2, FolderOpen, Zap,
   ShieldCheck, Wrench, MessageSquare, CreditCard, BarChart2, Scale, TrendingUp,
@@ -215,6 +216,7 @@ export default function DashboardLayout({ children }) {
   const router = useRouter();
   const pathname = usePathname();
   const { user, logout } = useUser();
+  const { brandName } = useBranding();
   const [badgeCounts, setBadgeCounts] = useState({});
   const [notification, setNotification] = useState(null);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -422,7 +424,7 @@ export default function DashboardLayout({ children }) {
                   <div className="flex h-7 w-7 items-center justify-center rounded-xl bg-gradient-to-tr from-[#0992C2] to-[#0B2D72]">
                     <Building2 className="h-3.5 w-3.5 text-white" />
                   </div>
-                  <span className="text-sm font-extrabold text-[#0B2D72]">RentifyPro</span>
+                  <span className="text-sm font-extrabold text-[#0B2D72]">{brandName}</span>
                 </div>
                 <button
                   onClick={() => setMobileOpen(false)}

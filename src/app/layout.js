@@ -19,11 +19,6 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const metadata = {
-  title: 'RentifyPro',
-  description: 'Rental Agreement Platform',
-};
-
 const DEFAULT_BRANDING = {
   brandName: 'RentifyPro',
   supportEmail: 'support@rentifypro.com',
@@ -46,6 +41,14 @@ async function getInitialBranding() {
   } catch {
     return DEFAULT_BRANDING;
   }
+}
+
+export async function generateMetadata() {
+  const branding = await getInitialBranding();
+  return {
+    title: branding.brandName,
+    description: 'Rental Agreement Platform',
+  };
 }
 
 export default async function RootLayout({ children }) {

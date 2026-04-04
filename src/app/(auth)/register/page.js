@@ -6,6 +6,7 @@ import Link from 'next/link';
 import axios from 'axios';
 import api, { setAccessToken } from '@/utils/api';
 import { useUser } from '@/context/UserContext';
+import { useBranding } from '@/context/BrandingContext';
 import {
   User, Mail, Lock, Phone, Building2, Loader2, CheckCircle,
   ShieldCheck, Eye, EyeOff, ArrowLeft,
@@ -37,6 +38,7 @@ const ROLE_OPTIONS = [
 function RegisterContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { brandName } = useBranding();
   const { setUser, user } = useUser();
 
   // SEC-05: redirect already-logged-in users away from register page
@@ -184,7 +186,7 @@ function RegisterContent() {
                 {step === 'register' ? 'Create account' : step === 'verify-email' ? 'Verify your email' : 'Verify your phone'}
               </h2>
               <p className="mt-2 text-xs text-slate-400">
-                {step === 'register' && 'Join RentifyPro — free forever on the starter plan.'}
+                {step === 'register' && `Join ${brandName} — free forever on the starter plan.`}
                 {step === 'verify-email' && `Enter the 6‑digit code sent to ${formData.email}`}
                 {step === 'verify-phone' && `Enter the 6‑digit code sent to ${formData.phoneNumber}`}
               </p>

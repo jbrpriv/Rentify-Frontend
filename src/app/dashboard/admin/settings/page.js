@@ -95,7 +95,7 @@ export default function AdminSettingsPage() {
                 value={form.brandName}
                 onChange={(e) => setForm((p) => ({ ...p, brandName: e.target.value }))}
                 className="w-full rounded-xl border border-slate-200 pl-9 pr-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#0992C2]/35"
-                placeholder="e.g. RentifyPro"
+                placeholder="e.g. Your Platform"
               />
             </div>
           </label>

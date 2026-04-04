@@ -4,6 +4,7 @@ import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import api from '@/utils/api';
 import { useCurrency } from '@/context/CurrencyContext';
+import { useBranding } from '@/context/BrandingContext';
 import {
   Check, Loader2, Zap, Building2, Crown, AlertTriangle,
   CreditCard, ArrowUpRight,
@@ -32,6 +33,7 @@ const BTN_STYLE = {
 function BillingContent() {
   const searchParams = useSearchParams();
   const { formatMoney } = useCurrency();
+  const { brandName } = useBranding();
 
   const [plans, setPlans] = useState([]);
   const [currentTier, setCurrentTier] = useState(null);
@@ -110,7 +112,7 @@ function BillingContent() {
           Subscription &amp; Billing
         </h1>
         <p className="text-gray-400 text-sm font-medium mt-1">
-          Manage your RentifyPro plan and payment method.
+          Manage your {brandName} plan and payment method.
         </p>
       </div>
 

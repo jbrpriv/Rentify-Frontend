@@ -10,6 +10,7 @@ import {
 import api from '@/utils/api';
 import { useUser } from '@/context/UserContext';
 import { useToast } from '@/context/ToastContext';
+import { useBranding } from '@/context/BrandingContext';
 
 /* ─── Config ─────────────────────────────────────────────────────────────── */
 const TABS = [
@@ -401,7 +402,7 @@ function NotificationsTab({ prefs, setPrefs, prefSaving, onSave }) {
   return (
     <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-6 sm:p-7">
       <h3 className="text-base font-extrabold text-gray-900 mb-1">Notification Preferences</h3>
-      <p className="text-xs text-gray-400 mb-6">Choose how you want RentifyPro to reach you</p>
+      <p className="text-xs text-gray-400 mb-6">Choose how you want {brandName} to reach you</p>
 
       <div className="space-y-3">
         {channels.map(({ key, icon: Icon, label, desc, color, bg }) => (
@@ -437,6 +438,7 @@ function NotificationsTab({ prefs, setPrefs, prefSaving, onSave }) {
 export default function ProfilePage() {
   const { user: ctxUser, refreshUser } = useUser();
   const { toast } = useToast();
+  const { brandName } = useBranding();
 
   const [activeTab, setActiveTab] = useState('profile');
   const [dbUser, setDbUser] = useState(null);

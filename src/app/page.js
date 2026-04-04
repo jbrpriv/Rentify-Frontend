@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useUser } from '@/context/UserContext';
+import { useBranding } from '@/context/BrandingContext';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
@@ -64,6 +65,7 @@ function RevealCard({ children, delay = 0, className = '' }) {
 
 export default function LandingPage() {
   const { user } = useUser();
+  const { brandName } = useBranding();
   const [roleTab, setRoleTab] = useState('tenant');
   const [query, setQuery] = useState('');
   const router = useRouter();
@@ -280,7 +282,7 @@ export default function LandingPage() {
                     </span>
                   </h2>
                   <p className={`text-body ${roleTab === 'tenant' ? 'text-white/75' : 'text-white/65'}`}>
-                    Switch views to see how RentifyPro adapts instantly to tenants or landlords — from application flows to analytics.
+                    Switch views to see how {brandName} adapts instantly to tenants or landlords — from application flows to analytics.
                   </p>
                 </div>
                 <div className="flex gap-3">

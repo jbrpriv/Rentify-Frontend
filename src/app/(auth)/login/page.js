@@ -6,6 +6,7 @@ import api, { setAccessToken } from '@/utils/api';
 import { requestFCMToken } from '@/utils/firebase';
 import Link from 'next/link';
 import { useUser } from '@/context/UserContext';
+import { useBranding } from '@/context/BrandingContext';
 import {
   Lock, Mail, Loader2, Eye, EyeOff,
   ShieldCheck, Phone, CheckCircle,
@@ -34,6 +35,7 @@ const getRecaptchaToken = (action) => {
 function LoginContent() {
   const router = useRouter();
   const { setUser, user } = useUser();
+  const { brandName } = useBranding();
 
   // SEC-05: redirect already-logged-in users away from login page
   useEffect(() => {
@@ -253,7 +255,7 @@ function LoginContent() {
             <div className="mb-8 text-center md:text-left">
               <p className="text-micro text-slate-400">Welcome back</p>
               <h2 className="text-h2 mt-1 bg-gradient-to-r from-slate-50 via-sky-100 to-slate-200 bg-clip-text text-transparent">
-                Sign in to RentifyPro
+                Sign in to {brandName}
               </h2>
               <p className="mt-2 text-xs text-slate-400">
                 Manage your rentals, agreements, and tenants in one premium dashboard.

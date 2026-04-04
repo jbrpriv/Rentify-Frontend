@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import api, { setAccessToken, getAccessToken } from '@/utils/api';
 import { useUser } from '@/context/UserContext';
+import { useBranding } from '@/context/BrandingContext';
 import {
   Check, X, Building2, Zap, Crown, ArrowRight,
   HelpCircle, Loader2, Star, LayoutDashboard,
@@ -46,7 +47,7 @@ const FAQ = [
   },
   {
     q: 'Are payments secure?',
-    a: 'All transactions are processed by Stripe, a PCI-DSS Level 1 certified payments provider. RentifyPro never stores your card details.',
+    a: 'All transactions are processed by Stripe, a PCI-DSS Level 1 certified payments provider. The platform never stores your card details.',
   },
   {
     q: 'Is there a free trial?',
@@ -66,6 +67,7 @@ function FeatureCell({ value }) {
 
 export default function PricingPage() {
   const { user } = useUser();
+  const { brandName } = useBranding();
   const router = useRouter();
   const [plans, setPlans] = useState([]);
   const [currentTier, setCurrentTier] = useState(null);
@@ -74,7 +76,7 @@ export default function PricingPage() {
   const [openFaq, setOpenFaq] = useState(null);
 
   useEffect(() => {
-    const fetches = [api.get('/billing/plans')];
+    a: 'All transactions are processed by Stripe, a PCI-DSS Level 1 certified payments provider. The platform never stores your card details.',
     const stored = getAccessToken();
     if (stored) fetches.push(api.get('/billing/status'));
 
@@ -388,7 +390,7 @@ export default function PricingPage() {
                       Ready to get started?
                     </h2>
                     <p className="mb-8" style={{ color: 'rgba(255,255,255,0.62)', fontSize: '0.97rem' }}>
-                      Join landlords across Pakistan already managing their properties with RentifyPro.
+                      Join landlords across Pakistan already managing their properties with {brandName}.
                     </p>
                     <Link
                       href="/register"

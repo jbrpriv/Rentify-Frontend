@@ -3,6 +3,7 @@
 import { useState, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import api from '@/utils/api';
+import { useBranding } from '@/context/BrandingContext';
 import Link from 'next/link';
 import { Lock, Eye, EyeOff, Loader2, CheckCircle, XCircle, ArrowLeft, ShieldCheck } from 'lucide-react';
 import Button from '@/components/ui/Button';
@@ -11,6 +12,7 @@ import TextField from '@/components/ui/TextField';
 function ResetPasswordContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const { brandName } = useBranding();
   const token = searchParams.get('token');
 
   const [password, setPassword] = useState('');
@@ -105,7 +107,7 @@ function ResetPasswordContent() {
               </span>
             </h1>
             <p className="mt-4 max-w-md text-[0.98rem] leading-relaxed text-neutral-600">
-              Choose a strong password to keep your RentifyPro account safe.
+              Choose a strong password to keep your {brandName} account safe.
               You'll be signed in automatically after resetting.
             </p>
 
