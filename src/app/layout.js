@@ -24,11 +24,37 @@ export const metadata = {
   description: 'Rental Agreement Platform',
 };
 
-export default function RootLayout({ children }) {
+const DEFAULT_BRANDING = {
+  brandName: 'RentifyPro',
+  supportEmail: 'support@rentifypro.com',
+};
+
+async function getInitialBranding() {
+  try {
+    const apiBase = process.env.NEXT_PUBLIC_API_URL;
+    if (!apiBase) return DEFAULT_BRANDING;
+
+    const endpoint = `${apiBase.replace(/\/$/, '')}/settings/branding`;
+    const res = await fetch(endpoint, { cache: 'no-store' });
+    if (!res.ok) return DEFAULT_BRANDING;
+
+    const data = await res.json();
+    return {
+      brandName: data?.brandName || DEFAULT_BRANDING.brandName,
+      supportEmail: data?.supportEmail || DEFAULT_BRANDING.supportEmail,
+    };
+  } catch {
+    return DEFAULT_BRANDING;
+  }
+}
+
+export default async function RootLayout({ children }) {
+  const initialBranding = await getInitialBranding();
+
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased rf-shell`}>
-        <BrandingProvider>
+        <BrandingProvider initialBranding={initialBranding}>
           <UserProvider>
             <CurrencyProvider>
               <ToastProvider>

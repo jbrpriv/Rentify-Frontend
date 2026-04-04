@@ -9,9 +9,14 @@ const DEFAULT_BRANDING = {
 
 const BrandingContext = createContext(null);
 
-export function BrandingProvider({ children }) {
-  const [branding, setBranding] = useState(DEFAULT_BRANDING);
-  const [loading, setLoading] = useState(true);
+const normalizeBranding = (input) => ({
+  brandName: input?.brandName || DEFAULT_BRANDING.brandName,
+  supportEmail: input?.supportEmail || DEFAULT_BRANDING.supportEmail,
+});
+
+export function BrandingProvider({ children, initialBranding = null }) {
+  const [branding, setBranding] = useState(() => normalizeBranding(initialBranding));
+  const [loading, setLoading] = useState(!initialBranding);
 
   const refreshBranding = useCallback(async () => {
     try {
@@ -19,10 +24,7 @@ export function BrandingProvider({ children }) {
       const res = await fetch(`${apiBase}/settings/branding`, { credentials: 'include' });
       if (!res.ok) throw new Error('Failed to load branding');
       const data = await res.json();
-      setBranding({
-        brandName: data.brandName || DEFAULT_BRANDING.brandName,
-        supportEmail: data.supportEmail || DEFAULT_BRANDING.supportEmail,
-      });
+      setBranding(normalizeBranding(data));
     } catch {
       setBranding(DEFAULT_BRANDING);
     } finally {
@@ -31,8 +33,14 @@ export function BrandingProvider({ children }) {
   }, []);
 
   useEffect(() => {
+    if (!initialBranding) {
+      refreshBranding();
+      return;
+    }
+
+    // Keep client in sync with latest admin changes after initial server hydration.
     refreshBranding();
-  }, [refreshBranding]);
+  }, [refreshBranding, initialBranding]);
 
   const value = useMemo(
     () => ({ ...branding, loading, refreshBranding }),
