@@ -80,8 +80,6 @@ export default function CreateAgreementTemplatePage() {
     router.push(user.role === 'landlord' ? '/dashboard/billing' : '/dashboard');
   }, [user, canAccessTemplateStudio, router, toast]);
 
-  if (user && !canAccessTemplateStudio) return null;
-
   const renderPdfPreview = async () => {
     if (!themeId) return;
 
@@ -124,6 +122,8 @@ export default function CreateAgreementTemplatePage() {
 
     return () => clearTimeout(timer);
   }, [themeId, previewMode, form.customizations, form.standardClauses]);
+
+  if (user && !canAccessTemplateStudio) return null;
 
   const submit = async () => {
     if (!form.name.trim()) {
