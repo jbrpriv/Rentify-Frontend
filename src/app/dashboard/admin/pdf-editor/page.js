@@ -15,6 +15,7 @@ export default function AdminPdfEditorPage() {
   const [form, setForm] = useState(null);
   const [saving, setSaving] = useState(false);
   const [previewUrl, setPreviewUrl] = useState('');
+  const [previewType, setPreviewType] = useState('agreement');
 
   const activeTheme = useMemo(() => themes.find((t) => t._id === activeId) || null, [themes, activeId]);
 
@@ -58,6 +59,7 @@ export default function AdminPdfEditorPage() {
             backgroundColor: form.backgroundColor,
             fontFamily: form.fontFamily,
             fontSizeScale: form.fontSizeScale,
+            previewType,
           },
           responseType: 'blob',
         });
@@ -73,7 +75,7 @@ export default function AdminPdfEditorPage() {
     }, 500);
 
     return () => clearTimeout(timer);
-  }, [activeId, form]);
+  }, [activeId, form, previewType]);
 
   const save = async () => {
     if (!activeId || !form) return;
@@ -114,7 +116,7 @@ export default function AdminPdfEditorPage() {
     <div style={cssVars} className="max-w-7xl mx-auto pb-10">
       <div className="mb-4">
         <h1 className="text-2xl font-extrabold text-slate-900">Global PDF Branding</h1>
-        <p className="text-sm text-slate-500">Changes affect future generated PDFs for agreements using each layout.</p>
+        <p className="text-sm text-slate-500">Changes affect future generated PDFs for agreements and receipts using each layout.</p>
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-[260px_380px_1fr] gap-4">
@@ -199,7 +201,7 @@ export default function AdminPdfEditorPage() {
             </label>
 
             <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
-              Changes affect all future PDF downloads for agreements using this layout.
+              Changes affect all future PDF downloads for agreements and receipts using this layout.
             </div>
 
             <button onClick={save} disabled={saving} className="w-full rounded-xl px-4 py-2.5 text-sm font-extrabold text-white inline-flex items-center justify-center gap-2" style={{ background: 'var(--brand-primary)' }}>
@@ -211,7 +213,25 @@ export default function AdminPdfEditorPage() {
         <section className="rounded-2xl border bg-white overflow-hidden" style={{ borderColor: 'var(--brand-border)' }}>
           <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between">
             <p className="text-sm font-bold text-slate-800">Live Preview</p>
-            <button onClick={() => loadThemes()} className="text-xs font-semibold text-slate-500 inline-flex items-center gap-1"><RefreshCcw size={12} /> Refresh</button>
+            <div className="flex items-center gap-2">
+              <div className="inline-flex rounded-lg border border-slate-200 p-0.5 bg-slate-50">
+                <button
+                  onClick={() => setPreviewType('agreement')}
+                  className="px-2.5 py-1 text-xs font-semibold rounded-md"
+                  style={previewType === 'agreement' ? { background: 'var(--brand-primary)', color: '#fff' } : { color: '#334155' }}
+                >
+                  Agreement
+                </button>
+                <button
+                  onClick={() => setPreviewType('receipt')}
+                  className="px-2.5 py-1 text-xs font-semibold rounded-md"
+                  style={previewType === 'receipt' ? { background: 'var(--brand-primary)', color: '#fff' } : { color: '#334155' }}
+                >
+                  Receipt
+                </button>
+              </div>
+              <button onClick={() => loadThemes()} className="text-xs font-semibold text-slate-500 inline-flex items-center gap-1"><RefreshCcw size={12} /> Refresh</button>
+            </div>
           </div>
           <div className="h-[74vh] bg-slate-50">
             {previewUrl ? (
