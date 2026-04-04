@@ -10,7 +10,7 @@ import { useUser } from '@/context/UserContext';
 import {
   LayoutDashboard, Building2, FileText, Users, Key, User, Loader2, FolderOpen, Zap,
   ShieldCheck, Wrench, MessageSquare, CreditCard, BarChart2, Scale, TrendingUp,
-  ClipboardList, X, Tag, BookOpen, Menu, BadgeCheck, Brush,
+  ClipboardList, X, Tag, BookOpen, Menu, BadgeCheck, Brush, Settings,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
