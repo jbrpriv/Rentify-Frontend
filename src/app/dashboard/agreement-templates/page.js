@@ -91,6 +91,9 @@ export default function AgreementTemplatesPage() {
   const { user } = useUser();
   const { toast } = useToast();
   const { themes, cssVars } = useGlobalPdfTheme();
+  const normalizedTier = String(user?.subscriptionTier || '').trim().toLowerCase();
+  const tier = ['free', 'pro', 'enterprise'].includes(normalizedTier) ? normalizedTier : 'free';
+  const canAccessTemplateStudio = user?.role === 'admin' || (user?.role === 'landlord' && tier === 'enterprise');
 
   const [templates, setTemplates] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -109,12 +112,16 @@ export default function AgreementTemplatesPage() {
   }, [toast]);
 
   useEffect(() => {
-    if (!['landlord', 'property_manager'].includes(user?.role)) {
-      router.push('/dashboard');
+    if (!user) return;
+
+    if (!canAccessTemplateStudio) {
+      toast('Agreement template studio is available on the Enterprise plan only.', 'error');
+      router.push(user.role === 'landlord' ? '/dashboard/billing' : '/dashboard');
       return;
     }
+
     fetchTemplates();
-  }, [user, router, fetchTemplates]);
+  }, [user, canAccessTemplateStudio, router, fetchTemplates, toast]);
 
   const onDelete = async (id) => {
     if (!confirm('Archive this template?')) return;
@@ -158,6 +165,8 @@ export default function AgreementTemplatesPage() {
     approved: templates.filter((t) => t.status === 'approved'),
     rejected: templates.filter((t) => t.status === 'rejected'),
   }), [templates]);
+
+  if (user && !canAccessTemplateStudio) return null;
 
   return (
     <div style={cssVars} className="max-w-6xl mx-auto pb-10">

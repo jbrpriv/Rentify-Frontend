@@ -5,13 +5,18 @@ import { useParams, useRouter } from 'next/navigation';
 import { Loader2, RefreshCcw } from 'lucide-react';
 import api from '@/utils/api';
 import { useToast } from '@/context/ToastContext';
+import { useUser } from '@/context/UserContext';
 import useGlobalPdfTheme from '@/hooks/useGlobalPdfTheme';
 
 export default function EditAgreementTemplatePage() {
   const { id } = useParams();
   const router = useRouter();
   const { toast } = useToast();
+  const { user } = useUser();
   const { themes, cssVars } = useGlobalPdfTheme();
+  const normalizedTier = String(user?.subscriptionTier || '').trim().toLowerCase();
+  const tier = ['free', 'pro', 'enterprise'].includes(normalizedTier) ? normalizedTier : 'free';
+  const canAccessTemplateStudio = user?.role === 'admin' || (user?.role === 'landlord' && tier === 'enterprise');
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -22,6 +27,19 @@ export default function EditAgreementTemplatePage() {
   const [form, setForm] = useState(null);
 
   useEffect(() => {
+    if (!user) return;
+    if (canAccessTemplateStudio) return;
+
+    toast('Agreement template studio is available on the Enterprise plan only.', 'error');
+    router.push(user.role === 'landlord' ? '/dashboard/billing' : '/dashboard');
+  }, [user, canAccessTemplateStudio, router, toast]);
+
+  useEffect(() => {
+    if (user && !canAccessTemplateStudio) {
+      setLoading(false);
+      return;
+    }
+
     let ignore = false;
 
     api.get(`/agreement-templates/${id}`)
@@ -56,7 +74,7 @@ export default function EditAgreementTemplatePage() {
     return () => {
       ignore = true;
     };
-  }, [id, toast]);
+  }, [id, toast, user, canAccessTemplateStudio]);
 
   const readOnly = template?.status === 'approved';
 
@@ -129,6 +147,7 @@ export default function EditAgreementTemplatePage() {
 
   const themeOptions = useMemo(() => themes || [], [themes]);
 
+  if (user && !canAccessTemplateStudio) return null;
   if (loading || !form) return <p className="text-sm text-slate-500">Loading...</p>;
 
   const selectedTheme = themeOptions.find((t) => t._id === form.baseTheme);

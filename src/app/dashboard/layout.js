@@ -265,7 +265,12 @@ export default function DashboardLayout({ children }) {
       if (!['landlord', 'admin', 'law_reviewer'].includes(role)) router.push('/dashboard');
     }
     else if (pathname.startsWith('/dashboard/agreement-templates')) {
-      if (!['landlord', 'admin'].includes(role)) router.push('/dashboard');
+      if (role === 'admin') return;
+      const normalizedTier = String(user.subscriptionTier || '').trim().toLowerCase();
+      const tier = ['free', 'pro', 'enterprise'].includes(normalizedTier) ? normalizedTier : 'free';
+      if (role !== 'landlord' || tier !== 'enterprise') {
+        router.push(role === 'landlord' ? '/dashboard/billing' : '/dashboard');
+      }
     }
     else if (pathname.startsWith('/dashboard/offers')) {
       if (!['landlord', 'tenant'].includes(role)) router.push('/dashboard');
@@ -350,7 +355,8 @@ export default function DashboardLayout({ children }) {
   }
 
   const role = user.role || 'tenant';
-  const tier = user.subscriptionTier || 'free';
+  const normalizedTier = String(user.subscriptionTier || '').trim().toLowerCase();
+  const tier = ['free', 'pro', 'enterprise'].includes(normalizedTier) ? normalizedTier : 'free';
   let currentNav = NAV_BY_ROLE[role] || NAV_BY_ROLE.tenant;
   // Filter sidebar items based on subscription tier for landlords
   if (role === 'landlord') {

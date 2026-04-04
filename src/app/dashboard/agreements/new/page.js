@@ -1014,8 +1014,9 @@ function AgreementForm() {
   const { user } = useUser();
   const offerId = searchParams.get('offerId');
 
-  const tier = ['free', 'pro', 'enterprise'].includes(user?.subscriptionTier)
-    ? user.subscriptionTier
+  const normalizedTier = String(user?.subscriptionTier || '').trim().toLowerCase();
+  const tier = ['free', 'pro', 'enterprise'].includes(normalizedTier)
+    ? normalizedTier
     : 'free';
   const canUseAgreementTemplates = tier === 'enterprise';
   const canSelectPdfTheme = tier !== 'free';

@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Loader2, RefreshCcw } from 'lucide-react';
 import api from '@/utils/api';
 import { useToast } from '@/context/ToastContext';
+import { useUser } from '@/context/UserContext';
 import useGlobalPdfTheme from '@/hooks/useGlobalPdfTheme';
 
 const defaultClauses = {
@@ -19,7 +20,11 @@ export default function CreateAgreementTemplatePage() {
   const router = useRouter();
   const params = useSearchParams();
   const { toast } = useToast();
+  const { user } = useUser();
   const { themes, activeTheme, cssVars } = useGlobalPdfTheme();
+  const normalizedTier = String(user?.subscriptionTier || '').trim().toLowerCase();
+  const tier = ['free', 'pro', 'enterprise'].includes(normalizedTier) ? normalizedTier : 'free';
+  const canAccessTemplateStudio = user?.role === 'admin' || (user?.role === 'landlord' && tier === 'enterprise');
 
   const [themeId, setThemeId] = useState(params.get('themeId') || '');
   const [previewUrl, setPreviewUrl] = useState('');
@@ -66,6 +71,16 @@ export default function CreateAgreementTemplatePage() {
       if (previewUrl) URL.revokeObjectURL(previewUrl);
     };
   }, [previewUrl]);
+
+  useEffect(() => {
+    if (!user) return;
+    if (canAccessTemplateStudio) return;
+
+    toast('Agreement template studio is available on the Enterprise plan only.', 'error');
+    router.push(user.role === 'landlord' ? '/dashboard/billing' : '/dashboard');
+  }, [user, canAccessTemplateStudio, router, toast]);
+
+  if (user && !canAccessTemplateStudio) return null;
 
   const renderPdfPreview = async () => {
     if (!themeId) return;
