@@ -87,24 +87,40 @@ function TemplatePicker({ onApply, onClose, canUseTemplates = true, canUseThemes
   const [templates, setTemplates] = useState([]);
   const [themes, setThemes] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState(canUseTemplates ? 'templates' : 'themes');
+  const [serverCanUseTemplates, setServerCanUseTemplates] = useState(Boolean(canUseTemplates));
+  const [serverCanUseThemes, setServerCanUseThemes] = useState(Boolean(canUseThemes));
+  const [activeTab, setActiveTab] = useState('themes');
   const [applying, setApplying] = useState(null);
+
+  const effectiveCanUseTemplates = Boolean(canUseTemplates) && Boolean(serverCanUseTemplates);
+  const effectiveCanUseThemes = Boolean(canUseThemes) && Boolean(serverCanUseThemes);
+
+  useEffect(() => {
+    setActiveTab(effectiveCanUseTemplates ? 'templates' : 'themes');
+  }, [effectiveCanUseTemplates]);
 
   useEffect(() => {
     api.get('/agreement-templates/available')
       .then(({ data }) => {
         setTemplates(Array.isArray(data?.templates) ? data.templates : []);
         setThemes(Array.isArray(data?.themes) ? data.themes : []);
+
+        const capability = Boolean(data?.capabilities?.canUseAgreementTemplates);
+        setServerCanUseTemplates(capability);
+        const themeCapability = Boolean(data?.capabilities?.canSelectPdfThemes);
+        setServerCanUseThemes(themeCapability);
       })
       .catch(() => {
         setTemplates([]);
         setThemes([]);
+        setServerCanUseTemplates(false);
+        setServerCanUseThemes(false);
       })
       .finally(() => setLoading(false));
   }, []);
 
   const handleSelectTemplate = async (tpl) => {
-    if (!canUseTemplates) return;
+    if (!effectiveCanUseTemplates) return;
     setApplying(tpl._id);
     try {
       await api.post(`/agreement-templates/${tpl._id}/use`);
@@ -114,7 +130,7 @@ function TemplatePicker({ onApply, onClose, canUseTemplates = true, canUseThemes
   };
 
   const handleSelectTheme = (theme) => {
-    if (!canUseThemes) return;
+    if (!effectiveCanUseThemes) return;
     onApply({ type: 'theme', id: theme._id, name: theme.name });
   };
 
@@ -135,33 +151,34 @@ function TemplatePicker({ onApply, onClose, canUseTemplates = true, canUseThemes
         </div>
 
         <div className="px-5 py-3 border-b bg-white flex items-center gap-2">
-          <button
-            type="button"
-            onClick={() => { if (canUseTemplates) setActiveTab('templates'); }}
-            disabled={!canUseTemplates}
-            className={`px-3 py-1.5 rounded-full text-xs font-semibold border ${activeTab === 'templates' ? 'bg-blue-600 text-white border-blue-600' : 'border-gray-300 text-gray-600'} ${!canUseTemplates ? 'opacity-50 cursor-not-allowed' : ''}`}
-          >
-            My Templates ({templates.length})
-          </button>
+          {effectiveCanUseTemplates && (
+            <button
+              type="button"
+              onClick={() => setActiveTab('templates')}
+              className={`px-3 py-1.5 rounded-full text-xs font-semibold border ${activeTab === 'templates' ? 'bg-blue-600 text-white border-blue-600' : 'border-gray-300 text-gray-600'}`}
+            >
+              My Templates ({templates.length})
+            </button>
+          )}
           <button
             type="button"
             onClick={() => setActiveTab('themes')}
-            disabled={!canUseThemes}
-            className={`px-3 py-1.5 rounded-full text-xs font-semibold border ${activeTab === 'themes' ? 'bg-blue-600 text-white border-blue-600' : 'border-gray-300 text-gray-600'} ${!canUseThemes ? 'opacity-50 cursor-not-allowed' : ''}`}
+            disabled={!effectiveCanUseThemes}
+            className={`px-3 py-1.5 rounded-full text-xs font-semibold border ${activeTab === 'themes' ? 'bg-blue-600 text-white border-blue-600' : 'border-gray-300 text-gray-600'} ${!effectiveCanUseThemes ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
             Default Themes ({themes.length})
           </button>
         </div>
 
-        {!canUseTemplates && canUseThemes && (
+        {!effectiveCanUseTemplates && effectiveCanUseThemes && (
           <div className="px-5 py-2 bg-amber-50 border-b border-amber-200 text-[11px] text-amber-800">
-            Agreement templates during drafting are available on Enterprise only. You can still choose a default PDF theme.
+            Agreement templates during drafting are available on Enterprise only. Your plan can choose from these default PDF themes.
           </div>
         )}
 
-        {!canUseTemplates && !canUseThemes && (
+        {!effectiveCanUseTemplates && !effectiveCanUseThemes && (
           <div className="px-5 py-2 bg-amber-50 border-b border-amber-200 text-[11px] text-amber-800">
-            Free tier uses the admin global default PDF theme during drafting.
+            Pro and Free tiers use the admin global default PDF theme during drafting.
           </div>
         )}
 
@@ -203,13 +220,13 @@ function TemplatePicker({ onApply, onClose, canUseTemplates = true, canUseThemes
             </div>
           ))}
 
-          {!loading && activeTab === 'themes' && !canUseThemes && (
+          {!loading && activeTab === 'themes' && !effectiveCanUseThemes && (
             <p className="text-sm text-gray-400 text-center py-8 italic">
-              PDF theme selection is not available on the Free plan.
+              PDF theme selection is available on the Enterprise plan only.
             </p>
           )}
 
-          {!loading && activeTab === 'themes' && canUseThemes && themes.map(theme => (
+          {!loading && activeTab === 'themes' && effectiveCanUseThemes && themes.map(theme => (
             <div key={theme._id} className="border border-gray-200 rounded-xl p-4 hover:border-blue-300 hover:bg-blue-50/30 transition">
               <div className="flex items-start justify-between gap-3">
                 <div className="flex-1 min-w-0">
@@ -1019,7 +1036,7 @@ function AgreementForm() {
     ? normalizedTier
     : 'free';
   const canUseAgreementTemplates = tier === 'enterprise';
-  const canSelectPdfTheme = tier !== 'free';
+  const canSelectPdfTheme = tier === 'enterprise';
   const clauseLimit = tier === 'free' ? 2 : Number.POSITIVE_INFINITY;
   const canUseClauses = true;
 
@@ -1130,7 +1147,7 @@ function AgreementForm() {
       return;
     }
     if (selection?.type === 'theme' && !canSelectPdfTheme) {
-      toast('Free tier uses the admin global default PDF theme.', 'error');
+      toast('Pro and Free tiers use the admin global default PDF theme.', 'error');
       setShowTemplatePicker(false);
       return;
     }
@@ -1231,7 +1248,7 @@ function AgreementForm() {
               clearFieldError={(key) => setFormErrors((prev) => ({ ...prev, [key]: null }))}
               onOpenTemplate={() => {
                 if (!canUseAgreementTemplates && !canSelectPdfTheme) {
-                  toast('Free tier uses the admin global default PDF theme.', 'error');
+                  toast('Pro and Free tiers use the admin global default PDF theme.', 'error');
                   return;
                 }
                 setShowTemplatePicker(true);
