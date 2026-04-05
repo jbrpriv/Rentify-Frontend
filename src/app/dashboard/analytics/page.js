@@ -80,6 +80,7 @@ function Skeleton() {
 
 const PAYMENT_STATUS = {
   paid: { label: 'Paid', color: 'bg-[#E6EAF2] text-[#0B2D72] border border-[#CBD5E1]' },
+  pending_approval: { label: 'Awaiting Approval', color: 'bg-[#E6EAF2] text-[#0B2D72] border border-[#CBD5E1]' },
   pending: { label: 'Pending', color: 'bg-[#E6EAF2] text-[#0B2D72] border border-[#CBD5E1]' },
   failed: { label: 'Failed', color: 'bg-[#E6EAF2] text-[#0B2D72] border border-[#CBD5E1]' },
   retry_scheduled: { label: 'Retrying', color: 'bg-[#E6EAF2] text-[#0B2D72] border border-[#CBD5E1]' },
@@ -128,7 +129,7 @@ function LandlordAnalytics({ data }) {
   const [downloading, setDownloading] = useState(null);
 
   useEffect(() => {
-    api.get('/payments/history?limit=20&status=paid')
+    api.get('/payments/history?limit=20&status=paid,pending_approval')
       .then(({ data: d }) => setRecentPayments(d.payments || []))
       .catch(() => { })
       .finally(() => setPaymentsLoading(false));

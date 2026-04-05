@@ -55,6 +55,7 @@ const NAV_BY_ROLE = {
     { name: 'Global Branding Settings', href: '/dashboard/admin/settings', icon: Settings },
     { name: 'Verifications', href: '/dashboard/admin/verifications', icon: BadgeCheck },
     { name: 'Billing', href: '/dashboard/admin/billing', icon: CreditCard },
+    { name: 'Payments', href: '/dashboard/admin/payments', icon: CreditCard },
     { name: 'Disputes', href: '/dashboard/disputes', icon: Scale },
     { name: 'Messages', href: '/dashboard/messages', icon: MessageSquare, badgeKey: 'messages' },
     { name: 'Audit Logs', href: '/dashboard/admin/audit-logs', icon: ShieldCheck },

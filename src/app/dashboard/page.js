@@ -227,6 +227,11 @@ export default function DashboardHome() {
   const activeLeases = agreements.filter(a => a.status === 'active');
   const pendingOffers = offers.filter(o => ['pending', 'countered'].includes(o.status));
   const totalRevenue = activeLeases.reduce((s, a) => s + (a.financials?.rentAmount || 0), 0);
+  const pendingApprovalPayments = payments.filter((p) => p.status === 'pending_approval');
+  const pendingApprovalAmount = pendingApprovalPayments.reduce(
+    (sum, p) => sum + Number(p.landlordPayoutAmount ?? p.amount ?? 0),
+    0
+  );
 
   /* Alert tasks */
   const tasks = [];
@@ -336,6 +341,7 @@ export default function DashboardHome() {
           {user.role === 'landlord' && (
             <>
               <StatCard label="Monthly Income" value={formatMoneyCompact(totalRevenue)} icon={TrendingUp} theme={theme} sub={`${activeLeases.length} active lease(s)`} />
+              <StatCard label="Pending Payments" value={formatMoneyCompact(pendingApprovalAmount)} icon={Clock} theme={theme} sub={`${pendingApprovalPayments.length} waiting admin approval`} />
               <StatCard label="Late Fees" value={formatMoneyCompact(payments.reduce((s, p) => s + (p.lateFeeAmount || 0), 0))} icon={AlertCircle} theme={theme} sub={`${payments.filter(p => p.status === 'late_fee_applied').length} pending fee(s)`} />
               <StatCard label="Properties" value={properties.length} icon={Building2} theme={theme} />
               <StatCard label="Agreements" value={agreements.length} icon={FileText} theme={theme} />
@@ -502,7 +508,7 @@ export default function DashboardHome() {
 
 function buildMonthly(payments) {
   const map = {};
-  payments.filter(p => p.status === 'paid').forEach(p => {
+  payments.filter(p => ['paid', 'pending_approval'].includes(p.status)).forEach(p => {
     const d = new Date(p.paidAt || p.createdAt);
     const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
     map[key] = (map[key] || 0) + (p.amount || 0);

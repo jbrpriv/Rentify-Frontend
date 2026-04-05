@@ -6,6 +6,7 @@ import {
   User, Mail, Phone, Shield, Save, Loader2, Bell, MessageSquare,
   ShieldCheck, ShieldOff, QrCode, CheckCircle, AlertTriangle,
   Camera, Upload, X, Calendar, Lock, Award,
+  CreditCard, RefreshCw,
 } from 'lucide-react';
 import api from '@/utils/api';
 import { useUser } from '@/context/UserContext';
@@ -61,7 +62,25 @@ function ToggleSwitch({ checked, onToggle, color = '#0992C2' }) {
 }
 
 /* ─── Tabs ─────────────────────────────────────────────────────────────────── */
-function ProfileTab({ user, form, setForm, saving, onSubmit, photoFile, photoPreview, photoUploading, onPhotoSelect, onPhotoUpload, onPhotoClear, fileInputRef }) {
+function ProfileTab({
+  user,
+  form,
+  setForm,
+  saving,
+  onSubmit,
+  photoFile,
+  photoPreview,
+  photoUploading,
+  onPhotoSelect,
+  onPhotoUpload,
+  onPhotoClear,
+  fileInputRef,
+  stripeConnect,
+  stripeLoading,
+  stripeConnecting,
+  onStripeConnect,
+  onStripeRefresh,
+}) {
   const roleConfig = ROLE_CONFIG[user.role] || ROLE_CONFIG.tenant;
   const displayRoleLabel = user.role?.replace(/_/g, ' ');
   return (
@@ -201,6 +220,84 @@ function ProfileTab({ user, form, setForm, saving, onSubmit, photoFile, photoPre
           </div>
         </div>
       </div>
+
+      {user.role === 'landlord' && (
+        <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-6 sm:p-7">
+          <h3 className="text-base font-extrabold text-gray-900 mb-1">Stripe Connect Payouts</h3>
+          <p className="text-xs text-gray-400 mb-5">Connect Stripe to receive approved rent payouts from admins</p>
+
+          <div className="rounded-2xl border border-gray-100 bg-gray-50 p-4 sm:p-5">
+            <div className="flex items-start justify-between gap-4 flex-wrap">
+              <div className="space-y-1">
+                <p className="text-sm font-bold text-gray-900">Payout Status</p>
+                <div className="flex items-center gap-2">
+                  <span
+                    className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold ${
+                      stripeConnect.connected
+                        ? 'bg-green-100 text-green-700 border border-green-200'
+                        : stripeConnect.stripeId
+                          ? 'bg-amber-100 text-amber-700 border border-amber-200'
+                          : 'bg-gray-100 text-gray-700 border border-gray-200'
+                    }`}
+                  >
+                    {stripeConnect.connected ? 'Connected' : stripeConnect.stripeId ? 'Action Required' : 'Not Connected'}
+                  </span>
+                  {stripeConnect.stripeId && (
+                    <span className="text-[11px] text-gray-400 font-mono">{stripeConnect.stripeId}</span>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={onStripeRefresh}
+                  disabled={stripeLoading}
+                  className="inline-flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold border border-gray-200 text-gray-600 hover:bg-white disabled:opacity-60"
+                >
+                  {stripeLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5" />}
+                  Refresh
+                </button>
+
+                <button
+                  type="button"
+                  onClick={onStripeConnect}
+                  disabled={stripeConnecting}
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold bg-[#E6EAF2] text-[#0B2D72] border border-[#CBD5E1] hover:bg-[#DBE2ED] disabled:opacity-60"
+                >
+                  {stripeConnecting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CreditCard className="w-3.5 h-3.5" />}
+                  {stripeConnect.connected ? 'Reconnect Stripe' : 'Connect Stripe'}
+                </button>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4">
+              <div className="rounded-xl bg-white border border-gray-100 px-3 py-2.5">
+                <p className="text-[11px] uppercase tracking-wide text-gray-400 font-bold">Details Submitted</p>
+                <p className={`text-sm font-bold mt-1 ${stripeConnect.detailsSubmitted ? 'text-green-600' : 'text-amber-600'}`}>
+                  {stripeConnect.detailsSubmitted ? 'Yes' : 'No'}
+                </p>
+              </div>
+              <div className="rounded-xl bg-white border border-gray-100 px-3 py-2.5">
+                <p className="text-[11px] uppercase tracking-wide text-gray-400 font-bold">Payouts Enabled</p>
+                <p className={`text-sm font-bold mt-1 ${stripeConnect.payoutsEnabled ? 'text-green-600' : 'text-amber-600'}`}>
+                  {stripeConnect.payoutsEnabled ? 'Yes' : 'No'}
+                </p>
+              </div>
+            </div>
+
+            {Array.isArray(stripeConnect.requirementsDue) && stripeConnect.requirementsDue.length > 0 && (
+              <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2.5">
+                <p className="text-xs font-bold text-amber-800 mb-1">Stripe requires additional information:</p>
+                <p className="text-xs text-amber-700">
+                  {stripeConnect.requirementsDue.slice(0, 3).join(', ')}
+                  {stripeConnect.requirementsDue.length > 3 ? '...' : ''}
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -468,6 +565,42 @@ export default function ProfilePage() {
   const [disableOTP, setDisableOTP] = useState('');
   const [disableVia, setDisableVia] = useState('');
 
+  // Stripe Connect (landlord payouts)
+  const [stripeConnect, setStripeConnect] = useState({
+    connected: false,
+    stripeId: null,
+    onboardingComplete: false,
+    detailsSubmitted: false,
+    payoutsEnabled: false,
+    chargesEnabled: false,
+    requirementsDue: [],
+  });
+  const [stripeLoading, setStripeLoading] = useState(false);
+  const [stripeConnecting, setStripeConnecting] = useState(false);
+
+  const fetchStripeStatus = useCallback(async () => {
+    const role = dbUser?.role || ctxUser?.role;
+    if (role !== 'landlord') return;
+
+    setStripeLoading(true);
+    try {
+      const { data } = await api.get('/users/stripe-connect/status');
+      setStripeConnect({
+        connected: !!data.connected,
+        stripeId: data.stripeId || null,
+        onboardingComplete: !!data.onboardingComplete,
+        detailsSubmitted: !!data.detailsSubmitted,
+        payoutsEnabled: !!data.payoutsEnabled,
+        chargesEnabled: !!data.chargesEnabled,
+        requirementsDue: Array.isArray(data.requirementsDue) ? data.requirementsDue : [],
+      });
+    } catch (err) {
+      toast(err.response?.data?.message || 'Failed to load Stripe Connect status', 'error');
+    } finally {
+      setStripeLoading(false);
+    }
+  }, [dbUser?.role, ctxUser?.role, toast]);
+
   /* Fetch from server */
   useEffect(() => {
     api.get('/users/me')
@@ -480,6 +613,34 @@ export default function ProfilePage() {
       .catch(() => { })
       .finally(() => setLoading(false));
   }, []);
+
+  useEffect(() => {
+    const role = dbUser?.role || ctxUser?.role;
+    if (role === 'landlord') {
+      fetchStripeStatus();
+    }
+  }, [dbUser?.role, ctxUser?.role, fetchStripeStatus]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const role = dbUser?.role || ctxUser?.role;
+    if (role !== 'landlord') return;
+
+    const url = new URL(window.location.href);
+    const stripeQuery = url.searchParams.get('stripe');
+    if (!stripeQuery) return;
+
+    if (stripeQuery === 'return') {
+      toast('Stripe returned successfully. Refreshing status...', 'success');
+    } else if (stripeQuery === 'refresh') {
+      toast('Stripe onboarding is incomplete. Please continue setup.', 'info');
+    }
+
+    fetchStripeStatus();
+
+    url.searchParams.delete('stripe');
+    window.history.replaceState({}, '', `${url.pathname}${url.search}${url.hash}`);
+  }, [dbUser?.role, ctxUser?.role, fetchStripeStatus, toast]);
 
   /* Handlers */
   const handleSaveProfile = async (e) => {
@@ -524,6 +685,21 @@ export default function ProfilePage() {
   };
 
   const handlePhotoClear = () => { setPhotoFile(null); setPhotoPreview(null); };
+
+  const handleStripeConnect = async () => {
+    setStripeConnecting(true);
+    try {
+      const { data } = await api.post('/users/stripe-connect/onboard');
+      if (!data?.url) {
+        throw new Error('Stripe onboarding URL not returned');
+      }
+      window.location.href = data.url;
+      return;
+    } catch (err) {
+      toast(err.response?.data?.message || err.message || 'Failed to start Stripe Connect onboarding', 'error');
+      setStripeConnecting(false);
+    }
+  };
 
   const handleSavePrefs = async () => {
     setPrefSaving(true);
@@ -789,6 +965,11 @@ export default function ProfilePage() {
               onPhotoUpload={handlePhotoUpload}
               onPhotoClear={handlePhotoClear}
               fileInputRef={fileInputRef}
+              stripeConnect={stripeConnect}
+              stripeLoading={stripeLoading}
+              stripeConnecting={stripeConnecting}
+              onStripeConnect={handleStripeConnect}
+              onStripeRefresh={fetchStripeStatus}
             />
           </motion.div>
         )}

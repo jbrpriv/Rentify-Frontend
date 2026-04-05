@@ -57,7 +57,7 @@ export default function PaymentsPage() {
   useEffect(() => {
     if (!selected) return;
     setPaymentMap({});
-    api.get(`/payments/history?agreementId=${selected._id}&status=paid&limit=100`)
+    api.get(`/payments/history?agreementId=${selected._id}&status=paid,pending_approval&limit=100`)
       .then(({ data }) => {
         const map = {};
         (data.payments || []).forEach(p => {

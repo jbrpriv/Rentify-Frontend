@@ -73,7 +73,7 @@ const PaymentCalendar = ({ theme, agreements = [], payments = [] }) => {
             // Find the one payment record that covers this agreement + this month/year.
             // Priority: match by dueDate first (most precise), then fall back to paidAt.
             const matchingPayment = payments.find(p => {
-                if (p.status !== 'paid') return false;
+                if (!['paid', 'pending_approval'].includes(p.status)) return false;
                 const pAgreementId = (p.agreement?._id || p.agreement)?.toString();
                 if (pAgreementId !== agreementId) return false;
 
@@ -208,7 +208,7 @@ const PaymentCalendar = ({ theme, agreements = [], payments = [] }) => {
                     {Array.from({ length: daysInMonth }).map((_, i) => {
                         const day = i + 1;
                         const dayPayments = getDayPayments(day);
-                        const hasPaid = dayPayments.some(p => p.status === 'paid');
+                        const hasPaid = dayPayments.some(p => ['paid', 'pending_approval'].includes(p.status));
                         const hasPending = dayPayments.some(p => p.status === 'pending');
                         const hasOverdue = dayPayments.some(p => p.status === 'overdue');
                         const cellBg = dayPayments.length === 0 ? 'white' : hasOverdue ? '#FEF2F2' : hasPending ? '#FFFBEB' : '#F0FDF4';
@@ -296,16 +296,17 @@ const PaymentCalendar = ({ theme, agreements = [], payments = [] }) => {
                             <div className="space-y-3 max-h-64 overflow-y-auto">
                                 {selectedDayInfo.payments.map((p, idx) => {
                                     const isPaid = p.status === 'paid';
+                                    const isPendingApproval = p.status === 'pending_approval';
                                     const isOverdue = p.status === 'overdue' ||
                                         p.status === 'late_fee_applied' ||
-                                        (!isPaid && p.dueDate && new Date(p.dueDate) < new Date());
+                                        (!isPaid && !isPendingApproval && p.dueDate && new Date(p.dueDate) < new Date());
                                     const pid = p._id;
                                     const isReal = isPaid && pid && !String(pid).startsWith('pending_');
                                     const displayAmount = p.amount || p.paidAmount || 0;
                                     const propertyTitle = p.property?.title || p.property || 'Property';
 
                                     return (
-                                        <div key={pid || idx} className={`p-3 rounded-xl border ${isPaid ? 'bg-green-50 border-green-100' : isOverdue ? 'bg-red-50 border-red-100' : 'bg-orange-50 border-orange-100'}`}>
+                                        <div key={pid || idx} className={`p-3 rounded-xl border ${isPaid ? 'bg-green-50 border-green-100' : isPendingApproval ? 'bg-amber-50 border-amber-100' : isOverdue ? 'bg-red-50 border-red-100' : 'bg-orange-50 border-orange-100'}`}>
                                             <div className="flex justify-between items-start">
                                                 <div>
                                                     <p className="text-sm font-bold text-gray-800">{formatMoney(displayAmount)}</p>
@@ -313,9 +314,9 @@ const PaymentCalendar = ({ theme, agreements = [], payments = [] }) => {
                                                         <p className="text-xs text-gray-500 mt-0.5 truncate max-w-[150px]">{propertyTitle}</p>
                                                     )}
                                                     <p className="text-xs font-medium mt-0.5 flex items-center gap-1">
-                                                        {isPaid ? <CheckCircle className="w-3 h-3 text-green-600" /> : isOverdue ? <AlertCircle className="w-3 h-3 text-red-600" /> : <Clock className="w-3 h-3 text-orange-600" />}
-                                                        <span className={isPaid ? 'text-green-700' : isOverdue ? 'text-red-700' : 'text-orange-700'}>
-                                                            {isPaid ? 'Paid' : isOverdue ? 'Overdue' : 'Pending'}
+                                                        {isPaid ? <CheckCircle className="w-3 h-3 text-green-600" /> : isPendingApproval ? <Clock className="w-3 h-3 text-amber-600" /> : isOverdue ? <AlertCircle className="w-3 h-3 text-red-600" /> : <Clock className="w-3 h-3 text-orange-600" />}
+                                                        <span className={isPaid ? 'text-green-700' : isPendingApproval ? 'text-amber-700' : isOverdue ? 'text-red-700' : 'text-orange-700'}>
+                                                            {isPaid ? 'Paid' : isPendingApproval ? 'Awaiting Approval' : isOverdue ? 'Overdue' : 'Pending'}
                                                         </span>
                                                     </p>
                                                 </div>
