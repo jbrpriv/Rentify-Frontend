@@ -120,6 +120,7 @@ export default function DashboardHome() {
   const [offers, setOffers] = useState([]);
   const [pendingDisputes, setPD] = useState(0);
   const [pendingMaint, setPM] = useState(0);
+  const [pendingApprovalSummary, setPendingApprovalSummary] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -139,6 +140,10 @@ export default function DashboardHome() {
           setPayments(payResp.data?.payments || []);
           setPD(summary.counts?.pendingDisputes || 0);
           setPM(summary.counts?.pendingMaintenance || 0);
+          setPendingApprovalSummary({
+            count: summary.counts?.pendingApprovalPayments || 0,
+            amount: summary.counts?.pendingApprovalAmount || 0,
+          });
           // For property count and offers, use summary counts
           if (['landlord', 'property_manager', 'admin'].includes(user.role)) {
             // Properties list needed for calendar — fetch separately but lightweight
@@ -161,6 +166,7 @@ export default function DashboardHome() {
           }
 
           setPayments(payResp.data?.payments || []);
+          setPendingApprovalSummary(null);
 
           const [dispResp, maintResp] = await Promise.all([
             api.get('/disputes').catch(() => ({ data: { disputes: [] } })),
@@ -228,10 +234,12 @@ export default function DashboardHome() {
   const pendingOffers = offers.filter(o => ['pending', 'countered'].includes(o.status));
   const totalRevenue = activeLeases.reduce((s, a) => s + (a.financials?.rentAmount || 0), 0);
   const pendingApprovalPayments = payments.filter((p) => p.status === 'pending_approval');
-  const pendingApprovalAmount = pendingApprovalPayments.reduce(
+  const pendingApprovalAmountDerived = pendingApprovalPayments.reduce(
     (sum, p) => sum + Number(p.landlordPayoutAmount ?? p.amount ?? 0),
     0
   );
+  const pendingApprovalCountDisplay = pendingApprovalSummary ? pendingApprovalSummary.count : pendingApprovalPayments.length;
+  const pendingApprovalAmountDisplay = pendingApprovalSummary ? pendingApprovalSummary.amount : pendingApprovalAmountDerived;
 
   /* Alert tasks */
   const tasks = [];
@@ -341,7 +349,7 @@ export default function DashboardHome() {
           {user.role === 'landlord' && (
             <>
               <StatCard label="Monthly Income" value={formatMoneyCompact(totalRevenue)} icon={TrendingUp} theme={theme} sub={`${activeLeases.length} active lease(s)`} />
-              <StatCard label="Pending Payments" value={formatMoneyCompact(pendingApprovalAmount)} icon={Clock} theme={theme} sub={`${pendingApprovalPayments.length} waiting admin approval`} />
+              <StatCard label="Pending Payments" value={formatMoneyCompact(pendingApprovalAmountDisplay)} icon={Clock} theme={theme} sub={`${pendingApprovalCountDisplay} waiting admin approval`} />
               <StatCard label="Late Fees" value={formatMoneyCompact(payments.reduce((s, p) => s + (p.lateFeeAmount || 0), 0))} icon={AlertCircle} theme={theme} sub={`${payments.filter(p => p.status === 'late_fee_applied').length} pending fee(s)`} />
               <StatCard label="Properties" value={properties.length} icon={Building2} theme={theme} />
               <StatCard label="Agreements" value={agreements.length} icon={FileText} theme={theme} />
