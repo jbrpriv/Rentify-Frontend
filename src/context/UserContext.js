@@ -51,12 +51,27 @@ export function UserProvider({ children }) {
   // in api.js (and any legacy code still reading localStorage directly) stays
   // in sync.
   const setUser = useCallback((u) => {
-    setUserState(u);
-    if (u) {
-      localStorage.setItem('userInfo', JSON.stringify(u));
-    } else {
-      localStorage.removeItem('userInfo');
-    }
+    setUserState((prev) => {
+      if (!u) {
+        localStorage.removeItem('userInfo');
+        return null;
+      }
+
+      // Preserve token when refreshing profile data for the same user.
+      const sameUser =
+        prev?._id &&
+        u?._id &&
+        String(prev._id) === String(u._id);
+
+      const merged = {
+        ...(prev || {}),
+        ...u,
+        ...(u.token ? {} : (sameUser && prev?.token ? { token: prev.token } : {})),
+      };
+
+      localStorage.setItem('userInfo', JSON.stringify(merged));
+      return merged;
+    });
   }, []);
 
   // Re-fetch the full profile from the server.  Called once on mount (to pick
@@ -81,9 +96,13 @@ export function UserProvider({ children }) {
   // token from the HttpOnly refresh cookie. This replaces the old pattern of
   // checking localStorage for a token (SEC-01: tokens no longer in storage).
   useEffect(() => {
+    const localToken = user?.token;
+    if (localToken) setAccessToken(localToken);
+
     api.post('/auth/refresh')
       .then(({ data }) => {
-        if (data?.token) setAccessToken(data.token);
+        const token = data?.token || localToken;
+        if (token) setAccessToken(token);
         return refreshUser();
       })
       .then(() => {
@@ -97,12 +116,14 @@ export function UserProvider({ children }) {
         // have the HttpOnly cookie ready in time) from incorrectly clearing
         // a freshly-restored admin/landlord session.
         if (err.response?.status === 401) {
-          setUserState(null);
-          localStorage.removeItem('userInfo');
+          if (!localToken) {
+            setUserState(null);
+            localStorage.removeItem('userInfo');
+          }
         }
         // For any other error (network down, 500, etc.) keep existing state.
       });
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [refreshUser, user?.token]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Listen for storage events from OTHER tabs so role/logout changes propagate
   // immediately without a page reload.
