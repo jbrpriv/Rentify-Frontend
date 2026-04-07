@@ -8,6 +8,7 @@ import { CurrencyProvider } from '@/context/CurrencyContext';
 import { BrandingProvider } from '@/context/BrandingContext';
 import { Toaster } from 'react-hot-toast';
 import FCMListener from '@/components/FCMListener';
+import PWARegister from '@/components/PWARegister';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -50,8 +51,19 @@ async function getInitialBranding() {
 export async function generateMetadata() {
   const branding = await getInitialBranding();
   return {
+    applicationName: branding.brandName,
     title: branding.brandName,
     description: 'Rental Agreement Platform',
+    manifest: '/manifest.webmanifest',
+    themeColor: '#0b1220',
+    appleWebApp: {
+      capable: true,
+      title: branding.brandName,
+      statusBarStyle: 'default',
+    },
+    formatDetection: {
+      telephone: false,
+    },
     icons: {
       icon: branding.faviconUrl || '/favicon.ico',
       shortcut: branding.faviconUrl || '/favicon.ico',
@@ -71,6 +83,7 @@ export default async function RootLayout({ children }) {
             <CurrencyProvider>
               <ToastProvider>
                 {children}
+                <PWARegister />
                 <FCMListener />
                 <Toaster />
               </ToastProvider>

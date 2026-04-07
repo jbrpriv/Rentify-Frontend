@@ -1,85 +1,133 @@
-/**
- * firebase-messaging-sw.js — Service Worker for Background Push Notifications
- *
- * Browser pushes that arrive while the app is in the background (or closed)
- * are handled here by Firebase Messaging. The service worker must be at the
- * root of the public dir so it has the correct scope to intercept /api calls.
- *
- * IMPORTANT: This file runs in a Service Worker context — it has no access to
- * `window`, `document`, React, or your Next.js app state. Keep it plain JS.
- *
- * The FIREBASE_* values below are replaced at build-time by Next.js when
- * injected via next.config.mjs env. However, service workers run before
- * Next.js can inject env vars, so we use importScripts and read them from a
- * separate injected file, or hardcode config here for the service worker only.
- *
- * EASIEST APPROACH (used here): Self-configure via the Firebase compat SDK
- * which lets us call `firebase.initializeApp` with a global config injected
- * from the HTML page via a `<link rel="preload">` or meta tag. We use the
- * recommended pattern of reading from a self-configuring bundle.
- */
+const CACHE_PREFIX = 'rentify';
+const CACHE_VERSION = 'v1';
+const STATIC_CACHE = `${CACHE_PREFIX}-static-${CACHE_VERSION}`;
+const RUNTIME_CACHE = `${CACHE_PREFIX}-runtime-${CACHE_VERSION}`;
+const OFFLINE_URL = '/offline';
 
-importScripts('https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js');
-importScripts('https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js');
+const CORE_ASSETS = ['/', OFFLINE_URL, '/manifest.webmanifest', '/favicon.ico', '/icons/icon.svg'];
 
-// ─── Firebase config ─────────────────────────────────────────────────────────
-// These are the *public* web config values (safe to expose in client code).
-// They mirror your NEXT_PUBLIC_FIREBASE_* env vars.
-// Keep these in sync with src/utils/firebase.js.
-//
-// You MUST replace the placeholder values below with your actual Firebase
-// project config from the Firebase Console → Project Settings → Your apps.
+self.addEventListener('install', (event) => {
+    event.waitUntil(
+        caches.open(STATIC_CACHE).then((cache) => cache.addAll(CORE_ASSETS)).catch(() => undefined)
+    );
+    self.skipWaiting();
+});
 
-const firebaseConfig = {
-    apiKey: 'AIzaSyAWAOtIA_9cC5hghbIj28GWgroQUJWqiLg',
-    authDomain: 'rentifypro-778cd.firebaseapp.com',
-    projectId: 'rentifypro-778cd',
-    storageBucket: 'rentifypro-778cd.firebasestorage.app',
-    messagingSenderId: '693283110573',
-    appId: '1:693283110573:web:c86892664eebabf6d25024',
-};
+self.addEventListener('activate', (event) => {
+    event.waitUntil(
+        caches
+            .keys()
+            .then((keys) =>
+                Promise.all(
+                    keys
+                        .filter((key) => key.startsWith(`${CACHE_PREFIX}-`) && ![STATIC_CACHE, RUNTIME_CACHE].includes(key))
+                        .map((key) => caches.delete(key))
+                )
+            )
+            .then(() => self.clients.claim())
+    );
+});
 
-// ─── Init ─────────────────────────────────────────────────────────────────────
-if (firebaseConfig.projectId) {
-    firebase.initializeApp(firebaseConfig);
+self.addEventListener('message', (event) => {
+    if (event.data?.type === 'SKIP_WAITING') {
+        self.skipWaiting();
+    }
+});
 
-    const messaging = firebase.messaging();
+function isAssetRequest(request) {
+    return ['style', 'script', 'font', 'image', 'worker'].includes(request.destination);
+}
 
-    // ─── Background message handler ───────────────────────────────────────────
-    // Called when a push arrives while the page is in the background/closed.
-    // NOTE: If the push payload contains a `notification` object, Firebase will
-    // AUTOMATICALLY display an OS notification. We do NOT need to call 
-    // `showNotification` manually unless we are handling pure "data" messages.
-    messaging.onBackgroundMessage((payload) => {
-        console.log('[firebase-messaging-sw] Received background message:', payload);
+async function staleWhileRevalidate(request) {
+    const cache = await caches.open(RUNTIME_CACHE);
+    const cached = await cache.match(request);
+    const networkPromise = fetch(request)
+        .then((response) => {
+            if (response && response.ok) {
+                cache.put(request, response.clone());
+            }
+            return response;
+        })
+        .catch(() => undefined);
 
-        // Only show manually if Firebase didn't automatically show it (i.e. data-only push)
-        if (!payload.notification && payload.data) {
-            self.registration.showNotification(payload.data.title || 'RentifyPro', {
-                body: payload.data.body || '',
-                icon: '/icons/icon-192x192.png',
-                data: payload.data,
-            });
-        }
-    });
+    return cached || networkPromise || Response.error();
+}
 
-    // ─── Notification click handler ───────────────────────────────────────────
-    self.addEventListener('notificationclick', (event) => {
-        event.notification.close();
-        const url = event.notification.data?.url || '/dashboard';
-        event.waitUntil(
-            clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
-                // If the dashboard is already open, focus it
-                for (const client of windowClients) {
-                    if (client.url.includes('/dashboard') && 'focus' in client) {
-                        return client.focus();
-                    }
-                }
-                // Otherwise open a new tab
-                if (clients.openWindow) return clients.openWindow(url);
+self.addEventListener('fetch', (event) => {
+    const { request } = event;
+    if (request.method !== 'GET') return;
+
+    const url = new URL(request.url);
+    const isSameOrigin = url.origin === self.location.origin;
+
+    if (!isSameOrigin) return;
+
+    if (url.pathname.startsWith('/api/')) {
+        event.respondWith(fetch(request));
+        return;
+    }
+
+    if (request.mode === 'navigate') {
+        event.respondWith(
+            fetch(request).catch(async () => {
+                const offlineResponse = await caches.match(OFFLINE_URL);
+                return offlineResponse || Response.error();
             })
         );
-    });
-} else {
-    console.warn('[firebase-messaging-sw] Firebase not configured — push notifications disabled.');
+        return;
+    }
+
+    if (isAssetRequest(request)) {
+        event.respondWith(staleWhileRevalidate(request));
+    }
+});
+
+try {
+    importScripts('https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js');
+    importScripts('https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js');
+
+    const firebaseConfig = {
+        apiKey: 'AIzaSyAWAOtIA_9cC5hghbIj28GWgroQUJWqiLg',
+        authDomain: 'rentifypro-778cd.firebaseapp.com',
+        projectId: 'rentifypro-778cd',
+        storageBucket: 'rentifypro-778cd.firebasestorage.app',
+        messagingSenderId: '693283110573',
+        appId: '1:693283110573:web:c86892664eebabf6d25024',
+    };
+
+    if (firebaseConfig.projectId && self.firebase) {
+        firebase.initializeApp(firebaseConfig);
+        const messaging = firebase.messaging();
+
+        messaging.onBackgroundMessage((payload) => {
+            if (!payload.notification && payload.data) {
+                self.registration.showNotification(payload.data.title || 'RentifyPro', {
+                    body: payload.data.body || '',
+                    icon: '/icons/icon.svg',
+                    badge: '/icons/icon.svg',
+                    data: payload.data,
+                });
+            }
+        });
+    }
+} catch {
+    // Firebase SDK failed to load; app shell and offline support still work.
 }
+
+self.addEventListener('notificationclick', (event) => {
+    event.notification.close();
+    const url = event.notification.data?.url || '/dashboard';
+
+    event.waitUntil(
+        clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
+            for (const client of windowClients) {
+                if (client.url.includes('/dashboard') && 'focus' in client) {
+                    return client.focus();
+                }
+            }
+
+            if (clients.openWindow) return clients.openWindow(url);
+            return undefined;
+        })
+    );
+});

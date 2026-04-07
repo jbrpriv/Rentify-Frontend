@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="RentifyPro icon">
+  <defs>
+    <linearGradient id="rf-grad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0b1220" />
+      <stop offset="100%" stop-color="#1f2937" />
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#rf-grad)" />
+  <path
+    d="M160 392V120h138c55 0 91 34 91 84 0 37-20 66-54 78l73 110h-72l-62-98h-45v98h-69Zm69-151h63c19 0 31-13 31-31 0-17-12-30-31-30h-63v61Z"
+    fill="#f8fafc"
+  />
+</svg>
