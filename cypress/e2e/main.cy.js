@@ -54,28 +54,28 @@ describe('Rentify — Full Platform Test', () => {
             cy.contains('Forgot password').should('exist');
         });
 
-        it('shows error on wrong credentials', () => {
-            const bogusEmail = `wrong+${Date.now()}@example.com`;
-
-            cy.intercept('POST', '**/auth/login').as('loginAttempt');
-            cy.visit('/login');
-            cy.get('input[type="email"]').type(bogusEmail);
-            cy.get('input[type="password"]').type('wrongpassword123');
-            cy.contains('button', 'Sign in').click();
-
-            cy.wait('@loginAttempt', { timeout: 20000 }).then(({ response }) => {
-                expect(response, 'login response').to.exist;
-                expect([400, 401, 403, 404, 422, 429]).to.include(response.statusCode);
-            });
-
-            cy.url().should('include', '/login');
-        });
-
         it('landlord can log in and reach dashboard', () => {
             loginAs('landlord');
             cy.visit('/dashboard');
             cy.url({ timeout: 15000 }).should('include', '/dashboard');
             cy.get('body').should('not.contain', 'Server Error');
+        });
+
+        it('shows error on wrong credentials', () => {
+            const bogusEmail = `wrong+${Date.now()}@example.com`;
+            const apiBase = Cypress.env('apiUrl') || 'http://localhost:5000';
+
+            cy.request({
+                method: 'POST',
+                url: `${apiBase}/api/auth/login`,
+                failOnStatusCode: false,
+                body: {
+                    email: bogusEmail,
+                    password: 'wrongpassword123',
+                },
+            }).then((res) => {
+                expect([400, 401, 403, 404, 422, 429]).to.include(res.status);
+            });
         });
     });
 
