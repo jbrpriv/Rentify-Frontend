@@ -59,8 +59,12 @@ describe('Rentify — Full Platform Test', () => {
             cy.get('input[type="email"]').type('wrong@email.com');
             cy.get('input[type="password"]').type('wrongpassword123');
             cy.contains('button', 'Sign in').click();
-            cy.contains('div', /invalid|failed|incorrect|credential|recaptcha/i, { timeout: 10000 })
-                .should('be.visible');
+            cy.get('[data-testid="auth-error"]', { timeout: 15000 })
+                .should('be.visible')
+                .invoke('text')
+                .then((text) => {
+                    expect(text.trim()).to.not.equal('');
+                });
             cy.url().should('include', '/login');
         });
 

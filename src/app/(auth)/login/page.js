@@ -268,7 +268,12 @@ function LoginContent() {
               </div>
             )}
             {error && (
-              <div className="mb-6 rounded-xl border border-red-500/50 bg-red-950/60 px-4 py-3 text-xs text-red-100">
+              <div
+                data-testid="auth-error"
+                role="alert"
+                aria-live="polite"
+                className="mb-6 rounded-xl border border-red-500/50 bg-red-950/60 px-4 py-3 text-xs text-red-100"
+              >
                 {error}
               </div>
             )}
