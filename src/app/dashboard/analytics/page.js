@@ -412,7 +412,6 @@ function LandlordAnalytics({ data }) {
             </table>
             </div>
           </>
-          </div>
         )}
       </div>
     </div>
