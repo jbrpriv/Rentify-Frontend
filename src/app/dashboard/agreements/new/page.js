@@ -428,7 +428,6 @@ function AgreementComposer({
   const [loading, setLoading] = useState(true);
   const [categoryFilter, setCategoryFilter] = useState('');
   const [jurisdictionFilter, setJurisdictionFilter] = useState('');
-  const [countryFilter, setCountryFilter] = useState('');
   const [search, setSearch] = useState('');
   const [editorTab, setEditorTab] = useState('terms');
   const [dragState, setDragState] = useState(null);
@@ -454,11 +453,19 @@ function AgreementComposer({
   }, []);
 
   useEffect(() => {
-    api.get('/agreements/clauses')
+    setLoading(true);
+
+    const params = new URLSearchParams();
+    if (jurisdictionFilter) params.set('jurisdiction', jurisdictionFilter);
+
+    const query = params.toString();
+    const endpoint = query ? `/agreements/clauses?${query}` : '/agreements/clauses';
+
+    api.get(endpoint)
       .then(({ data }) => setClauses(data))
       .catch(() => setClauses([]))
       .finally(() => setLoading(false));
-  }, []);
+  }, [jurisdictionFilter]);
 
   const getClauseJurisdiction = (clause) => {
     const jurisdictionValue = clause?.jurisdiction;
@@ -470,25 +477,25 @@ function AgreementComposer({
     ).trim();
   };
 
-  const getClauseCountry = (clause) => {
-    return String(
-      clause?.country ||
-      clause?.countryCode ||
-      clause?.jurisdiction?.country ||
-      ''
-    ).trim();
-  };
-
-  const availableClauses = clauses.filter(c =>
+  const clauseBasePool = clauses.filter((c) =>
     !selectedClauseIds.includes(c._id) &&
-    (!jurisdictionFilter || getClauseJurisdiction(c).toLowerCase() === jurisdictionFilter.toLowerCase()) &&
-    (!countryFilter || getClauseCountry(c).toLowerCase() === countryFilter.toLowerCase()) &&
     (!categoryFilter || c.category === categoryFilter) &&
     (!search || `${c.title} ${c.body}`.toLowerCase().includes(search.toLowerCase()))
   );
+
+  const jurisdictionOptionsPool = clauseBasePool;
+
+  const availableClauses = clauseBasePool.filter((c) =>
+    (!jurisdictionFilter || getClauseJurisdiction(c).toLowerCase() === jurisdictionFilter.toLowerCase())
+  );
   const categories = [...new Set(clauses.map(c => c.category))].sort();
-  const jurisdictions = [...new Set(clauses.map((c) => getClauseJurisdiction(c)).filter(Boolean))].sort((a, b) => a.localeCompare(b));
-  const countries = [...new Set(clauses.map((c) => getClauseCountry(c)).filter(Boolean))].sort((a, b) => a.localeCompare(b));
+  const jurisdictions = [...new Set(jurisdictionOptionsPool.map((c) => getClauseJurisdiction(c)).filter(Boolean))].sort((a, b) => a.localeCompare(b));
+
+  useEffect(() => {
+    if (jurisdictionFilter && !jurisdictions.includes(jurisdictionFilter)) {
+      setJurisdictionFilter('');
+    }
+  }, [jurisdictionFilter, jurisdictions]);
 
   const clausesById = new Map(clauses.map(c => [c._id, c]));
   const assignedClauses = selectedClauseIds.map(id => clausesById.get(id)).filter(Boolean);
@@ -926,19 +933,6 @@ function AgreementComposer({
                       ))}
                     </select>
                   </div>
-                  <div>
-                    <label className="block text-[11px] font-semibold text-gray-600 mb-1">Country</label>
-                    <select
-                      value={countryFilter}
-                      onChange={(e) => setCountryFilter(e.target.value)}
-                      className="w-full px-2.5 py-2 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-                    >
-                      <option value="">All countries</option>
-                      {countries.map((country) => (
-                        <option key={country} value={country}>{country}</option>
-                      ))}
-                    </select>
-                  </div>
                   <div className="flex gap-1.5 flex-wrap">
                     <button type="button" onClick={() => setCategoryFilter('')}
                       className={`text-[11px] px-2.5 py-1 rounded-full border ${!categoryFilter ? 'bg-blue-600 text-white border-blue-600' : 'border-gray-300 text-gray-600 hover:bg-gray-50'}`}>
@@ -984,11 +978,6 @@ function AgreementComposer({
                             {getClauseJurisdiction(clause) && (
                               <span className="text-[10px] px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full">
                                 {getClauseJurisdiction(clause)}
-                              </span>
-                            )}
-                            {getClauseCountry(clause) && (
-                              <span className="text-[10px] px-2 py-0.5 bg-gray-100 text-gray-700 rounded-full">
-                                {getClauseCountry(clause)}
                               </span>
                             )}
                             {clause.isDefault && (

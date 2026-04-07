@@ -6,7 +6,7 @@ import Link from 'next/link';
 import {
   Search, MapPin, Building2, Bed, Bath, Square,
   Heart, ChevronLeft, ChevronRight, SlidersHorizontal,
-  ChevronDown, Home, Star, ArrowUpDown, Tag, Loader2,
+  ChevronDown, Home, ArrowUpDown, Tag, Loader2,
 } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -22,6 +22,7 @@ const PRICE_RANGES = [
 const TYPES = ['apartment', 'house', 'studio', 'commercial'];
 const BEDS = ['1', '2', '3', '4', '5+'];
 const SORTS = ['Best Match', 'Price: Low to High', 'Price: High to Low', 'Newest'];
+const PAGE_SIZE = 15;
 
 function PhotoCarousel({ images, title }) {
   const [idx, setIdx] = useState(0);
@@ -102,7 +103,10 @@ function BrowseContent() {
   const searchParams = useSearchParams();
   const [listings, setListings] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(false);
   const [sort, setSort] = useState('Best Match');
   const [city, setCity] = useState(searchParams?.get('city') || '');
   const [type, setType] = useState('');
@@ -120,8 +124,13 @@ function BrowseContent() {
     return range.key;
   }, [formatMoney]);
 
-  const fetchListings = useCallback(async () => {
-    setLoading(true);
+  const fetchListings = useCallback(async ({ nextPage = 1, append = false } = {}) => {
+    if (append) {
+      setLoadingMore(true);
+    } else {
+      setLoading(true);
+    }
+
     try {
       const params = new URLSearchParams();
       if (city) params.append('city', city);
@@ -132,18 +141,36 @@ function BrowseContent() {
       if (sort === 'Price: Low to High') params.append('sort', 'price_asc');
       else if (sort === 'Price: High to Low') params.append('sort', 'price_desc');
       else if (sort === 'Newest') params.append('sort', 'newest');
+      params.append('page', String(nextPage));
+      params.append('limit', String(PAGE_SIZE));
 
       const res = await fetch(`/api/listings?${params.toString()}`);
       const data = await res.json();
-      let arr = Array.isArray(data) ? data : [];
+      const arr = Array.isArray(data?.listings) ? data.listings : [];
+      const pagination = data?.pagination || {};
 
-      setListings(arr);
-      setTotal(arr.length);
-    } catch { setListings([]); }
-    finally { setLoading(false); }
+      setListings((prev) => (append ? [...prev, ...arr] : arr));
+      setTotal(Number(pagination.total) || 0);
+      setPage(Number(pagination.page) || nextPage);
+      setHasMore(Boolean(pagination.hasMore));
+    } catch {
+      setListings([]);
+      setTotal(0);
+      setPage(1);
+      setHasMore(false);
+    }
+    finally {
+      setLoading(false);
+      setLoadingMore(false);
+    }
   }, [city, type, priceKey, beds, sort]);
 
-  useEffect(() => { fetchListings(); }, [fetchListings]);
+  const loadMoreListings = () => {
+    if (loadingMore || !hasMore) return;
+    fetchListings({ nextPage: page + 1, append: true });
+  };
+
+  useEffect(() => { fetchListings({ nextPage: 1, append: false }); }, [fetchListings]);
 
   return (
     <div className="flex min-h-screen flex-col bg-[#F8FBFC]">
@@ -273,24 +300,19 @@ function BrowseContent() {
                   </div>
                 </Link>
               ))}
+            </div>
+          )}
 
-              {listings.length >= 4 && (
-                <div className="flex min-h-[300px] flex-col items-center justify-center rounded-3xl bg-gradient-to-br from-[#0992C2] via-[#0AC4E0] to-[#F6E7BC] p-6 text-center text-white shadow-[0_22px_70px_rgba(11,45,114,0.3)]">
-                  <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-white/20 backdrop-blur-sm">
-                    <Star size={20} className="text-white" />
-                  </div>
-                  <h3 className="mb-2 text-lg font-semibold text-white">Discover more</h3>
-                  <p className="mb-5 text-xs leading-relaxed text-white/90">
-                    Quality properties — curated, verified, and always in sync with your filters.
-                  </p>
-                  <Link
-                    href="/register"
-                    className="rounded-full bg-white px-5 py-2.5 text-xs font-bold text-[#0B2D72] transition-all hover:bg-[#F6E7BC]"
-                  >
-                    Save this search
-                  </Link>
-                </div>
-              )}
+          {!loading && listings.length > 0 && hasMore && (
+            <div className="mt-6 flex justify-center">
+              <button
+                type="button"
+                onClick={loadMoreListings}
+                disabled={loadingMore}
+                className="rounded-full bg-[#0992C2] px-6 py-2.5 text-sm font-bold text-white transition-all hover:bg-[#0B2D72] disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {loadingMore ? 'Loading...' : 'Load More'}
+              </button>
             </div>
           )}
         </div>
