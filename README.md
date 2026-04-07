@@ -140,3 +140,200 @@ NEXT_PUBLIC_FIREBASE_VAPID_KEY=your_web_push_vapid_key
 
 CYPRESS_BASE_URL=https://rentify-frontend-naa6.vercel.app
 ```
+Rentify-Frontend
+   ├─ .eslintrc.json
+   ├─ cypress
+   │  ├─ e2e
+   │  │  └─ main.cy.js
+   │  └─ support
+   │     ├─ commands.js
+   │     └─ e2e.js
+   ├─ cypress.config.js
+   ├─ cypress.env.json
+   ├─ cypress_results.txt
+   ├─ eslint.config.mjs
+   ├─ jsconfig.json
+   ├─ next.config.mjs
+   ├─ package-lock.json
+   ├─ package.json
+   ├─ postcss.config.mjs
+   ├─ properties.log
+   ├─ public
+   │  ├─ file.svg
+   │  ├─ firebase-messaging-sw.js
+   │  ├─ globe.svg
+   │  ├─ icons
+   │  │  ├─ apple-touch-icon.png
+   │  │  ├─ icon-192x192.png
+   │  │  ├─ icon-512x512.png
+   │  │  ├─ icon.svg
+   │  │  ├─ icons8-home.svg
+   │  │  └─ maskable-512x512.png
+   │  ├─ next.svg
+   │  ├─ vercel.svg
+   │  └─ window.svg
+   ├─ README.md
+   ├─ result_auth.json
+   ├─ src
+   │  ├─ app
+   │  │  ├─ (auth)
+   │  │  │  ├─ forgot-password
+   │  │  │  │  └─ page.js
+   │  │  │  ├─ login
+   │  │  │  │  └─ page.js
+   │  │  │  ├─ register
+   │  │  │  │  └─ page.js
+   │  │  │  ├─ reset-password
+   │  │  │  │  └─ page.js
+   │  │  │  └─ verify-email
+   │  │  │     └─ page.js
+   │  │  ├─ auth
+   │  │  │  └─ oauth
+   │  │  │     ├─ complete-profile
+   │  │  │     │  └─ page.js
+   │  │  │     └─ success
+   │  │  │        └─ page.js
+   │  │  ├─ browse
+   │  │  │  ├─ page.js
+   │  │  │  └─ [id]
+   │  │  │     └─ page.js
+   │  │  ├─ dashboard
+   │  │  │  ├─ admin
+   │  │  │  │  ├─ agreement-templates
+   │  │  │  │  │  └─ page.js
+   │  │  │  │  ├─ agreements
+   │  │  │  │  │  └─ page.js
+   │  │  │  │  ├─ audit-logs
+   │  │  │  │  │  └─ page.js
+   │  │  │  │  ├─ billing
+   │  │  │  │  │  └─ page.js
+   │  │  │  │  ├─ page.js
+   │  │  │  │  ├─ payments
+   │  │  │  │  │  └─ page.js
+   │  │  │  │  ├─ pdf-editor
+   │  │  │  │  │  └─ page.js
+   │  │  │  │  ├─ properties
+   │  │  │  │  │  └─ page.js
+   │  │  │  │  ├─ settings
+   │  │  │  │  │  └─ page.js
+   │  │  │  │  ├─ templates
+   │  │  │  │  │  └─ page.js
+   │  │  │  │  ├─ users
+   │  │  │  │  │  └─ page.js
+   │  │  │  │  └─ verifications
+   │  │  │  │     └─ page.js
+   │  │  │  ├─ agreement-templates
+   │  │  │  │  ├─ new
+   │  │  │  │  │  └─ page.js
+   │  │  │  │  ├─ page.js
+   │  │  │  │  └─ [id]
+   │  │  │  │     └─ edit
+   │  │  │  │        └─ page.js
+   │  │  │  ├─ agreements
+   │  │  │  │  ├─ new
+   │  │  │  │  │  └─ page.js
+   │  │  │  │  ├─ page.js
+   │  │  │  │  └─ [id]
+   │  │  │  │     ├─ history
+   │  │  │  │     │  └─ page.js
+   │  │  │  │     ├─ page.js
+   │  │  │  │     └─ tenant-documents
+   │  │  │  │        └─ page.js
+   │  │  │  ├─ analytics
+   │  │  │  │  └─ page.js
+   │  │  │  ├─ billing
+   │  │  │  │  └─ page.js
+   │  │  │  ├─ disputes
+   │  │  │  │  └─ page.js
+   │  │  │  ├─ documents
+   │  │  │  │  └─ page.js
+   │  │  │  ├─ error.js
+   │  │  │  ├─ landlord
+   │  │  │  │  ├─ tenant-documents
+   │  │  │  │  │  └─ page.js
+   │  │  │  │  └─ tenants
+   │  │  │  │     └─ page.js
+   │  │  │  ├─ layout.js
+   │  │  │  ├─ maintenance
+   │  │  │  │  └─ page.js
+   │  │  │  ├─ messages
+   │  │  │  │  └─ page.js
+   │  │  │  ├─ my-lease
+   │  │  │  │  └─ page.js
+   │  │  │  ├─ notifications
+   │  │  │  │  └─ page.js
+   │  │  │  ├─ offers
+   │  │  │  │  └─ page.js
+   │  │  │  ├─ page.js
+   │  │  │  ├─ payments
+   │  │  │  │  └─ page.js
+   │  │  │  ├─ pm
+   │  │  │  │  ├─ maintenance
+   │  │  │  │  │  └─ page.js
+   │  │  │  │  ├─ properties
+   │  │  │  │  │  └─ page.js
+   │  │  │  │  └─ tenants
+   │  │  │  │     └─ page.js
+   │  │  │  ├─ profile
+   │  │  │  │  ├─ page.js
+   │  │  │  │  ├─ setup-2fa
+   │  │  │  │  │  └─ page.js
+   │  │  │  │  └─ verify-phone
+   │  │  │  │     └─ page.js
+   │  │  │  ├─ properties
+   │  │  │  │  ├─ edit
+   │  │  │  │  │  └─ page.js
+   │  │  │  │  ├─ new
+   │  │  │  │  │  └─ page.js
+   │  │  │  │  └─ page.js
+   │  │  │  └─ verification
+   │  │  │     └─ page.js
+   │  │  ├─ data-deletion
+   │  │  │  └─ page.js
+   │  │  ├─ error.js
+   │  │  ├─ favicon.ico
+   │  │  ├─ globals.css
+   │  │  ├─ layout.js
+   │  │  ├─ manifest.js
+   │  │  ├─ not-found.js
+   │  │  ├─ offline
+   │  │  │  └─ page.js
+   │  │  ├─ page.js
+   │  │  ├─ pricing
+   │  │  │  └─ page.js
+   │  │  ├─ privacy
+   │  │  │  └─ page.js
+   │  │  ├─ sign
+   │  │  │  └─ [id]
+   │  │  │     └─ page.js
+   │  │  ├─ super-login
+   │  │  │  └─ page.js
+   │  │  └─ support
+   │  │     └─ page.js
+   │  ├─ components
+   │  │  ├─ FCMListener.js
+   │  │  ├─ Footer.js
+   │  │  ├─ MapPicker.js
+   │  │  ├─ Navbar.js
+   │  │  ├─ PaymentCalendar.js
+   │  │  ├─ PWARegister.js
+   │  │  ├─ SignatureModal.js
+   │  │  └─ ui
+   │  │     ├─ Button.js
+   │  │     ├─ Card.js
+   │  │     ├─ Input.js
+   │  │     ├─ Motion.js
+   │  │     └─ TextField.js
+   │  ├─ context
+   │  │  ├─ BrandingContext.js
+   │  │  ├─ CurrencyContext.js
+   │  │  ├─ ToastContext.js
+   │  │  └─ UserContext.js
+   │  ├─ hooks
+   │  │  ├─ useGlobalPdfTheme.js
+   │  │  └─ useReveal.js
+   │  ├─ middleware.js
+   │  └─ utils
+   │     ├─ api.js
+   │     └─ firebase.js
+   └─ tailwind.config.js
