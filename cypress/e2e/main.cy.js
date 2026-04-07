@@ -13,17 +13,24 @@ function loginAs(role) {
     cy.session(role, () => {
         const email = Cypress.env(`${role.toUpperCase()}_EMAIL`);
         const password = Cypress.env(`${role.toUpperCase()}_PASSWORD`);
+        const apiBase = Cypress.env('apiUrl') || 'http://localhost:5000';
 
-        // Admin and law_reviewer authenticate via the super-login route
         const loginPath = ['admin', 'law_reviewer'].includes(role)
-            ? '/super-login'
-            : '/login';
+            ? '/api/auth/super-login'
+            : '/api/auth/login';
 
-        cy.visit(loginPath);
-        cy.get('input[type="email"]').type(email);
-        cy.get('input[type="password"]').type(password);
-        cy.get('button[type="submit"]').click();
-        cy.url({ timeout: 15000 }).should('include', '/dashboard');
+        cy.request({
+            method: 'POST',
+            url: `${apiBase}${loginPath}`,
+            body: { email, password },
+        }).then(({ body }) => {
+            cy.visit('/dashboard', {
+                onBeforeLoad(win) {
+                    win.localStorage.setItem('userInfo', JSON.stringify(body));
+                },
+            });
+            cy.url({ timeout: 15000 }).should('include', '/dashboard');
+        });
     }, {
         cacheAcrossSpecs: true,
     });
