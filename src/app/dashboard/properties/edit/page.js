@@ -6,6 +6,7 @@ import api from '@/utils/api';
 import { useCurrency } from '@/context/CurrencyContext';
 import { Loader2, Save, ArrowLeft, UserCheck, UserX, Search } from 'lucide-react';
 import Link from 'next/link';
+import MapPicker from '@/components/MapPicker';
 
 const AMENITIES_LIST = [
   'Parking','Gym','Elevator','Backup Generator','CCTV','Pool','Garden',
@@ -32,10 +33,19 @@ function EditPropertyContent() {
   const [managerError, setManagerError]       = useState('');
   const [managerSuccess, setManagerSuccess]   = useState('');
   const [assigning, setAssigning]             = useState(false);
+  const [mapVisible, setMapVisible]           = useState(false);
+  const [mapCenter, setMapCenter]             = useState(null);
+  const [mapMarker, setMapMarker]             = useState(null);
+  const [mapQuery, setMapQuery]               = useState('');
+  const [mapSearching, setMapSearching]       = useState(false);
 
   useEffect(() => {
     api.get(`/properties/${id}`)
       .then(({ data }) => {
+        const existingLocation = Array.isArray(data.location?.coordinates) && data.location.coordinates.length === 2
+          ? { lng: Number(data.location.coordinates[0]), lat: Number(data.location.coordinates[1]) }
+          : null;
+
         setCurrentManager(data.managedBy || null);
         setForm({
           title:              data.title || '',
@@ -63,10 +73,72 @@ function EditPropertyContent() {
           },
           amenities: data.amenities || [],
         });
+        setMapMarker(existingLocation);
+        setMapCenter(existingLocation);
+        setMapVisible(!!existingLocation);
       })
       .catch(err => setError(err.response?.data?.message || 'Failed to load property'))
       .finally(() => setLoading(false));
   }, [id]);
+
+  const buildAddressQuery = () => {
+    const { street, unitNumber, city, state, zip } = form.address;
+    return [street, unitNumber, city, state, zip].filter(Boolean).join(', ');
+  };
+
+  const geocodeAddress = async (query) => {
+    const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(query)}`;
+    const resp = await fetch(url, { headers: { 'Accept-Language': 'en' } });
+    const results = await resp.json();
+    if (!Array.isArray(results) || results.length === 0) return null;
+    const first = results[0];
+    return { lat: Number(first.lat), lng: Number(first.lon) };
+  };
+
+  const handleMarkOnMap = async () => {
+    const addressQuery = buildAddressQuery();
+    if (!addressQuery) {
+      setError('Please enter the address before marking the location on the map.');
+      return;
+    }
+
+    setMapVisible(true);
+    setMapQuery(addressQuery);
+    setMapSearching(true);
+    setError('');
+
+    try {
+      const coords = await geocodeAddress(addressQuery);
+      if (coords) {
+        setMapCenter(coords);
+        setMapMarker(coords);
+      } else {
+        setError('Unable to find that address. Try a more specific location.');
+      }
+    } catch {
+      setError('Failed to search that address. Please try again.');
+    } finally {
+      setMapSearching(false);
+    }
+  };
+
+  const handleSearchMap = async () => {
+    if (!mapQuery.trim()) return;
+    setMapSearching(true);
+    setError('');
+    try {
+      const coords = await geocodeAddress(mapQuery.trim());
+      if (coords) {
+        setMapCenter(coords);
+      } else {
+        setError('No results found for that search.');
+      }
+    } catch {
+      setError('Map search failed. Please try again.');
+    } finally {
+      setMapSearching(false);
+    }
+  };
 
   const toggleAmenity = (a) => {
     setForm(f => ({
@@ -85,6 +157,12 @@ function EditPropertyContent() {
       // Convert financial values from selected currency to USD before saving
       const dataToSave = {
         ...form,
+        ...(mapMarker ? {
+          location: {
+            type: 'Point',
+            coordinates: [mapMarker.lng, mapMarker.lat],
+          },
+        } : {}),
         financials: {
           ...form.financials,
           monthlyRent: convertToUSD(Number(form.financials.monthlyRent) || 0),
@@ -216,6 +294,65 @@ function EditPropertyContent() {
             <InputField label="City"  value={form.address.city}  onChange={v => set('address.city', v)}  required />
             <InputField label="State" value={form.address.state} onChange={v => set('address.state', v)} required />
             <InputField label="ZIP"   value={form.address.zip}   onChange={v => set('address.zip', v)}   required />
+          </div>
+        </Section>
+
+        <Section title="Location">
+          <div className="space-y-3">
+            <div className="flex flex-wrap items-center gap-3">
+              <button
+                type="button"
+                onClick={handleMarkOnMap}
+                disabled={mapSearching}
+                className="flex items-center gap-2 rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm font-bold text-[#0B2D72] transition hover:bg-gray-100 disabled:opacity-50"
+              >
+                {mapSearching ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
+                {mapSearching ? 'Finding address...' : 'Mark on Map'}
+              </button>
+              {mapMarker && (
+                <span className="text-xs font-semibold text-emerald-600">Location marked</span>
+              )}
+              {mapMarker && (
+                <button
+                  type="button"
+                  onClick={() => setMapMarker(null)}
+                  className="rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs font-bold text-[#0B2D72] transition hover:bg-gray-50"
+                >
+                  Remove Mark
+                </button>
+              )}
+            </div>
+
+            {mapVisible && (
+              <>
+                <div className="flex flex-wrap gap-2">
+                  <input
+                    value={mapQuery}
+                    onChange={e => setMapQuery(e.target.value)}
+                    placeholder="Search a place or address"
+                    className="flex-1 rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#0B2D72]"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleSearchMap}
+                    className="rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm font-bold text-[#0B2D72] transition hover:bg-gray-100"
+                  >
+                    Search
+                  </button>
+                </div>
+
+                <MapPicker
+                  center={mapCenter}
+                  marker={mapMarker}
+                  onMarkerChange={setMapMarker}
+                  height={320}
+                />
+
+                <p className="text-xs text-gray-500">
+                  Click anywhere on the map to move the marker. The updated coordinates will be saved with the property.
+                </p>
+              </>
+            )}
           </div>
         </Section>
 
