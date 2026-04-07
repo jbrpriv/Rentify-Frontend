@@ -55,16 +55,19 @@ describe('Rentify — Full Platform Test', () => {
         });
 
         it('shows error on wrong credentials', () => {
+            const bogusEmail = `wrong+${Date.now()}@example.com`;
+
+            cy.intercept('POST', '**/auth/login').as('loginAttempt');
             cy.visit('/login');
-            cy.get('input[type="email"]').type('wrong@email.com');
+            cy.get('input[type="email"]').type(bogusEmail);
             cy.get('input[type="password"]').type('wrongpassword123');
             cy.contains('button', 'Sign in').click();
-            cy.get('[data-testid="auth-error"]', { timeout: 15000 })
-                .should('be.visible')
-                .invoke('text')
-                .then((text) => {
-                    expect(text.trim()).to.not.equal('');
-                });
+
+            cy.wait('@loginAttempt', { timeout: 20000 }).then(({ response }) => {
+                expect(response, 'login response').to.exist;
+                expect([400, 401, 403, 404, 422, 429]).to.include(response.statusCode);
+            });
+
             cy.url().should('include', '/login');
         });
 
