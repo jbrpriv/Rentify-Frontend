@@ -306,7 +306,7 @@ export default function SuperLoginPage() {
                           placeholder=" "
                           className="peer w-full rounded-xl border border-[#D1E7F0] bg-white/70 px-3.5 pt-5 pb-2.5 text-sm text-[#111827] placeholder-transparent outline-none transition-colors focus:border-[#0992C2]"
                         />
-                        <label className="pointer-events-none absolute left-3.5 top-2.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#9CA3AF] transition-all peer-placeholder-shown:top-3.5 peer-placeholder-shown:text-xs peer-placeholder-shown:text-[#9CA3AF] peer-focus:top-2 peer-focus:text-[10px] peer-focus:text-[#0992C2]">
+                        <label className={`pointer-events-none absolute left-3.5 font-semibold uppercase tracking-[0.16em] transition-all peer-focus:top-2 peer-focus:text-[10px] peer-focus:text-[#0992C2] ${formData.name ? 'top-2 text-[10px] text-[#0992C2]' : 'top-3.5 text-xs text-[#9CA3AF]'}`}>
                           Full name
                         </label>
                       </div>
@@ -340,7 +340,7 @@ export default function SuperLoginPage() {
                       placeholder=" "
                       className="peer w-full rounded-xl border border-[#D1E7F0] bg-white/70 pl-9 pr-3.5 pt-5 pb-2.5 text-sm text-[#111827] placeholder-transparent outline-none transition-colors focus:border-[#0992C2]"
                     />
-                    <label className="pointer-events-none absolute left-9 top-2.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#9CA3AF] transition-all peer-placeholder-shown:top-3.5 peer-placeholder-shown:text-xs peer-placeholder-shown:text-[#9CA3AF] peer-focus:top-2 peer-focus:text-[10px] peer-focus:text-[#0992C2]">
+                    <label className={`pointer-events-none absolute left-9 font-semibold uppercase tracking-[0.16em] transition-all peer-focus:top-2 peer-focus:text-[10px] peer-focus:text-[#0992C2] ${formData.email ? 'top-2 text-[10px] text-[#0992C2]' : 'top-3.5 text-xs text-[#9CA3AF]'}`}>
                       Email address
                     </label>
                   </div>
@@ -356,7 +356,7 @@ export default function SuperLoginPage() {
                         placeholder=" "
                         className="peer w-full rounded-xl border border-[#D1E7F0] bg-white/70 pl-9 pr-3.5 pt-5 pb-2.5 text-sm text-[#111827] placeholder-transparent outline-none transition-colors focus:border-[#0992C2]"
                       />
-                      <label className="pointer-events-none absolute left-9 top-2.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#9CA3AF] transition-all peer-placeholder-shown:top-3.5 peer-placeholder-shown:text-xs peer-placeholder-shown:text-[#9CA3AF] peer-focus:top-2 peer-focus:text-[10px] peer-focus:text-[#0992C2]">
+                      <label className={`pointer-events-none absolute left-9 font-semibold uppercase tracking-[0.16em] transition-all peer-focus:top-2 peer-focus:text-[10px] peer-focus:text-[#0992C2] ${formData.phoneNumber ? 'top-2 text-[10px] text-[#0992C2]' : 'top-3.5 text-xs text-[#9CA3AF]'}`}>
                         Phone number
                       </label>
                     </div>
@@ -372,7 +372,7 @@ export default function SuperLoginPage() {
                       placeholder=" "
                       className="peer w-full rounded-xl border border-[#D1E7F0] bg-white/70 pl-9 pr-9 pt-5 pb-2.5 text-sm text-[#111827] placeholder-transparent outline-none transition-colors focus:border-[#0992C2]"
                     />
-                    <label className="pointer-events-none absolute left-9 top-2.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#9CA3AF] transition-all peer-placeholder-shown:top-3.5 peer-placeholder-shown:text-xs peer-placeholder-shown:text-[#9CA3AF] peer-focus:top-2 peer-focus:text-[10px] peer-focus:text-[#0992C2]">
+                    <label className={`pointer-events-none absolute left-9 font-semibold uppercase tracking-[0.16em] transition-all peer-focus:top-2 peer-focus:text-[10px] peer-focus:text-[#0992C2] ${formData.password ? 'top-2 text-[10px] text-[#0992C2]' : 'top-3.5 text-xs text-[#9CA3AF]'}`}>
                       Password
                     </label>
                     <button

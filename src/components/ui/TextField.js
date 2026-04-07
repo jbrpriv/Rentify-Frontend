@@ -13,7 +13,7 @@ export default function TextField({
   return (
     <div className="space-y-1.5">
       {label && (
-        <label className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">
+        <label className="block leading-none text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">
           {label}
         </label>
       )}

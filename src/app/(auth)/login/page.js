@@ -293,7 +293,7 @@ function LoginContent() {
                   />
                   <div className="space-y-1.5">
                     <div className="flex items-center justify-between">
-                      <label className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">Password</label>
+                      <label className="block leading-none text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">Password</label>
                       <Link href="/forgot-password" className="text-[11px] font-medium text-sky-300 hover:text-sky-200">
                         Forgot password?
                       </Link>
