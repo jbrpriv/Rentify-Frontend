@@ -140,6 +140,10 @@ NEXT_PUBLIC_FIREBASE_VAPID_KEY=your_web_push_vapid_key
 
 CYPRESS_BASE_URL=https://rentify-frontend-naa6.vercel.app
 ```
+
+## Project Tree
+
+```text
 Rentify-Frontend
    ├─ .eslintrc.json
    ├─ cypress
@@ -337,3 +341,4 @@ Rentify-Frontend
    │     ├─ api.js
    │     └─ firebase.js
    └─ tailwind.config.js
+```
