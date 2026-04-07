@@ -4,7 +4,17 @@ const STATIC_CACHE = `${CACHE_PREFIX}-static-${CACHE_VERSION}`;
 const RUNTIME_CACHE = `${CACHE_PREFIX}-runtime-${CACHE_VERSION}`;
 const OFFLINE_URL = '/offline';
 
-const CORE_ASSETS = ['/', OFFLINE_URL, '/manifest.webmanifest', '/favicon.ico', '/icons/icon.svg'];
+const CORE_ASSETS = [
+    '/',
+    OFFLINE_URL,
+    '/manifest.webmanifest',
+    '/favicon.ico',
+    '/icons/icons8-home.svg',
+    '/icons/icon-192x192.png',
+    '/icons/icon-512x512.png',
+    '/icons/maskable-512x512.png',
+    '/icons/apple-touch-icon.png',
+];
 
 self.addEventListener('install', (event) => {
     event.waitUntil(
@@ -103,8 +113,8 @@ try {
             if (!payload.notification && payload.data) {
                 self.registration.showNotification(payload.data.title || 'RentifyPro', {
                     body: payload.data.body || '',
-                    icon: '/icons/icon.svg',
-                    badge: '/icons/icon.svg',
+                    icon: '/icons/icon-192x192.png',
+                    badge: '/icons/icon-192x192.png',
                     data: payload.data,
                 });
             }

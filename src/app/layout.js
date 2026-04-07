@@ -65,9 +65,9 @@ export async function generateMetadata() {
       telephone: false,
     },
     icons: {
-      icon: branding.faviconUrl || '/favicon.ico',
-      shortcut: branding.faviconUrl || '/favicon.ico',
-      apple: branding.faviconUrl || '/favicon.ico',
+      icon: '/icons/icons8-home.svg',
+      shortcut: '/favicon.ico',
+      apple: '/icons/apple-touch-icon.png',
     },
   };
 }
@@ -77,7 +77,7 @@ export default async function RootLayout({ children }) {
 
   return (
     <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased rf-shell`}>
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased rf-shell overflow-x-hidden`}>
         <BrandingProvider initialBranding={initialBranding}>
           <UserProvider>
             <CurrencyProvider>

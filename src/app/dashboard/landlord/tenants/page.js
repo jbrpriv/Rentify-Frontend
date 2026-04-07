@@ -100,7 +100,60 @@ export default function LandlordTenantsPage() {
         </div>
       ) : (
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-          <table className="w-full text-sm">
+          <div className="md:hidden divide-y divide-gray-100">
+            {withExpiry.map(a => {
+              const expiringSoon = a.daysLeft <= 30 && a.daysLeft >= 0 && a.status === 'active';
+              return (
+                <div key={a._id} className={`p-4 space-y-3 ${expiringSoon ? 'bg-amber-50/30' : ''}`}>
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <p className="font-semibold text-gray-900 truncate">{a.tenant?.name}</p>
+                      <p className="text-xs text-gray-400 truncate">{a.tenant?.email}</p>
+                    </div>
+                    <span className="bg-[#E6EAF2] text-[#0B2D72] border border-[#CBD5E1] text-[10px] font-black uppercase px-2 py-1 rounded-full">
+                      {(a.status === 'signed' || a.status === 'sent') ? 'Payment Pending' : a.status}
+                    </span>
+                  </div>
+                  <p className="text-xs text-gray-600 truncate">Property: {a.property?.title}</p>
+                  <div className="grid grid-cols-2 gap-2 text-xs">
+                    <div className="rounded-lg bg-gray-50 p-2">
+                      <p className="text-gray-400">Rent</p>
+                      <p className="font-semibold text-gray-900">{formatMoney(a.financials?.rentAmount || 0)}</p>
+                    </div>
+                    <div className="rounded-lg bg-gray-50 p-2">
+                      <p className="text-gray-400">Lease End</p>
+                      <p className={`${expiringSoon ? 'text-amber-600 font-bold' : 'text-gray-700'}`}>
+                        {new Date(a.term?.endDate).toLocaleDateString()} {expiringSoon ? `(${a.daysLeft}d)` : ''}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex gap-2 items-center">
+                    {a.tenant?.email && (
+                      <a href={`mailto:${a.tenant.email}`} className="text-blue-400 hover:text-blue-600">
+                        <Mail className="w-4 h-4" />
+                      </a>
+                    )}
+                    {a.tenant?.phoneNumber && (
+                      <a href={`tel:${a.tenant.phoneNumber}`} className="text-green-400 hover:text-green-600">
+                        <Phone className="w-4 h-4" />
+                      </a>
+                    )}
+                    {a.tenant?._id && (
+                      <Link
+                        href={`/dashboard/landlord/tenant-documents?tenantId=${a.tenant._id}&name=${encodeURIComponent(a.tenant.name || 'Tenant')}`}
+                        className="ml-auto text-[10px] font-bold uppercase tracking-widest bg-[#E6EAF2] text-[#0B2D72] border border-[#CBD5E1] px-2.5 py-1 rounded-lg hover:bg-[#DBE2ED] transition"
+                        title="View tenant documents (secure, view-only)"
+                      >
+                        Docs
+                      </Link>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          <table className="hidden md:table w-full text-sm">
             <thead>
               <tr className="border-b border-gray-100 bg-gray-50">
                 <th className="text-left px-6 py-3 text-xs font-black uppercase tracking-widest text-gray-400">Tenant</th>

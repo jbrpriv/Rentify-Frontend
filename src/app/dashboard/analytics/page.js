@@ -299,7 +299,55 @@ function LandlordAnalytics({ data }) {
         ) : filteredPayments.length === 0 ? (
           <p className="text-sm text-gray-400 text-center py-8">No payments found</p>
         ) : (
-          <div className="overflow-x-auto">
+          <>
+            <div className="md:hidden space-y-3">
+              {filteredPayments.map((p) => {
+                const st = PAYMENT_STATUS[p.status] || PAYMENT_STATUS.pending;
+                return (
+                  <div key={p._id} className="rounded-xl border border-gray-100 p-3 space-y-2">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <p className="font-semibold text-gray-900 text-xs truncate">{p.tenant?.name || '—'}</p>
+                        <p className="text-[10px] text-gray-400 truncate">{p.tenant?.email || '—'}</p>
+                      </div>
+                      <span className={`text-[10px] font-black uppercase px-2 py-1 rounded-full ${st.color}`}>
+                        {st.label}
+                      </span>
+                    </div>
+                    <p className="text-xs text-gray-600 truncate">{p.property?.title || '—'}</p>
+                    <div className="grid grid-cols-2 gap-2 text-xs">
+                      <div className="rounded-lg bg-gray-50 p-2">
+                        <p className="text-gray-400">Type</p>
+                        <p className="font-semibold text-gray-700">{(p.type || '—').replace('_', ' ')}</p>
+                      </div>
+                      <div className="rounded-lg bg-gray-50 p-2">
+                        <p className="text-gray-400">Amount</p>
+                        <p className="font-black text-gray-900">{formatMoney(Number(p.amount))}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <p className="text-[10px] text-gray-500">{p.paidAt ? new Date(p.paidAt).toLocaleDateString('en-PK') : '—'}</p>
+                      {p.status === 'paid' ? (
+                        <button
+                          onClick={() => handleDownloadReceipt(p._id)}
+                          disabled={downloading === p._id}
+                          className="flex items-center gap-1 text-[10px] font-black uppercase px-2.5 py-1.5 rounded-lg bg-[#E6EAF2] text-[#0B2D72] border border-[#CBD5E1] hover:bg-[#DBE2ED] disabled:opacity-50 transition"
+                        >
+                          {downloading === p._id
+                            ? <Loader2 className="w-3 h-3 animate-spin" />
+                            : <Download className="w-3 h-3" />}
+                          {downloading === p._id ? 'Downloading…' : 'Receipt'}
+                        </button>
+                      ) : (
+                        <span className="text-[10px] text-gray-300">—</span>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="hidden md:block overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-gray-100">
@@ -362,6 +410,8 @@ function LandlordAnalytics({ data }) {
                 })}
               </tbody>
             </table>
+            </div>
+          </>
           </div>
         )}
       </div>

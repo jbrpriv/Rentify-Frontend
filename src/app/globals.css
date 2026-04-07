@@ -75,6 +75,27 @@
 }
 
 @layer base {
+  html,
+  body {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: clip;
+  }
+
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  img,
+  svg,
+  video,
+  canvas,
+  iframe {
+    max-width: 100%;
+  }
+
   body {
     color: var(--rf-color-text-main);
     background:
@@ -90,6 +111,19 @@
       radial-gradient(circle at 0% -10%, rgba(9, 146, 194, 0.15), transparent 55%),
       radial-gradient(circle at 90% 0%, rgba(246, 231, 188, 0.5), transparent 62%),
       radial-gradient(circle at 0% 80%, rgba(10, 196, 224, 0.12), transparent 60%);
+  }
+}
+
+@media (max-width: 1024px), (pointer: coarse) {
+  * {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  *::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+    display: none;
   }
 }
 

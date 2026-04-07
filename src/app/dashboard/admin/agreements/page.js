@@ -172,7 +172,60 @@ export default function AdminAgreementsPage() {
         </div>
       ) : (
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-          <div className="overflow-x-auto">
+          <div className="md:hidden divide-y divide-gray-100">
+            {agreements.map((a) => (
+              <div key={a._id} className="p-4 space-y-3">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <p className="font-semibold text-gray-900 truncate">{a.property?.title || '—'}</p>
+                    <p className="text-xs text-gray-500 truncate">{a.landlord?.name || '—'} → {a.tenant?.name || '—'}</p>
+                  </div>
+                  <StatusBadge status={a.status} />
+                </div>
+
+                <div className="grid grid-cols-2 gap-2 text-xs">
+                  <div className="rounded-lg bg-gray-50 p-2">
+                    <p className="text-gray-400">Term</p>
+                    <p className="text-gray-700 font-medium leading-snug">
+                      {a.term?.startDate
+                        ? `${new Date(a.term.startDate).toLocaleDateString()} → ${new Date(a.term.endDate).toLocaleDateString()}`
+                        : '—'}
+                    </p>
+                  </div>
+                  <div className="rounded-lg bg-gray-50 p-2">
+                    <p className="text-gray-400">Rent / mo</p>
+                    <p className="text-gray-900 font-semibold">
+                      {a.financials?.rentAmount ? formatMoney(a.financials.rentAmount) : '—'}
+                    </p>
+                  </div>
+                </div>
+
+                <button
+                  onClick={async () => {
+                    try {
+                      const response = await api.get(
+                        `/agreements/${a._id}/pdf`,
+                        { responseType: 'blob', params: { currency } }
+                      );
+                      const bUrl = URL.createObjectURL(response.data);
+                      const link = document.createElement('a');
+                      link.href = bUrl;
+                      link.download = `agreement-${a._id}.pdf`;
+                      link.click();
+                      URL.revokeObjectURL(bUrl);
+                    } catch {
+                      toast('Failed to download PDF. Please try again.', 'error');
+                    }
+                  }}
+                  className="inline-flex w-full items-center justify-center gap-1 text-xs text-[#0B2D72] border border-[#CBD5E1] rounded-lg py-2 hover:bg-[#E6EAF2] font-semibold"
+                >
+                  <Eye className="h-3.5 w-3.5" /> Download PDF
+                </button>
+              </div>
+            ))}
+          </div>
+
+          <div className="hidden md:block overflow-x-auto">
             <table className="w-full text-sm">
               <thead className="bg-gray-50 border-b border-gray-100">
                 <tr>

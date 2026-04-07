@@ -49,19 +49,22 @@ export function BrandingProvider({ children, initialBranding = null }) {
   useEffect(() => {
     if (typeof document === 'undefined') return;
 
-    const iconHref = branding.faviconUrl || DEFAULT_BRANDING.faviconUrl;
-    const rels = ['icon', 'shortcut icon', 'apple-touch-icon'];
+    const localIcons = {
+      icon: '/icons/icons8-home.svg',
+      'shortcut icon': '/favicon.ico',
+      'apple-touch-icon': '/icons/apple-touch-icon.png',
+    };
 
-    rels.forEach((rel) => {
+    Object.entries(localIcons).forEach(([rel, href]) => {
       let link = document.querySelector(`link[rel="${rel}"]`);
       if (!link) {
         link = document.createElement('link');
         link.setAttribute('rel', rel);
         document.head.appendChild(link);
       }
-      link.setAttribute('href', iconHref);
+      link.setAttribute('href', href);
     });
-  }, [branding.faviconUrl]);
+  }, []);
 
   const value = useMemo(
     () => ({ ...branding, loading, refreshBranding }),

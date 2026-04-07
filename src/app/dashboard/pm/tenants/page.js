@@ -88,7 +88,37 @@ export default function PMTenantsPage() {
         </div>
       ) : (
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-          <table className="w-full text-sm">
+          <div className="md:hidden divide-y divide-gray-100">
+            {agreements.map(a => (
+              <div key={a._id} className="p-4 space-y-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 bg-[#0B2D72] rounded-full flex items-center justify-center">
+                    <span className="text-white text-xs font-black">{a.tenant?.name?.charAt(0)?.toUpperCase()}</span>
+                  </div>
+                  <div className="min-w-0">
+                    <p className="font-bold text-gray-900 truncate">{a.tenant?.name}</p>
+                    <p className="text-xs text-gray-500 truncate">{a.property?.title}</p>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-2 text-xs">
+                  <div className="rounded-lg bg-gray-50 p-2">
+                    <p className="text-gray-400">Rent</p>
+                    <p className="font-bold text-gray-900">{formatMoney(a.financials?.rentAmount)}</p>
+                  </div>
+                  <div className="rounded-lg bg-gray-50 p-2">
+                    <p className="text-gray-400">Lease End</p>
+                    <p className="text-gray-700">{new Date(a.term?.endDate).toLocaleDateString()}</p>
+                  </div>
+                </div>
+                <div className="flex gap-3">
+                  {a.tenant?.email && (<a href={`mailto:${a.tenant.email}`} className="text-[#0B2D72] hover:opacity-80"><Mail className="w-4 h-4" /></a>)}
+                  {a.tenant?.phoneNumber && a.tenant?.phoneNumber !== '0000000000' && (<a href={`tel:${a.tenant.phoneNumber}`} className="text-[#0B2D72] hover:opacity-80"><Phone className="w-4 h-4" /></a>)}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <table className="hidden md:table w-full text-sm">
             <thead>
               <tr className="border-b border-gray-100 bg-gray-50">
                 <th className="text-left px-6 py-3 text-xs font-black uppercase tracking-widest text-gray-400">Tenant</th>

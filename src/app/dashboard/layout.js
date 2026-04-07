@@ -373,7 +373,7 @@ export default function DashboardLayout({ children }) {
   const sidebarProps = { user, role, currentNav, pathname, badgeCounts, pulseColor, badgeColor };
 
   return (
-    <div className={`min-h-screen flex flex-col bg-[#F8FBFC] ${mobileOpen ? 'overflow-hidden' : ''}`}>
+    <div className={`min-h-screen flex flex-col bg-[#F8FBFC] overflow-x-hidden ${mobileOpen ? 'overflow-hidden' : ''}`}>
       <Navbar />
       <NotificationToast notification={notification} onDismiss={() => setNotification(null)} />
 

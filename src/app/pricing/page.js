@@ -291,7 +291,29 @@ export default function PricingPage() {
                 Full feature comparison
               </h2>
 
-              <div className="rounded-3xl overflow-hidden ring-1 ring-white/15" style={{ background: 'rgba(255,255,255,0.05)', backdropFilter: 'blur(16px)' }}>
+              <div className="md:hidden space-y-3">
+                {FEATURE_TABLE.map((row) => (
+                  <div key={row.label} className="rounded-2xl border border-white/15 bg-white/5 p-4">
+                    <p className="text-white/85 text-sm font-semibold mb-2">{row.label}</p>
+                    <div className="grid grid-cols-3 gap-2 text-center">
+                      <div className="rounded-lg bg-white/10 p-2">
+                        <p className="text-[10px] uppercase text-white/60 mb-1">Free</p>
+                        <FeatureCell value={row.free} />
+                      </div>
+                      <div className="rounded-lg bg-white/10 p-2">
+                        <p className="text-[10px] uppercase text-[#0AC4E0] mb-1">Pro</p>
+                        <FeatureCell value={row.pro} />
+                      </div>
+                      <div className="rounded-lg bg-white/10 p-2">
+                        <p className="text-[10px] uppercase text-white/80 mb-1">Ent</p>
+                        <FeatureCell value={row.enterprise} />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="hidden md:block rounded-3xl overflow-hidden ring-1 ring-white/15" style={{ background: 'rgba(255,255,255,0.05)', backdropFilter: 'blur(16px)' }}>
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b border-white/10">

@@ -136,7 +136,54 @@ export default function AdminUsersPage() {
         {loading ? (
           <div className="flex justify-center py-16"><Loader2 className="animate-spin h-8 w-8 text-[#0B2D72]" /></div>
         ) : (
-          <table className="w-full text-sm">
+          <>
+            <div className="md:hidden divide-y divide-gray-100">
+              {users.map(u => (
+                <div key={u._id} className="p-4 space-y-3">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <p className="font-semibold text-gray-900 truncate">{u.name}</p>
+                      <p className="text-xs text-gray-400 truncate">{u.email}</p>
+                    </div>
+                    <span className={`text-[10px] font-black uppercase px-2 py-1 rounded-full ${u.isActive ? 'bg-[#0B2D72] text-[#E6EAF2]' : 'bg-[#CBD5E1] text-[#1F2933]'}`}>
+                      {u.isActive ? 'Active' : 'Banned'}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between gap-2">
+                    <span className={`text-[10px] font-black uppercase px-2 py-1 rounded-full ${ROLE_COLORS[u.role] || 'bg-gray-100 text-gray-500'}`}>
+                      {u.role.replace('_', ' ')}
+                    </span>
+                    <span className="text-xs text-gray-400">Joined {new Date(u.createdAt).toLocaleDateString()}</span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      onClick={() => { setSelectedUser(u); setNewRole(u.role); }}
+                      className="text-xs border border-gray-200 px-3 py-2 rounded-lg hover:border-[#0B2D72] hover:text-[#0B2D72] transition"
+                    >
+                      Change Role
+                    </button>
+                    <button
+                      onClick={() => handleBan(u._id, u.name)}
+                      disabled={actionLoading === u._id + '-ban'}
+                      className={`text-xs px-3 py-2 rounded-lg transition flex items-center justify-center gap-1 ${u.isActive
+                          ? 'bg-[#E6EAF2] text-[#1F2933] hover:bg-[#CBD5E1] border border-[#CBD5E1]'
+                          : 'bg-[#0B2D72] text-[#E6EAF2] hover:opacity-90'
+                        }`}
+                    >
+                      {actionLoading === u._id + '-ban' ? (
+                        <Loader2 className="w-3 h-3 animate-spin" />
+                      ) : u.isActive ? (
+                        <><UserX className="w-3 h-3" /> Ban</>
+                      ) : (
+                        <><UserCheck className="w-3 h-3" /> Unban</>
+                      )}
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <table className="hidden md:table w-full text-sm">
             <thead>
               <tr className="border-b border-gray-100 bg-gray-50">
                 <th className="text-left px-6 py-3 text-xs font-black uppercase tracking-widest text-gray-400">User</th>
@@ -195,7 +242,8 @@ export default function AdminUsersPage() {
                 </tr>
               ))}
             </tbody>
-          </table>
+            </table>
+          </>
         )}
 
         {/* Pagination */}

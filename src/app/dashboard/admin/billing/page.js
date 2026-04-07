@@ -142,7 +142,41 @@ export default function AdminBillingPage() {
         <div className="text-[#1F2933] bg-[#E6EAF2] border border-[#CBD5E1] rounded-lg p-4">{error}</div>
       ) : (
         <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
-          <div className="overflow-x-auto">
+          <div className="md:hidden divide-y divide-gray-100">
+            {loading ? (
+              Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className="animate-pulse p-4 space-y-2">
+                  <div className="h-4 bg-gray-200 rounded w-1/2" />
+                  <div className="h-4 bg-gray-200 rounded w-2/3" />
+                </div>
+              ))
+            ) : data?.users?.length === 0 ? (
+              <div className="px-4 py-10 text-center text-gray-400">No landlords found.</div>
+            ) : (
+              data?.users?.map((user) => {
+                const effectiveTier = user.subscriptionTier || 'free';
+                return (
+                  <div key={user._id} className="p-4 space-y-2">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <p className="font-semibold text-gray-900 truncate">{user.name}</p>
+                        <p className="text-xs text-gray-400 truncate">{user.email}</p>
+                      </div>
+                      <span className={`px-2 py-0.5 rounded-full text-xs font-semibold capitalize ${TIER_BADGE[effectiveTier] || TIER_BADGE.free}`}>
+                        {effectiveTier}
+                      </span>
+                    </div>
+                    <p className="text-xs text-gray-500">Joined: {fmtDate(user.createdAt)}</p>
+                    {!user.isActive && (
+                      <span className="inline-block text-xs bg-[#CBD5E1] text-[#1F2933] px-1.5 py-0.5 rounded">Banned</span>
+                    )}
+                  </div>
+                );
+              })
+            )}
+          </div>
+
+          <div className="hidden md:block overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-100 text-sm">
               <thead className="bg-gray-50 text-gray-500 text-xs uppercase tracking-wide">
                 <tr>

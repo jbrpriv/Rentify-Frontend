@@ -83,7 +83,31 @@ export default function AuditLogsPage() {
         {loading ? (
           <div className="flex justify-center py-16"><Loader2 className="animate-spin h-8 w-8 text-[#0B2D72]" /></div>
         ) : (
-          <table className="w-full text-sm">
+          <>
+            <div className="md:hidden divide-y divide-gray-100">
+              {logs.length === 0 ? (
+                <div className="text-center py-16 text-gray-400">
+                  <div className="flex flex-col items-center">
+                    <ShieldCheck className="w-10 h-10 mb-3 opacity-30" />
+                    <p className="font-bold">No audit logs found</p>
+                  </div>
+                </div>
+              ) : logs.map((log, i) => (
+                <div key={i} className="p-4 space-y-2">
+                  <div className="flex items-start justify-between gap-2">
+                    <span className={`text-[10px] font-black uppercase px-2 py-1 rounded-full ${ACTION_COLORS[log.action] || 'bg-[#E6EAF2] text-[#1F2933]'}`}>
+                      {log.action?.replace(/_/g, ' ')}
+                    </span>
+                    <span className="text-[10px] text-gray-500">{new Date(log.timestamp).toLocaleString()}</span>
+                  </div>
+                  <p className="text-xs text-gray-600">Agreement: <span className="font-mono text-gray-400">{String(log.agreementId).slice(-8)}</span></p>
+                  <p className="text-xs text-gray-500">IP: {log.ipAddress || '—'}</p>
+                  <p className="text-xs text-gray-600 break-words">{log.details || '—'}</p>
+                </div>
+              ))}
+            </div>
+
+            <table className="hidden md:table w-full text-sm">
             <thead>
               <tr className="border-b border-gray-100 bg-gray-50">
                 <th className="text-left px-6 py-3 text-xs font-black uppercase tracking-widest text-gray-400">Timestamp</th>
@@ -121,7 +145,8 @@ export default function AuditLogsPage() {
                 </tr>
               ))}
             </tbody>
-          </table>
+            </table>
+          </>
         )}
 
         {!loading && (
