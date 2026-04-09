@@ -46,11 +46,10 @@ function isAuthPage(pathname) {
 export function middleware(request) {
   const { pathname } = request.nextUrl;
 
-  // Always pass through internals, static files, and the public sign page
+  // Always pass through internals and static files
   if (
     pathname.startsWith('/api/') ||
     pathname.startsWith('/_next/') ||
-    pathname.startsWith('/sign/') ||
     pathname.includes('.')
   ) {
     return NextResponse.next();
