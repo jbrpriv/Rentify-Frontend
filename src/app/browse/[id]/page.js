@@ -579,7 +579,17 @@ function ListingDetailContent() {
                     <div>
                       <p style={{ fontWeight: 700, color: '#0F172A', fontSize: '0.95rem' }}>{listing.landlord?.name || 'Landlord'}</p>
                       <div className="flex items-center gap-1 mt-0.5">
-                        <ShieldCheck size={13} style={{ color: '#22C55E' }} /><span style={{ color: '#16A34A', fontSize: '0.75rem', fontWeight: 600 }}>Verified Landlord</span>
+                        {listing.landlord?.documentsVerified ? (
+                          <>
+                            <ShieldCheck size={13} style={{ color: '#22C55E' }} />
+                            <span style={{ color: '#16A34A', fontSize: '0.75rem', fontWeight: 600 }}>Verified Landlord</span>
+                          </>
+                        ) : (
+                          <>
+                            <ShieldCheck size={13} style={{ color: '#94A3B8' }} />
+                            <span style={{ color: '#64748B', fontSize: '0.75rem', fontWeight: 600 }}>Unverified Landlord</span>
+                          </>
+                        )}
                       </div>
                     </div>
                   </div>
