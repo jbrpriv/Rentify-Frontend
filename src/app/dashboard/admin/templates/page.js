@@ -282,6 +282,7 @@ export default function TemplatesPage() {
   const [expanded, setExpanded] = useState({});
   const [catFilter, setCat] = useState('');
   const [approvedFilter, setApproved] = useState('');
+  const [showArchived, setShowArchived] = useState(false);
 
   // Variable definitions fetched from backend
   const [variables, setVariables] = useState([]);
@@ -302,7 +303,7 @@ export default function TemplatesPage() {
   const [rejectTarget, setRejectTarget] = useState(null);
   const [rejectionReason, setRejectionReason] = useState('');
 
-  useEffect(() => { fetchClauses(); }, [catFilter, approvedFilter]); // eslint-disable-line
+  useEffect(() => { fetchClauses(); }, [catFilter, approvedFilter, showArchived]); // eslint-disable-line
 
   // Fetch available template variables once on mount
   useEffect(() => {
@@ -317,6 +318,7 @@ export default function TemplatesPage() {
       const params = new URLSearchParams();
       if (catFilter) params.set('category', catFilter);
       if (approvedFilter !== '') params.set('isApproved', approvedFilter);
+      params.set('isArchived', showArchived ? 'true' : 'false');
       const { data } = await api.get(`/admin/clauses?${params}`);
       setClauses(data);
     } catch (err) { console.error(err); }
@@ -350,9 +352,23 @@ export default function TemplatesPage() {
     setActionId(id + '-archive');
     try {
       await api.put(`/admin/clauses/${id}/archive`);
+      toast('Clause archived successfully', 'success');
       fetchClauses();
     } catch (err) { toast(err.response?.data?.message || 'Failed to archive clause', 'error'); }
     finally { setActionId(null); }
+  };
+
+  const handleRestore = async (id) => {
+    setActionId(id + '-restore');
+    try {
+      await api.put(`/admin/clauses/${id}/restore`);
+      toast('Clause restored successfully', 'success');
+      fetchClauses();
+    } catch (err) {
+      toast(err.response?.data?.message || 'Failed to restore clause', 'error');
+    } finally {
+      setActionId(null);
+    }
   };
 
   const handleCreate = async (e) => {
@@ -401,7 +417,9 @@ export default function TemplatesPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-black text-gray-900 tracking-tighter">Clause Templates</h1>
-          <p className="text-gray-400 text-sm mt-1">{clauses.length} templates</p>
+          <p className="text-gray-400 text-sm mt-1">
+            {clauses.length} {showArchived ? 'archived templates' : 'templates'}
+          </p>
         </div>
         {(isAdmin || isReviewer) && (
           <button
@@ -525,6 +543,20 @@ export default function TemplatesPage() {
           <option value="true">Approved</option>
           <option value="false">Pending Review</option>
         </select>
+        {(isAdmin || isReviewer) && (
+          <button
+            type="button"
+            onClick={() => setShowArchived(v => !v)}
+            className={`inline-flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-bold border transition ${
+              showArchived
+                ? 'bg-[#E6EAF2] text-[#0B2D72] border-[#CBD5E1]'
+                : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'
+            }`}
+          >
+            {showArchived ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+            {showArchived ? 'Showing Archived' : 'Show Archived'}
+          </button>
+        )}
       </div>
 
       {/* ── Clause List ──────────────────────────────────────────────────────── */}
@@ -535,7 +567,7 @@ export default function TemplatesPage() {
       ) : clauses.length === 0 ? (
         <div className="text-center py-16 text-gray-400">
           <Scale className="w-10 h-10 mx-auto mb-3 opacity-30" />
-          <p className="font-bold">No clauses found</p>
+          <p className="font-bold">{showArchived ? 'No archived clauses found' : 'No clauses found'}</p>
         </div>
       ) : (
         <div className="space-y-3">
@@ -568,7 +600,7 @@ export default function TemplatesPage() {
                   >
                     {expanded[c._id] ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                   </button>
-                  {(isAdmin || isReviewer) && !c.isApproved && (
+                  {(isAdmin || isReviewer) && !showArchived && !c.isApproved && (
                     <button
                       onClick={() => handleApprove(c._id)}
                       disabled={actionId === c._id}
@@ -580,7 +612,7 @@ export default function TemplatesPage() {
                       }
                     </button>
                   )}
-                  {(isAdmin || isReviewer) && c.isApproved && (
+                  {(isAdmin || isReviewer) && !showArchived && c.isApproved && (
                     <button
                       onClick={() => { setRejectTarget(c._id); setRejectionReason(''); }}
                       disabled={actionId === c._id}
@@ -589,13 +621,25 @@ export default function TemplatesPage() {
                       <XCircle className="w-3 h-3" /> Reject
                     </button>
                   )}
-                  {isAdmin && (
+                  {isAdmin && !showArchived && (
                     <button
                       onClick={() => setArchiveTarget(c._id)}
                       disabled={actionId === c._id + '-archive'}
                       className="flex items-center gap-1 text-xs bg-gray-100 text-gray-500 px-3 py-1.5 rounded-lg hover:bg-gray-200 transition"
                     >
                       <Archive className="w-3 h-3" /> Archive
+                    </button>
+                  )}
+                  {isAdmin && showArchived && (
+                    <button
+                      onClick={() => handleRestore(c._id)}
+                      disabled={actionId === c._id + '-restore'}
+                      className="flex items-center gap-1 text-xs bg-[#E6EAF2] text-[#0B2D72] px-3 py-1.5 rounded-lg hover:bg-[#CBD5E1] border border-[#CBD5E1] transition"
+                    >
+                      {actionId === c._id + '-restore'
+                        ? <Loader2 className="w-3 h-3 animate-spin" />
+                        : <><CheckCircle className="w-3 h-3" /> Restore</>
+                      }
                     </button>
                   )}
                 </div>

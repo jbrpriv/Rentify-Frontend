@@ -123,14 +123,18 @@ function RegisterContent() {
 
   return (
     <div className="flex min-h-screen flex-col bg-transparent">
+      <Link
+        href="/"
+        className="fixed left-4 top-4 z-40 inline-flex items-center gap-1.5 rounded-full border border-[#0992C2]/20 bg-white/90 px-3 py-1.5 text-[0.75rem] font-semibold text-neutral-600 shadow-sm backdrop-blur-sm transition-colors hover:text-neutral-800"
+      >
+        <ArrowLeft className="h-3.5 w-3.5" /> Back to home
+      </Link>
+
       <div className="flex flex-1 items-center justify-center px-4 py-16 sm:px-8">
         <div className="mx-auto grid w-full max-w-6xl items-center gap-10 md:grid-cols-2 lg:gap-16">
 
           {/* Left: brand story */}
           <div className="hidden md:block">
-            <Link href="/" className="inline-flex items-center gap-1.5 text-[0.75rem] font-semibold text-neutral-500 hover:text-neutral-700 transition-colors mb-8">
-              <ArrowLeft className="h-3.5 w-3.5" /> Back to home
-            </Link>
             <div className="inline-flex items-center gap-2 rounded-full border border-[#0992C2]/30 bg-white/80 px-3 py-1 text-[0.7rem] font-semibold uppercase tracking-[0.25em] text-neutral-500 shadow-sm shadow-[#0992C2]/20 backdrop-blur-sm">
               <span className="h-1.5 w-1.5 rounded-full bg-[#0992C2]" />
               Your rental workspace awaits
@@ -164,11 +168,6 @@ function RegisterContent() {
 
           {/* Right: register card */}
           <div className="rf-glass-dark rf-fade-in-up w-full max-w-md md:justify-self-end px-8 py-9">
-
-            {/* Mobile back link */}
-            <Link href="/" className="inline-flex items-center gap-1.5 text-[0.72rem] font-semibold text-slate-500 hover:text-slate-300 transition-colors mb-6 md:hidden">
-              <ArrowLeft className="h-3 w-3" /> Home
-            </Link>
 
             {/* Step progress */}
             <div className="flex gap-1.5 mb-7">

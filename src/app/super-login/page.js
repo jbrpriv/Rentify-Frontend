@@ -6,7 +6,7 @@ import { useUser } from '@/context/UserContext';
 import { useBranding } from '@/context/BrandingContext';
 import api, { setAccessToken } from '@/utils/api';
 import { requestFCMToken } from '@/utils/firebase';
-import { Lock, Mail, Loader2, Eye, EyeOff, ShieldCheck, UserPlus, LogIn, Phone, CheckCircle } from 'lucide-react';
+import { Lock, Mail, Loader2, Eye, EyeOff, ShieldCheck, LogIn, Phone, CheckCircle } from 'lucide-react';
 
 // Reuse the same reCAPTCHA helper as the regular login page
 const getRecaptchaToken = (action) =>
@@ -28,8 +28,7 @@ export default function SuperLoginPage() {
   const router = useRouter();
   const { setUser } = useUser();
   const { brandName } = useBranding();
-  const [mode, setMode] = useState('login');
-  const [formData, setFormData] = useState({ name: '', email: '', password: '', phoneNumber: '', role: 'admin' });
+  const [formData, setFormData] = useState({ email: '', password: '' });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -57,26 +56,18 @@ export default function SuperLoginPage() {
     setLoading(true);
     clearAlerts();
     try {
-      if (mode === 'register') {
-        const recaptchaToken = await getRecaptchaToken('register');
-        const payload = { ...formData, recaptchaToken };
-        await api.post('/auth/register', payload);
-        setSuccess(`A 6-digit verification code was sent to ${formData.email}`);
-        setStep('email');
-      } else {
-        const recaptchaToken = await getRecaptchaToken('login');
-        const { data } = await api.post('/auth/super-login', { email: formData.email, password: formData.password, recaptchaToken });
-        if (!['admin', 'law_reviewer'].includes(data.role)) {
-          setError('Access denied. This portal is for admins and law reviewers only.');
-          return;
-        }
-        if (data.twoFactorEnabled) {
-          setUserId2FA(data._id);
-          setStep('2fa');
-          return;
-        }
-        proceedAfterLogin(data);
+      const recaptchaToken = await getRecaptchaToken('login');
+      const { data } = await api.post('/auth/super-login', { email: formData.email, password: formData.password, recaptchaToken });
+      if (!['admin', 'law_reviewer'].includes(data.role)) {
+        setError('Access denied. This portal is for admins and law reviewers only.');
+        return;
       }
+      if (data.twoFactorEnabled) {
+        setUserId2FA(data._id);
+        setStep('2fa');
+        return;
+      }
+      proceedAfterLogin(data);
     } catch (err) {
       const msg = err.response?.data?.message;
       if (msg === 'EMAIL_NOT_VERIFIED') {
@@ -273,63 +264,7 @@ export default function SuperLoginPage() {
             {/* ── MAIN FORM ──────────────────────────────────────────────────────── */}
             {step === 'main' && (
               <>
-                {/* Login / Register toggle */}
-                <div className="mb-6 flex gap-1 rounded-xl bg-[#F0F8FA] p-1">
-                  {['login', 'register'].map((m) => (
-                    <button
-                      key={m}
-                      onClick={() => { setMode(m); clearAlerts(); }}
-                      className={`flex flex-1 items-center justify-center gap-2 rounded-lg py-2 text-sm font-bold transition-all ${mode === m
-                        ? 'bg-white text-[#0B2D72] shadow-sm shadow-[#0992C2]/25'
-                        : 'text-[#6B7280] hover:text-[#111827]'
-                        }`}
-                    >
-                      {m === 'login' ? (
-                        <LogIn className="h-3.5 w-3.5" />
-                      ) : (
-                        <UserPlus className="h-3.5 w-3.5" />
-                      )}
-                      {m === 'login' ? 'Sign in' : 'Create account'}
-                    </button>
-                  ))}
-                </div>
-
                 <form onSubmit={handleSubmit} className="space-y-4">
-                  {mode === 'register' && (
-                    <>
-                      <div className="relative">
-                        <input
-                          type="text"
-                          required
-                          value={formData.name}
-                          onChange={e => setFormData(f => ({ ...f, name: e.target.value }))}
-                          placeholder=" "
-                          className="peer w-full rounded-xl border border-[#D1E7F0] bg-white/70 px-3.5 pt-5 pb-2.5 text-sm text-[#111827] placeholder-transparent outline-none transition-colors focus:border-[#0992C2]"
-                        />
-                        <label className={`pointer-events-none absolute left-3.5 font-semibold uppercase tracking-[0.16em] transition-all peer-focus:top-2 peer-focus:text-[10px] peer-focus:text-[#0992C2] ${formData.name ? 'top-2 text-[10px] text-[#0992C2]' : 'top-3.5 text-xs text-[#9CA3AF]'}`}>
-                          Full name
-                        </label>
-                      </div>
-
-                      {/* Role selector — only needed when registering */}
-                      <div className="relative">
-                        <ShieldCheck className="pointer-events-none absolute left-3.5 top-3.5 h-4 w-4 text-[#9CA3AF]" />
-                        <select
-                          required
-                          value={formData.role}
-                          onChange={e => setFormData(f => ({ ...f, role: e.target.value }))}
-                          className="w-full appearance-none rounded-xl border border-[#D1E7F0] bg-white/70 pl-9 pr-3.5 pt-5 pb-2.5 text-sm text-[#111827] outline-none transition-colors focus:border-[#0992C2]"
-                        >
-                          <option value="admin">System Administrator</option>
-                          <option value="law_reviewer">Law Reviewer</option>
-                        </select>
-                        <label className="pointer-events-none absolute left-9 top-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-[#0992C2]">
-                          Role
-                        </label>
-                      </div>
-                    </>
-                  )}
-
                   <div className="relative">
                     <Mail className="pointer-events-none absolute left-3.5 top-3.5 h-4 w-4 text-[#9CA3AF]" />
                     <input
@@ -344,23 +279,6 @@ export default function SuperLoginPage() {
                       Email address
                     </label>
                   </div>
-
-                  {mode === 'register' && (
-                    <div className="relative">
-                      <Phone className="pointer-events-none absolute left-3.5 top-3.5 h-4 w-4 text-[#9CA3AF]" />
-                      <input
-                        type="tel"
-                        required
-                        value={formData.phoneNumber}
-                        onChange={e => setFormData(f => ({ ...f, phoneNumber: e.target.value }))}
-                        placeholder=" "
-                        className="peer w-full rounded-xl border border-[#D1E7F0] bg-white/70 pl-9 pr-3.5 pt-5 pb-2.5 text-sm text-[#111827] placeholder-transparent outline-none transition-colors focus:border-[#0992C2]"
-                      />
-                      <label className={`pointer-events-none absolute left-9 font-semibold uppercase tracking-[0.16em] transition-all peer-focus:top-2 peer-focus:text-[10px] peer-focus:text-[#0992C2] ${formData.phoneNumber ? 'top-2 text-[10px] text-[#0992C2]' : 'top-3.5 text-xs text-[#9CA3AF]'}`}>
-                        Phone number
-                      </label>
-                    </div>
-                  )}
 
                   <div className="relative">
                     <Lock className="pointer-events-none absolute left-3.5 top-3.5 h-4 w-4 text-[#9CA3AF]" />
@@ -391,10 +309,8 @@ export default function SuperLoginPage() {
                   >
                     {loading ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : mode === 'login' ? (
-                      <><LogIn className="h-4 w-4" /> Sign in</>
                     ) : (
-                      <><UserPlus className="h-4 w-4" /> Create account</>
+                      <><LogIn className="h-4 w-4" /> Sign in</>
                     )}
                   </button>
                 </form>
