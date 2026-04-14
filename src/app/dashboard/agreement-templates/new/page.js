@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
 import { useToast } from '@/context/ToastContext';
@@ -32,7 +32,7 @@ export default function CreateAgreementTemplatePage() {
 
   const handleSave = React.useCallback((data) => {
     console.log('Document Saved:', { ...metadata, ...data });
-    toast.success('Agreement template drafted successfully');
+    toast('Agreement template drafted successfully');
     // Integration point for backend persistence
   }, [metadata, toast]);
 
