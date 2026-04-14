@@ -1,18 +1,48 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
 import TextAlign from '@tiptap/extension-text-align';
-import { Eye, FileJson, FileCode, CheckCircle2 } from 'lucide-react';
+import Image from '@tiptap/extension-image';
+import TextStyle from '@tiptap/extension-text-style';
+import { Color } from '@tiptap/extension-color';
+import { Eye, FileJson, FileCode, CheckCircle2, Loader2, Sparkles } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import api from '@/utils/api';
 
 import { Variable } from './VariableExtension';
+import { FontSize } from './FontSizeExtension';
 import Toolbar from './Toolbar';
 import PreviewModal from './PreviewModal';
 import './builder.css';
 
 const AgreementBuilder = ({ initialContent = '', onSave }) => {
   const [showPreview, setShowPreview] = useState(false);
+  const [approvedClauses, setApprovedClauses] = useState([]);
+  const [loadingClauses, setLoadingClauses] = useState(false);
+
+  useEffect(() => {
+    fetchApprovedClauses();
+  }, []);
+
+  const fetchApprovedClauses = async () => {
+    setLoadingClauses(true);
+    try {
+      // In a real app, this endpoint would exist. 
+      // I'll implement this on the backend next.
+      const { data } = await api.get('/agreement-templates/approved-clauses');
+      setApprovedClauses(data);
+    } catch (err) {
+      console.warn('Could not fetch approved clauses:', err.message);
+      // Fallback for demo if backend isn't ready yet
+      setApprovedClauses([
+        { id: '1', title: 'Maintenance Policy', body: 'The Tenant shall keep the property in clean and habitable condition throughout the tenancy.' },
+        { id: '2', title: 'Pet Policy (Approved)', body: 'Small pets are allowed subject to a one-time non-refundable deposit of 15,000 PKR.' }
+      ]);
+    } finally {
+      setLoadingClauses(false);
+    }
+  };
 
   const editor = useEditor({
     extensions: [
@@ -21,9 +51,17 @@ const AgreementBuilder = ({ initialContent = '', onSave }) => {
       TextAlign.configure({
         types: ['heading', 'paragraph'],
       }),
+      Image.configure({
+        HTMLAttributes: {
+          class: 'document-image max-w-full rounded-lg shadow-sm',
+        },
+      }),
+      TextStyle,
+      Color,
       Variable,
+      FontSize,
     ],
-    content: initialContent || '<h1>Rental Agreement</h1><p>Type your agreement here. Insert variables using the buttons above.</p>',
+    content: initialContent || '<h1>Rental Agreement</h1><p>Type your agreement here. Insert variables or approved clauses using the tools above.</p>',
     editorProps: {
       attributes: {
         class: 'a4-page outline-none',
@@ -107,7 +145,7 @@ const AgreementBuilder = ({ initialContent = '', onSave }) => {
       </div>
 
       {/* Toolbar */}
-      <Toolbar editor={editor} />
+      <Toolbar editor={editor} approvedClauses={approvedClauses} loadingClauses={loadingClauses} />
 
       {/* Editor Main Area */}
       <div className="flex-1 overflow-y-auto document-container">
