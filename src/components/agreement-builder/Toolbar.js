@@ -2,11 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { 
   Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight, 
   Type, Heading1, Heading2, User, Landmark, Banknote, Calendar, 
-  ChevronDown, Image as ImageIcon, Sparkles, ScrollText, Plus
+  ChevronDown, Image as ImageIcon, Sparkles, ScrollText, Plus,
+  MapPin, Home, ShieldCheck, Wallet, Clock, Users, Hash
 } from 'lucide-react';
 
 const Toolbar = ({ editor }) => {
   const [showFontSizes, setShowFontSizes] = useState(false);
+  const [showVariables, setShowVariables] = useState(false);
 
   // Dynamically load Cloudinary Upload Widget script
   useEffect(() => {
@@ -25,6 +27,7 @@ const Toolbar = ({ editor }) => {
       type: 'variable',
       attrs: { name, label },
     }).run();
+    setShowVariables(false);
   };
 
   const insertImage = () => {
@@ -36,8 +39,8 @@ const Toolbar = ({ editor }) => {
 
     const myWidget = window.cloudinary.createUploadWidget(
       {
-        cloudName: 'dj4a5robb', // Derived from existing assets
-        uploadPreset: 'rentify_unsigned', // Common naming convention for this project
+        cloudName: 'dj4a5robb',
+        uploadPreset: 'rentify_unsigned',
         sources: ['local', 'url', 'camera'],
         showAdvancedOptions: false,
         cropping: true,
@@ -79,7 +82,50 @@ const Toolbar = ({ editor }) => {
     editor.chain().focus().insertContent({ type: 'clausesPlaceholder' }).run();
   };
 
-  const fontSizes = ['12px', '14px', '16px', '18px', '20px', '24px', '32px'];
+  const fontSizes = ['12px', '14px', '16px', '18px', '20px', '24px', '32px', '48px'];
+
+  const variableGroups = [
+    {
+      label: 'Main Parties',
+      vars: [
+        { id: 'landlord_name', label: 'Landlord Name', icon: Landmark },
+        { id: 'tenant_name', label: 'Tenant Name', icon: User },
+        { id: 'landlord_id_card', label: 'Landlord CNIC/ID', icon: ShieldCheck },
+        { id: 'tenant_id_card', label: 'Tenant CNIC/ID', icon: ShieldCheck },
+      ]
+    },
+    {
+      label: 'Property Info',
+      vars: [
+        { id: 'property_title', label: 'Property Title', icon: Home },
+        { id: 'property_address', label: 'Full Address', icon: MapPin },
+      ]
+    },
+    {
+      label: 'Financials',
+      vars: [
+        { id: 'monthly_rent', label: 'Monthly Rent', icon: Wallet },
+        { id: 'security_deposit', label: 'Security Deposit', icon: Banknote },
+        { id: 'maintenance_fee', label: 'Maintenance Fee', icon: Hash },
+        { id: 'late_fee', label: 'Late Payment Fee', icon: Clock },
+      ]
+    },
+    {
+      label: 'Dates & Duration',
+      vars: [
+        { id: 'start_date', label: 'Lease Start Date', icon: Calendar },
+        { id: 'end_date', label: 'Lease End Date', icon: Calendar },
+        { id: 'lease_duration', label: 'Duration (months)', icon: Clock },
+      ]
+    },
+    {
+      label: 'Other',
+      vars: [
+        { id: 'witness_1_name', label: 'Witness 1 Name', icon: Users },
+        { id: 'witness_2_name', label: 'Witness 2 Name', icon: Users },
+      ]
+    }
+  ];
 
   return (
     <div className="bg-white border-b border-gray-200 p-2 flex flex-wrap items-center gap-1 sticky top-0 z-50">
@@ -109,7 +155,7 @@ const Toolbar = ({ editor }) => {
       </div>
 
       {/* Font Size */}
-      <div className="relative border-r border-gray-100 px-2 group">
+      <div className="relative border-r border-gray-100 px-2">
         <button
           onClick={() => setShowFontSizes(!showFontSizes)}
           className="flex items-center gap-1 px-2 py-1.5 text-xs font-bold text-gray-600 hover:bg-gray-100 rounded transition-colors whitespace-nowrap"
@@ -117,23 +163,26 @@ const Toolbar = ({ editor }) => {
           Size <ChevronDown size={14} />
         </button>
         {showFontSizes && (
-          <div className="absolute top-full left-0 mt-1 w-24 bg-white border border-gray-200 rounded-xl shadow-xl overflow-hidden z-[100]">
-            {fontSizes.map(size => (
+          <>
+            <div className="fixed inset-0 z-[90]" onClick={() => setShowFontSizes(false)} />
+            <div className="absolute top-full left-0 mt-1 w-24 bg-white border border-gray-200 rounded-xl shadow-xl overflow-hidden z-[100]">
+              {fontSizes.map(size => (
+                <button
+                  key={size}
+                  onClick={() => setFontSize(size)}
+                  className="w-full text-left px-4 py-2 text-xs font-medium hover:bg-blue-50 hover:text-blue-600 transition-colors"
+                >
+                  {size}
+                </button>
+              ))}
               <button
-                key={size}
-                onClick={() => setFontSize(size)}
-                className="w-full text-left px-4 py-2 text-xs font-medium hover:bg-blue-50 hover:text-blue-600 transition-colors"
+                onClick={() => editor.chain().focus().unsetFontSize().run()}
+                className="w-full text-left px-4 py-2 text-xs font-bold border-t border-gray-100 text-red-500 hover:bg-red-50"
               >
-                {size}
+                Reset
               </button>
-            ))}
-            <button
-              onClick={() => editor.chain().focus().unsetFontSize().run()}
-              className="w-full text-left px-4 py-2 text-xs font-bold border-t border-gray-100 text-red-500 hover:bg-red-50"
-            >
-              Reset
-            </button>
-          </div>
+            </div>
+          </>
         )}
       </div>
 
@@ -198,33 +247,45 @@ const Toolbar = ({ editor }) => {
         </button>
       </div>
 
-      {/* Variables */}
-      <div className="flex items-center gap-2 px-2 border-r border-gray-100">
-        <span className="text-[10px] uppercase font-bold text-gray-400">Insert Info:</span>
+      {/* Variable Dropdown */}
+      <div className="relative px-2 border-r border-gray-100">
         <button
-          onClick={() => addVariable('tenant_name', 'Tenant')}
-          className="flex items-center gap-1 text-[11px] font-bold px-2 py-1 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-all border border-blue-100"
+          onClick={() => setShowVariables(!showVariables)}
+          className="flex items-center gap-2 px-3 py-1.5 bg-blue-600 text-white text-[11px] font-bold rounded-xl hover:bg-blue-700 transition-all shadow-sm active:scale-95"
+          title="Insert dynamic variables"
         >
-          <User size={12} /> Tenant
+          <Sparkles size={14} />
+          Insert Variables
+          <ChevronDown size={14} />
         </button>
-        <button
-          onClick={() => addVariable('landlord_name', 'Landlord')}
-          className="flex items-center gap-1 text-[11px] font-bold px-2 py-1 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-all border border-blue-100"
-        >
-          <Landmark size={12} /> Landlord
-        </button>
-        <button
-          onClick={() => addVariable('rent_amount', 'Rent')}
-          className="flex items-center gap-1 text-[11px] font-bold px-2 py-1 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-all border border-blue-100"
-        >
-          <Banknote size={12} /> Rent
-        </button>
-        <button
-          onClick={() => addVariable('start_date', 'Start Date')}
-          className="flex items-center gap-1 text-[11px] font-bold px-2 py-1 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-all border border-blue-100"
-        >
-          <Calendar size={12} /> Date
-        </button>
+
+        {showVariables && (
+          <>
+            <div className="fixed inset-0 z-[90]" onClick={() => setShowVariables(false)} />
+            <div className="absolute top-full left-0 mt-1 w-64 bg-white border border-gray-200 rounded-2xl shadow-2xl overflow-hidden z-[100] max-h-[80vh] overflow-y-auto">
+              <div className="px-4 py-3 bg-gray-50 border-b border-gray-100">
+                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Variable Library</p>
+              </div>
+              {variableGroups.map((group, idx) => (
+                <div key={group.label} className={idx > 0 ? 'border-t border-gray-50' : ''}>
+                  <p className="px-4 pt-3 pb-1 text-[9px] font-bold text-blue-600 uppercase tracking-wider bg-white">{group.label}</p>
+                  <div className="p-1 space-y-0.5">
+                    {group.vars.map(v => (
+                      <button
+                        key={v.id}
+                        onClick={() => addVariable(v.id, v.label)}
+                        className="w-full flex items-center gap-3 px-3 py-2 text-xs font-semibold text-gray-700 hover:bg-blue-50 hover:text-blue-700 rounded-xl transition-colors"
+                      >
+                        <v.icon size={14} className="opacity-50" />
+                        {v.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
       </div>
 
       {/* Dynamic Clauses Section Placeholder */}

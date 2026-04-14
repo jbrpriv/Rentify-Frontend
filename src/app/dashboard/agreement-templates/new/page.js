@@ -30,6 +30,12 @@ export default function CreateAgreementTemplatePage() {
 
   if (user && !canAccessTemplateStudio) return null;
 
+  const handleSave = React.useCallback((data) => {
+    console.log('Document Saved:', { ...metadata, ...data });
+    toast.success('Agreement template drafted successfully');
+    // Integration point for backend persistence
+  }, [metadata, toast]);
+
   return (
     <div className="max-w-6xl mx-auto pb-12">
       <div className="mb-6 flex items-center justify-between">
@@ -69,11 +75,7 @@ export default function CreateAgreementTemplatePage() {
       </div>
 
       <AgreementBuilder 
-        onSave={(data) => {
-          console.log('Document Saved:', { ...metadata, ...data });
-          toast.success('Agreement template drafted successfully');
-          // Integration point for backend persistence
-        }}
+        onSave={handleSave}
       />
     </div>
   );

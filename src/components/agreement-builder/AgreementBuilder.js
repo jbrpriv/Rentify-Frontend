@@ -6,7 +6,8 @@ import { TextAlign } from '@tiptap/extension-text-align';
 import { Image } from '@tiptap/extension-image';
 import { TextStyle } from '@tiptap/extension-text-style';
 import { Color } from '@tiptap/extension-color';
-import { Eye, FileJson, FileCode, CheckCircle2, Loader2, Sparkles } from 'lucide-react';
+import { Eye, FileJson, FileCode, CheckCircle2, Loader2, Sparkles, Hash } from 'lucide-react';
+import { CharacterCount } from '@tiptap/extension-character-count';
 import { toast } from 'react-hot-toast';
 import api from '@/utils/api';
 
@@ -62,6 +63,7 @@ const AgreementBuilder = ({ initialContent = '', onSave }) => {
       Variable,
       FontSize,
       ClausesPlaceholder,
+      CharacterCount,
     ],
     content: initialContent || '<h1>Rental Agreement</h1><p>Type your agreement here. Insert variables or approved clauses using the tools above.</p>',
     editorProps: {
@@ -178,4 +180,4 @@ const AgreementBuilder = ({ initialContent = '', onSave }) => {
   );
 };
 
-export default AgreementBuilder;
+export default React.memo(AgreementBuilder);

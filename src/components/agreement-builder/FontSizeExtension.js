@@ -5,7 +5,7 @@ export const FontSize = Mark.create({
 
   addOptions() {
     return {
-      types: ['textStyle'],
+      HTMLAttributes: {},
     };
   },
 
@@ -43,13 +43,12 @@ export const FontSize = Mark.create({
     return {
       setFontSize: (size) => ({ chain }) => {
         return chain()
-          .setMark('textStyle', { size })
+          .setMark(this.name, { size })
           .run();
       },
       unsetFontSize: () => ({ chain }) => {
         return chain()
-          .setMark('textStyle', { size: null })
-          .removeEmptyTextStyle()
+          .unsetMark(this.name)
           .run();
       },
     };
