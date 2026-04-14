@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
 import { useToast } from '@/context/ToastContext';
 import { useUser } from '@/context/UserContext';
+import api from '@/utils/api';
+import useGlobalPdfTheme from '@/hooks/useGlobalPdfTheme';
 import AgreementBuilder from '@/components/agreement-builder/AgreementBuilder';
 
 export default function CreateAgreementTemplatePage() {
@@ -15,6 +17,8 @@ export default function CreateAgreementTemplatePage() {
   const tier = ['free', 'pro', 'enterprise'].includes(normalizedTier) ? normalizedTier : 'free';
   const canAccessTemplateStudio = user?.role === 'admin' || (user?.role === 'landlord' && tier === 'enterprise');
 
+  const { themes } = useGlobalPdfTheme();
+  const [saving, setSaving] = useState(false);
   const [metadata, setMetadata] = useState({
     name: '',
     description: '',
@@ -28,13 +32,45 @@ export default function CreateAgreementTemplatePage() {
     router.push(user.role === 'landlord' ? '/dashboard/billing' : '/dashboard');
   }, [user, canAccessTemplateStudio, router, toast]);
 
-  if (user && !canAccessTemplateStudio) return null;
+  const handleSave = React.useCallback(async (data) => {
+    if (!metadata.name.trim()) {
+      toast('Please enter a template name before saving', 'error');
+      return;
+    }
 
-  const handleSave = React.useCallback((data) => {
-    console.log('Document Saved:', { ...metadata, ...data });
-    toast('Agreement template drafted successfully');
-    // Integration point for backend persistence
-  }, [metadata, toast]);
+    setSaving(true);
+    try {
+      const baseTheme = themes.find(t => t.isDefault)?._id || themes[0]?._id;
+      
+      if (!baseTheme) {
+        throw new Error('No base themes available. Please contact support.');
+      }
+
+      await api.post('/agreement-templates', {
+        name: metadata.name,
+        description: metadata.description,
+        baseTheme,
+        bodyHtml: data.html,
+        bodyJson: data.json,
+        customizations: {
+          primaryColor: '',
+          accentColor: '',
+          backgroundColor: '',
+          fontFamily: '',
+          fontSizeScale: 1.0
+        }
+      });
+
+      toast('Agreement template saved and submitted for review');
+      router.push('/dashboard/agreement-templates');
+    } catch (err) {
+      toast(err.response?.data?.message || err.message || 'Failed to save template', 'error');
+    } finally {
+      setSaving(false);
+    }
+  }, [metadata, toast, themes, router]);
+
+  if (user && !canAccessTemplateStudio) return null;
 
   return (
     <div className="max-w-6xl mx-auto pb-12">
@@ -76,6 +112,7 @@ export default function CreateAgreementTemplatePage() {
 
       <AgreementBuilder 
         onSave={handleSave}
+        isSaving={saving}
       />
     </div>
   );

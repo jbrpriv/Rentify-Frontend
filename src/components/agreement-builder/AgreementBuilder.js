@@ -18,7 +18,7 @@ import Toolbar from './Toolbar';
 import PreviewModal from './PreviewModal';
 import './builder.css';
 
-const AgreementBuilder = ({ initialContent = '', onSave }) => {
+const AgreementBuilder = ({ initialContent = '', onSave, isSaving = false }) => {
   const [showPreview, setShowPreview] = useState(false);
   const [approvedClauses, setApprovedClauses] = useState([]);
   const [loadingClauses, setLoadingClauses] = useState(false);
@@ -46,25 +46,27 @@ const AgreementBuilder = ({ initialContent = '', onSave }) => {
     }
   };
 
+  const extensions = React.useMemo(() => [
+    StarterKit,
+    Underline,
+    TextAlign.configure({
+      types: ['heading', 'paragraph'],
+    }),
+    Image.configure({
+      HTMLAttributes: {
+        class: 'document-image max-w-full rounded-lg shadow-sm',
+      },
+    }),
+    TextStyle,
+    Color,
+    Variable,
+    FontSize,
+    ClausesPlaceholder,
+    CharacterCount,
+  ], []);
+
   const editor = useEditor({
-    extensions: [
-      StarterKit,
-      Underline,
-      TextAlign.configure({
-        types: ['heading', 'paragraph'],
-      }),
-      Image.configure({
-        HTMLAttributes: {
-          class: 'document-image max-w-full rounded-lg shadow-sm',
-        },
-      }),
-      TextStyle,
-      Color,
-      Variable,
-      FontSize,
-      ClausesPlaceholder,
-      CharacterCount,
-    ],
+    extensions,
     content: initialContent || '<h1>Rental Agreement</h1><p>Type your agreement here. Insert variables or approved clauses using the tools above.</p>',
     editorProps: {
       attributes: {
@@ -141,9 +143,11 @@ const AgreementBuilder = ({ initialContent = '', onSave }) => {
 
           <button
             onClick={handleSave}
-            className="flex items-center gap-2 px-6 py-2 text-sm font-bold text-white bg-blue-600 rounded-xl hover:bg-blue-700 transition-all shadow-sm ml-2"
+            disabled={isSaving}
+            className="flex items-center gap-2 px-6 py-2 text-sm font-bold text-white bg-blue-600 rounded-xl hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed transition-all shadow-sm ml-2"
           >
-            Capture State
+            {isSaving ? <Loader2 className="animate-spin" size={16} /> : null}
+            {isSaving ? 'Saving...' : 'Capture State'}
           </button>
         </div>
       </div>
