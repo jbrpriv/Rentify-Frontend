@@ -526,7 +526,12 @@ function TemplateDocument({
         tenant_name: offerData?.tenant?.name || '[Tenant Name]',
         landlord_name: offerData?.landlord?.name || offerData?.property?.landlord?.name || '[Landlord Name]',
         rent_amount: formData?.rentAmount ? formatMoney(Number(formData.rentAmount)) : '[Rent Amount]',
+        monthly_rent: formData?.rentAmount ? formatMoney(Number(formData.rentAmount)) : '[Rent Amount]',
         start_date: formData?.startDate || '[Start Date]',
+        lease_end_date: formData?.endDate || '[End Date]',
+        security_deposit: formData?.depositAmount ? formatMoney(Number(formData.depositAmount)) : '[Security Deposit]',
+        property_title: offerData?.property?.title || '[Property Title]',
+        property_address: offerData?.property?.address ? `${offerData.property.address.street}, ${offerData.property.address.city}` : '[Property Address]',
       };
 
       variables.forEach(v => {
@@ -1350,7 +1355,7 @@ function AgreementForm() {
     if (pdfSelection?.type === 'template' && pdfSelection.id) {
       setLoadingTemplate(true);
       api.get(`/agreement-templates/${pdfSelection.id}`)
-        .then(({ data }) => setTemplateHtml(data.html || ''))
+        .then(({ data }) => setTemplateHtml(data.data?.bodyHtml || ''))
         .catch(() => setTemplateHtml(''))
         .finally(() => setLoadingTemplate(false));
     } else {
