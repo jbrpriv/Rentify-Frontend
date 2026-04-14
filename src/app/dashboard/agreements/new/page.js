@@ -371,6 +371,19 @@ function substituteVariables(text, offer, form, formatMoney) {
   return replaced;
 }
 
+const makeBucket = (clauseId = null) => ({
+  key: `bucket-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+  clauseId,
+});
+
+const arraysEqual = (a = [], b = []) => {
+  if (a.length !== b.length) return false;
+  for (let i = 0; i < a.length; i += 1) {
+    if (String(a[i]) !== String(b[i])) return false;
+  }
+  return true;
+};
+
 // ─── Toggle Switch ─────────────────────────────────────────────────────────────
 function Toggle({ enabled, onChange, label, description }) {
   return (
@@ -390,18 +403,223 @@ function Toggle({ enabled, onChange, label, description }) {
   );
 }
 
-const makeBucket = (clauseId = null) => ({
-  key: `bucket-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-  clauseId,
-});
+// ─── Clause Buckets Section ──────────────────────────────────────────────────
+function ClauseBucketsSection({ 
+  clauseBuckets, idxOffset = 0, clausesById, hoveredBucketKey, 
+  setHoveredBucketKey, handleDropToBucket, handleDragStart, 
+  moveBucketClause, handleRemoveClause, addClauseBucket, 
+  isClauseLimitFinite, clauseLimit, offerData, formData, formatMoney 
+}) {
+  return (
+    <div className="space-y-4 my-8">
+      <div className="flex items-center justify-between border-b border-gray-100 pb-2">
+        <p className="text-sm font-bold text-gray-800 flex items-center gap-2">
+          <ScrollText size={16} className="text-blue-600" /> Clause Library Buckets
+        </p>
+        <button
+          type="button"
+          onClick={addClauseBucket}
+          disabled={isClauseLimitFinite && clauseBuckets.length >= clauseLimit}
+          className="px-3 py-1 text-xs font-bold text-blue-700 border border-blue-200 bg-blue-50 rounded-lg hover:bg-blue-100 disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-95"
+        >
+          Add Clause Slot
+        </button>
+      </div>
 
-const arraysEqual = (a = [], b = []) => {
-  if (a.length !== b.length) return false;
-  for (let i = 0; i < a.length; i += 1) {
-    if (String(a[i]) !== String(b[i])) return false;
-  }
-  return true;
-};
+      {clauseBuckets.map((bucket, idx) => {
+        const letter = String.fromCharCode(65 + idx + idxOffset);
+        const clause = bucket.clauseId ? clausesById.get(bucket.clauseId) : null;
+        const isHovered = hoveredBucketKey === bucket.key;
+        return (
+          <div
+            key={bucket.key}
+            onDragOver={(e) => { e.preventDefault(); setHoveredBucketKey(bucket.key); }}
+            onDragLeave={() => setHoveredBucketKey('')}
+            onDrop={(e) => { e.preventDefault(); handleDropToBucket(bucket.key); }}
+            className={`rounded-xl border-2 p-5 transition-all duration-200 ${isHovered ? 'border-blue-400 bg-blue-50/50 shadow-inner' : 'border-dashed border-gray-200 bg-white/50 hover:border-gray-300'}`}
+          >
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <span className="flex items-center justify-center w-5 h-5 bg-gray-900 text-white text-[10px] font-black rounded-md">{letter}</span>
+                <p className="text-xs font-black text-gray-500 uppercase tracking-widest">{`Provision Slot`}</p>
+              </div>
+              <span className="text-[10px] font-bold text-gray-300 uppercase tracking-tighter">Drop Zone</span>
+            </div>
+
+            {!clause && (
+              <div className="py-2 text-center">
+                <p className="text-xs text-gray-400 font-medium italic">Drag a clause from the library panel and drop it here.</p>
+              </div>
+            )}
+
+            {clause && (
+              <div
+                draggable
+                onDragStart={() => handleDragStart(clause._id, 'bucket')}
+                className="rounded-xl border border-blue-100 bg-white p-4 shadow-sm cursor-grab active:cursor-grabbing hover:shadow-md transition-shadow group"
+              >
+                <div className="flex items-start gap-3">
+                  <div className="mt-1 flex flex-col items-center gap-1 text-blue-300 group-hover:text-blue-500 transition-colors">
+                    <GripVertical size={18} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-3 mb-2">
+                      <h4 className="text-sm font-black text-gray-900 truncate">{clause.title}</h4>
+                      <div className="flex items-center gap-1 shrink-0">
+                        <button
+                          type="button"
+                          disabled={idx === 0}
+                          className="p-1 rounded bg-white border border-gray-100 text-gray-400 hover:text-blue-600 hover:border-blue-100 disabled:opacity-30 transition-colors"
+                          onClick={(e) => { e.stopPropagation(); moveBucketClause(idx, 'up'); }}
+                        >
+                          <ChevronUp size={14} />
+                        </button>
+                        <button
+                          type="button"
+                          disabled={idx === clauseBuckets.length - 1}
+                          className="p-1 rounded bg-white border border-gray-100 text-gray-400 hover:text-blue-600 hover:border-blue-100 disabled:opacity-30 transition-colors"
+                          onClick={(e) => { e.stopPropagation(); moveBucketClause(idx, 'down'); }}
+                        >
+                          <ChevronDown size={14} />
+                        </button>
+                        <button
+                          type="button"
+                          className="ml-1 p-1 rounded bg-white border border-red-50 text-red-300 hover:text-red-600 hover:border-red-100 transition-colors"
+                          onClick={(e) => { e.stopPropagation(); handleRemoveClause(clause._id); }}
+                        >
+                          <X size={14} />
+                        </button>
+                      </div>
+                    </div>
+                    <div
+                      className="text-sm text-gray-600 leading-relaxed"
+                      dangerouslySetInnerHTML={{ __html: substituteVariables(clause.body, offerData, formData, formatMoney) }}
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+// ─── Template Document Renderer ───────────────────────────────────────────────
+function TemplateDocument({ 
+  templateHtml, offerData, formData, formatMoney,
+  clauseBuckets, clausesById, hoveredBucketKey, setHoveredBucketKey, 
+  handleDropToBucket, dragState, handleDragStart, moveBucketClause, 
+  handleRemoveClause, addClauseBucket, isClauseLimitFinite, clauseLimit 
+}) {
+  
+  const sections = useMemo(() => {
+    if (!templateHtml) return [];
+    try {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(templateHtml, 'text/html');
+
+      // 1. Replace Tiptap Variables
+      const variables = doc.querySelectorAll('span[data-type="variable"]');
+      const samples = {
+        tenant_name: offerData?.tenant?.name || '[Tenant Name]',
+        landlord_name: offerData?.landlord?.name || offerData?.property?.landlord?.name || '[Landlord Name]',
+        rent_amount: formData?.rentAmount ? formatMoney(Number(formData.rentAmount)) : '[Rent Amount]',
+        start_date: formData?.startDate || '[Start Date]',
+      };
+
+      variables.forEach(v => {
+        const name = v.getAttribute('data-name');
+        const replacement = samples[name] || `{${v.innerText}}`;
+        const span = doc.createElement('strong');
+        span.className = 'text-blue-700 font-extrabold bg-blue-50 px-1 rounded';
+        span.innerText = replacement;
+        v.parentNode.replaceChild(span, v);
+      });
+
+      // 2. Look for Placeholder
+      const placeholderHtml = '<div data-type="clauses-placeholder"></div>';
+      const fullHtml = doc.body.innerHTML;
+
+      if (!fullHtml.includes(placeholderHtml)) {
+        return [fullHtml];
+      }
+      return fullHtml.split(placeholderHtml);
+    } catch (error) {
+      console.error('Template rendering error:', error);
+      return [templateHtml];
+    }
+  }, [templateHtml, offerData, formData, formatMoney]);
+
+  return (
+    <div className="prose prose-blue prose-sm max-w-none agreement-tiptap-content">
+      <style>{`
+        .agreement-tiptap-content h1, 
+        .agreement-tiptap-content h2, 
+        .agreement-tiptap-content h3 { 
+          font-weight: 900 !important; 
+          color: #0f172a !important;
+          margin-top: 1.5em;
+          margin-bottom: 0.5em;
+        }
+        .agreement-tiptap-content p { margin-bottom: 1em; color: #334155; line-height: 1.7; }
+        .agreement-tiptap-content .document-image { margin: 2em auto; display: block; }
+      `}</style>
+      
+      {sections.map((html, i) => (
+        <React.Fragment key={i}>
+          <div dangerouslySetInnerHTML={{ __html: html }} />
+          {i === 0 && sections.length > 1 && (
+            <div className="not-prose my-10 border-2 border-dashed border-gray-100 rounded-2xl p-6 bg-gray-50/30">
+              <ClauseBucketsSection 
+                clauseBuckets={clauseBuckets}
+                clausesById={clausesById}
+                hoveredBucketKey={hoveredBucketKey}
+                setHoveredBucketKey={setHoveredBucketKey}
+                handleDropToBucket={handleDropToBucket}
+                handleDragStart={handleDragStart}
+                moveBucketClause={moveBucketClause}
+                handleRemoveClause={handleRemoveClause}
+                addClauseBucket={addClauseBucket}
+                isClauseLimitFinite={isClauseLimitFinite}
+                clauseLimit={clauseLimit}
+                offerData={offerData}
+                formData={formData}
+                formatMoney={formatMoney}
+              />
+            </div>
+          )}
+        </React.Fragment>
+      ))}
+
+      {sections.length === 1 && (
+        <div className="not-prose mt-12 pt-12 border-t border-gray-100">
+          <div className="mb-6 flex flex-col items-center opacity-30">
+            <ScrollText className="text-gray-400" size={32} />
+            <p className="text-[10px] font-black uppercase tracking-[0.3em] mt-2">End of Fixed Content</p>
+          </div>
+          <ClauseBucketsSection 
+            clauseBuckets={clauseBuckets}
+            clausesById={clausesById}
+            hoveredBucketKey={hoveredBucketKey}
+            setHoveredBucketKey={setHoveredBucketKey}
+            handleDropToBucket={handleDropToBucket}
+            handleDragStart={handleDragStart}
+            moveBucketClause={moveBucketClause}
+            handleRemoveClause={handleRemoveClause}
+            addClauseBucket={addClauseBucket}
+            isClauseLimitFinite={isClauseLimitFinite}
+            clauseLimit={clauseLimit}
+            offerData={offerData}
+            formData={formData}
+            formatMoney={formatMoney}
+          />
+        </div>
+      )}
+    </div>
+  );
+}
 
 function AgreementComposer({
   selectedClauseIds,
@@ -422,6 +640,8 @@ function AgreementComposer({
   saving = false,
   onCancel = () => {},
   pdfSelection = null,
+  templateHtml = '',
+  loadingTemplate = false,
 }) {
   const { formatMoney } = useCurrency();
   const [clauses, setClauses] = useState([]);
@@ -627,140 +847,116 @@ function AgreementComposer({
             </span>
           </div>
 
-          <div className="rounded-xl border border-[#d9ddd9] bg-[#f3f5f4] p-4 sm:p-6 shadow-sm">
-            <div className="mx-auto w-full max-w-[850px] bg-white border border-[#d7d7d7] shadow-[0_18px_38px_rgba(15,23,42,0.12)] px-8 sm:px-12 py-10 sm:py-12 space-y-6" style={{ fontFamily: 'Georgia, Times New Roman, serif' }}>
-              <div className="text-center border-b border-gray-200 pb-6">
-                <p className="text-[11px] tracking-[0.22em] text-gray-500 uppercase">Residential Lease Contract</p>
-                <h3 className="mt-2 text-2xl font-semibold text-gray-900">Rental Agreement</h3>
-                <p className="mt-1 text-sm text-gray-500">Draft Version - Live Preview</p>
-              </div>
-
-          <div className="rounded-md bg-white border border-gray-200 p-4">
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Permanent Section: Parties and Property</p>
-            <p className="text-sm text-gray-700"><strong>Landlord:</strong> {offerData?.landlord?.name || offerData?.property?.landlord?.name || 'Landlord'}</p>
-            <p className="text-sm text-gray-700"><strong>Tenant:</strong> {offerData?.tenant?.name || 'Tenant'}</p>
-            <p className="text-sm text-gray-700"><strong>Premises:</strong> {offerData?.property?.title || 'Property'}{offerData?.property?.address?.street ? `, ${offerData.property.address.street}, ${offerData.property.address.city}` : ''}</p>
-          </div>
-
-          <div className="rounded-md bg-white border border-gray-200 p-4">
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Permanent Section: Core Lease Terms</p>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-gray-700">
-              <p><strong>Start Date:</strong> {formData?.startDate || 'N/A'}</p>
-              <p><strong>End Date:</strong> {formData?.endDate || 'N/A'}</p>
-              <p><strong>Monthly Rent:</strong> {formatMoney(Number(formData?.rentAmount || 0))}</p>
-              <p><strong>Security Deposit:</strong> {formatMoney(Number(formData?.depositAmount || 0))}</p>
-              <p><strong>Late Fee:</strong> {formatMoney(Number(formData?.lateFeeAmount || 0))}</p>
-              <p><strong>Grace Period:</strong> {formData?.lateFeeGracePeriodDays || '0'} days</p>
-            </div>
-          </div>
-
-          <div className="rounded-md bg-white border border-gray-200 p-4">
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Permanent Section: Policies</p>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-gray-700">
-              <p><strong>Pets:</strong> {formData?.petAllowed ? 'Allowed' : 'Not allowed'}</p>
-              <p><strong>Pet Deposit:</strong> {formData?.petAllowed ? formatMoney(Number(formData?.petDeposit || 0)) : 'N/A'}</p>
-              <p><strong>Utilities Included:</strong> {formData?.utilitiesIncluded ? 'Yes' : 'No'}</p>
-              <p><strong>Utilities Details:</strong> {formData?.utilitiesIncluded ? (formData?.utilitiesDetails || 'Not specified') : 'N/A'}</p>
-              <p className="md:col-span-2"><strong>Termination Policy:</strong> {formData?.terminationPolicy || 'Default policy applies.'}</p>
-            </div>
-          </div>
-
-            <div className="flex items-center justify-between">
-              <p className="text-sm font-semibold text-gray-800">Clause Buckets</p>
-              <button
-                type="button"
-                onClick={addClauseBucket}
-                disabled={isClauseLimitFinite && clauseBuckets.length >= clauseLimit}
-                className="px-2.5 py-1 text-xs font-semibold text-blue-700 border border-blue-200 bg-blue-50 rounded-lg hover:bg-blue-100 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                Add Clause
-              </button>
-            </div>
-
-            {clauseBuckets.map((bucket, idx) => {
-              const letter = String.fromCharCode(65 + idx);
-              const clause = bucket.clauseId ? clausesById.get(bucket.clauseId) : null;
-              const isHovered = hoveredBucketKey === bucket.key;
-              return (
-                <div
-                  key={bucket.key}
-                  onDragOver={(e) => { e.preventDefault(); setHoveredBucketKey(bucket.key); }}
-                  onDragLeave={() => setHoveredBucketKey('')}
-                  onDrop={(e) => { e.preventDefault(); handleDropToBucket(bucket.key); }}
-                  className={`rounded-md border-2 p-4 transition ${isHovered ? 'border-blue-400 bg-blue-50' : 'border-dashed border-gray-300 bg-white'}`}
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <p className="text-sm font-semibold text-gray-800">{`Clause ${letter}`}</p>
-                    <span className="text-xs text-gray-400">Drop zone</span>
+          <div className="rounded-xl border border-[#d9ddd9] bg-[#f3f5f4] p-4 sm:p-6 shadow-sm min-h-[1000px]">
+            <div className="mx-auto w-full max-w-[850px] bg-white border border-[#d7d7d7] shadow-[0_18px_38px_rgba(15,23,42,0.12)] px-8 sm:px-12 py-10 sm:py-12 space-y-6 overflow-hidden" style={{ fontFamily: 'Georgia, Times New Roman, serif' }}>
+              
+              {loadingTemplate ? (
+                <div className="flex flex-col items-center justify-center py-20 gap-3 text-gray-400">
+                  <Loader2 className="animate-spin w-8 h-8" />
+                  <p className="text-sm font-medium">Loading document template...</p>
+                </div>
+              ) : templateHtml ? (
+                /* ── Template-Driven Layout ── */
+                <TemplateDocument 
+                  templateHtml={templateHtml}
+                  offerData={offerData}
+                  formData={formData}
+                  formatMoney={formatMoney}
+                  clauseBuckets={clauseBuckets}
+                  clausesById={clausesById}
+                  hoveredBucketKey={hoveredBucketKey}
+                  setHoveredBucketKey={setHoveredBucketKey}
+                  handleDropToBucket={handleDropToBucket}
+                  dragState={dragState}
+                  handleDragStart={handleDragStart}
+                  moveBucketClause={moveBucketClause}
+                  handleRemoveClause={handleRemoveClause}
+                  addClauseBucket={addClauseBucket}
+                  isClauseLimitFinite={isClauseLimitFinite}
+                  clauseLimit={clauseLimit}
+                />
+              ) : (
+                /* ── Legacy / Fallback Layout ── */
+                <div className="space-y-10">
+                  <div className="text-center border-b border-gray-200 pb-8">
+                    <p className="text-[11px] tracking-[0.25em] text-gray-400 uppercase font-bold">Residential Lease Contract</p>
+                    <h3 className="mt-4 text-3xl font-black text-gray-900 tracking-tight">Rental Agreement</h3>
+                    <p className="mt-2 text-sm text-gray-500 font-medium">Draft Version · Final Review Pending</p>
                   </div>
 
-                  {!clause && (
-                    <p className="text-xs text-gray-400 italic">Drag clauses here from the floating editor.</p>
-                  )}
+                  <div className="space-y-6">
+                    <div className="rounded-xl bg-gray-50/50 border border-gray-100 p-6">
+                      <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest mb-4">I. Parties and Property</p>
+                      <div className="space-y-2">
+                        <p className="text-sm text-gray-800">This agreement is made between <strong>{offerData?.landlord?.name || offerData?.property?.landlord?.name || 'Landlord'}</strong> and <strong>{offerData?.tenant?.name || 'Tenant'}</strong>.</p>
+                        <p className="text-sm text-gray-800">The premises are located at: <strong>{offerData?.property?.title || 'Property'}{offerData?.property?.address?.street ? `, ${offerData.property.address.street}, ${offerData.property.address.city}` : ''}</strong>.</p>
+                      </div>
+                    </div>
 
-                  {clause && (
-                    <div
-                      draggable
-                      onDragStart={() => handleDragStart(clause._id, 'bucket')}
-                      className="rounded-md border border-blue-100 bg-blue-50 p-3 cursor-grab active:cursor-grabbing"
-                    >
-                      <div className="flex items-start gap-2">
-                        <GripVertical className="w-4 h-4 text-blue-400 mt-0.5 flex-shrink-0" />
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center justify-between gap-2">
-                            <p className="text-sm font-semibold text-blue-900 truncate">{clause.title}</p>
-                            <div className="flex items-center gap-1">
-                              <button
-                                type="button"
-                                disabled={idx === 0}
-                                className="text-xs px-2 py-0.5 rounded border border-blue-200 text-blue-700 hover:bg-blue-100 disabled:opacity-40 disabled:cursor-not-allowed"
-                                onMouseDown={(e) => e.stopPropagation()}
-                                onDragStart={(e) => e.preventDefault()}
-                                onClick={(e) => { e.stopPropagation(); moveBucketClause(idx, 'up'); }}
-                              >
-                                Up
-                              </button>
-                              <button
-                                type="button"
-                                disabled={idx === clauseBuckets.length - 1}
-                                className="text-xs px-2 py-0.5 rounded border border-blue-200 text-blue-700 hover:bg-blue-100 disabled:opacity-40 disabled:cursor-not-allowed"
-                                onMouseDown={(e) => e.stopPropagation()}
-                                onDragStart={(e) => e.preventDefault()}
-                                onClick={(e) => { e.stopPropagation(); moveBucketClause(idx, 'down'); }}
-                              >
-                                Down
-                              </button>
-                              <button
-                                type="button"
-                                className="text-xs px-2 py-0.5 rounded border border-red-200 text-red-600 hover:bg-red-50"
-                                onMouseDown={(e) => e.stopPropagation()}
-                                onDragStart={(e) => e.preventDefault()}
-                                onClick={(e) => { e.stopPropagation(); handleRemoveClause(clause._id); }}
-                              >
-                                Remove
-                              </button>
-                            </div>
-                          </div>
-                          <p
-                            className="mt-2 text-xs text-gray-700 leading-relaxed whitespace-pre-line"
-                            dangerouslySetInnerHTML={{ __html: substituteVariables(clause.body, offerData, formData, formatMoney) }}
-                          />
+                    <div className="rounded-xl bg-gray-50/50 border border-gray-100 p-6">
+                      <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest mb-4">II. Core Lease Terms</p>
+                      <div className="grid grid-cols-2 gap-y-4 gap-x-8">
+                        <div>
+                          <p className="text-[10px] text-gray-400 font-bold uppercase">Start Date</p>
+                          <p className="text-sm text-gray-800 font-bold">{formData?.startDate || '—'}</p>
+                        </div>
+                        <div>
+                          <p className="text-[10px] text-gray-400 font-bold uppercase">End Date</p>
+                          <p className="text-sm text-gray-800 font-bold">{formData?.endDate || '—'}</p>
+                        </div>
+                        <div>
+                          <p className="text-[10px] text-gray-400 font-bold uppercase">Monthly Rent</p>
+                          <p className="text-sm text-gray-800 font-bold">{formatMoney(Number(formData?.rentAmount || 0))}</p>
+                        </div>
+                        <div>
+                          <p className="text-[10px] text-gray-400 font-bold uppercase">Security Deposit</p>
+                          <p className="text-sm text-gray-800 font-bold">{formatMoney(Number(formData?.depositAmount || 0))}</p>
                         </div>
                       </div>
                     </div>
-                  )}
-                </div>
-              );
-            })}
 
-              <div className="pt-3 border-t border-gray-200 text-xs text-gray-500 flex items-center justify-between">
-                <span>Generated by Rentify Agreement Studio</span>
-                <span>Page 1 (Live)</span>
-              </div>
+                    <div className="rounded-xl bg-gray-50/50 border border-gray-100 p-6">
+                      <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest mb-4">III. Standard Policies</p>
+                      <div className="grid grid-cols-2 gap-y-4 gap-x-8">
+                        <div>
+                          <p className="text-[10px] text-gray-400 font-bold uppercase">Pets</p>
+                          <p className="text-sm text-gray-800 font-bold">{formData?.petAllowed ? `Allowed (${formatMoney(Number(formData?.petDeposit || 0))} dep)` : 'Strictly Prohibited'}</p>
+                        </div>
+                        <div>
+                          <p className="text-[10px] text-gray-400 font-bold uppercase">Utilities</p>
+                          <p className="text-sm text-gray-800 font-bold">{formData?.utilitiesIncluded ? 'Landlord Paid' : 'Tenant Paid'}</p>
+                        </div>
+                      </div>
+                      <div className="mt-4 pt-4 border-t border-gray-100">
+                        <p className="text-[10px] text-gray-400 font-bold uppercase">Termination Policy</p>
+                        <p className="text-sm text-gray-800 mt-1 leading-relaxed">{formData?.terminationPolicy || 'Standard 30-day notice applies.'}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <ClauseBucketsSection 
+                    clauseBuckets={clauseBuckets}
+                    clausesById={clausesById}
+                    hoveredBucketKey={hoveredBucketKey}
+                    setHoveredBucketKey={setHoveredBucketKey}
+                    handleDropToBucket={handleDropToBucket}
+                    handleDragStart={handleDragStart}
+                    moveBucketClause={moveBucketClause}
+                    handleRemoveClause={handleRemoveClause}
+                    addClauseBucket={addClauseBucket}
+                    isClauseLimitFinite={isClauseLimitFinite}
+                    clauseLimit={clauseLimit}
+                    offerData={offerData}
+                    formData={formData}
+                    formatMoney={formatMoney}
+                  />
+                </div>
+              )}
             </div>
           </div>
         </div>
       </div>
+
 
       {showEditor && (
       <div
@@ -1098,6 +1294,8 @@ function AgreementForm() {
   const [showPDFPreview, setShowPDFPreview] = useState(false);
   const [offerData, setOfferData] = useState(null);
   const [showTemplatePicker, setShowTemplatePicker] = useState(false);
+  const [templateHtml, setTemplateHtml] = useState('');
+  const [loadingTemplate, setLoadingTemplate] = useState(false);
   const [pdfSelection, setPdfSelection] = useState(null);
   const [mounted, setMounted] = useState(false);
 
@@ -1147,6 +1345,18 @@ function AgreementForm() {
       .catch(() => { })
       .finally(() => setLoading(false));
   }, [offerId]);
+
+  useEffect(() => {
+    if (pdfSelection?.type === 'template' && pdfSelection.id) {
+      setLoadingTemplate(true);
+      api.get(`/agreement-templates/${pdfSelection.id}`)
+        .then(({ data }) => setTemplateHtml(data.html || ''))
+        .catch(() => setTemplateHtml(''))
+        .finally(() => setLoadingTemplate(false));
+    } else {
+      setTemplateHtml('');
+    }
+  }, [pdfSelection]);
 
   // ── Build the accept-offer payload (single source of truth) ────────────────
   const buildAcceptPayload = () => ({
@@ -1307,6 +1517,8 @@ function AgreementForm() {
               saving={savingClauses}
               onCancel={() => router.push('/dashboard/agreements')}
               pdfSelection={pdfSelection}
+              templateHtml={templateHtml}
+              loadingTemplate={loadingTemplate}
             />
           </div>
 

@@ -1,13 +1,22 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight, 
   Type, Heading1, Heading2, User, Landmark, Banknote, Calendar, 
-  ChevronDown, Image as ImageIcon, Sparkles, Loader2, Minus, Plus
+  ChevronDown, Image as ImageIcon, Sparkles, ScrollText, Plus
 } from 'lucide-react';
 
-const Toolbar = ({ editor, approvedClauses = [], loadingClauses = false }) => {
-  const [showClauses, setShowClauses] = useState(false);
+const Toolbar = ({ editor }) => {
   const [showFontSizes, setShowFontSizes] = useState(false);
+
+  // Dynamically load Cloudinary Upload Widget script
+  useEffect(() => {
+    if (!window.cloudinary) {
+      const script = document.createElement('script');
+      script.src = 'https://upload-widget.cloudinary.com/global/all.js';
+      script.async = true;
+      document.body.appendChild(script);
+    }
+  }, []);
 
   if (!editor) return null;
 
@@ -19,10 +28,46 @@ const Toolbar = ({ editor, approvedClauses = [], loadingClauses = false }) => {
   };
 
   const insertImage = () => {
-    const url = window.prompt('Enter Logo/Image URL:');
-    if (url) {
-      editor.chain().focus().setImage({ src: url }).run();
+    if (!window.cloudinary) {
+      const url = window.prompt('Cloudinary widget not loaded yet. Enter URL manually:');
+      if (url) editor.chain().focus().setImage({ src: url }).run();
+      return;
     }
+
+    const myWidget = window.cloudinary.createUploadWidget(
+      {
+        cloudName: 'dj4a5robb', // Derived from existing assets
+        uploadPreset: 'rentify_unsigned', // Common naming convention for this project
+        sources: ['local', 'url', 'camera'],
+        showAdvancedOptions: false,
+        cropping: true,
+        multiple: false,
+        defaultSource: 'local',
+        styles: {
+          palette: {
+            window: '#FFFFFF',
+            windowBorder: '#90A0B3',
+            tabIcon: '#0078FF',
+            menuIcons: '#5A616A',
+            textDark: '#000000',
+            textLight: '#FFFFFF',
+            link: '#0078FF',
+            action: '#FF620C',
+            inactiveTabIcon: '#0E2F5A',
+            error: '#F44235',
+            inProgress: '#0078FF',
+            complete: '#20B832',
+            sourceHover: '#E4EBF1'
+          }
+        }
+      },
+      (error, result) => {
+        if (!error && result && result.event === 'success') {
+          editor.chain().focus().setImage({ src: result.info.secure_url }).run();
+        }
+      }
+    );
+    myWidget.open();
   };
 
   const setFontSize = (size) => {
@@ -30,9 +75,8 @@ const Toolbar = ({ editor, approvedClauses = [], loadingClauses = false }) => {
     setShowFontSizes(false);
   };
 
-  const insertClause = (clause) => {
-    editor.chain().focus().insertContent(`<h2>${clause.title}</h2><p>${clause.body}</p>`).run();
-    setShowClauses(false);
+  const insertClausesSection = () => {
+    editor.chain().focus().insertContent({ type: 'clausesPlaceholder' }).run();
   };
 
   const fontSizes = ['12px', '14px', '16px', '18px', '20px', '24px', '32px'];
@@ -73,7 +117,7 @@ const Toolbar = ({ editor, approvedClauses = [], loadingClauses = false }) => {
           Size <ChevronDown size={14} />
         </button>
         {showFontSizes && (
-          <div className="absolute top-full left-0 mt-1 w-24 bg-white border border-gray-200 rounded-xl shadow-xl overflow-hidden z-[100] animate-in fade-in slide-in-from-top-2">
+          <div className="absolute top-full left-0 mt-1 w-24 bg-white border border-gray-200 rounded-xl shadow-xl overflow-hidden z-[100]">
             {fontSizes.map(size => (
               <button
                 key={size}
@@ -148,7 +192,7 @@ const Toolbar = ({ editor, approvedClauses = [], loadingClauses = false }) => {
         <button
           onClick={insertImage}
           className="p-1.5 rounded hover:bg-gray-100 text-gray-600 transition-colors"
-          title="Insert Logo"
+          title="Upload Logo (Cloudinary)"
         >
           <ImageIcon size={18} />
         </button>
@@ -159,73 +203,41 @@ const Toolbar = ({ editor, approvedClauses = [], loadingClauses = false }) => {
         <span className="text-[10px] uppercase font-bold text-gray-400">Insert Info:</span>
         <button
           onClick={() => addVariable('tenant_name', 'Tenant')}
-          className="flex items-center gap-1 text-[11px] font-bold px-2 py-1 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-all border border-blue-100 active:scale-95"
+          className="flex items-center gap-1 text-[11px] font-bold px-2 py-1 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-all border border-blue-100"
         >
           <User size={12} /> Tenant
         </button>
         <button
           onClick={() => addVariable('landlord_name', 'Landlord')}
-          className="flex items-center gap-1 text-[11px] font-bold px-2 py-1 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-all border border-blue-100 active:scale-95"
+          className="flex items-center gap-1 text-[11px] font-bold px-2 py-1 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-all border border-blue-100"
         >
           <Landmark size={12} /> Landlord
         </button>
         <button
           onClick={() => addVariable('rent_amount', 'Rent')}
-          className="flex items-center gap-1 text-[11px] font-bold px-2 py-1 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-all border border-blue-100 active:scale-95"
+          className="flex items-center gap-1 text-[11px] font-bold px-2 py-1 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-all border border-blue-100"
         >
           <Banknote size={12} /> Rent
         </button>
         <button
           onClick={() => addVariable('start_date', 'Start Date')}
-          className="flex items-center gap-1 text-[11px] font-bold px-2 py-1 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-all border border-blue-100 active:scale-95"
+          className="flex items-center gap-1 text-[11px] font-bold px-2 py-1 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-all border border-blue-100"
         >
           <Calendar size={12} /> Date
         </button>
       </div>
 
-      {/* Dynamic Clauses */}
-      <div className="relative px-2">
+      {/* Dynamic Clauses Section Placeholder */}
+      <div className="px-2">
         <button
-          onClick={() => setShowClauses(!showClauses)}
-          disabled={loadingClauses}
-          className={`flex items-center gap-2 px-4 py-1.5 text-xs font-extrabold rounded-xl transition-all shadow-sm border
-            ${showClauses ? 'bg-green-600 text-white border-green-700 shadow-green-100' : 'bg-green-50 text-green-700 border-green-100 hover:bg-green-100'}`}
+          onClick={insertClausesSection}
+          className="flex items-center gap-2 px-4 py-1.5 text-xs font-black bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-xl hover:bg-emerald-100 transition-all shadow-sm active:scale-95"
+          title="Insert the dynamic clauses zone"
         >
-          {loadingClauses ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
-          Clause Library
-          <ChevronDown size={14} className={`transition-transform duration-200 ${showClauses ? 'rotate-180' : ''}`} />
+          <ScrollText size={14} />
+          Clauses Section
+          <Plus size={10} strokeWidth={3} />
         </button>
-
-        {showClauses && (
-          <div className="absolute top-full left-0 mt-2 w-72 bg-white border border-gray-200 rounded-2xl shadow-2xl overflow-hidden z-[100] animate-in fade-in zoom-in duration-200">
-            <div className="p-3 bg-gray-50 border-b border-gray-200">
-              <h4 className="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest">Select an approved clause</h4>
-            </div>
-            <div className="max-h-80 overflow-y-auto p-2 space-y-1">
-              {approvedClauses.length > 0 ? (
-                approvedClauses.map((clause) => (
-                  <button
-                    key={clause._id || clause.id}
-                    onClick={() => insertClause(clause)}
-                    className="w-full text-left p-2.5 hover:bg-green-50 rounded-xl transition-all group"
-                  >
-                    <p className="text-xs font-bold text-gray-900 group-hover:text-green-700 transition-colors">{clause.title}</p>
-                    <p className="text-[10px] text-gray-500 line-clamp-2 mt-0.5">{clause.body}</p>
-                    {clause.category && (
-                      <span className="inline-block mt-2 px-1.5 py-0.5 bg-gray-100 text-gray-500 text-[9px] font-bold rounded uppercase">
-                        {clause.category}
-                      </span>
-                    )}
-                  </button>
-                ))
-              ) : (
-                <div className="p-8 text-center bg-gray-50 rounded-xl border border-dashed border-gray-200">
-                  <p className="text-xs text-gray-400 font-medium italic">No approved clauses found in the library.</p>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );

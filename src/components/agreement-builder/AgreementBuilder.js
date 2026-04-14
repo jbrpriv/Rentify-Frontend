@@ -12,6 +12,7 @@ import api from '@/utils/api';
 
 import { Variable } from './VariableExtension';
 import { FontSize } from './FontSizeExtension';
+import { ClausesPlaceholder } from './ClausesPlaceholder';
 import Toolbar from './Toolbar';
 import PreviewModal from './PreviewModal';
 import './builder.css';
@@ -60,6 +61,7 @@ const AgreementBuilder = ({ initialContent = '', onSave }) => {
       Color,
       Variable,
       FontSize,
+      ClausesPlaceholder,
     ],
     content: initialContent || '<h1>Rental Agreement</h1><p>Type your agreement here. Insert variables or approved clauses using the tools above.</p>',
     editorProps: {

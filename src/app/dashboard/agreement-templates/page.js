@@ -25,56 +25,6 @@ const STATUS_META = {
   rejected: { label: 'Rejected', icon: XCircle, color: '#991B1B', bg: '#FEE2E2' },
 };
 
-function ThemePickerModal({ open, themes, onClose, onPick }) {
-  if (!open) return null;
-
-  return (
-    <div className="fixed inset-0 z-50 bg-black/50 p-4 sm:p-8 flex items-center justify-center" onClick={(e) => e.target === e.currentTarget && onClose()}>
-      <div className="w-full max-w-5xl max-h-[88vh] bg-white rounded-2xl overflow-hidden border border-slate-200 shadow-2xl">
-        <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
-          <div>
-            <h2 className="text-xl font-extrabold text-slate-900">Choose Base Layout</h2>
-            <p className="text-sm text-slate-500">Pick a global theme to start your branded PDF template.</p>
-          </div>
-          <button onClick={onClose} className="text-sm font-semibold text-slate-500 hover:text-slate-700">Close</button>
-        </div>
-
-        <div className="p-6 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 overflow-y-auto max-h-[72vh]">
-          {themes.map((theme) => (
-            <div key={theme._id} className="rounded-xl border border-slate-200 bg-white p-4 hover:border-slate-400 transition">
-              <div className="flex items-center justify-between">
-                <p className="text-sm font-bold text-slate-900">{theme.name}</p>
-                {theme.isDefault && <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-900 text-white font-bold">Default</span>}
-              </div>
-              <p className="text-xs text-slate-500 mt-1 min-h-8">{theme.description || 'Global branding preset'}</p>
-
-              <div className="mt-3 flex items-center gap-2">
-                <span className="w-5 h-5 rounded-full border border-slate-200" style={{ background: theme.primaryColor }} />
-                <span className="w-5 h-5 rounded-full border border-slate-200" style={{ background: theme.accentColor }} />
-                <span className="w-5 h-5 rounded-full border border-slate-200" style={{ background: theme.backgroundColor }} />
-              </div>
-
-              <div className="mt-4 h-24 rounded-lg border border-slate-200 p-3" style={{ background: theme.backgroundColor || '#fff' }}>
-                <div className="h-2.5 rounded-full" style={{ background: theme.primaryColor }} />
-                <div className="h-2 rounded-full mt-2 w-3/4" style={{ background: theme.accentColor }} />
-                <div className="h-2 rounded-full mt-2 w-1/2 bg-slate-200" />
-              </div>
-
-              <button
-                onClick={() => onPick(theme)}
-                className="mt-4 w-full rounded-lg px-3 py-2 text-sm font-bold border"
-                style={{ borderColor: 'var(--brand-primary)', color: 'white', background: 'var(--brand-primary)' }}
-              >
-                Choose
-              </button>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
-
 function StatusBadge({ status }) {
   const meta = STATUS_META[status] || STATUS_META.pending;
   const Icon = meta.icon;
@@ -90,14 +40,13 @@ export default function AgreementTemplatesPage() {
   const router = useRouter();
   const { user } = useUser();
   const { toast } = useToast();
-  const { themes, cssVars } = useGlobalPdfTheme();
+  const { cssVars } = useGlobalPdfTheme();
   const normalizedTier = String(user?.subscriptionTier || '').trim().toLowerCase();
   const tier = ['free', 'pro', 'enterprise'].includes(normalizedTier) ? normalizedTier : 'free';
   const canAccessTemplateStudio = user?.role === 'admin' || (user?.role === 'landlord' && tier === 'enterprise');
 
   const [templates, setTemplates] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [showThemePicker, setShowThemePicker] = useState(false);
   const [deleting, setDeleting] = useState('');
 
   const fetchTemplates = useCallback(async () => {
@@ -170,12 +119,6 @@ export default function AgreementTemplatesPage() {
 
   return (
     <div style={cssVars} className="max-w-6xl mx-auto pb-10">
-      <ThemePickerModal
-        open={showThemePicker}
-        themes={themes}
-        onClose={() => setShowThemePicker(false)}
-        onPick={(theme) => router.push(`/dashboard/agreement-templates/new?themeId=${theme._id}`)}
-      />
 
       <div className="rounded-2xl p-6 border mb-6" style={{ borderColor: 'var(--brand-border)', background: 'linear-gradient(145deg, var(--brand-bg), #ffffff)' }}>
         <div className="flex flex-wrap gap-4 items-end justify-between">
@@ -185,7 +128,7 @@ export default function AgreementTemplatesPage() {
             <p className="text-sm text-slate-600 mt-1">Create branded agreement PDFs using global base layouts, then submit for admin approval.</p>
           </div>
           <button
-            onClick={() => setShowThemePicker(true)}
+            onClick={() => router.push('/dashboard/agreement-templates/new')}
             className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold border"
             style={{ background: 'var(--brand-primary)', color: 'white', borderColor: 'var(--brand-primary)' }}
           >
@@ -202,7 +145,7 @@ export default function AgreementTemplatesPage() {
           <p className="text-xl font-bold text-slate-800">No templates yet</p>
           <p className="text-sm text-slate-500 mt-1">Start by choosing a base layout and customizing colors, typography, and clause language.</p>
           <button
-            onClick={() => setShowThemePicker(true)}
+            onClick={() => router.push('/dashboard/agreement-templates/new')}
             className="mt-4 px-4 py-2 rounded-lg text-sm font-bold border"
             style={{ borderColor: 'var(--brand-primary)', color: 'white', background: 'var(--brand-primary)' }}
           >
