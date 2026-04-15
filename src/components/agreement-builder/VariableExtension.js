@@ -58,7 +58,9 @@ export const Variable = Node.create({
   },
 
   renderHTML({ HTMLAttributes }) {
-    return ['span', mergeAttributes(HTMLAttributes, { 'data-type': 'variable' }), 0];
+    // atom: true means no children — do NOT include the trailing 0 (child slot).
+    // We also bake data-type in here so parseHTML can reliably identify these spans.
+    return ['span', mergeAttributes({ 'data-type': 'variable' }, HTMLAttributes)];
   },
 
   addNodeView() {
