@@ -49,7 +49,7 @@ const PreviewModal = ({ isOpen, onClose, html }) => {
       const variables = doc.querySelectorAll('span[data-type="variable"]');
       variables.forEach(v => {
         const name = v.getAttribute('data-name');
-        const replacement = samples[name] || `{${v.innerText}}`;
+        const replacement = samples[name] || `[${name}]`;
         const span = doc.createElement('strong');
         span.className = 'preview-variable';
         span.style.color = name?.includes('clause') ? '#15803d' : '#1e40af';

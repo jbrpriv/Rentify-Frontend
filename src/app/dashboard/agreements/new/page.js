@@ -250,7 +250,34 @@ function substituteVariables(text, offer, form, formatMoney) {
   const termPolicy = form?.terminationPolicy || '';
 
   const rules = {
-    // camelCase tokens (used by the admin clause builder)
+    // snake_case (Primary standard)
+    '{{tenant_name}}': offer?.tenant?.name || '[Tenant Name]',
+    '{{landlord_name}}': offer?.landlord?.name || offer?.property?.landlord?.name || '[Landlord Name]',
+    '{{property_title}}': offer?.property?.title || '[Property Title]',
+    '{{property_address}}': offer?.property?.address ? `${offer.property.address.street}, ${offer.property.address.city}` : '[Property Address]',
+    '{{rent_amount}}': form?.rentAmount ? formatMoney(Number(form.rentAmount)) : '[Rent Amount]',
+    '{{monthly_rent}}': form?.rentAmount ? formatMoney(Number(form.rentAmount)) : '[Monthly Rent]',
+    '{{security_deposit}}': form?.depositAmount ? formatMoney(Number(form.depositAmount)) : '[Security Deposit]',
+    '{{deposit_amount}}': form?.depositAmount ? formatMoney(Number(form.depositAmount)) : '[Deposit Amount]',
+    '{{total_move_in}}': (form?.rentAmount && form?.depositAmount) ? formatMoney(Number(form.rentAmount) + Number(form.depositAmount)) : '[Total Move-in]',
+    '{{maintenance_fee}}': form?.maintenanceFee ? formatMoney(Number(form.maintenanceFee)) : '[Maintenance Fee]',
+    '{{late_fee}}': form?.lateFeeAmount ? formatMoney(Number(form.lateFeeAmount)) : '[Late Fee]',
+    '{{late_fee_amount}}': form?.lateFeeAmount ? formatMoney(Number(form.lateFeeAmount)) : '[Late Fee Amount]',
+    '{{late_fee_grace_days}}': form?.lateFeeGracePeriodDays ? `${form.lateFeeGracePeriodDays} days` : '[Grace Period]',
+    '{{start_date}}': form?.startDate ? new Date(form.startDate).toLocaleDateString() : '[Start Date]',
+    '{{end_date}}': form?.endDate ? new Date(form.endDate).toLocaleDateString() : '[End Date]',
+    '{{duration_months}}': form?.leaseDurationMonths || '[Duration]',
+    '{{utilities_included}}': utilities,
+    '{{utilities}}': utilities,
+    '{{utilities_details}}': utilDetails || '[Utilities Details]',
+    '{{pet_allowed}}': petLabel,
+    '{{pet_policy}}': petLabel,
+    '{{pet_deposit}}': petDeposit,
+    '{{termination_policy}}': termPolicy || '[Termination Policy]',
+    '{{current_date}}': new Date().toLocaleDateString(),
+    '{{agreement_id}}': '[Draft ID]',
+
+    // camelCase (Legacy/Admin support)
     '{{tenantName}}': offer?.tenant?.name || '[Tenant Name]',
     '{{landlordName}}': offer?.landlord?.name || offer?.property?.landlord?.name || '[Landlord Name]',
     '{{propertyTitle}}': offer?.property?.title || '[Property Title]',
@@ -263,20 +290,10 @@ function substituteVariables(text, offer, form, formatMoney) {
     '{{lateFeeGraceDays}}': form?.lateFeeGracePeriodDays ? `${form.lateFeeGracePeriodDays} days` : '[Grace Period]',
     '{{petPolicy}}': petLabel,
     '{{petDeposit}}': petDeposit,
-    '{{utilities}}': utilities,
     '{{utilitiesDetails}}': utilDetails || '[Utilities Details]',
     '{{terminationPolicy}}': termPolicy || '[Termination Policy]',
     '{{currentDate}}': new Date().toLocaleDateString(),
-    // snake_case tokens (legacy)
-    '{{tenant_name}}': offer?.tenant?.name || '[Tenant Name]',
-    '{{landlord_name}}': offer?.landlord?.name || offer?.property?.landlord?.name || '[Landlord Name]',
-    '{{property_address}}': offer?.property?.address ? `${offer.property.address.street}, ${offer.property.address.city}` : '[Property Address]',
-    '{{start_date}}': form?.startDate ? new Date(form.startDate).toLocaleDateString() : '[Start Date]',
-    '{{end_date}}': form?.endDate ? new Date(form.endDate).toLocaleDateString() : '[End Date]',
-    '{{rent_amount}}': form?.rentAmount ? formatMoney(Number(form.rentAmount)) : '[Rent Amount]',
-    '{{deposit_amount}}': form?.depositAmount ? formatMoney(Number(form.depositAmount)) : '[Deposit Amount]',
-    '{{late_fee_amount}}': form?.lateFeeAmount ? formatMoney(Number(form.lateFeeAmount)) : '[Late Fee]',
-    '{{grace_period}}': form?.lateFeeGracePeriodDays ? `${form.lateFeeGracePeriodDays} days` : '[Grace Period]',
+    '{{agreementId}}': '[Draft ID]',
   };
 
   for (const [key, value] of Object.entries(rules)) {
@@ -440,20 +457,54 @@ function TemplateDocument({
       // 1. Replace Tiptap Variables
       const variables = doc.querySelectorAll('span[data-type="variable"]');
       const samples = {
+        // snake_case
         tenant_name: offerData?.tenant?.name || '[Tenant Name]',
         landlord_name: offerData?.landlord?.name || offerData?.property?.landlord?.name || '[Landlord Name]',
-        rent_amount: formData?.rentAmount ? formatMoney(Number(formData.rentAmount)) : '[Rent Amount]',
-        monthly_rent: formData?.rentAmount ? formatMoney(Number(formData.rentAmount)) : '[Rent Amount]',
-        start_date: formData?.startDate || '[Start Date]',
-        lease_end_date: formData?.endDate || '[End Date]',
-        security_deposit: formData?.depositAmount ? formatMoney(Number(formData.depositAmount)) : '[Security Deposit]',
         property_title: offerData?.property?.title || '[Property Title]',
         property_address: offerData?.property?.address ? `${offerData.property.address.street}, ${offerData.property.address.city}` : '[Property Address]',
+        rent_amount: formData?.rentAmount ? formatMoney(Number(formData.rentAmount)) : '[Rent Amount]',
+        monthly_rent: formData?.rentAmount ? formatMoney(Number(formData.rentAmount)) : '[Monthly Rent]',
+        security_deposit: formData?.depositAmount ? formatMoney(Number(formData.depositAmount)) : '[Security Deposit]',
+        deposit_amount: formData?.depositAmount ? formatMoney(Number(formData.depositAmount)) : '[Deposit Amount]',
+        total_move_in: (formData?.rentAmount && formData?.depositAmount) ? formatMoney(Number(formData.rentAmount) + Number(formData.depositAmount)) : '[Total Move-in]',
+        maintenance_fee: formData?.maintenanceFee ? formatMoney(Number(formData.maintenanceFee)) : '[Maintenance Fee]',
+        late_fee: formData?.lateFeeAmount ? formatMoney(Number(formData.lateFeeAmount)) : '[Late Fee]',
+        late_fee_amount: formData?.lateFeeAmount ? formatMoney(Number(formData.lateFeeAmount)) : '[Late Fee Amount]',
+        late_fee_grace_days: formData?.lateFeeGracePeriodDays ? `${formData.lateFeeGracePeriodDays} days` : '[Grace Period]',
+        start_date: formData?.startDate || '[Start Date]',
+        end_date: formData?.endDate || '[End Date]',
+        duration_months: formData?.leaseDurationMonths || '[Duration]',
+        utilities_included: formData?.utilitiesIncluded ? 'Included' : 'Not Included',
+        utilities: formData?.utilitiesIncluded ? 'Included' : 'Not Included',
+        utilities_details: formData?.utilitiesDetails || '[Utilities Details]',
+        pet_allowed: formData?.petAllowed ? 'Allowed' : 'Not Allowed',
+        pet_policy: formData?.petAllowed ? 'Allowed' : 'Not Allowed',
+        pet_deposit: formData?.petDeposit ? formatMoney(Number(formData.petDeposit)) : '[Pet Deposit]',
+        termination_policy: formData?.terminationPolicy || '[Termination Policy]',
+        current_date: new Date().toLocaleDateString(),
+        agreement_id: '[Draft ID]',
+
+        // camelCase aliases
+        tenantName: offerData?.tenant?.name || '[Tenant Name]',
+        landlordName: offerData?.landlord?.name || offerData?.property?.landlord?.name || '[Landlord Name]',
+        propertyTitle: offerData?.property?.title || '[Property Title]',
+        propertyAddress: offerData?.property?.address ? `${offerData.property.address.street}, ${offerData.property.address.city}` : '[Property Address]',
+        rentAmount: formData?.rentAmount ? formatMoney(Number(formData.rentAmount)) : '[Rent Amount]',
+        depositAmount: formData?.depositAmount ? formatMoney(Number(formData.depositAmount)) : '[Deposit Amount]',
+        startDate: formData?.startDate || '[Start Date]',
+        endDate: formData?.endDate || '[End Date]',
+        lease_end_date: formData?.endDate || '[End Date]',
+        leaseDuration: formData?.leaseDurationMonths || '[Duration]',
+        maintenanceFee: formData?.maintenanceFee ? formatMoney(Number(formData.maintenanceFee)) : '[Maintenance Fee]',
+        lateFeeAmount: formData?.lateFeeAmount ? formatMoney(Number(formData.lateFeeAmount)) : '[Late Fee]',
+        lateFeeGraceDays: formData?.lateFeeGracePeriodDays ? `${formData.lateFeeGracePeriodDays} days` : '[Grace Period]',
+        currentDate: new Date().toLocaleDateString(),
+        agreementId: '[Draft ID]',
       };
 
       variables.forEach(v => {
         const name = v.getAttribute('data-name');
-        const replacement = samples[name] || `{${v.innerText}}`;
+        const replacement = samples[name] || `[${name}]`;
         const span = doc.createElement('strong');
         span.className = 'text-blue-700 font-extrabold bg-blue-50 px-1 rounded';
         span.innerText = replacement;
