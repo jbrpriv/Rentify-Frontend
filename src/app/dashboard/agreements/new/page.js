@@ -1211,6 +1211,7 @@ function AgreementForm() {
   const canUseAgreementTemplates = tier === 'enterprise';
   const clauseLimit = tier === 'free' ? 2 : Number.POSITIVE_INFINITY;
   const canUseClauses = tier !== 'free'; // Pro + Enterprise can drag-and-drop clauses
+  const canSelectPdfTheme = tier === 'enterprise';
 
   const [loading, setLoading] = useState(false);
   const [formErrors, setFormErrors] = useState({});
