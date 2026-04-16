@@ -1254,7 +1254,7 @@ function AgreementForm() {
     setLoading(true);
     api.get(`/offers/${offerId}`)
       .then(({ data }) => {
-        const lastRound = data.history[data.history.length - 1];
+        const lastRound = Array.isArray(data.history) && data.history.length ? data.history[data.history.length - 1] : null;
         const start = new Date();
         const end = new Date(start);
         end.setMonth(end.getMonth() + (lastRound?.leaseDurationMonths || 12));
@@ -1433,6 +1433,7 @@ function AgreementForm() {
       {offerId && (
         <>
           <div className="mb-8">
+            <LocalErrorBoundary>
             <AgreementComposer
               selectedClauseIds={selectedClauseIds}
               onReorder={handleReorderClauses}
@@ -1461,6 +1462,7 @@ function AgreementForm() {
               templateHtml={templateHtml}
               loadingTemplate={loadingTemplate}
             />
+            </LocalErrorBoundary>
           </div>
 
           {showTemplatePicker && (
@@ -1490,4 +1492,36 @@ export default function Page() {
       <AgreementForm />
     </Suspense>
   );
+}
+
+// Local Error Boundary to catch render/runtime errors inside the composer
+class LocalErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { error: null };
+  }
+
+  static getDerivedStateFromError(error) {
+    return { error };
+  }
+
+  componentDidCatch(error, info) {
+    // Log details to console so the stack is available in client logs
+    console.error('[LocalErrorBoundary] Caught error in Agreement composer', error, info);
+  }
+
+  render() {
+    if (this.state.error) {
+      return (
+        <div className="p-6 bg-red-50 border border-red-100 rounded-xl text-sm text-red-700">
+          <div className="font-bold mb-2">An error occurred while rendering the Agreement editor.</div>
+          <div className="mb-3">The error has been logged to the browser console for debugging.</div>
+          <div className="flex items-center gap-2">
+            <button onClick={() => window.location.reload()} className="px-3 py-1 bg-white border rounded">Reload page</button>
+          </div>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
 }
