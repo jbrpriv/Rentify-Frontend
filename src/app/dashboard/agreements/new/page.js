@@ -123,25 +123,6 @@ function TemplatePicker({ onApply, onClose, canUseTemplates = true }) {
           </button>
         </div>
 
-        <div className="px-5 py-3 border-b bg-white flex items-center gap-2">
-          {effectiveCanUseTemplates && (
-            <button
-              type="button"
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50"
-      onClick={e => e.target === e.currentTarget && onClose()}
-    >
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[84vh] flex flex-col overflow-hidden">
-        <div className="flex items-center justify-between px-5 py-4 border-b bg-gray-50">
-          <div className="flex items-center gap-2 font-bold text-gray-800">
-            <LayoutTemplate className="w-5 h-5 text-blue-600" />
-            My Agreement Templates
-          </div>
-          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-gray-200 transition text-gray-500">
-            <X className="w-5 h-5" />
-          </button>
-        </div>
-
         {!canUseTemplates && (
           <div className="px-5 py-2 bg-amber-50 border-b border-amber-200 text-[11px] text-amber-800">
             Custom agreement templates are available on the Enterprise plan only.
