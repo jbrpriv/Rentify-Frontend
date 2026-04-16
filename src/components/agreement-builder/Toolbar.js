@@ -102,10 +102,12 @@ const Toolbar = ({ editor, templateType = 'agreement' }) => {
     {
       label: 'Financials',
       vars: [
-        { id: 'monthly_rent', label: 'Monthly Rent', icon: Wallet },
+        { id: 'rent_amount', label: 'Monthly Rent', icon: Wallet },
         { id: 'security_deposit', label: 'Security Deposit', icon: Banknote },
+        { id: 'total_move_in', label: 'Total Move-in Cost', icon: Landmark },
         { id: 'maintenance_fee', label: 'Maintenance Fee', icon: Hash },
         { id: 'late_fee', label: 'Late Payment Fee', icon: Clock },
+        { id: 'late_fee_grace_days', label: 'Grace Period (Days)', icon: Clock },
       ]
     },
     {
@@ -113,10 +115,18 @@ const Toolbar = ({ editor, templateType = 'agreement' }) => {
       vars: [
         { id: 'start_date', label: 'Lease Start Date', icon: Calendar },
         { id: 'end_date', label: 'Lease End Date', icon: Calendar },
-        { id: 'lease_duration', label: 'Duration (months)', icon: Clock },
+        { id: 'duration_months', label: 'Duration (months)', icon: Clock },
       ]
     },
-    // 'Other' group intentionally omitted (witness/name & CNIC removed)
+    {
+      label: 'Policies',
+      vars: [
+        { id: 'utilities_included', label: 'Utilities Included?', icon: Sparkles },
+        { id: 'pet_allowed', label: 'Pets Allowed?', icon: Sparkles },
+        { id: 'pet_deposit', label: 'Pet Deposit', icon: Banknote },
+        { id: 'termination_policy', label: 'Termination Notice', icon: ScrollText },
+      ]
+    },
   ];
 
   const receiptVariableGroups = [

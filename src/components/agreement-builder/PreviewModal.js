@@ -3,13 +3,38 @@ import { X, ExternalLink, ShieldCheck, ScrollText } from 'lucide-react';
 
 const PreviewModal = ({ isOpen, onClose, html }) => {
   const samples = useMemo(() => ({
-    tenant_name: 'Ali',
-    landlord_name: 'Sara',
-    rent_amount: '50,000 PKR',
-    start_date: 'April 14, 2026',
+    // Parties
+    tenant_name: 'Abdul Jabbar',
+    landlord_name: 'Sara Landlord',
+    // Property
+    property_title: 'Sara Seed Property 11 - Studio',
+    property_address: '464 Business District Road, Rawalpindi',
+    // Financials
+    rent_amount: '34,000 PKR',
+    monthly_rent: '34,000 PKR',
+    security_deposit: '3,400 PKR',
+    deposit_amount: '3,400 PKR',
+    total_move_in: '37,400 PKR',
+    maintenance_fee: '1,500 PKR',
+    late_fee: '500 PKR',
+    late_fee_amount: '500 PKR',
+    late_fee_grace_days: '5 days',
+    // Term
+    start_date: 'April 16, 2026',
+    end_date: 'April 16, 2027',
+    duration_months: '12',
+    // Policies
+    utilities_included: 'Included',
+    pet_allowed: 'Allowed',
+    pet_deposit: '5,000 PKR',
+    termination_policy: '30-day written notice required.',
+    // System
+    current_date: new Date().toLocaleDateString(),
+    agreement_id: 'AGR-77421-B',
+    // Legacy Clauses (Builder support)
     maintenance_clause: 'The Tenant shall keep the property in clean and habitable condition throughout the tenancy.',
     subletting_clause: 'The Tenant shall not sublet or assign the property without prior written consent from the Landlord.',
-    deposit_clause: 'A security deposit of 50,000 PKR is required and will be held for the duration of the lease.',
+    deposit_clause: 'A security deposit is required and will be held for the duration of the lease.',
     termination_clause: 'Either party may terminate this agreement with 30 days prior written notice.'
   }), []);
 
