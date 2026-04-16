@@ -18,7 +18,7 @@ import Toolbar from './Toolbar';
 import PreviewModal from './PreviewModal';
 import './builder.css';
 
-const AgreementBuilder = ({ initialContent = '', onSave, isSaving = false }) => {
+const AgreementBuilder = ({ initialContent = '', onSave, isSaving = false, templateType = 'agreement' }) => {
   const [showPreview, setShowPreview] = useState(false);
   const [approvedClauses, setApprovedClauses] = useState([]);
   const [loadingClauses, setLoadingClauses] = useState(false);
@@ -153,7 +153,7 @@ const AgreementBuilder = ({ initialContent = '', onSave, isSaving = false }) => 
       </div>
 
       {/* Toolbar */}
-      <Toolbar editor={editor} approvedClauses={approvedClauses} loadingClauses={loadingClauses} />
+      <Toolbar editor={editor} approvedClauses={approvedClauses} loadingClauses={loadingClauses} templateType={templateType} />
 
       {/* Editor Main Area */}
       <div className="flex-1 overflow-y-auto document-container">

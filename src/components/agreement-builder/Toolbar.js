@@ -6,7 +6,7 @@ import {
   MapPin, Home, ShieldCheck, Wallet, Clock, Users, Hash
 } from 'lucide-react';
 
-const Toolbar = ({ editor }) => {
+const Toolbar = ({ editor, templateType = 'agreement' }) => {
   const [showFontSizes, setShowFontSizes] = useState(false);
   const [showVariables, setShowVariables] = useState(false);
 
@@ -84,7 +84,7 @@ const Toolbar = ({ editor }) => {
 
   const fontSizes = ['12px', '14px', '16px', '18px', '20px', '24px', '32px', '48px'];
 
-  const variableGroups = [
+  const agreementVariableGroups = [
     {
       label: 'Main Parties',
       vars: [
@@ -126,6 +126,31 @@ const Toolbar = ({ editor }) => {
       ]
     }
   ];
+
+  const receiptVariableGroups = [
+    {
+      label: 'Receipt Info',
+      vars: [
+        { id: 'receipt_number', label: 'Receipt No.', icon: Hash },
+        { id: 'payment_date', label: 'Payment Date', icon: Calendar },
+        { id: 'transaction_id', label: 'Transaction ID', icon: Hash },
+        { id: 'payment_method', label: 'Payment Method', icon: Banknote },
+        { id: 'paid_amount', label: 'Paid Amount', icon: Wallet },
+        { id: 'period_covered', label: 'Period Covered', icon: Calendar },
+      ],
+    },
+    {
+      label: 'Tenant & Property',
+      vars: [
+        { id: 'tenant_name', label: 'Tenant Name', icon: User },
+        { id: 'tenant_email', label: 'Tenant Email', icon: User },
+        { id: 'property_title', label: 'Property Title', icon: Home },
+        { id: 'property_address', label: 'Full Address', icon: MapPin },
+      ]
+    }
+  ];
+
+  const variableGroups = templateType === 'receipt' ? receiptVariableGroups : agreementVariableGroups;
 
   return (
     <div className="bg-white border-b border-gray-200 p-2 flex flex-wrap items-center gap-1 sticky top-0 z-50">
@@ -289,6 +314,7 @@ const Toolbar = ({ editor }) => {
       </div>
 
       {/* Dynamic Clauses Section Placeholder */}
+      {templateType !== 'receipt' && (
       <div className="px-2">
         <button
           onClick={insertClausesSection}
@@ -300,6 +326,7 @@ const Toolbar = ({ editor }) => {
           <Plus size={10} strokeWidth={3} />
         </button>
       </div>
+      )}
     </div>
   );
 };

@@ -83,55 +83,28 @@ function FlowTracker({ offerData }) {
 
 
 // ─── Template Picker Modal ────────────────────────────────────────────────────
-function TemplatePicker({ onApply, onClose, canUseTemplates = true, canUseThemes = true }) {
+function TemplatePicker({ onApply, onClose, canUseTemplates = true }) {
   const [templates, setTemplates] = useState([]);
-  const [themes, setThemes] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [serverCanUseTemplates, setServerCanUseTemplates] = useState(Boolean(canUseTemplates));
-  const [serverCanUseThemes, setServerCanUseThemes] = useState(Boolean(canUseThemes));
-  const [activeTab, setActiveTab] = useState('themes');
   const [applying, setApplying] = useState(null);
-
-  const effectiveCanUseTemplates = Boolean(canUseTemplates) && Boolean(serverCanUseTemplates);
-  const effectiveCanUseThemes = Boolean(canUseThemes) && Boolean(serverCanUseThemes);
-
-  useEffect(() => {
-    setActiveTab(effectiveCanUseTemplates ? 'templates' : 'themes');
-  }, [effectiveCanUseTemplates]);
 
   useEffect(() => {
     api.get('/agreement-templates/available')
       .then(({ data }) => {
         setTemplates(Array.isArray(data?.templates) ? data.templates : []);
-        setThemes(Array.isArray(data?.themes) ? data.themes : []);
-
-        const capability = Boolean(data?.capabilities?.canUseAgreementTemplates);
-        setServerCanUseTemplates(capability);
-        const themeCapability = Boolean(data?.capabilities?.canSelectPdfThemes);
-        setServerCanUseThemes(themeCapability);
       })
-      .catch(() => {
-        setTemplates([]);
-        setThemes([]);
-        setServerCanUseTemplates(false);
-        setServerCanUseThemes(false);
-      })
+      .catch(() => setTemplates([]))
       .finally(() => setLoading(false));
   }, []);
 
   const handleSelectTemplate = async (tpl) => {
-    if (!effectiveCanUseTemplates) return;
+    if (!canUseTemplates) return;
     setApplying(tpl._id);
     try {
       await api.post(`/agreement-templates/${tpl._id}/use`);
     } catch { }
     onApply({ type: 'template', id: tpl._id, name: tpl.name });
     setApplying(null);
-  };
-
-  const handleSelectTheme = (theme) => {
-    if (!effectiveCanUseThemes) return;
-    onApply({ type: 'theme', id: theme._id, name: theme.name });
   };
 
   return (
@@ -154,48 +127,41 @@ function TemplatePicker({ onApply, onClose, canUseTemplates = true, canUseThemes
           {effectiveCanUseTemplates && (
             <button
               type="button"
-              onClick={() => setActiveTab('templates')}
-              className={`px-3 py-1.5 rounded-full text-xs font-semibold border ${activeTab === 'templates' ? 'bg-blue-600 text-white border-blue-600' : 'border-gray-300 text-gray-600'}`}
-            >
-              My Templates ({templates.length})
-            </button>
-          )}
-          <button
-            type="button"
-            onClick={() => setActiveTab('themes')}
-            disabled={!effectiveCanUseThemes}
-            className={`px-3 py-1.5 rounded-full text-xs font-semibold border ${activeTab === 'themes' ? 'bg-blue-600 text-white border-blue-600' : 'border-gray-300 text-gray-600'} ${!effectiveCanUseThemes ? 'opacity-50 cursor-not-allowed' : ''}`}
-          >
-            Default Themes ({themes.length})
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50"
+      onClick={e => e.target === e.currentTarget && onClose()}
+    >
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[84vh] flex flex-col overflow-hidden">
+        <div className="flex items-center justify-between px-5 py-4 border-b bg-gray-50">
+          <div className="flex items-center gap-2 font-bold text-gray-800">
+            <LayoutTemplate className="w-5 h-5 text-blue-600" />
+            My Agreement Templates
+          </div>
+          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-gray-200 transition text-gray-500">
+            <X className="w-5 h-5" />
           </button>
         </div>
 
-        {!effectiveCanUseTemplates && effectiveCanUseThemes && (
+        {!canUseTemplates && (
           <div className="px-5 py-2 bg-amber-50 border-b border-amber-200 text-[11px] text-amber-800">
-            Agreement templates during drafting are available on Enterprise only. Your plan can choose from these default PDF themes.
-          </div>
-        )}
-
-        {!effectiveCanUseTemplates && !effectiveCanUseThemes && (
-          <div className="px-5 py-2 bg-amber-50 border-b border-amber-200 text-[11px] text-amber-800">
-            Pro and Free tiers use the admin global default PDF theme during drafting.
+            Custom agreement templates are available on the Enterprise plan only.
           </div>
         )}
 
         <div className="flex-1 overflow-y-auto p-4 space-y-3">
           {loading && (
             <div className="flex items-center justify-center py-10 gap-2 text-gray-400">
-              <Loader2 className="animate-spin w-5 h-5" /> Loading choices...
+              <Loader2 className="animate-spin w-5 h-5" /> Loading templates...
             </div>
           )}
 
-          {!loading && activeTab === 'templates' && templates.length === 0 && (
+          {!loading && templates.length === 0 && (
             <p className="text-sm text-gray-400 text-center py-8 italic">
               No approved personal templates available yet.
             </p>
           )}
 
-          {!loading && activeTab === 'templates' && templates.map(tpl => (
+          {!loading && templates.map(tpl => (
             <div key={tpl._id} className="border border-gray-200 rounded-xl p-4 hover:border-blue-300 hover:bg-blue-50/30 transition">
               <div className="flex items-start justify-between gap-3">
                 <div className="flex-1 min-w-0">
@@ -203,7 +169,6 @@ function TemplatePicker({ onApply, onClose, canUseTemplates = true, canUseThemes
                   {tpl.description && (
                     <p className="text-xs text-gray-500 mt-0.5 line-clamp-2">{tpl.description}</p>
                   )}
-                  <p className="text-xs text-blue-600 mt-1">Base: {tpl.baseTheme?.name || 'Theme'} </p>
                 </div>
                 <button
                   type="button"
@@ -219,40 +184,11 @@ function TemplatePicker({ onApply, onClose, canUseTemplates = true, canUseThemes
               </div>
             </div>
           ))}
-
-          {!loading && activeTab === 'themes' && !effectiveCanUseThemes && (
-            <p className="text-sm text-gray-400 text-center py-8 italic">
-              PDF theme selection is available on the Enterprise plan only.
-            </p>
-          )}
-
-          {!loading && activeTab === 'themes' && effectiveCanUseThemes && themes.map(theme => (
-            <div key={theme._id} className="border border-gray-200 rounded-xl p-4 hover:border-blue-300 hover:bg-blue-50/30 transition">
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex-1 min-w-0">
-                  <h4 className="font-semibold text-gray-900 text-sm">{theme.name}</h4>
-                  <p className="text-xs text-gray-500 mt-0.5 line-clamp-2">{theme.description || 'Global theme option'}</p>
-                  <div className="mt-2 flex items-center gap-2">
-                    <span className="w-3.5 h-3.5 rounded-full border border-gray-300" style={{ background: theme.primaryColor }} />
-                    <span className="w-3.5 h-3.5 rounded-full border border-gray-300" style={{ background: theme.accentColor }} />
-                    <span className="w-3.5 h-3.5 rounded-full border border-gray-300" style={{ background: theme.backgroundColor }} />
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => handleSelectTheme(theme)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 text-white text-xs font-semibold rounded-lg hover:bg-blue-700 transition shrink-0"
-                >
-                  <LayoutTemplate className="w-3 h-3" /> Use
-                </button>
-              </div>
-            </div>
-          ))}
         </div>
 
         <div className="px-5 py-3 border-t bg-gray-50">
           <p className="text-xs text-gray-400">
-            Pick either an approved custom template or a default global theme for the generated agreement PDF.
+            Select one of your approved templates to override the global default for this agreement.
           </p>
         </div>
       </div>
@@ -1242,14 +1178,19 @@ function AgreementComposer({
 
           {(!isMobile || mobilePanelOpen) && (
           <div className="px-3 py-2.5 border-t bg-gray-50 flex items-center gap-2">
-            <button
-              type="button"
-              onClick={onOpenTemplate}
-              disabled={!canUseAgreementTemplates && !canSelectPdfTheme}
-              className="px-2.5 py-1.5 text-[11px] font-semibold text-blue-700 border border-blue-200 bg-blue-50 rounded-lg hover:bg-blue-100 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {canUseAgreementTemplates ? 'Select PDF Template' : canSelectPdfTheme ? 'Select PDF Theme' : 'Using Global PDF Theme'}
-            </button>
+            {canUseAgreementTemplates ? (
+              <button
+                type="button"
+                onClick={onOpenTemplate}
+                className="px-2.5 py-1.5 text-[11px] font-semibold text-blue-700 border border-blue-200 bg-blue-50 rounded-lg hover:bg-blue-100 transition"
+              >
+                {pdfSelection?.type === 'template' ? `Template: ${pdfSelection.name}` : 'Select My Template'}
+              </button>
+            ) : (
+              <span className="px-2.5 py-1.5 text-[11px] font-semibold text-gray-400 border border-gray-200 bg-gray-50 rounded-lg cursor-not-allowed">
+                Using Admin Default Template
+              </span>
+            )}
             <button
               type="button"
               onClick={onCancel}
@@ -1287,9 +1228,8 @@ function AgreementForm() {
     ? normalizedTier
     : 'free';
   const canUseAgreementTemplates = tier === 'enterprise';
-  const canSelectPdfTheme = tier === 'enterprise';
   const clauseLimit = tier === 'free' ? 2 : Number.POSITIVE_INFINITY;
-  const canUseClauses = true;
+  const canUseClauses = tier !== 'free'; // Pro + Enterprise can drag-and-drop clauses
 
   const [loading, setLoading] = useState(false);
   const [formErrors, setFormErrors] = useState({});
@@ -1302,6 +1242,7 @@ function AgreementForm() {
   const [templateHtml, setTemplateHtml] = useState('');
   const [loadingTemplate, setLoadingTemplate] = useState(false);
   const [pdfSelection, setPdfSelection] = useState(null);
+  const [globalDefaultHtml, setGlobalDefaultHtml] = useState(''); // preloaded global template
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => { setMounted(true); }, []);
@@ -1351,17 +1292,39 @@ function AgreementForm() {
       .finally(() => setLoading(false));
   }, [offerId]);
 
+  // Load global default agreement template on mount (used as default live preview)
+  useEffect(() => {
+    api.get('/agreement-templates/available')
+      .then(({ data }) => {
+        const defaultAgreement = Array.isArray(data?.globalDefaults)
+          ? data.globalDefaults.find((t) => t.templateType === 'agreement')
+          : null;
+        if (defaultAgreement?.bodyHtml) {
+          setGlobalDefaultHtml(defaultAgreement.bodyHtml);
+          // Pre-populate templateHtml for live preview if no custom selection
+          setTemplateHtml(defaultAgreement.bodyHtml);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  // When user picks an enterprise custom template, load its HTML
   useEffect(() => {
     if (pdfSelection?.type === 'template' && pdfSelection.id) {
       setLoadingTemplate(true);
       api.get(`/agreement-templates/${pdfSelection.id}`)
-        .then(({ data }) => setTemplateHtml(data.data?.bodyHtml || ''))
-        .catch(() => setTemplateHtml(''))
+        .then(({ data }) => {
+          // The API wraps data inside `data.data` in some routes, handle both
+          const html = data?.bodyHtml || data?.data?.bodyHtml || '';
+          setTemplateHtml(html);
+        })
+        .catch(() => setTemplateHtml(globalDefaultHtml))
         .finally(() => setLoadingTemplate(false));
-    } else {
-      setTemplateHtml('');
+    } else if (!pdfSelection) {
+      // Reset back to global default when deselected
+      setTemplateHtml(globalDefaultHtml);
     }
-  }, [pdfSelection]);
+  }, [pdfSelection, globalDefaultHtml]);
 
   // ── Build the accept-offer payload (single source of truth) ────────────────
   const buildAcceptPayload = () => ({
@@ -1411,11 +1374,6 @@ function AgreementForm() {
       setShowTemplatePicker(false);
       return;
     }
-    if (selection?.type === 'theme' && !canSelectPdfTheme) {
-      toast('Pro and Free tiers use the admin global default PDF theme.', 'error');
-      setShowTemplatePicker(false);
-      return;
-    }
     setPdfSelection(selection);
     setShowTemplatePicker(false);
   };
@@ -1424,10 +1382,7 @@ function AgreementForm() {
     if (pdfSelection?.type === 'template' && !canUseAgreementTemplates) {
       setPdfSelection(null);
     }
-    if (pdfSelection?.type === 'theme' && !canSelectPdfTheme) {
-      setPdfSelection(null);
-    }
-  }, [canUseAgreementTemplates, canSelectPdfTheme, pdfSelection]);
+  }, [canUseAgreementTemplates, pdfSelection]);
 
   const handleClauseLimitReached = (limit) => {
     toast(`Free plan can include up to ${limit} clauses. Upgrade to Pro for unlimited clauses.`, 'error');
