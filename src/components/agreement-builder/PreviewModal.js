@@ -48,11 +48,7 @@ const PreviewModal = ({ isOpen, onClose, html }) => {
         p.parentNode.replaceChild(div, p);
       });
 
-      // 3. Ensure font-size styles are not stripped by prose
-      const styledElements = doc.querySelectorAll('[style*="font-size"]');
-      styledElements.forEach(el => {
-         el.classList.add('preserve-font-size');
-      });
+      // 3. Keep inline font-size styles as-is so the preview matches the editor
 
       return doc.body.innerHTML;
     } catch (error) {
@@ -72,9 +68,7 @@ const PreviewModal = ({ isOpen, onClose, html }) => {
           font-weight: 900 !important; 
           color: #0f172a !important;
         }
-        .agreement-preview-container .preserve-font-size {
-          font-size: inherit !important; /* Let the inline style win */
-        }
+        /* Inline font-size styles should apply directly; no override here. */
         @media print {
           .preview-clauses-placeholder { border: none !important; background: transparent !important; }
         }

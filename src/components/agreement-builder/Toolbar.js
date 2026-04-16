@@ -90,8 +90,6 @@ const Toolbar = ({ editor, templateType = 'agreement' }) => {
       vars: [
         { id: 'landlord_name', label: 'Landlord Name', icon: Landmark },
         { id: 'tenant_name', label: 'Tenant Name', icon: User },
-        { id: 'landlord_id_card', label: 'Landlord CNIC/ID', icon: ShieldCheck },
-        { id: 'tenant_id_card', label: 'Tenant CNIC/ID', icon: ShieldCheck },
       ]
     },
     {
@@ -118,13 +116,7 @@ const Toolbar = ({ editor, templateType = 'agreement' }) => {
         { id: 'lease_duration', label: 'Duration (months)', icon: Clock },
       ]
     },
-    {
-      label: 'Other',
-      vars: [
-        { id: 'witness_1_name', label: 'Witness 1 Name', icon: Users },
-        { id: 'witness_2_name', label: 'Witness 2 Name', icon: Users },
-      ]
-    }
+    // 'Other' group intentionally omitted (witness/name & CNIC removed)
   ];
 
   const receiptVariableGroups = [
