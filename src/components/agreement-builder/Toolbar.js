@@ -162,7 +162,6 @@ const Toolbar = ({ editor, templateType = 'agreement' }) => {
     <>
       <Script 
         src="https://upload-widget.cloudinary.com/global/all.js" 
-        onLoad={initCloudinary}
       />
       <div className="bg-white border-b border-gray-200 p-2 flex flex-wrap items-center gap-1 sticky top-0 z-50">
       {/* Text Formatting */}

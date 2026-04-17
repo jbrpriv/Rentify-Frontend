@@ -107,9 +107,20 @@ export const ResizableImage = Node.create({
 
   renderHTML({ node, HTMLAttributes }) {
     return ['img', mergeAttributes(HTMLAttributes, { 
-      style: `width: ${node.attrs.width}; text-align: ${node.attrs.textAlign};`,
-      'data-text-align': node.attrs.textAlign,
+      style: `width: ${node.attrs.width}; text-align: ${node.attrs.textAlign || 'center'};`,
+      'data-text-align': node.attrs.textAlign || 'center',
     })];
+  },
+
+  addCommands() {
+    return {
+      setImage: options => ({ commands }) => {
+        return commands.insertContent({
+          type: this.name,
+          attrs: options,
+        });
+      },
+    };
   },
 
   addNodeView() {
