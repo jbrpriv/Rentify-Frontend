@@ -30,45 +30,36 @@ const Toolbar = ({ editor, templateType = 'agreement' }) => {
       return;
     }
 
-    // Using openUploadWidget directly (one-step creation and opening)
-    // for maximum reliability with cropping.
+    // Using absolute default styling to ensure no buttons are hidden
     window.cloudinary.openUploadWidget(
       {
         cloudName: 'dj4a5robb',
         uploadPreset: 'rentify_unsigned',
-        sources: ['local', 'url'],
+        sources: ['local', 'url', 'camera'],
+        resourceType: 'image',
         showAdvancedOptions: false,
         cropping: true,
         multiple: false,
+        showSkipCropButton: true,
+        croppingDefaultSelectionRatio: 0.8,
         defaultSource: 'local',
-        styles: {
-          palette: {
-            window: '#FFFFFF',
-            windowBorder: '#90A0B3',
-            tabIcon: '#0078FF',
-            menuIcons: '#5A616A',
-            textDark: '#000000',
-            textLight: '#FFFFFF',
-            link: '#0078FF',
-            action: '#FF620C',
-            inactiveTabIcon: '#0E2F5A',
-            error: '#F44235',
-            inProgress: '#0078FF',
-            complete: '#20B832',
-            sourceHover: '#E4EBF1'
-          }
-        }
+        // Styles removed to rule out UI bugs
       },
       (error, result) => {
-        if (!error && result && result.event === 'success') {
+        if (error) {
+          console.error('Cloudinary Widget Error:', error);
+          toast.error('Upload failed. Check your preset settings.');
+          return;
+        }
+
+        if (result && result.event === 'success') {
           const imageUrl = result.info.secure_url || result.info.url;
           if (imageUrl && editor) {
             editor.chain().focus().setImage({ src: imageUrl }).run();
-            toast.success('Image added to document');
+            toast.success('Image added');
           }
-        } else if (error) {
-          console.error('Cloudinary Error:', error);
-          toast.error('Upload failed. Please check your preset.');
+        } else if (result && result.event === 'failed') {
+          toast.error('Crop/Upload failed. Check transformations in Cloudinary.');
         }
       }
     );
