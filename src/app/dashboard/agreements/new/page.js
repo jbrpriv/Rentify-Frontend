@@ -549,7 +549,14 @@ function TemplateDocument({
           margin-bottom: 0.5em;
         }
         .agreement-tiptap-content p { margin-bottom: 1em; color: #334155; line-height: 1.7; }
-        .agreement-tiptap-content .document-image { margin: 2em auto; display: block; }
+        .agreement-tiptap-content .document-image { 
+          margin: 2em auto; 
+          display: block; 
+          max-width: 100%; 
+          height: auto; 
+          border-radius: 8px; 
+          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
       `}</style>
       
       {sections.map((html, i) => (

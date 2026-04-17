@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import Script from 'next/script';
 import { 
   Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight, 
   Type, Heading1, Heading2, User, Landmark, Banknote, Calendar, 
@@ -9,16 +10,50 @@ import {
 const Toolbar = ({ editor, templateType = 'agreement' }) => {
   const [showFontSizes, setShowFontSizes] = useState(false);
   const [showVariables, setShowVariables] = useState(false);
+  const widgetRef = useRef(null);
 
-  // Dynamically load Cloudinary Upload Widget script
-  useEffect(() => {
-    if (!window.cloudinary) {
-      const script = document.createElement('script');
-      script.src = 'https://upload-widget.cloudinary.com/global/all.js';
-      script.async = true;
-      document.body.appendChild(script);
+  // Initialize Cloudinary Widget once script is loaded
+  const initCloudinary = () => {
+    if (window.cloudinary && !widgetRef.current) {
+      widgetRef.current = window.cloudinary.createUploadWidget(
+        {
+          cloudName: 'dj4a5robb',
+          uploadPreset: 'rentify_unsigned',
+          sources: ['local', 'url', 'camera'],
+          showAdvancedOptions: false,
+          cropping: true,
+          multiple: false,
+          defaultSource: 'local',
+          styles: {
+            palette: {
+              window: '#FFFFFF',
+              windowBorder: '#90A0B3',
+              tabIcon: '#0078FF',
+              menuIcons: '#5A616A',
+              textDark: '#000000',
+              textLight: '#FFFFFF',
+              link: '#0078FF',
+              action: '#FF620C',
+              inactiveTabIcon: '#0E2F5A',
+              error: '#F44235',
+              inProgress: '#0078FF',
+              complete: '#20B832',
+              sourceHover: '#E4EBF1'
+            }
+          }
+        },
+        (error, result) => {
+          if (!error && result && result.event === 'success') {
+            console.log('Image upload success:', result.info);
+            const imageUrl = result.info.secure_url || result.info.url;
+            if (imageUrl && editor) {
+              editor.chain().focus().setImage({ src: imageUrl }).run();
+            }
+          }
+        }
+      );
     }
-  }, []);
+  };
 
   if (!editor) return null;
 
@@ -31,46 +66,22 @@ const Toolbar = ({ editor, templateType = 'agreement' }) => {
   };
 
   const insertImage = () => {
-    if (!window.cloudinary) {
-      const url = window.prompt('Cloudinary widget not loaded yet. Enter URL manually:');
+    if (!widgetRef.current) {
+      // Fallback if widget not ready or script failed
+      if (window.cloudinary) {
+        initCloudinary();
+        if (widgetRef.current) {
+          widgetRef.current.open();
+          return;
+        }
+      }
+      
+      const url = window.prompt('Image upload widget is still loading. Enter URL manually:');
       if (url) editor.chain().focus().setImage({ src: url }).run();
       return;
     }
 
-    const myWidget = window.cloudinary.createUploadWidget(
-      {
-        cloudName: 'dj4a5robb',
-        uploadPreset: 'rentify_unsigned',
-        sources: ['local', 'url', 'camera'],
-        showAdvancedOptions: false,
-        cropping: true,
-        multiple: false,
-        defaultSource: 'local',
-        styles: {
-          palette: {
-            window: '#FFFFFF',
-            windowBorder: '#90A0B3',
-            tabIcon: '#0078FF',
-            menuIcons: '#5A616A',
-            textDark: '#000000',
-            textLight: '#FFFFFF',
-            link: '#0078FF',
-            action: '#FF620C',
-            inactiveTabIcon: '#0E2F5A',
-            error: '#F44235',
-            inProgress: '#0078FF',
-            complete: '#20B832',
-            sourceHover: '#E4EBF1'
-          }
-        }
-      },
-      (error, result) => {
-        if (!error && result && result.event === 'success') {
-          editor.chain().focus().setImage({ src: result.info.secure_url }).run();
-        }
-      }
-    );
-    myWidget.open();
+    widgetRef.current.open();
   };
 
   const setFontSize = (size) => {
@@ -158,7 +169,12 @@ const Toolbar = ({ editor, templateType = 'agreement' }) => {
   const variableGroups = templateType === 'receipt' ? receiptVariableGroups : agreementVariableGroups;
 
   return (
-    <div className="bg-white border-b border-gray-200 p-2 flex flex-wrap items-center gap-1 sticky top-0 z-50">
+    <>
+      <Script 
+        src="https://upload-widget.cloudinary.com/global/all.js" 
+        onLoad={initCloudinary}
+      />
+      <div className="bg-white border-b border-gray-200 p-2 flex flex-wrap items-center gap-1 sticky top-0 z-50">
       {/* Text Formatting */}
       <div className="flex items-center gap-1 px-2 border-r border-gray-100">
         <button
@@ -333,6 +349,7 @@ const Toolbar = ({ editor, templateType = 'agreement' }) => {
       </div>
       )}
     </div>
+    </>
   );
 };
 

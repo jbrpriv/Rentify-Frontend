@@ -96,6 +96,14 @@ const PreviewModal = ({ isOpen, onClose, html }) => {
           font-weight: 900 !important; 
           color: #0f172a !important;
         }
+        .agreement-preview-container .document-image { 
+          margin: 2em auto; 
+          display: block; 
+          max-width: 100%; 
+          height: auto; 
+          border-radius: 8px; 
+          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); 
+        }
         /* Inline font-size styles should apply directly; no override here. */
         @media print {
           .preview-clauses-placeholder { border: none !important; background: transparent !important; }
@@ -125,6 +133,7 @@ const PreviewModal = ({ isOpen, onClose, html }) => {
                         h1, h2, h3 { font-weight: 900; color: #0f172a; }
                         h1 { font-size: 2.5em; border-bottom: 2px solid #eee; padding-bottom: 10px; }
                         strong { color: #1e40af; font-weight: 800; }
+                        .document-image { display: block; margin: 2em auto; max-width: 100%; height: auto; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
                         .preview-clauses-placeholder { border: 2px dashed #e2e8f0; padding: 40px; text-align: center; color: #94a3b8; border-radius: 12px; margin: 40px 0; }
                       </style>
                     </head>
