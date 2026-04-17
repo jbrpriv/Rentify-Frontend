@@ -18,6 +18,7 @@ import api from '@/utils/api';
 import { useUser } from '@/context/UserContext';
 import { useToast } from '@/context/ToastContext';
 import useGlobalPdfTheme from '@/hooks/useGlobalPdfTheme';
+import PreviewModal from '@/components/agreement-builder/PreviewModal';
 
 const STATUS_META = {
   pending: { label: 'Pending', icon: Clock3, color: '#A16207', bg: '#FEF3C7' },
@@ -48,6 +49,7 @@ export default function AgreementTemplatesPage() {
   const [templates, setTemplates] = useState([]);
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState('');
+  const [previewTemplate, setPreviewTemplate] = useState(null);
 
   const fetchTemplates = useCallback(async () => {
     try {
@@ -87,27 +89,7 @@ export default function AgreementTemplatesPage() {
     }
   };
 
-  const previewTemplate = async (template) => {
-    try {
-      const params = {
-        primaryColor: template.customizations?.primaryColor || undefined,
-        accentColor: template.customizations?.accentColor || undefined,
-        backgroundColor: template.customizations?.backgroundColor || undefined,
-        fontFamily: template.customizations?.fontFamily || undefined,
-        fontSizeScale: template.customizations?.fontSizeScale || undefined,
-      };
-
-      const { data } = await api.get(`/pdf-themes/${template.baseTheme?._id || template.baseTheme}/preview`, {
-        params,
-        responseType: 'blob',
-      });
-
-      const url = URL.createObjectURL(new Blob([data], { type: 'application/pdf' }));
-      window.open(url, '_blank');
-    } catch {
-      toast('Preview unavailable for this template right now', 'error');
-    }
-  };
+  const handlePreview = (template) => setPreviewTemplate(template);
 
   const grouped = useMemo(() => ({
     pending: templates.filter((t) => t.status === 'pending'),
@@ -203,7 +185,7 @@ export default function AgreementTemplatesPage() {
                           <span className="inline-flex items-center gap-1"><Brush size={12} /> {template.status === 'approved' ? 'View' : 'Edit'}</span>
                         </button>
                         <button
-                          onClick={() => previewTemplate(template)}
+                          onClick={() => handlePreview(template)}
                           className="flex-1 px-3 py-2 rounded-lg text-xs font-bold border"
                           style={{ borderColor: 'var(--brand-accent)', color: 'white', background: 'var(--brand-accent)' }}
                         >
@@ -226,6 +208,12 @@ export default function AgreementTemplatesPage() {
           })}
         </div>
       )}
+
+      <PreviewModal
+        isOpen={!!previewTemplate}
+        onClose={() => setPreviewTemplate(null)}
+        html={previewTemplate?.bodyHtml || ''}
+      />
     </div>
   );
 }

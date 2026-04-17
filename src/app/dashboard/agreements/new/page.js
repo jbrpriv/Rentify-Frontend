@@ -270,6 +270,10 @@ function substituteVariables(text, offer, form, formatMoney) {
     '{{utilities_included}}': utilities,
     '{{utilities}}': utilities,
     '{{utilities_details}}': utilDetails || '[Utilities Details]',
+    '{{rent_escalation_enabled}}': form?.rentEscalationEnabled ? 'Enabled' : 'Disabled',
+    '{{rent_escalation_percentage}}': form?.rentEscalationEnabled
+                                     ? `${form.rentEscalationPercentage || 5}%`
+                                     : 'N/A',
     '{{pet_allowed}}': petLabel,
     '{{pet_policy}}': petLabel,
     '{{pet_deposit}}': petDeposit,
@@ -291,6 +295,10 @@ function substituteVariables(text, offer, form, formatMoney) {
     '{{petPolicy}}': petLabel,
     '{{petDeposit}}': petDeposit,
     '{{utilitiesDetails}}': utilDetails || '[Utilities Details]',
+    '{{rentEscalationEnabled}}': form?.rentEscalationEnabled ? 'Enabled' : 'Disabled',
+    '{{rentEscalationPercentage}}': form?.rentEscalationEnabled
+                                     ? `${form.rentEscalationPercentage || 5}%`
+                                     : 'N/A',
     '{{terminationPolicy}}': termPolicy || '[Termination Policy]',
     '{{currentDate}}': new Date().toLocaleDateString(),
     '{{agreementId}}': '[Draft ID]',
@@ -477,6 +485,10 @@ function TemplateDocument({
         utilities_included: formData?.utilitiesIncluded ? 'Included' : 'Not Included',
         utilities: formData?.utilitiesIncluded ? 'Included' : 'Not Included',
         utilities_details: formData?.utilitiesDetails || '[Utilities Details]',
+        rent_escalation_enabled:     formData?.rentEscalationEnabled ? 'Enabled' : 'Disabled',
+        rent_escalation_percentage:  formData?.rentEscalationEnabled
+                                       ? `${formData.rentEscalationPercentage || 5}%`
+                                       : 'N/A',
         pet_allowed: formData?.petAllowed ? 'Allowed' : 'Not Allowed',
         pet_policy: formData?.petAllowed ? 'Allowed' : 'Not Allowed',
         pet_deposit: formData?.petDeposit ? formatMoney(Number(formData.petDeposit)) : '[Pet Deposit]',

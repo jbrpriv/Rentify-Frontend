@@ -5,6 +5,7 @@ import { CheckCircle2, Clock3, Download, Loader2, XCircle } from 'lucide-react';
 import api from '@/utils/api';
 import { useToast } from '@/context/ToastContext';
 import useGlobalPdfTheme from '@/hooks/useGlobalPdfTheme';
+import PreviewModal from '@/components/agreement-builder/PreviewModal';
 
 function statusColor(status) {
   if (status === 'approved') return { color: '#166534', bg: '#DCFCE7' };
@@ -22,6 +23,7 @@ export default function AdminAgreementTemplatesPage() {
   const [busyId, setBusyId] = useState('');
   const [rejectTarget, setRejectTarget] = useState(null);
   const [rejectionReason, setRejectionReason] = useState('');
+  const [previewTemplate, setPreviewTemplate] = useState(null);
 
   const fetchTemplates = async () => {
     setLoading(true);
@@ -40,15 +42,7 @@ export default function AdminAgreementTemplatesPage() {
     fetchTemplates();
   }, [filter]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const previewPdf = async (id) => {
-    try {
-      const { data } = await api.get(`/agreement-templates/${id}/preview-pdf`, { responseType: 'blob' });
-      const url = URL.createObjectURL(new Blob([data], { type: 'application/pdf' }));
-      window.open(url, '_blank');
-    } catch (err) {
-      toast(err.response?.data?.message || 'Failed to preview PDF', 'error');
-    }
-  };
+  const handlePreview = (template) => setPreviewTemplate(template);
 
   const approve = async (id) => {
     setBusyId(id);
@@ -166,7 +160,7 @@ export default function AdminAgreementTemplatesPage() {
               <p className="text-slate-700">{t.baseTheme?.name || '-'}</p>
               <p className="text-slate-500 text-xs">{new Date(t.createdAt).toLocaleDateString()}</p>
               <div className="flex items-center gap-1.5">
-                <button onClick={() => previewPdf(t._id)} className="px-2.5 py-1.5 rounded-lg border text-xs font-bold inline-flex items-center gap-1" style={{ borderColor: 'var(--brand-border)', color: 'var(--brand-primary)' }}>
+                <button onClick={() => handlePreview(t)} className="px-2.5 py-1.5 rounded-lg border text-xs font-bold inline-flex items-center gap-1" style={{ borderColor: 'var(--brand-border)', color: 'var(--brand-primary)' }}>
                   <Download size={12} /> Preview
                 </button>
                 <button onClick={() => approve(t._id)} disabled={busyId === t._id} className="px-2.5 py-1.5 rounded-lg text-xs font-bold text-white inline-flex items-center gap-1" style={{ background: 'var(--brand-primary)' }}>
@@ -180,6 +174,12 @@ export default function AdminAgreementTemplatesPage() {
           );
         })}
       </div>
+
+      <PreviewModal
+        isOpen={!!previewTemplate}
+        onClose={() => setPreviewTemplate(null)}
+        html={previewTemplate?.bodyHtml || ''}
+      />
     </div>
   );
 }

@@ -25,8 +25,11 @@ const PreviewModal = ({ isOpen, onClose, html }) => {
     duration_months: '12',
     // Policies
     utilities_included: 'Included',
+    utilities_details: 'Electricity, Water, Gas',
     pet_allowed: 'Allowed',
     pet_deposit: '5,000 PKR',
+    rent_escalation_enabled: 'Enabled',
+    rent_escalation_percentage: '5%',
     termination_policy: '30-day written notice required.',
     // System
     current_date: new Date().toLocaleDateString(),

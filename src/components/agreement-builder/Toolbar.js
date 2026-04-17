@@ -3,7 +3,7 @@ import {
   Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight, 
   Type, Heading1, Heading2, User, Landmark, Banknote, Calendar, 
   ChevronDown, Image as ImageIcon, Sparkles, ScrollText, Plus,
-  MapPin, Home, ShieldCheck, Wallet, Clock, Users, Hash
+  MapPin, Home, ShieldCheck, Wallet, Clock, Users, Hash, TrendingUp
 } from 'lucide-react';
 
 const Toolbar = ({ editor, templateType = 'agreement' }) => {
@@ -122,8 +122,11 @@ const Toolbar = ({ editor, templateType = 'agreement' }) => {
       label: 'Policies',
       vars: [
         { id: 'utilities_included', label: 'Utilities Included?', icon: Sparkles },
+        { id: 'utilities_details',          label: 'Utilities Details',          icon: ScrollText },
         { id: 'pet_allowed', label: 'Pets Allowed?', icon: Sparkles },
         { id: 'pet_deposit', label: 'Pet Deposit', icon: Banknote },
+        { id: 'rent_escalation_enabled',    label: 'Rent Escalation?',           icon: TrendingUp },
+        { id: 'rent_escalation_percentage', label: 'Rent Escalation %',          icon: TrendingUp },
         { id: 'termination_policy', label: 'Termination Notice', icon: ScrollText },
       ]
     },
