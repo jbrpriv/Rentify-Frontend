@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Script from 'next/script';
+import { toast } from 'react-hot-toast';
 import { 
   Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight, 
   Type, Heading1, Heading2, User, Landmark, Banknote, Calendar, 
@@ -12,49 +13,6 @@ const Toolbar = ({ editor, templateType = 'agreement' }) => {
   const [showVariables, setShowVariables] = useState(false);
   const widgetRef = useRef(null);
 
-  // Initialize Cloudinary Widget once script is loaded
-  const initCloudinary = () => {
-    if (window.cloudinary && !widgetRef.current) {
-      widgetRef.current = window.cloudinary.createUploadWidget(
-        {
-          cloudName: 'dj4a5robb',
-          uploadPreset: 'rentify_unsigned',
-          sources: ['local', 'url', 'camera'],
-          showAdvancedOptions: false,
-          cropping: true,
-          multiple: false,
-          defaultSource: 'local',
-          styles: {
-            palette: {
-              window: '#FFFFFF',
-              windowBorder: '#90A0B3',
-              tabIcon: '#0078FF',
-              menuIcons: '#5A616A',
-              textDark: '#000000',
-              textLight: '#FFFFFF',
-              link: '#0078FF',
-              action: '#FF620C',
-              inactiveTabIcon: '#0E2F5A',
-              error: '#F44235',
-              inProgress: '#0078FF',
-              complete: '#20B832',
-              sourceHover: '#E4EBF1'
-            }
-          }
-        },
-        (error, result) => {
-          if (!error && result && result.event === 'success') {
-            console.log('Image upload success:', result.info);
-            const imageUrl = result.info.secure_url || result.info.url;
-            if (imageUrl && editor) {
-              editor.chain().focus().setImage({ src: imageUrl }).run();
-            }
-          }
-        }
-      );
-    }
-  };
-
   if (!editor) return null;
 
   const addVariable = (name, label) => {
@@ -66,22 +24,54 @@ const Toolbar = ({ editor, templateType = 'agreement' }) => {
   };
 
   const insertImage = () => {
-    if (!widgetRef.current) {
-      // Fallback if widget not ready or script failed
-      if (window.cloudinary) {
-        initCloudinary();
-        if (widgetRef.current) {
-          widgetRef.current.open();
-          return;
-        }
-      }
-      
+    if (!window.cloudinary) {
       const url = window.prompt('Image upload widget is still loading. Enter URL manually:');
       if (url) editor.chain().focus().setImage({ src: url }).run();
       return;
     }
 
-    widgetRef.current.open();
+    // Using openUploadWidget directly (one-step creation and opening)
+    // for maximum reliability with cropping.
+    window.cloudinary.openUploadWidget(
+      {
+        cloudName: 'dj4a5robb',
+        uploadPreset: 'rentify_unsigned',
+        sources: ['local', 'url'],
+        showAdvancedOptions: false,
+        cropping: true,
+        multiple: false,
+        defaultSource: 'local',
+        styles: {
+          palette: {
+            window: '#FFFFFF',
+            windowBorder: '#90A0B3',
+            tabIcon: '#0078FF',
+            menuIcons: '#5A616A',
+            textDark: '#000000',
+            textLight: '#FFFFFF',
+            link: '#0078FF',
+            action: '#FF620C',
+            inactiveTabIcon: '#0E2F5A',
+            error: '#F44235',
+            inProgress: '#0078FF',
+            complete: '#20B832',
+            sourceHover: '#E4EBF1'
+          }
+        }
+      },
+      (error, result) => {
+        if (!error && result && result.event === 'success') {
+          const imageUrl = result.info.secure_url || result.info.url;
+          if (imageUrl && editor) {
+            editor.chain().focus().setImage({ src: imageUrl }).run();
+            toast.success('Image added to document');
+          }
+        } else if (error) {
+          console.error('Cloudinary Error:', error);
+          toast.error('Upload failed. Please check your preset.');
+        }
+      }
+    );
   };
 
   const setFontSize = (size) => {
