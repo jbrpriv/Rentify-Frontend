@@ -30,7 +30,6 @@ const Toolbar = ({ editor, templateType = 'agreement' }) => {
       return;
     }
 
-    // Using absolute default styling to ensure no buttons are hidden
     window.cloudinary.openUploadWidget(
       {
         cloudName: 'dj4a5robb',
@@ -38,12 +37,26 @@ const Toolbar = ({ editor, templateType = 'agreement' }) => {
         sources: ['local', 'url', 'camera'],
         resourceType: 'image',
         showAdvancedOptions: false,
-        cropping: true,
+        cropping: false,
         multiple: false,
-        showSkipCropButton: true,
-        croppingDefaultSelectionRatio: 0.8,
         defaultSource: 'local',
-        // Styles removed to rule out UI bugs
+        styles: {
+          palette: {
+            window: '#FFFFFF',
+            windowBorder: '#90A0B3',
+            tabIcon: '#0078FF',
+            menuIcons: '#5A616A',
+            textDark: '#000000',
+            textLight: '#FFFFFF',
+            link: '#0078FF',
+            action: '#FF620C',
+            inactiveTabIcon: '#0E2F5A',
+            error: '#F44235',
+            inProgress: '#0078FF',
+            complete: '#20B832',
+            sourceHover: '#E4EBF1'
+          }
+        }
       },
       (error, result) => {
         if (error) {
@@ -58,8 +71,6 @@ const Toolbar = ({ editor, templateType = 'agreement' }) => {
             editor.chain().focus().setImage({ src: imageUrl }).run();
             toast.success('Image added');
           }
-        } else if (result && result.event === 'failed') {
-          toast.error('Crop/Upload failed. Check transformations in Cloudinary.');
         }
       }
     );
