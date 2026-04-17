@@ -36,10 +36,13 @@ const ResizableImageComponent = ({ node, updateAttributes, selected }) => {
   return (
     <NodeViewWrapper 
       className={`resizable-image-wrapper ${selected ? 'is-selected' : ''}`}
-      style={{ textAlign: textAlign || 'center' }}
+      style={{ 
+        display: 'flex',
+        justifyContent: textAlign === 'center' ? 'center' : textAlign === 'right' ? 'flex-end' : 'flex-start'
+      }}
     >
       <div 
-        className="inline-block relative group"
+        className="relative group"
         style={{ width: width || 'auto' }}
       >
         <img
@@ -84,9 +87,7 @@ export const ResizableImage = Node.create({
       width: {
         default: 'auto',
       },
-      textAlign: {
-        default: 'center',
-      },
+      // Note: textAlign is handled by the TextAlign extension
     };
   },
 
@@ -99,7 +100,6 @@ export const ResizableImage = Node.create({
           alt: element.getAttribute('alt'),
           title: element.getAttribute('title'),
           width: element.style.width || element.getAttribute('width') || 'auto',
-          textAlign: element.style.textAlign || element.getAttribute('data-text-align') || 'center',
         }),
       },
     ];
@@ -107,8 +107,7 @@ export const ResizableImage = Node.create({
 
   renderHTML({ node, HTMLAttributes }) {
     return ['img', mergeAttributes(HTMLAttributes, { 
-      style: `width: ${node.attrs.width}; text-align: ${node.attrs.textAlign || 'center'};`,
-      'data-text-align': node.attrs.textAlign || 'center',
+      style: `width: ${node.attrs.width}; display: block; margin: ${node.attrs.textAlign === 'center' ? '0 auto' : node.attrs.textAlign === 'right' ? '0 0 0 auto' : '0'};`,
     })];
   },
 
