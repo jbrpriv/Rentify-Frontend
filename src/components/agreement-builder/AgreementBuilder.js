@@ -3,7 +3,7 @@ import { useEditor, EditorContent } from '@tiptap/react';
 import { StarterKit } from '@tiptap/starter-kit';
 import { Underline } from '@tiptap/extension-underline';
 import { TextAlign } from '@tiptap/extension-text-align';
-import { Image } from '@tiptap/extension-image';
+import { ResizableImage } from './ResizableImage';
 import { TextStyle } from '@tiptap/extension-text-style';
 import { Color } from '@tiptap/extension-color';
 import { Eye, FileJson, FileCode, CheckCircle2, Loader2, Sparkles, Hash } from 'lucide-react';
@@ -50,9 +50,9 @@ const AgreementBuilder = ({ initialContent = '', onSave, isSaving = false, templ
     StarterKit,
     Underline,
     TextAlign.configure({
-      types: ['heading', 'paragraph'],
+      types: ['heading', 'paragraph', 'image'],
     }),
-    Image.configure({
+    ResizableImage.configure({
       HTMLAttributes: {
         class: 'document-image max-w-full rounded-lg shadow-sm',
       },

@@ -550,12 +550,12 @@ function TemplateDocument({
         }
         .agreement-tiptap-content p { margin-bottom: 1em; color: #334155; line-height: 1.7; }
         .agreement-tiptap-content .document-image { 
-          margin: 2em auto; 
-          display: block; 
           max-width: 100%; 
           height: auto; 
           border-radius: 8px; 
           box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+          margin-top: 1.5em;
+          margin-bottom: 1.5em;
         }
       `}</style>
       

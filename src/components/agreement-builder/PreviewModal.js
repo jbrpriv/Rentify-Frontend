@@ -97,12 +97,12 @@ const PreviewModal = ({ isOpen, onClose, html }) => {
           color: #0f172a !important;
         }
         .agreement-preview-container .document-image { 
-          margin: 2em auto; 
-          display: block; 
           max-width: 100%; 
           height: auto; 
           border-radius: 8px; 
           box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); 
+          margin-top: 1.5em;
+          margin-bottom: 1.5em;
         }
         /* Inline font-size styles should apply directly; no override here. */
         @media print {

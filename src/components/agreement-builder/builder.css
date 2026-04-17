@@ -64,15 +64,22 @@
 
 /* Document Images */
 .document-image {
-  display: block;
-  margin: 1.5rem auto;
-  max-width: 100%;
-  height: auto;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   border-radius: 0.5rem;
-  transition: transform 0.2s;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  transition: all 0.2s;
 }
 
-.document-image:hover {
-  transform: scale(1.01);
+.resizable-image-wrapper {
+  margin: 1.5rem 0;
+  line-height: 0;
+}
+
+.resizable-image-wrapper.is-selected div {
+  outline: 2px solid #2563eb;
+  border-radius: 8px;
+}
+
+/* Ensure images don't overflow the A4 page */
+.a4-page .document-image {
+  max-width: 100%;
 }
