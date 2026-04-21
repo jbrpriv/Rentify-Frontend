@@ -540,16 +540,20 @@ function TemplateDocument({
     }
   }, [templateHtml, offerData, formData, formatMoney]);
 
+  const containerRef = useRef(null);
   const [portalNode, setPortalNode] = useState(null);
 
   useEffect(() => {
-    if (hasPortal) {
-      setPortalNode(document.getElementById('clause-buckets-portal-root'));
+    if (hasPortal && containerRef.current) {
+      const node = containerRef.current.querySelector('#clause-buckets-portal-root');
+      if (node) {
+        setPortalNode(node);
+      }
     }
   }, [html, hasPortal]);
 
   return (
-    <div className="prose prose-blue prose-sm max-w-none agreement-tiptap-content">
+    <div className="prose prose-blue prose-sm max-w-none agreement-tiptap-content" ref={containerRef}>
       <style>{`
         .agreement-tiptap-content h1, 
         .agreement-tiptap-content h2, 
