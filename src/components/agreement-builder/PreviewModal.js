@@ -106,7 +106,7 @@ const PreviewModal = ({ isOpen, onClose, html }) => {
         }
         .dual-column-wrapper {
           display: grid;
-          grid-template-columns: 1fr 1fr;
+          grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
           gap: 0;
           position: relative;
           min-height: 100px;
@@ -126,6 +126,10 @@ const PreviewModal = ({ isOpen, onClose, html }) => {
           padding: 0 20px;
           position: relative;
           z-index: 2;
+          min-width: 0;
+          word-wrap: break-word;
+          overflow-wrap: break-word;
+          max-width: 100%;
         }
         
         .agreement-table {

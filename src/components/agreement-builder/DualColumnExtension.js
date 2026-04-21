@@ -31,7 +31,7 @@ export const DualColumnSide = Node.create({
 
 const DualColumnComponent = ({ deleteNode }) => {
   return (
-    <NodeViewWrapper className="dual-column-node group relative" draggable="true" data-drag-handle>
+    <NodeViewWrapper className="dual-column-node group relative">
       <button
         className="dual-column-delete absolute -top-3 -right-3 w-6 h-6 bg-red-500 text-white border-2 border-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-20 shadow-md cursor-pointer disabled:opacity-0"
         onClick={deleteNode}
