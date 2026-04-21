@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, FileText } from 'lucide-react';
 import { useToast } from '@/context/ToastContext';
 import { useUser } from '@/context/UserContext';
 import api from '@/utils/api';
@@ -19,10 +19,8 @@ export default function CreateAgreementTemplatePage() {
 
   const { themes } = useGlobalPdfTheme();
   const [saving, setSaving] = useState(false);
-  const [metadata, setMetadata] = useState({
-    name: '',
-    description: '',
-  });
+  const [name, setName] = useState('');
+  const [description, setDescription] = useState('');
 
   useEffect(() => {
     if (!user) return;
@@ -33,7 +31,7 @@ export default function CreateAgreementTemplatePage() {
   }, [user, canAccessTemplateStudio, router, toast]);
 
   const handleSave = React.useCallback(async (data) => {
-    if (!metadata.name.trim()) {
+    if (!name.trim()) {
       toast('Please enter a template name before saving', 'error');
       return;
     }
@@ -41,14 +39,14 @@ export default function CreateAgreementTemplatePage() {
     setSaving(true);
     try {
       const baseTheme = themes.find(t => t.isDefault)?._id || themes[0]?._id;
-      
+
       if (!baseTheme) {
         throw new Error('No base themes available. Please contact support.');
       }
 
       await api.post('/agreement-templates', {
-        name: metadata.name,
-        description: metadata.description,
+        name: name.trim(),
+        description: description.trim(),
         baseTheme,
         bodyHtml: data.html,
         bodyJson: data.json,
@@ -57,8 +55,8 @@ export default function CreateAgreementTemplatePage() {
           accentColor: '',
           backgroundColor: '',
           fontFamily: '',
-          fontSizeScale: 1.0
-        }
+          fontSizeScale: 1.0,
+        },
       });
 
       toast('Agreement template saved and submitted for review');
@@ -68,52 +66,57 @@ export default function CreateAgreementTemplatePage() {
     } finally {
       setSaving(false);
     }
-  }, [metadata, toast, themes, router]);
+  }, [name, description, toast, themes, router]);
 
   if (user && !canAccessTemplateStudio) return null;
 
   return (
-    <div className="max-w-6xl mx-auto pb-12">
-      <div className="mb-6 flex items-center justify-between">
-        <div>
-          <button 
-            onClick={() => router.back()}
-            className="flex items-center gap-2 text-sm font-bold text-gray-500 hover:text-gray-900 transition-colors mb-2"
-          >
-            <ArrowLeft size={16} /> Back to Templates
-          </button>
-          <h1 className="text-3xl font-extrabold text-gray-900">New Agreement Template</h1>
-          <p className="text-sm text-gray-500 mt-1">Design your custom agreement document using the builder below.</p>
+    <div className="flex flex-col h-screen bg-gray-50">
+      {/* Compact fullscreen top bar */}
+      <div className="builder-fullscreen-topbar flex-shrink-0">
+        <button
+          onClick={() => router.push('/dashboard/agreement-templates')}
+          className="back-btn"
+        >
+          <ArrowLeft size={15} />
+          Templates
+        </button>
+
+        <div className="flex items-center gap-2 ml-2">
+          <div className="p-1.5 bg-blue-600 rounded-lg">
+            <FileText size={14} className="text-white" />
+          </div>
+          <span className="text-sm font-extrabold text-slate-900 hidden sm:block">New Template</span>
         </div>
+
+        <div className="h-5 w-px bg-gray-200 mx-1" />
+
+        <input
+          type="text"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="Template name (required)..."
+          className="meta-input flex-1 min-w-0"
+          style={{ maxWidth: 300 }}
+        />
+
+        <input
+          type="text"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          placeholder="Short description (optional)..."
+          className="meta-input flex-1 min-w-0 hidden md:block"
+          style={{ maxWidth: 300 }}
+        />
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-        <div className="bg-white p-4 rounded-2xl border border-gray-200">
-          <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">Template Name</label>
-          <input 
-            type="text"
-            value={metadata.name}
-            onChange={(e) => setMetadata({...metadata, name: e.target.value})}
-            placeholder="e.g., Standard Residential Lease 2026"
-            className="w-full mt-1 px-4 py-2 bg-gray-50 border border-gray-100 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all font-medium text-gray-900"
-          />
-        </div>
-        <div className="bg-white p-4 rounded-2xl border border-gray-200">
-          <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">Description (Optional)</label>
-          <input 
-            type="text"
-            value={metadata.description}
-            onChange={(e) => setMetadata({...metadata, description: e.target.value})}
-            placeholder="e.g., Used for multi-family units in downtown"
-            className="w-full mt-1 px-4 py-2 bg-gray-50 border border-gray-100 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all font-medium text-gray-900"
-          />
-        </div>
+      {/* Builder — fills remaining height */}
+      <div className="flex-1 min-h-0 overflow-hidden">
+        <AgreementBuilder
+          onSave={handleSave}
+          isSaving={saving}
+        />
       </div>
-
-      <AgreementBuilder 
-        onSave={handleSave}
-        isSaving={saving}
-      />
     </div>
   );
 }

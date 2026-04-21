@@ -2,7 +2,8 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import dynamic from 'next/dynamic';
-import { Loader2, Save, FileText, Receipt, AlertCircle, Check } from 'lucide-react';
+import { Loader2, FileText, Receipt, AlertCircle, Check, ArrowLeft } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import api from '@/utils/api';
 import { useToast } from '@/context/ToastContext';
 
@@ -14,19 +15,14 @@ const AgreementBuilder = dynamic(
 
 export default function AdminPdfEditorPage() {
   const { toast } = useToast();
+  const router = useRouter();
 
-  // Which global template we're editing: 'agreement' | 'receipt'
-  const [templateType, setTemplateType] = useState(null); // null = modal open
-  const [showTypeModal, setShowTypeModal] = useState(true);
-
-  // The loaded template data
+  const [templateType, setTemplateType] = useState(null);
   const [agreementTemplate, setAgreementTemplate] = useState(null);
   const [receiptTemplate, setReceiptTemplate] = useState(null);
-
   const [saving, setSaving] = useState(false);
   const [loadingTemplates, setLoadingTemplates] = useState(true);
 
-  // Load global templates on mount
   useEffect(() => {
     const load = async () => {
       setLoadingTemplates(true);
@@ -37,7 +33,7 @@ export default function AdminPdfEditorPage() {
         setAgreementTemplate(agreement);
         setReceiptTemplate(receipt);
       } catch {
-        // It's fine — templates may not exist yet (admin creates them fresh)
+        // Fine — templates may not exist yet
       } finally {
         setLoadingTemplates(false);
       }
@@ -67,68 +63,85 @@ export default function AdminPdfEditorPage() {
   }, [templateType, toast]);
 
   return (
-    <div className="max-w-full pb-10">
-      {/* Page header */}
-      <div className="mb-5 flex items-center justify-between">
+    <div className="flex flex-col h-screen bg-gray-50">
+
+      {/* ── Fullscreen top bar ── */}
+      <div className="builder-fullscreen-topbar flex-shrink-0 flex-wrap gap-y-2">
+        <button
+          onClick={() => router.push('/dashboard/admin')}
+          className="back-btn"
+        >
+          <ArrowLeft size={15} />
+          Admin
+        </button>
+
+        <div className="h-5 w-px bg-gray-200 mx-1 hidden sm:block" />
+
         <div>
-          <h1 className="text-2xl font-extrabold text-slate-900">Global PDF Template Studio</h1>
-          <p className="text-sm text-slate-500 mt-1">
-            Design the global default templates for Agreements and Receipts. All tiers use these unless an Enterprise landlord selects their own template.
-          </p>
+          <p className="text-xs font-black text-slate-400 uppercase tracking-widest leading-none">PDF Template Studio</p>
+          <p className="text-sm font-extrabold text-slate-900 leading-tight">Global Default Templates</p>
+        </div>
+
+        {/* Type switcher — in the top bar */}
+        <div className="flex items-center gap-2 ml-auto">
+          <button
+            onClick={() => setTemplateType('agreement')}
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold border transition-all ${
+              templateType === 'agreement'
+                ? 'bg-blue-600 text-white border-blue-600 shadow-sm'
+                : 'bg-white text-slate-600 border-slate-200 hover:border-blue-300 hover:text-blue-600'
+            }`}
+          >
+            <FileText size={13} />
+            Agreement
+            {agreementTemplate && (
+              <span className="ml-0.5 bg-green-400 w-2 h-2 rounded-full inline-block" title="Template set" />
+            )}
+          </button>
+
+          <button
+            onClick={() => setTemplateType('receipt')}
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold border transition-all ${
+              templateType === 'receipt'
+                ? 'bg-purple-600 text-white border-purple-600 shadow-sm'
+                : 'bg-white text-slate-600 border-slate-200 hover:border-purple-300 hover:text-purple-600'
+            }`}
+          >
+            <Receipt size={13} />
+            Receipt
+            {receiptTemplate && (
+              <span className="ml-0.5 bg-green-400 w-2 h-2 rounded-full inline-block" title="Template set" />
+            )}
+          </button>
+
+          {currentTemplate && (
+            <span className="flex items-center gap-1 text-green-700 bg-green-50 border border-green-200 px-2.5 py-1.5 rounded-full text-[11px] font-bold">
+              <Check size={11} /> Saved
+            </span>
+          )}
         </div>
       </div>
 
-      {/* Type switcher tabs */}
-      <div className="flex items-center gap-2 mb-5">
-        <button
-          onClick={() => setTemplateType('agreement')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold border transition-all ${
-            templateType === 'agreement'
-              ? 'bg-blue-600 text-white border-blue-600 shadow'
-              : 'bg-white text-slate-600 border-slate-200 hover:border-blue-300'
-          }`}
-        >
-          <FileText size={15} />
-          Global Agreement Template
-          {agreementTemplate && (
-            <span className="ml-1 bg-green-500 text-white text-[10px] font-black px-1.5 py-0.5 rounded-full">
-              SET
-            </span>
-          )}
-        </button>
-        <button
-          onClick={() => setTemplateType('receipt')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold border transition-all ${
-            templateType === 'receipt'
-              ? 'bg-purple-600 text-white border-purple-600 shadow'
-              : 'bg-white text-slate-600 border-slate-200 hover:border-purple-300'
-          }`}
-        >
-          <Receipt size={15} />
-          Global Receipt Template
-          {receiptTemplate && (
-            <span className="ml-1 bg-green-500 text-white text-[10px] font-black px-1.5 py-0.5 rounded-full">
-              SET
-            </span>
-          )}
-        </button>
-      </div>
-
-      {/* No type selected — prompt */}
+      {/* ── No type selected ── */}
       {!templateType && !loadingTemplates && (
-        <div className="rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50 flex flex-col items-center justify-center gap-4 py-20">
-          <AlertCircle size={36} className="text-slate-300" />
-          <p className="text-slate-500 font-semibold text-sm">Select a template type above to start editing.</p>
+        <div className="flex-1 flex flex-col items-center justify-center gap-5 bg-gray-50">
+          <div className="p-4 bg-slate-100 rounded-2xl">
+            <AlertCircle size={32} className="text-slate-400" />
+          </div>
+          <div className="text-center">
+            <p className="text-slate-700 font-bold text-base">Select a template type to begin</p>
+            <p className="text-slate-400 text-sm mt-1">Design the global default for all tenants and landlords</p>
+          </div>
           <div className="flex items-center gap-3">
             <button
               onClick={() => setTemplateType('agreement')}
-              className="px-5 py-2.5 rounded-xl text-sm font-bold bg-blue-600 text-white hover:bg-blue-700 transition flex items-center gap-2"
+              className="px-6 py-2.5 rounded-xl text-sm font-bold bg-blue-600 text-white hover:bg-blue-700 transition flex items-center gap-2 shadow-sm"
             >
               <FileText size={15} /> Edit Global Agreement
             </button>
             <button
               onClick={() => setTemplateType('receipt')}
-              className="px-5 py-2.5 rounded-xl text-sm font-bold bg-purple-600 text-white hover:bg-purple-700 transition flex items-center gap-2"
+              className="px-6 py-2.5 rounded-xl text-sm font-bold bg-purple-600 text-white hover:bg-purple-700 transition flex items-center gap-2 shadow-sm"
             >
               <Receipt size={15} /> Edit Global Receipt
             </button>
@@ -136,36 +149,37 @@ export default function AdminPdfEditorPage() {
         </div>
       )}
 
-      {/* Loading */}
+      {/* ── Loading ── */}
       {loadingTemplates && (
-        <div className="flex items-center justify-center py-20 gap-2 text-slate-400 text-sm">
+        <div className="flex-1 flex items-center justify-center gap-2 text-slate-400 text-sm">
           <Loader2 className="animate-spin" size={18} /> Loading saved global templates…
         </div>
       )}
 
-      {/* Builder */}
+      {/* ── Builder ── */}
       {!loadingTemplates && templateType && (
-        <div className="rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
-          {/* Info bar */}
-          <div className={`px-5 py-3 text-sm font-semibold flex items-center gap-2 ${templateType === 'agreement' ? 'bg-blue-50 text-blue-800 border-b border-blue-100' : 'bg-purple-50 text-purple-800 border-b border-purple-100'}`}>
-            {templateType === 'agreement' ? <FileText size={15} /> : <Receipt size={15} />}
+        <div className="flex-1 min-h-0 overflow-hidden flex flex-col">
+          {/* Info strip */}
+          <div className={`px-5 py-2 text-xs font-semibold flex items-center gap-2 flex-shrink-0 ${
+            templateType === 'agreement'
+              ? 'bg-blue-50 text-blue-800 border-b border-blue-100'
+              : 'bg-purple-50 text-purple-800 border-b border-purple-100'
+          }`}>
+            {templateType === 'agreement' ? <FileText size={13} /> : <Receipt size={13} />}
             {templateType === 'agreement'
-              ? 'Editing the Global Agreement Template — use "Insert Variables" to add dynamic fields, and "Clauses Section" to mark where Pro users can drag-and-drop their clauses.'
-              : 'Editing the Global Receipt Template — use "Insert Variables" to add payment-specific dynamic fields. Clauses do not apply to receipts.'}
-            {currentTemplate && (
-              <span className="ml-auto flex items-center gap-1 text-green-700 bg-green-50 border border-green-200 px-2 py-0.5 rounded-full text-[11px] font-bold">
-                <Check size={11} /> Saved version exists
-              </span>
-            )}
+              ? 'Global Agreement Template — use the Toolbox to insert variables and clauses section.'
+              : 'Global Receipt Template — insert payment-specific variables. Clauses do not apply.'}
           </div>
 
-          <AgreementBuilder
-            key={templateType} // force remount when switching type
-            templateType={templateType}
-            initialContent={currentTemplate?.bodyHtml || ''}
-            onSave={handleSave}
-            isSaving={saving}
-          />
+          <div className="flex-1 min-h-0 overflow-hidden">
+            <AgreementBuilder
+              key={templateType}
+              templateType={templateType}
+              initialContent={currentTemplate?.bodyHtml || ''}
+              onSave={handleSave}
+              isSaving={saving}
+            />
+          </div>
         </div>
       )}
     </div>

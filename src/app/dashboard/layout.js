@@ -372,12 +372,18 @@ export default function DashboardLayout({ children }) {
 
   const sidebarProps = { user, role, currentNav, pathname, badgeCounts, pulseColor, badgeColor };
 
+  const isBuilderFullscreen =
+    pathname === '/dashboard/agreement-templates/new' ||
+    /^\/dashboard\/agreement-templates\/[^/]+\/edit$/.test(pathname) ||
+    pathname === '/dashboard/admin/pdf-editor';
+
   return (
     <div className={`min-h-screen flex flex-col bg-[#F8FBFC] overflow-x-hidden ${mobileOpen ? 'overflow-hidden' : ''}`}>
       <Navbar />
       <NotificationToast notification={notification} onDismiss={() => setNotification(null)} />
 
-      {/* ── Mobile top bar (hamburger) ── */}
+      {/* ── Mobile top bar (hamburger) — hidden in fullscreen builder ── */}
+      {!isBuilderFullscreen && (
       <div className="lg:hidden fixed top-[60px] left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-b border-gray-100 px-4 py-2 flex items-center gap-3">
         <button
           onClick={() => setMobileOpen(true)}
@@ -401,6 +407,7 @@ export default function DashboardLayout({ children }) {
           </span>
         </div>
       </div>
+      )}
 
       {/* ── Mobile drawer overlay ── */}
       <AnimatePresence>
@@ -466,38 +473,54 @@ export default function DashboardLayout({ children }) {
         )}
       </AnimatePresence>
 
-      {/* ── Page body ── */}
-      <div className="flex-1 pt-24 pb-10 lg:pt-24">
-        {/* Extra top padding on mobile to account for the mobile top bar */}
-        <div className="lg:hidden h-11" />
-
-        <div className="mx-auto flex max-w-[1600px] gap-6 px-4 sm:px-8 lg:px-12">
-
-          {/* Desktop Sidebar */}
-          <motion.aside
-            initial={{ x: -40, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            transition={{ duration: 0.5, ease: [0.21, 0.8, 0.3, 1] }}
-            className="sticky top-28 self-start max-h-[calc(100vh-8rem)] overflow-y-auto hidden w-64 shrink-0 flex-col rounded-3xl bg-white/85 p-4 shadow-[0_22px_70px_rgba(11,45,114,0.35)] ring-1 ring-[#0992C2]/15 lg:flex custom-scrollbar"
-          >
-            <SidebarContent {...sidebarProps} />
-          </motion.aside>
-
-          {/* Main content */}
+      {/* ── Full-screen builder mode ── */}
+      {isBuilderFullscreen ? (
+        <div className="flex-1 pt-16 lg:pt-16">
           <motion.main
-            className="flex-1 min-w-0"
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.45, ease: [0.21, 0.6, 0.35, 1] }}
+            className="w-full min-w-0"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.3 }}
           >
-            <div className="rounded-[2rem] bg-white/80 p-4 shadow-[0_24px_80px_rgba(148,163,120,0.45)] ring-1 ring-[#E0EDC5] sm:p-6 lg:p-8">
-              {children}
-            </div>
+            {children}
           </motion.main>
         </div>
-      </div>
+      ) : (
+        <>
+          {/* ── Page body ── */}
+          <div className="flex-1 pt-24 pb-10 lg:pt-24">
+            {/* Extra top padding on mobile to account for the mobile top bar */}
+            <div className="lg:hidden h-11" />
 
-      <Footer />
+            <div className="mx-auto flex max-w-[1600px] gap-6 px-4 sm:px-8 lg:px-12">
+
+              {/* Desktop Sidebar */}
+              <motion.aside
+                initial={{ x: -40, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                transition={{ duration: 0.5, ease: [0.21, 0.8, 0.3, 1] }}
+                className="sticky top-28 self-start max-h-[calc(100vh-8rem)] overflow-y-auto hidden w-64 shrink-0 flex-col rounded-3xl bg-white/85 p-4 shadow-[0_22px_70px_rgba(11,45,114,0.35)] ring-1 ring-[#0992C2]/15 lg:flex custom-scrollbar"
+              >
+                <SidebarContent {...sidebarProps} />
+              </motion.aside>
+
+              {/* Main content */}
+              <motion.main
+                className="flex-1 min-w-0"
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.45, ease: [0.21, 0.6, 0.35, 1] }}
+              >
+                <div className="rounded-[2rem] bg-white/80 p-4 shadow-[0_24px_80px_rgba(148,163,120,0.45)] ring-1 ring-[#E0EDC5] sm:p-6 lg:p-8">
+                  {children}
+                </div>
+              </motion.main>
+            </div>
+          </div>
+
+          <Footer />
+        </>
+      )}
     </div>
   );
 }
