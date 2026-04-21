@@ -1,13 +1,12 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import {
-  GripVertical, X, Search, ChevronDown, ChevronRight,
-  Sparkles, User, Landmark, Banknote, Calendar, MapPin,
-  Home, ShieldCheck, Wallet, Clock, Hash, TrendingUp,
-  ScrollText, Columns, Minus, Package
+  GripVertical, X, Sparkles, User, Landmark, Banknote, Calendar, MapPin,
+  Home, Wallet, Clock, Hash, TrendingUp, ScrollText
 } from 'lucide-react';
 
 const AGREEMENT_VARIABLE_GROUPS = [
   {
+    category: 'parties',
     label: 'Main Parties',
     vars: [
       { id: 'landlord_name', label: 'Landlord Name', icon: Landmark },
@@ -15,6 +14,7 @@ const AGREEMENT_VARIABLE_GROUPS = [
     ],
   },
   {
+    category: 'property',
     label: 'Property Info',
     vars: [
       { id: 'property_title', label: 'Property Title', icon: Home },
@@ -22,6 +22,7 @@ const AGREEMENT_VARIABLE_GROUPS = [
     ],
   },
   {
+    category: 'financials',
     label: 'Financials',
     vars: [
       { id: 'rent_amount', label: 'Monthly Rent', icon: Wallet },
@@ -33,6 +34,7 @@ const AGREEMENT_VARIABLE_GROUPS = [
     ],
   },
   {
+    category: 'dates',
     label: 'Dates & Duration',
     vars: [
       { id: 'start_date', label: 'Lease Start Date', icon: Calendar },
@@ -41,6 +43,7 @@ const AGREEMENT_VARIABLE_GROUPS = [
     ],
   },
   {
+    category: 'policies',
     label: 'Policies',
     vars: [
       { id: 'utilities_included', label: 'Utilities Included?', icon: Sparkles },
@@ -56,6 +59,7 @@ const AGREEMENT_VARIABLE_GROUPS = [
 
 const RECEIPT_VARIABLE_GROUPS = [
   {
+    category: 'receipt',
     label: 'Receipt Info',
     vars: [
       { id: 'receipt_number', label: 'Receipt No.', icon: Hash },
@@ -67,6 +71,7 @@ const RECEIPT_VARIABLE_GROUPS = [
     ],
   },
   {
+    category: 'tenant',
     label: 'Tenant & Property',
     vars: [
       { id: 'tenant_name', label: 'Tenant Name', icon: User },
@@ -77,15 +82,12 @@ const RECEIPT_VARIABLE_GROUPS = [
   },
 ];
 
-const FloatingToolbox = ({ editor, templateType = 'agreement' }) => {
-  const [isMinimized, setIsMinimized] = useState(false);
+const FloatingToolbox = ({ editor, templateType = 'agreement', isOpen, onClose }) => {
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const [searchTerm, setSearchTerm] = useState('');
-  const [expandedSections, setExpandedSections] = useState({ variables: true, blocks: true });
   const toolboxRef = useRef(null);
-  const pillRef = useRef(null);
 
   // Initialize position
   useEffect(() => {
@@ -111,9 +113,9 @@ const FloatingToolbox = ({ editor, templateType = 'agreement' }) => {
 
   // Drag handlers
   const handleMouseDown = useCallback((e) => {
-    if (e.target.tagName === 'INPUT') return;
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON') return;
     setIsDragging(true);
-    const rect = (toolboxRef.current || pillRef.current)?.getBoundingClientRect();
+    const rect = toolboxRef.current?.getBoundingClientRect();
     if (rect) {
       setDragOffset({ x: e.clientX - rect.left, y: e.clientY - rect.top });
     }
@@ -138,26 +140,12 @@ const FloatingToolbox = ({ editor, templateType = 'agreement' }) => {
     };
   }, [isDragging, dragOffset]);
 
-  const addVariable = (name, label) => {
+  const addVariable = (name, label, category) => {
     if (!editor) return;
     editor.chain().focus().insertContent({
       type: 'variable',
-      attrs: { name, label },
+      attrs: { name, label, category },
     }).run();
-  };
-
-  const insertClausesSection = () => {
-    if (!editor) return;
-    editor.chain().focus().insertContent({ type: 'clausesPlaceholder' }).run();
-  };
-
-  const insertDualColumn = () => {
-    if (!editor) return;
-    editor.chain().focus().insertContent({ type: 'dualColumn' }).run();
-  };
-
-  const toggleSection = (key) => {
-    setExpandedSections(prev => ({ ...prev, [key]: !prev[key] }));
   };
 
   const variableGroups = templateType === 'receipt' ? RECEIPT_VARIABLE_GROUPS : AGREEMENT_VARIABLE_GROUPS;
@@ -171,21 +159,7 @@ const FloatingToolbox = ({ editor, templateType = 'agreement' }) => {
     ),
   })).filter(group => group.vars.length > 0);
 
-  // Minimized pill
-  if (isMinimized) {
-    return (
-      <div
-        ref={pillRef}
-        className="floating-toolbox-pill"
-        style={{ left: position.x, top: position.y }}
-        onClick={() => setIsMinimized(false)}
-        onMouseDown={handleMouseDown}
-      >
-        <Package size={14} />
-        Toolbox
-      </div>
-    );
-  }
+  if (!isOpen) return null;
 
   return (
     <div
@@ -195,21 +169,22 @@ const FloatingToolbox = ({ editor, templateType = 'agreement' }) => {
         left: position.x,
         top: position.y,
         cursor: isDragging ? 'grabbing' : 'default',
+        width: 320
       }}
     >
       {/* Header — drag handle */}
       <div className="floating-toolbox-header" onMouseDown={handleMouseDown}>
         <div className="flex items-center gap-2">
           <GripVertical size={14} className="opacity-60" />
-          <h3>Toolbox</h3>
+          <h3>Variables Library</h3>
         </div>
         <div className="flex items-center gap-1">
           <button
-            onClick={(e) => { e.stopPropagation(); setIsMinimized(true); }}
+            onClick={(e) => { e.stopPropagation(); onClose(); }}
             className="p-1 hover:bg-white/20 rounded transition-colors"
-            title="Minimize"
+            title="Close"
           >
-            <Minus size={12} className="text-white" />
+            <X size={14} className="text-white" />
           </button>
         </div>
       </div>
@@ -226,70 +201,46 @@ const FloatingToolbox = ({ editor, templateType = 'agreement' }) => {
         />
 
         {/* Variables Section */}
-        <div className="toolbox-section">
-          <div className="toolbox-section-header" onClick={() => toggleSection('variables')}>
-            <span className="flex items-center gap-1.5">
-              <Sparkles size={12} className="text-blue-500" />
-              Variables
-            </span>
-            {expandedSections.variables ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
-          </div>
+        <div className="toolbox-section-items px-1 mt-2">
+          {filteredGroups.map((group) => (
+            <div key={group.label} className="mb-4">
+              <div className="flex items-center gap-2 mb-2 px-1">
+                <div className="h-px bg-gray-100 flex-1"></div>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                  {group.label}
+                </p>
+                <div className="h-px bg-gray-100 flex-1"></div>
+              </div>
+              <div className="flex flex-wrap gap-1.5 justify-center">
+                {group.vars.map((v) => {
+                  const Icon = v.icon;
+                  // Use same category styles as the node view for the buttons (approximated)
+                  let chipClass = "toolbox-var-chip";
+                  if(group.category === 'parties') chipClass += " bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100";
+                  else if(group.category === 'property') chipClass += " bg-green-50 text-green-700 border-green-200 hover:bg-green-100";
+                  else if(group.category === 'financials') chipClass += " bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100";
+                  else if(group.category === 'dates') chipClass += " bg-purple-50 text-purple-700 border-purple-200 hover:bg-purple-100";
+                  else if(group.category === 'policies') chipClass += " bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100";
+                  else if(group.category === 'receipt') chipClass += " bg-cyan-50 text-cyan-700 border-cyan-200 hover:bg-cyan-100";
+                  else if(group.category === 'tenant') chipClass += " bg-teal-50 text-teal-700 border-teal-200 hover:bg-teal-100";
 
-          {expandedSections.variables && (
-            <div className="toolbox-section-items px-1">
-              {filteredGroups.map((group) => (
-                <div key={group.label} className="mb-2">
-                  <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider px-2 pt-2 pb-1">
-                    {group.label}
-                  </p>
-                  <div className="flex flex-wrap">
-                    {group.vars.map((v) => {
-                      const Icon = v.icon;
-                      return (
-                        <button
-                          key={v.id}
-                          className="toolbox-var-chip"
-                          onClick={() => addVariable(v.id, v.label)}
-                          title={`Insert {{${v.id}}}`}
-                        >
-                          <Icon size={11} className="opacity-50" />
-                          {v.label}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              ))}
-              {filteredGroups.length === 0 && (
-                <p className="text-xs text-slate-400 text-center py-4">No variables match your search</p>
-              )}
+                  return (
+                    <button
+                      key={v.id}
+                      className={`flex items-center gap-1.5 px-2.5 py-1 rounded border text-xs font-semibold cursor-pointer transition-transform active:scale-95 ${chipClass}`}
+                      onClick={() => addVariable(v.id, v.label, group.category)}
+                      title={`Insert {{${v.id}}}`}
+                    >
+                      <Icon size={12} className="opacity-60" />
+                      {v.label}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
-          )}
-        </div>
-
-        {/* Blocks Section */}
-        <div className="toolbox-section">
-          <div className="toolbox-section-header" onClick={() => toggleSection('blocks')}>
-            <span className="flex items-center gap-1.5">
-              <Package size={12} className="text-emerald-500" />
-              Blocks
-            </span>
-            {expandedSections.blocks ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
-          </div>
-
-          {expandedSections.blocks && (
-            <div className="toolbox-section-items px-1 pt-1">
-              {templateType !== 'receipt' && (
-                <button className="toolbox-block-btn" onClick={insertClausesSection}>
-                  <ScrollText size={14} className="text-emerald-600" />
-                  <span>Insert Clauses Section</span>
-                </button>
-              )}
-              <button className="toolbox-block-btn" onClick={insertDualColumn}>
-                <Columns size={14} className="text-blue-600" />
-                <span>Insert Dual Column</span>
-              </button>
-            </div>
+          ))}
+          {filteredGroups.length === 0 && (
+            <p className="text-xs text-slate-400 text-center py-4">No variables match your search</p>
           )}
         </div>
       </div>

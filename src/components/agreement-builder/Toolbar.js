@@ -1,15 +1,14 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import Script from 'next/script';
 import { toast } from 'react-hot-toast';
 import { 
   Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight, 
   ChevronDown, Image as ImageIcon,
-  Undo2, Redo2
+  Undo2, Redo2, Sparkles, ScrollText, Columns
 } from 'lucide-react';
 
-const Toolbar = ({ editor }) => {
+const Toolbar = ({ editor, isToolboxOpen, onToggleToolbox, templateType }) => {
   const [showFontSizes, setShowFontSizes] = useState(false);
-  const widgetRef = useRef(null);
 
   if (!editor) return null;
 
@@ -134,7 +133,7 @@ const Toolbar = ({ editor }) => {
         </div>
 
         {/* Font Size */}
-        <div className="relative border-r border-gray-100 px-2">
+        <div className="relative border-r border-gray-100 px-2" title="Font Size">
           <button
             onClick={() => setShowFontSizes(!showFontSizes)}
             className="flex items-center gap-1 px-2 py-1.5 text-xs font-bold text-gray-600 hover:bg-gray-100 rounded transition-colors whitespace-nowrap"
@@ -190,16 +189,43 @@ const Toolbar = ({ editor }) => {
           </button>
         </div>
 
-        {/* Media */}
+        {/* Insert Elements */}
         <div className="flex items-center gap-1 px-2">
+          <button
+            onClick={onToggleToolbox}
+            className={`p-1.5 rounded transition-colors ${isToolboxOpen ? 'bg-blue-100 text-blue-600' : 'hover:bg-gray-100 text-gray-600'}`}
+            title="Variables Library"
+          >
+            <Sparkles size={18} />
+          </button>
+
+          {templateType !== 'receipt' && (
+            <button
+              onClick={() => editor.chain().focus().insertContent({ type: 'clausesPlaceholder' }).run()}
+              className="p-1.5 rounded hover:bg-gray-100 text-emerald-600 transition-colors"
+              title="Insert Clauses Section"
+            >
+              <ScrollText size={18} />
+            </button>
+          )}
+
+          <button
+            onClick={() => editor.chain().focus().insertContent({ type: 'dualColumn' }).run()}
+            className="p-1.5 rounded hover:bg-gray-100 text-indigo-600 transition-colors"
+            title="Insert Split Section (Dual Column)"
+          >
+            <Columns size={18} />
+          </button>
+
           <button
             onClick={insertImage}
             className="p-1.5 rounded hover:bg-gray-100 text-gray-600 transition-colors"
-            title="Upload Image (Cloudinary)"
+            title="Upload Image"
           >
             <ImageIcon size={18} />
           </button>
         </div>
+
       </div>
     </>
   );

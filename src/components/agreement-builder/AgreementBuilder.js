@@ -25,6 +25,7 @@ const ZOOM_LEVELS = [75, 100, 125, 150];
 const AgreementBuilder = ({ initialContent = '', onSave, isSaving = false, templateType = 'agreement' }) => {
   const [showPreview, setShowPreview] = useState(false);
   const [showShortcuts, setShowShortcuts] = useState(false);
+  const [isToolboxOpen, setIsToolboxOpen] = useState(false);
   const [zoom, setZoom] = useState(100);
   const [autoSaveStatus, setAutoSaveStatus] = useState('idle'); // idle | saving | saved
   const autoSaveTimerRef = useRef(null);
@@ -191,7 +192,12 @@ const AgreementBuilder = ({ initialContent = '', onSave, isSaving = false, templ
       </div>
 
       {/* Toolbar */}
-      <Toolbar editor={editor} />
+      <Toolbar 
+        editor={editor} 
+        templateType={templateType}
+        isToolboxOpen={isToolboxOpen} 
+        onToggleToolbox={() => setIsToolboxOpen(!isToolboxOpen)} 
+      />
 
       {/* Editor Main Area */}
       <div className={`flex-1 overflow-y-auto document-container zoom-${zoom}`}>
@@ -201,7 +207,12 @@ const AgreementBuilder = ({ initialContent = '', onSave, isSaving = false, templ
       </div>
 
       {/* Floating Toolbox */}
-      <FloatingToolbox editor={editor} templateType={templateType} />
+      <FloatingToolbox 
+        editor={editor} 
+        templateType={templateType} 
+        isOpen={isToolboxOpen}
+        onClose={() => setIsToolboxOpen(false)}
+      />
 
       {/* Preview Modal */}
       <PreviewModal 

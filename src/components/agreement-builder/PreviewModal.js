@@ -55,7 +55,7 @@ const PreviewModal = ({ isOpen, onClose, html }) => {
         const replacement = samples[name] || `[${name}]`;
         const span = doc.createElement('strong');
         span.className = 'preview-variable';
-        span.style.color = name?.includes('clause') ? '#15803d' : '#1e40af';
+        span.style.color = '#0f172a'; // Standard black/slate text for the actual value
         span.style.fontWeight = '800';
         span.innerText = replacement;
         v.parentNode.replaceChild(span, v);
@@ -104,9 +104,33 @@ const PreviewModal = ({ isOpen, onClose, html }) => {
           margin-top: 1.5em;
           margin-bottom: 1.5em;
         }
+        .dual-column-wrapper {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 0;
+          position: relative;
+          min-height: 100px;
+          margin: 1.5rem 0;
+        }
+        .dual-column-wrapper::after {
+          content: '';
+          position: absolute;
+          top: 0;
+          bottom: 0;
+          left: 50%;
+          border-left: 2px dotted #cbd5e1;
+          transform: translateX(-50%);
+          z-index: 1;
+        }
+        .dual-column-side {
+          padding: 0 20px;
+          position: relative;
+          z-index: 2;
+        }
         /* Inline font-size styles should apply directly; no override here. */
         @media print {
           .preview-clauses-placeholder { border: none !important; background: transparent !important; }
+          .dual-column-wrapper::after { border-left-color: #000; }
         }
       `}</style>
       <div className="bg-white rounded-2xl w-full max-w-5xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
