@@ -544,13 +544,22 @@ function TemplateDocument({
   const [portalNode, setPortalNode] = useState(null);
 
   useEffect(() => {
-    if (hasPortal && containerRef.current) {
+    if (!containerRef.current) return;
+    
+    const htmlContainer = containerRef.current.querySelector('#agreement-tiptap-html-container');
+    if (htmlContainer && htmlContainer.innerHTML !== html) {
+      htmlContainer.innerHTML = html;
+    }
+
+    if (hasPortal) {
       const node = containerRef.current.querySelector('#clause-buckets-portal-root');
-      if (node) {
+      if (node && node !== portalNode) {
         setPortalNode(node);
       }
+    } else {
+      setPortalNode(null);
     }
-  }, [html, hasPortal]);
+  }, [html, hasPortal, portalNode]);
 
   return (
     <div className="prose prose-blue prose-sm max-w-none agreement-tiptap-content" ref={containerRef}>
@@ -625,8 +634,7 @@ function TemplateDocument({
           .dual-column-wrapper::after { border-left-color: #000; }
         }
       `}</style>
-      
-      <div dangerouslySetInnerHTML={{ __html: html }} />
+      <div id="agreement-tiptap-html-container"></div>
 
       {hasPortal && portalNode && createPortal(
         <div className="not-prose my-10 border-2 border-dashed border-gray-100 rounded-2xl p-6 bg-gray-50/30">
