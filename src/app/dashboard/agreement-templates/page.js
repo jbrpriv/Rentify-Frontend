@@ -177,13 +177,15 @@ export default function AgreementTemplatesPage() {
                       )}
 
                       <div className="mt-4 flex items-center gap-2">
-                        <button
-                          onClick={() => router.push(`/dashboard/agreement-templates/${template._id}/edit`)}
-                          className="flex-1 px-3 py-2 rounded-lg text-xs font-bold border"
-                          style={{ borderColor: 'var(--brand-primary)', color: 'var(--brand-primary)', background: '#E6EAF2' }}
-                        >
-                          <span className="inline-flex items-center gap-1"><Brush size={12} /> {template.status === 'approved' ? 'View' : 'Edit'}</span>
-                        </button>
+                        {(template.status === 'approved' || template.status === 'rejected') && (
+                          <button
+                            onClick={() => router.push(`/dashboard/agreement-templates/${template._id}/edit`)}
+                            className="flex-1 px-3 py-2 rounded-lg text-xs font-bold border"
+                            style={{ borderColor: 'var(--brand-primary)', color: 'var(--brand-primary)', background: '#E6EAF2' }}
+                          >
+                            <span className="inline-flex items-center gap-1"><Brush size={12} /> Edit</span>
+                          </button>
+                        )}
                         <button
                           onClick={() => handlePreview(template)}
                           className="flex-1 px-3 py-2 rounded-lg text-xs font-bold border"
