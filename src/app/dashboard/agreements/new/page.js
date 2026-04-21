@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef, useMemo, Suspense } from 'react';
+import { createPortal } from 'react-dom';
 import { useRouter, useSearchParams } from 'next/navigation';
 import api from '@/utils/api';
 import { useToast } from '@/context/ToastContext';
@@ -456,8 +457,8 @@ function TemplateDocument({
   handleRemoveClause, addClauseBucket, isClauseLimitFinite, clauseLimit 
 }) {
   
-  const sections = useMemo(() => {
-    if (!templateHtml) return [];
+  const { html, hasPortal } = useMemo(() => {
+    if (!templateHtml) return { html: '', hasPortal: false };
     try {
       const parser = new DOMParser();
       const doc = parser.parseFromString(templateHtml, 'text/html');
@@ -523,19 +524,36 @@ function TemplateDocument({
         v.parentNode.replaceChild(span, v);
       });
 
-      // 2. Look for Placeholder
+      // 2. Look for Placeholder and setup portal
       const placeholderHtml = '<div data-type="clauses-placeholder"></div>';
       const fullHtml = doc.body.innerHTML;
 
       if (!fullHtml.includes(placeholderHtml)) {
-        return [fullHtml];
+        return { html: fullHtml, hasPortal: false };
       }
-      return fullHtml.split(placeholderHtml);
+      
+      const placeholder = doc.querySelector('div[data-type="clauses-placeholder"]');
+      if (placeholder) {
+          const portalRoot = doc.createElement('div');
+          portalRoot.id = 'clause-buckets-portal-root';
+          placeholder.parentNode.replaceChild(portalRoot, placeholder);
+          return { html: doc.body.innerHTML, hasPortal: true };
+      }
+
+      return { html: fullHtml, hasPortal: false };
     } catch (error) {
       console.error('Template rendering error:', error);
-      return [templateHtml];
+      return { html: templateHtml, hasPortal: false };
     }
   }, [templateHtml, offerData, formData, formatMoney]);
+
+  const [portalNode, setPortalNode] = useState(null);
+
+  useEffect(() => {
+    if (hasPortal) {
+      setPortalNode(document.getElementById('clause-buckets-portal-root'));
+    }
+  }, [html, hasPortal]);
 
   return (
     <div className="prose prose-blue prose-sm max-w-none agreement-tiptap-content">
@@ -557,35 +575,85 @@ function TemplateDocument({
           margin-top: 1.5em;
           margin-bottom: 1.5em;
         }
+        .dual-column-wrapper {
+          display: grid;
+          grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+          gap: 0;
+          position: relative;
+          min-height: 100px;
+          margin: 1.5rem 0;
+        }
+        .dual-column-wrapper::after {
+          content: '';
+          position: absolute;
+          top: 0;
+          bottom: 0;
+          left: 50%;
+          border-left: 2px dotted #cbd5e1;
+          transform: translateX(-50%);
+          z-index: 1;
+        }
+        .dual-column-side {
+          padding: 0 20px;
+          position: relative;
+          z-index: 2;
+          min-width: 0;
+          word-wrap: break-word;
+          overflow-wrap: break-word;
+          max-width: 100%;
+        }
+        .agreement-table {
+          width: 100%;
+          margin: 1.5rem 0;
+          border-collapse: collapse;
+          table-layout: fixed;
+        }
+        .agreement-table th,
+        .agreement-table td {
+          min-width: 1em;
+          border: 1px solid #cbd5e1;
+          padding: 10px 14px;
+          vertical-align: top;
+        }
+        .agreement-table th {
+          font-weight: 800;
+          text-align: left;
+          background-color: #f8fafc;
+          color: #334155;
+        }
+        .agreement-table p {
+          margin: 0;
+        }
+        @media print {
+          .dual-column-wrapper::after { border-left-color: #000; }
+        }
       `}</style>
       
-      {sections.map((html, i) => (
-        <React.Fragment key={i}>
-          <div dangerouslySetInnerHTML={{ __html: html }} />
-          {i === 0 && sections.length > 1 && (
-            <div className="not-prose my-10 border-2 border-dashed border-gray-100 rounded-2xl p-6 bg-gray-50/30">
-              <ClauseBucketsSection 
-                clauseBuckets={clauseBuckets}
-                clausesById={clausesById}
-                hoveredBucketKey={hoveredBucketKey}
-                setHoveredBucketKey={setHoveredBucketKey}
-                handleDropToBucket={handleDropToBucket}
-                handleDragStart={handleDragStart}
-                moveBucketClause={moveBucketClause}
-                handleRemoveClause={handleRemoveClause}
-                addClauseBucket={addClauseBucket}
-                isClauseLimitFinite={isClauseLimitFinite}
-                clauseLimit={clauseLimit}
-                offerData={offerData}
-                formData={formData}
-                formatMoney={formatMoney}
-              />
-            </div>
-          )}
-        </React.Fragment>
-      ))}
+      <div dangerouslySetInnerHTML={{ __html: html }} />
 
-      {sections.length === 1 && (
+      {hasPortal && portalNode && createPortal(
+        <div className="not-prose my-10 border-2 border-dashed border-gray-100 rounded-2xl p-6 bg-gray-50/30">
+          <ClauseBucketsSection 
+            clauseBuckets={clauseBuckets}
+            clausesById={clausesById}
+            hoveredBucketKey={hoveredBucketKey}
+            setHoveredBucketKey={setHoveredBucketKey}
+            handleDropToBucket={handleDropToBucket}
+            handleDragStart={handleDragStart}
+            moveBucketClause={moveBucketClause}
+            handleRemoveClause={handleRemoveClause}
+            addClauseBucket={addClauseBucket}
+            isClauseLimitFinite={isClauseLimitFinite}
+            clauseLimit={clauseLimit}
+            offerData={offerData}
+            formData={formData}
+            formatMoney={formatMoney}
+          />
+        </div>,
+        portalNode
+      )}
+
+      {(!hasPortal || !portalNode) && (
         <div className="not-prose mt-12 pt-12 border-t border-gray-100">
           <div className="mb-6 flex flex-col items-center opacity-30">
             <ScrollText className="text-gray-400" size={32} />
