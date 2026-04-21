@@ -71,7 +71,7 @@ export default function CreateAgreementTemplatePage() {
   if (user && !canAccessTemplateStudio) return null;
 
   return (
-    <div className="flex flex-col h-screen bg-gray-50">
+    <div className="flex flex-col min-h-screen bg-gray-50">
       {/* Compact fullscreen top bar */}
       <div className="builder-fullscreen-topbar flex-shrink-0">
         <button
@@ -111,7 +111,7 @@ export default function CreateAgreementTemplatePage() {
       </div>
 
       {/* Builder — fills remaining height */}
-      <div className="flex-1 min-h-0 overflow-hidden">
+      <div className="flex-1 min-h-0">
         <AgreementBuilder
           onSave={handleSave}
           isSaving={saving}

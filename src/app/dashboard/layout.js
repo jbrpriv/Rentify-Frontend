@@ -378,7 +378,7 @@ export default function DashboardLayout({ children }) {
     pathname === '/dashboard/admin/pdf-editor';
 
   return (
-    <div className={`min-h-screen flex flex-col bg-[#F8FBFC] overflow-x-hidden ${mobileOpen ? 'overflow-hidden' : ''}`}>
+    <div className={`min-h-screen flex flex-col bg-[#F8FBFC] ${isBuilderFullscreen ? '' : 'overflow-x-hidden'} ${mobileOpen ? 'overflow-hidden' : ''}`}>
       <Navbar />
       <NotificationToast notification={notification} onDismiss={() => setNotification(null)} />
 

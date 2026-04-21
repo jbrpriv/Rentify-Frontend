@@ -63,7 +63,7 @@ export default function AdminPdfEditorPage() {
   }, [templateType, toast]);
 
   return (
-    <div className="flex flex-col h-screen bg-gray-50">
+    <div className="flex flex-col min-h-screen bg-gray-50">
 
       {/* ── Fullscreen top bar ── */}
       <div className="builder-fullscreen-topbar flex-shrink-0 flex-wrap gap-y-2">
@@ -158,7 +158,7 @@ export default function AdminPdfEditorPage() {
 
       {/* ── Builder ── */}
       {!loadingTemplates && templateType && (
-        <div className="flex-1 min-h-0 overflow-hidden flex flex-col">
+        <div className="flex-1 min-h-0 flex flex-col">
           {/* Info strip */}
           <div className={`px-5 py-2 text-xs font-semibold flex items-center gap-2 flex-shrink-0 ${
             templateType === 'agreement'
@@ -171,7 +171,7 @@ export default function AdminPdfEditorPage() {
               : 'Global Receipt Template — insert payment-specific variables. Clauses do not apply.'}
           </div>
 
-          <div className="flex-1 min-h-0 overflow-hidden">
+          <div className="flex-1 min-h-0">
             <AgreementBuilder
               key={templateType}
               templateType={templateType}
