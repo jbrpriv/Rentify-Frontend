@@ -50,20 +50,7 @@ export default function EditAgreementTemplatePage() {
       .finally(() => setLoading(false));
   }, [id, toast, user, canAccessTemplateStudio]);
 
-  if (user && !canAccessTemplateStudio) return null;
-  if (loading) return (
-    <div className="h-[60vh] flex flex-col items-center justify-center text-gray-400">
-      <Loader2 className="animate-spin mb-4" size={48} />
-      <p className="font-bold">Loading Template Builder...</p>
-    </div>
-  );
-
   const [saving, setSaving] = useState(false);
-
-  const initialContent = template?.bodyHtml || `
-    <h1>${template?.name || 'Agreement'}</h1>
-    <p>${template?.description || 'Residential Rental Agreement'}</p>
-  `;
 
   const handleSave = React.useCallback(async (data) => {
     if (!metadata.name.trim()) {
@@ -88,6 +75,19 @@ export default function EditAgreementTemplatePage() {
       setSaving(false);
     }
   }, [id, metadata, toast, router]);
+
+  if (user && !canAccessTemplateStudio) return null;
+  if (loading) return (
+    <div className="h-[60vh] flex flex-col items-center justify-center text-gray-400">
+      <Loader2 className="animate-spin mb-4" size={48} />
+      <p className="font-bold">Loading Template Builder...</p>
+    </div>
+  );
+
+  const initialContent = template?.bodyHtml || `
+    <h1>${template?.name || 'Agreement'}</h1>
+    <p>${template?.description || 'Residential Rental Agreement'}</p>
+  `;
 
   return (
     <div className="max-w-6xl mx-auto pb-12">
