@@ -379,6 +379,14 @@
 /* ═══════════════════════════════════
    Table Block
    ═══════════════════════════════════ */
+.ProseMirror table {
+  border-collapse: collapse;
+  table-layout: fixed;
+  width: 100%;
+  margin: 1.5rem 0;
+  overflow: hidden;
+}
+
 .agreement-table {
   width: 100%;
   margin: 1.5rem 0;
@@ -386,6 +394,8 @@
   table-layout: fixed;
 }
 
+.ProseMirror td,
+.ProseMirror th,
 .agreement-table th,
 .agreement-table td {
   min-width: 1em;
@@ -396,16 +406,20 @@
   position: relative;
 }
 
+/* Ensure empty cells have min-height and display paragraphs correctly */
+.ProseMirror td > *,
+.ProseMirror th > *,
+.agreement-table td > *,
+.agreement-table th > * {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
 .agreement-table th {
   font-weight: 800;
   text-align: left;
   background-color: #f8fafc;
   color: #334155;
-}
-
-.agreement-table td p,
-.agreement-table th p {
-  margin: 0;
 }
 
 /* Selected cells during drag selection */

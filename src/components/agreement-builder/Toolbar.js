@@ -7,6 +7,44 @@ import {
   ScrollText, Columns, Table as TableIcon, Check
 } from 'lucide-react';
 
+const TableGridPicker = ({ onSelect }) => {
+  const [hovered, setHovered] = useState({ r: 0, c: 0 });
+  const rows = 10;
+  const cols = 10;
+
+  return (
+    <div className="flex flex-col items-center">
+      <div 
+        className="grid gap-[2px] bg-slate-200 border border-slate-200 p-[2px] rounded-md"
+        style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}
+        onMouseLeave={() => setHovered({ r: 0, c: 0 })}
+      >
+        {Array.from({ length: rows }).map((_, rIndex) => (
+          Array.from({ length: cols }).map((_, cIndex) => {
+            const r = rIndex + 1;
+            const c = cIndex + 1;
+            const isHovered = r <= hovered.r && c <= hovered.c;
+            
+            return (
+              <div
+                key={`${r}-${c}`}
+                className={`w-3.5 h-3.5 rounded-sm transition-colors cursor-pointer ${
+                  isHovered ? 'bg-indigo-500' : 'bg-white'
+                }`}
+                onMouseEnter={() => setHovered({ r, c })}
+                onClick={() => onSelect(hovered.r, hovered.c)}
+              />
+            );
+          })
+        ))}
+      </div>
+      <div className="mt-2 text-xs font-bold text-indigo-600 h-4">
+        {hovered.r > 0 && hovered.c > 0 ? `${hovered.c} x ${hovered.r} Table` : ' '}
+      </div>
+    </div>
+  );
+};
+
 const Toolbar = ({ editor, isToolboxOpen, onToggleToolbox, templateType }) => {
   const [showFontSizes, setShowFontSizes] = useState(false);
   const [showTableMenu, setShowTableMenu] = useState(false);
@@ -115,39 +153,55 @@ const Toolbar = ({ editor, isToolboxOpen, onToggleToolbox, templateType }) => {
             <span className="text-xs font-bold leading-none">Split Column</span>
           </button>
           
-          <div className="relative">
-            <button
-              onClick={() => setShowTableMenu(!showTableMenu)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border transition-colors ${
-                editor.isActive('table') ? 'bg-slate-800 text-white border-slate-800 shadow-sm' : 'bg-white text-slate-600 border-slate-200 hover:border-slate-400 hover:text-slate-800'
-              }`}
-            >
-              <TableIcon size={14} />
-              <span className="text-xs font-bold leading-none">Table <ChevronDown size={12} className="inline ml-0.5 opacity-50" /></span>
-            </button>
-            {showTableMenu && (
-              <>
-                <div className="fixed inset-0 z-[90]" onClick={() => setShowTableMenu(false)} />
-                <div className="absolute top-full left-0 mt-1 w-44 bg-white border border-gray-200 rounded-xl shadow-xl overflow-hidden z-[100]">
-                  {!editor.isActive('table') ? (
-                    <button onClick={() => { editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run(); setShowTableMenu(false); }} className="w-full text-left px-4 py-2 text-xs font-bold hover:bg-slate-50 text-slate-700">Insert 3x3 Table</button>
-                  ) : (
-                    <>
-                      <button onClick={() => { editor.chain().focus().addColumnBefore().run(); setShowTableMenu(false); }} className="w-full text-left px-4 py-2 text-xs font-medium hover:bg-slate-50 text-slate-700">Add Column Before</button>
-                      <button onClick={() => { editor.chain().focus().addColumnAfter().run(); setShowTableMenu(false); }} className="w-full text-left px-4 py-2 text-xs font-medium hover:bg-slate-50 text-slate-700">Add Column After</button>
-                      <button onClick={() => { editor.chain().focus().deleteColumn().run(); setShowTableMenu(false); }} className="w-full text-left px-4 py-2 text-xs font-medium hover:bg-slate-50 text-slate-700 border-b border-gray-100">Delete Column</button>
-                      
-                      <button onClick={() => { editor.chain().focus().addRowBefore().run(); setShowTableMenu(false); }} className="w-full text-left px-4 py-2 text-xs font-medium hover:bg-slate-50 text-slate-700">Add Row Before</button>
-                      <button onClick={() => { editor.chain().focus().addRowAfter().run(); setShowTableMenu(false); }} className="w-full text-left px-4 py-2 text-xs font-medium hover:bg-slate-50 text-slate-700">Add Row After</button>
-                      <button onClick={() => { editor.chain().focus().deleteRow().run(); setShowTableMenu(false); }} className="w-full text-left px-4 py-2 text-xs font-medium hover:bg-slate-50 text-slate-700 border-b border-gray-100">Delete Row</button>
-                      
-                      <button onClick={() => { editor.chain().focus().deleteTable().run(); setShowTableMenu(false); }} className="w-full text-left px-4 py-2 text-xs font-bold hover:bg-red-50 text-red-600">Delete Table</button>
-                    </>
-                  )}
-                </div>
-              </>
-            )}
-          </div>
+        <div className="relative">
+          <button
+            onClick={() => setShowTableMenu(!showTableMenu)}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border transition-colors ${
+              editor.isActive('table') || showTableMenu ? 'bg-slate-800 text-white border-slate-800 shadow-sm' : 'bg-white text-slate-600 border-slate-200 hover:border-slate-400 hover:text-slate-800'
+            }`}
+          >
+            <TableIcon size={14} />
+            <span className="text-xs font-bold leading-none">Table <ChevronDown size={12} className="inline ml-0.5 opacity-50" /></span>
+          </button>
+          
+          {showTableMenu && (
+            <>
+              <div className="fixed inset-0 z-[90]" onClick={() => setShowTableMenu(false)} />
+              <div className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-xl overflow-hidden z-[100] min-w-[180px]">
+                
+                {!editor.isActive('table') ? (
+                  <div className="p-3 bg-slate-50">
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 text-center">
+                      Hover to Size
+                    </p>
+                    <TableGridPicker 
+                      onSelect={(rows, cols) => {
+                        editor.chain().focus().insertTable({ rows, cols, withHeaderRow: true }).run();
+                        setShowTableMenu(false);
+                      }} 
+                    />
+                  </div>
+                ) : (
+                  <div className="py-1">
+                    <button onClick={() => { editor.chain().focus().addColumnBefore().run(); setShowTableMenu(false); }} className="w-full text-left px-4 py-2 text-xs font-medium hover:bg-slate-50 text-slate-700">Add Column Before</button>
+                    <button onClick={() => { editor.chain().focus().addColumnAfter().run(); setShowTableMenu(false); }} className="w-full text-left px-4 py-2 text-xs font-medium hover:bg-slate-50 text-slate-700">Add Column After</button>
+                    <button onClick={() => { editor.chain().focus().deleteColumn().run(); setShowTableMenu(false); }} className="w-full text-left px-4 py-2 text-xs font-medium hover:bg-slate-50 text-slate-700 border-b border-gray-100">Delete Column</button>
+                    
+                    <button onClick={() => { editor.chain().focus().addRowBefore().run(); setShowTableMenu(false); }} className="w-full text-left px-4 py-2 text-xs font-medium hover:bg-slate-50 text-slate-700">Add Row Before</button>
+                    <button onClick={() => { editor.chain().focus().addRowAfter().run(); setShowTableMenu(false); }} className="w-full text-left px-4 py-2 text-xs font-medium hover:bg-slate-50 text-slate-700">Add Row After</button>
+                    <button onClick={() => { editor.chain().focus().deleteRow().run(); setShowTableMenu(false); }} className="w-full text-left px-4 py-2 text-xs font-medium hover:bg-slate-50 text-slate-700 border-b border-gray-100">Delete Row</button>
+                    
+                    <button onClick={() => { editor.chain().focus().goToNextCell().run(); setShowTableMenu(false); }} className="w-full text-left px-4 py-2 text-xs font-medium hover:bg-slate-50 text-slate-700 border-b border-gray-100 flex items-center justify-between">
+                      Next Cell <span className="text-[10px] text-slate-400 bg-slate-200 px-1 rounded">Tab</span>
+                    </button>
+
+                    <button onClick={() => { editor.chain().focus().deleteTable().run(); setShowTableMenu(false); }} className="w-full text-left px-4 py-2 text-xs font-bold hover:bg-red-50 text-red-600">Delete Table</button>
+                  </div>
+                )}
+              </div>
+            </>
+          )}
+        </div>
         </div>
 
         {/* Media */}
