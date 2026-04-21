@@ -525,13 +525,6 @@ function TemplateDocument({
       });
 
       // 2. Look for Placeholder and setup portal
-      const placeholderHtml = '<div data-type="clauses-placeholder"></div>';
-      const fullHtml = doc.body.innerHTML;
-
-      if (!fullHtml.includes(placeholderHtml)) {
-        return { html: fullHtml, hasPortal: false };
-      }
-      
       const placeholder = doc.querySelector('div[data-type="clauses-placeholder"]');
       if (placeholder) {
           const portalRoot = doc.createElement('div');
@@ -540,7 +533,7 @@ function TemplateDocument({
           return { html: doc.body.innerHTML, hasPortal: true };
       }
 
-      return { html: fullHtml, hasPortal: false };
+      return { html: doc.body.innerHTML, hasPortal: false };
     } catch (error) {
       console.error('Template rendering error:', error);
       return { html: templateHtml, hasPortal: false };
