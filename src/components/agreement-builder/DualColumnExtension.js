@@ -1,7 +1,4 @@
 import { Node, mergeAttributes } from '@tiptap/core';
-import { ReactNodeViewRenderer, NodeViewWrapper, NodeViewContent } from '@tiptap/react';
-import React from 'react';
-import { X } from 'lucide-react';
 
 export const DualColumnSide = Node.create({
   name: 'dualColumnSide',
@@ -29,27 +26,6 @@ export const DualColumnSide = Node.create({
   },
 });
 
-const DualColumnComponent = ({ deleteNode }) => {
-  return (
-    <NodeViewWrapper className="dual-column-node group relative">
-      <button
-        className="dual-column-delete absolute -top-3 -right-3 w-6 h-6 bg-red-500 text-white border-2 border-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-20 shadow-md cursor-pointer disabled:opacity-0"
-        onClick={deleteNode}
-        title="Remove split section"
-        contentEditable={false}
-      >
-        <X size={12} strokeWidth={3} />
-      </button>
-
-      {/* NodeViewContent injects the two DualColumnSide components directly here into this grid wrapper */}
-      <NodeViewContent 
-        as="div" 
-        className="dual-column-wrapper grid grid-cols-2 min-h-[100px] relative after:content-[''] after:absolute after:top-0 after:bottom-0 after:left-1/2 after:border-l-2 after:border-dotted after:border-slate-300 after:-translate-x-1/2 after:z-[1] after:pointer-events-none" 
-      />
-    </NodeViewWrapper>
-  );
-};
-
 export const DualColumn = Node.create({
   name: 'dualColumn',
   group: 'block',
@@ -69,13 +45,56 @@ export const DualColumn = Node.create({
       'div', 
       mergeAttributes(HTMLAttributes, { 
         'data-type': 'dual-column', 
-        class: 'dual-column-node group relative' 
+        class: 'dual-column-wrapper group relative' 
       }), 
       0
     ];
   },
 
-  addNodeView() {
-    return ReactNodeViewRenderer(DualColumnComponent);
+  addKeyboardShortcuts() {
+    return {
+      Backspace: () => {
+        const { state, dispatch } = this.editor.view;
+        const { selection } = state;
+        
+        // Ensure cursor is empty
+        if (!selection.empty) {
+          return false;
+        }
+
+        // Check if cursor is directly inside a DualColumnSide at position 0 (the start)
+        const $pos = selection.$anchor;
+        
+        // Find the dualColumn node wrapping us
+        let depth = $pos.depth;
+        let dualColumnNode = null;
+        let dualColumnPos = null;
+
+        for (let i = depth; i > 0; i--) {
+          const node = $pos.node(i);
+          if (node.type.name === 'dualColumn') {
+            dualColumnNode = node;
+            dualColumnPos = $pos.before(i);
+            break;
+          }
+        }
+
+        if (!dualColumnNode) {
+          return false; // Not inside a dual column
+        }
+
+        // We are inside a dual column. Check if both sides are practically empty.
+        // A single empty paragraph takes up 2 text size. Two empty paragraphs = 4.
+        // We will just measure the text content. If it's completely empty of text, we delete it.
+        if (dualColumnNode.textContent.trim().length === 0) {
+          if (dispatch) {
+            dispatch(state.tr.delete(dualColumnPos, dualColumnPos + dualColumnNode.nodeSize));
+          }
+          return true;
+        }
+
+        return false;
+      },
+    };
   },
 });
