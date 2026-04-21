@@ -127,6 +127,30 @@ const PreviewModal = ({ isOpen, onClose, html }) => {
           position: relative;
           z-index: 2;
         }
+        
+        .agreement-table {
+          width: 100%;
+          margin: 1.5rem 0;
+          border-collapse: collapse;
+          table-layout: fixed;
+        }
+        .agreement-table th,
+        .agreement-table td {
+          min-width: 1em;
+          border: 1px solid #cbd5e1;
+          padding: 10px 14px;
+          vertical-align: top;
+        }
+        .agreement-table th {
+          font-weight: 800;
+          text-align: left;
+          background-color: #f8fafc;
+          color: #334155;
+        }
+        .agreement-table p {
+          margin: 0;
+        }
+        
         /* Inline font-size styles should apply directly; no override here. */
         @media print {
           .preview-clauses-placeholder { border: none !important; background: transparent !important; }

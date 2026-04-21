@@ -6,6 +6,10 @@ import { TextAlign } from '@tiptap/extension-text-align';
 import { ResizableImage } from './ResizableImage';
 import { TextStyle } from '@tiptap/extension-text-style';
 import { Color } from '@tiptap/extension-color';
+import { Table } from '@tiptap/extension-table';
+import { TableRow } from '@tiptap/extension-table-row';
+import { TableCell } from '@tiptap/extension-table-cell';
+import { TableHeader } from '@tiptap/extension-table-header';
 import { Eye, CheckCircle2, Loader2, Save, Keyboard, ZoomIn, ZoomOut } from 'lucide-react';
 import { CharacterCount } from '@tiptap/extension-character-count';
 import { toast } from 'react-hot-toast';
@@ -13,7 +17,7 @@ import { toast } from 'react-hot-toast';
 import { Variable } from './VariableExtension';
 import { FontSize } from './FontSizeExtension';
 import { ClausesPlaceholder } from './ClausesPlaceholder';
-import { DualColumn } from './DualColumnExtension';
+import { DualColumn, DualColumnSide } from './DualColumnExtension';
 import Toolbar from './Toolbar';
 import FloatingToolbox from './FloatingToolbox';
 import PreviewModal from './PreviewModal';
@@ -52,6 +56,16 @@ const AgreementBuilder = ({ initialContent = '', onSave, isSaving = false, templ
     FontSize,
     ClausesPlaceholder,
     DualColumn,
+    DualColumnSide,
+    Table.configure({
+      resizable: true,
+      HTMLAttributes: {
+        class: 'agreement-table',
+      },
+    }),
+    TableRow,
+    TableHeader,
+    TableCell,
     CharacterCount.configure({
       mode: 'textSize',
     }),
