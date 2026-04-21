@@ -77,7 +77,7 @@ const Toolbar = ({ editor, isToolboxOpen, onToggleToolbox, templateType }) => {
   return (
     <>
       <Script src="https://upload-widget.cloudinary.com/global/all.js" />
-      <div className="bg-white border-b border-gray-200 p-2 flex flex-wrap items-center gap-1 sticky top-16 z-50">
+      <div className="bg-white border-b border-gray-200 p-2 flex flex-wrap items-center gap-1 sticky top-[57px] z-40">
         
         {/* Undo / Redo */}
         <div className="flex items-center gap-1 px-2 border-r border-gray-100">

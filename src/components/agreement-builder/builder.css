@@ -546,9 +546,6 @@
   padding: 8px 20px;
   background: white;
   border-bottom: 1px solid #e2e8f0;
-  position: sticky;
-  top: 0;
-  z-index: 60;
 }
 
 .builder-fullscreen-topbar .back-btn {
