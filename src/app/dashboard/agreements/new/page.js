@@ -541,14 +541,16 @@ function TemplateDocument({
   }, [templateHtml, offerData, formData, formatMoney]);
 
   const containerRef = useRef(null);
+  const lastInjectedHtml = useRef('');
   const [portalNode, setPortalNode] = useState(null);
 
   useEffect(() => {
     if (!containerRef.current) return;
     
     const htmlContainer = containerRef.current.querySelector('#agreement-tiptap-html-container');
-    if (htmlContainer && htmlContainer.innerHTML !== html) {
+    if (htmlContainer && lastInjectedHtml.current !== html) {
       htmlContainer.innerHTML = html;
+      lastInjectedHtml.current = html;
     }
 
     if (hasPortal) {
@@ -556,7 +558,7 @@ function TemplateDocument({
       if (node && node !== portalNode) {
         setPortalNode(node);
       }
-    } else {
+    } else if (portalNode !== null) {
       setPortalNode(null);
     }
   }, [html, hasPortal, portalNode]);
