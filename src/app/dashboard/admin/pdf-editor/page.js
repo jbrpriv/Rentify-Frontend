@@ -66,10 +66,10 @@ export default function AdminPdfEditorPage() {
     <div className="flex flex-col min-h-screen bg-gray-50">
 
       {/* ── Fullscreen top bar ── */}
-      <div className="builder-fullscreen-topbar flex-shrink-0 flex-wrap gap-y-2">
+      <div className="flex-shrink-0 flex flex-wrap items-center gap-3 gap-y-2 px-5 py-2 bg-white border-b border-slate-200">
         <button
           onClick={() => router.push('/dashboard/admin')}
-          className="back-btn"
+          className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-[10px] text-[13px] font-bold text-slate-500 bg-slate-50 border border-slate-200 transition-all hover:text-slate-800 hover:bg-slate-100 hover:border-slate-300"
         >
           <ArrowLeft size={15} />
           Admin
