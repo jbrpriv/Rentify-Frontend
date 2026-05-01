@@ -378,7 +378,7 @@ export default function DashboardLayout({ children }) {
     pathname === '/dashboard/admin/pdf-editor';
 
   return (
-    <div className={`min-h-screen flex flex-col bg-[#F8FBFC] ${isBuilderFullscreen ? '' : 'overflow-x-hidden'} ${mobileOpen ? 'overflow-hidden' : ''}`}>
+    <div className={`flex flex-col bg-[#F8FBFC] ${isBuilderFullscreen ? 'h-screen overflow-hidden' : 'min-h-screen overflow-x-hidden'} ${mobileOpen ? 'overflow-hidden' : ''}`}>
       <Navbar />
       <NotificationToast notification={notification} onDismiss={() => setNotification(null)} />
 
@@ -475,9 +475,9 @@ export default function DashboardLayout({ children }) {
 
       {/* ── Full-screen builder mode ── */}
       {isBuilderFullscreen ? (
-        <div className="flex-1 pt-16 lg:pt-16">
+        <div className="flex-1 pt-16 lg:pt-16 overflow-hidden flex flex-col min-h-0">
           <motion.main
-            className="w-full min-w-0"
+            className="w-full min-w-0 flex-1 overflow-hidden flex flex-col min-h-0"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.3 }}
