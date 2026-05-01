@@ -1,7 +1,7 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import {
   GripVertical, X, Sparkles, User, Landmark, Banknote, Calendar, MapPin,
-  Home, Wallet, Clock, Hash, TrendingUp, ScrollText
+  Home, Wallet, Clock, Hash, TrendingUp, ScrollText, LayoutTemplate
 } from 'lucide-react';
 
 const AGREEMENT_VARIABLE_GROUPS = [
@@ -82,11 +82,12 @@ const RECEIPT_VARIABLE_GROUPS = [
   },
 ];
 
-const FloatingToolbox = ({ editor, templateType = 'agreement', isOpen, onClose }) => {
+const FloatingToolbox = ({ editor, templateType = 'agreement', templates = [], isOpen, onClose, onApplyTemplate }) => {
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const [searchTerm, setSearchTerm] = useState('');
+  const [activeTab, setActiveTab] = useState('variables');
   const toolboxRef = useRef(null);
 
   // Initialize position
@@ -149,6 +150,7 @@ const FloatingToolbox = ({ editor, templateType = 'agreement', isOpen, onClose }
   };
 
   const variableGroups = templateType === 'receipt' ? RECEIPT_VARIABLE_GROUPS : AGREEMENT_VARIABLE_GROUPS;
+  const canShowTemplates = templateType !== 'receipt';
 
   // Filter variables by search
   const filteredGroups = variableGroups.map(group => ({
@@ -158,6 +160,20 @@ const FloatingToolbox = ({ editor, templateType = 'agreement', isOpen, onClose }
       v.id.toLowerCase().includes(searchTerm.toLowerCase())
     ),
   })).filter(group => group.vars.length > 0);
+
+  const filteredTemplates = useMemo(() => {
+    if (!Array.isArray(templates)) return [];
+    return templates.filter((template) => {
+      const haystack = `${template?.name || ''} ${template?.description || ''}`.toLowerCase();
+      return haystack.includes(searchTerm.toLowerCase());
+    });
+  }, [templates, searchTerm]);
+
+  useEffect(() => {
+    if (templateType === 'receipt' && activeTab !== 'variables') {
+      setActiveTab('variables');
+    }
+  }, [templateType, activeTab]);
 
   if (!isOpen) return null;
 
@@ -176,7 +192,7 @@ const FloatingToolbox = ({ editor, templateType = 'agreement', isOpen, onClose }
       <div className="floating-toolbox-header" onMouseDown={handleMouseDown}>
         <div className="flex items-center gap-2">
           <GripVertical size={14} className="opacity-60" />
-          <h3>Variables Library</h3>
+          <h3>{activeTab === 'templates' ? 'Templates Library' : 'Variables Library'}</h3>
         </div>
         <div className="flex items-center gap-1">
           <button
@@ -195,14 +211,39 @@ const FloatingToolbox = ({ editor, templateType = 'agreement', isOpen, onClose }
         <input
           type="text"
           className="floating-toolbox-search"
-          placeholder="Search variables..."
+          placeholder={activeTab === 'templates' ? 'Search templates...' : 'Search variables...'}
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
 
+        {canShowTemplates && (
+          <div className="flex items-center gap-1 px-1 mb-2">
+            <button
+              onClick={() => setActiveTab('variables')}
+              className={`px-2.5 py-1 rounded-md text-[11px] font-bold border transition-colors ${
+                activeTab === 'variables'
+                  ? 'bg-blue-600 text-white border-blue-600'
+                  : 'bg-white text-slate-600 border-slate-200 hover:border-blue-300 hover:text-blue-600'
+              }`}
+            >
+              Variables
+            </button>
+            <button
+              onClick={() => setActiveTab('templates')}
+              className={`px-2.5 py-1 rounded-md text-[11px] font-bold border transition-colors ${
+                activeTab === 'templates'
+                  ? 'bg-indigo-600 text-white border-indigo-600'
+                  : 'bg-white text-slate-600 border-slate-200 hover:border-indigo-300 hover:text-indigo-600'
+              }`}
+            >
+              Templates
+            </button>
+          </div>
+        )}
+
         {/* Variables Section */}
         <div className="toolbox-section-items px-1 mt-2">
-          {filteredGroups.map((group) => (
+          {activeTab === 'variables' && filteredGroups.map((group) => (
             <div key={group.label} className="mb-4">
               <div className="flex items-center gap-2 mb-2 px-1">
                 <div className="h-px bg-gray-100 flex-1"></div>
@@ -239,8 +280,36 @@ const FloatingToolbox = ({ editor, templateType = 'agreement', isOpen, onClose }
               </div>
             </div>
           ))}
-          {filteredGroups.length === 0 && (
+          {activeTab === 'variables' && filteredGroups.length === 0 && (
             <p className="text-xs text-slate-400 text-center py-4">No variables match your search</p>
+          )}
+
+          {activeTab === 'templates' && (
+            <div className="space-y-2 px-1">
+              {filteredTemplates.map((template) => (
+                <button
+                  key={template._id || template.name}
+                  className="w-full text-left px-3 py-2 rounded-lg border border-indigo-100 bg-indigo-50/60 hover:bg-indigo-50 transition-colors"
+                  onClick={() => onApplyTemplate?.(template)}
+                  title="Apply template to document"
+                >
+                  <div className="flex items-center gap-2">
+                    <LayoutTemplate size={13} className="text-indigo-600" />
+                    <p className="text-xs font-bold text-slate-800 truncate">
+                      {template.name || 'Untitled Template'}
+                    </p>
+                  </div>
+                  {template.description && (
+                    <p className="text-[11px] text-slate-500 mt-1 line-clamp-2">
+                      {template.description}
+                    </p>
+                  )}
+                </button>
+              ))}
+              {filteredTemplates.length === 0 && (
+                <p className="text-xs text-slate-400 text-center py-4">No templates match your search</p>
+              )}
+            </div>
           )}
         </div>
       </div>

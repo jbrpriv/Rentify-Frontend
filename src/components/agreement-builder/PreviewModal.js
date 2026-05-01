@@ -47,7 +47,7 @@ const PreviewModal = ({ isOpen, onClose, html }) => {
     try {
       const parser = new DOMParser();
       const doc = parser.parseFromString(html, 'text/html');
-      
+
       // 1. Replace Variables
       const variables = doc.querySelectorAll('span[data-type="variable"]');
       variables.forEach(v => {
@@ -95,6 +95,18 @@ const PreviewModal = ({ isOpen, onClose, html }) => {
         .agreement-preview-container h3 { 
           font-weight: 900 !important; 
           color: #0f172a !important;
+        }
+        .agreement-preview-container h1 {
+          font-size: 2.25rem !important;
+          margin-bottom: 1.5rem;
+        }
+        .agreement-preview-container h2 {
+          font-size: 1.5rem !important;
+          margin-top: 1.5rem;
+          margin-bottom: 1rem;
+        }
+        .agreement-preview-container h3 {
+          font-size: 1.25rem !important;
         }
         .agreement-preview-container .document-image { 
           max-width: 100%; 
@@ -147,7 +159,7 @@ const PreviewModal = ({ isOpen, onClose, html }) => {
         }
         .agreement-table th {
           font-weight: 800;
-          text-align: left;
+          text-align: inherit;
           background-color: #f8fafc;
           color: #334155;
         }
@@ -173,7 +185,7 @@ const PreviewModal = ({ isOpen, onClose, html }) => {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <button 
+            <button
               onClick={() => {
                 const win = window.open('', '_blank');
                 win.document.write(`
@@ -253,7 +265,7 @@ const PreviewModal = ({ isOpen, onClose, html }) => {
                         }
                         th, .agreement-table th {
                           font-weight: 800;
-                          text-align: left;
+                          text-align: inherit;
                           background-color: #f8fafc;
                           color: #334155;
                         }
@@ -287,7 +299,7 @@ const PreviewModal = ({ isOpen, onClose, html }) => {
             >
               <ExternalLink size={16} /> Open in New Tab
             </button>
-            <button 
+            <button
               onClick={onClose}
               className="p-2 text-gray-400 hover:text-red-600 transition-colors bg-gray-50 rounded-xl"
             >
@@ -297,14 +309,14 @@ const PreviewModal = ({ isOpen, onClose, html }) => {
         </div>
 
         <div className="flex-1 overflow-y-auto p-12 bg-gray-100/50 flex justify-center">
-            <div 
-              className="agreement-preview-container bg-white w-[794px] min-h-[1123px] shadow-2xl border border-gray-200 p-[80px] prose prose-blue prose-sm max-w-none prose-headings:text-gray-900 prose-p:text-gray-700 prose-strong:text-blue-700"
-              dangerouslySetInnerHTML={{ __html: previewHtml }}
-            />
+          <div
+            className="agreement-preview-container bg-white w-[794px] min-h-[1123px] shadow-2xl border border-gray-200 p-[80px] max-w-none"
+            dangerouslySetInnerHTML={{ __html: previewHtml }}
+          />
         </div>
 
         <div className="p-4 px-6 border-t border-gray-100 flex justify-end bg-white">
-          <button 
+          <button
             onClick={onClose}
             className="px-8 py-2.5 bg-gray-900 text-white font-bold rounded-xl hover:bg-black transition-all hover:shadow-lg active:scale-95"
           >

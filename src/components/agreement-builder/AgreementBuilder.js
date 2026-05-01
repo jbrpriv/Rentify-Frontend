@@ -13,6 +13,7 @@ import { TableHeader } from '@tiptap/extension-table-header';
 import { Eye, CheckCircle2, Loader2, Save, Keyboard, ZoomIn, ZoomOut } from 'lucide-react';
 import { CharacterCount } from '@tiptap/extension-character-count';
 import { toast } from 'react-hot-toast';
+import { STATIC_AGREEMENT_TEMPLATES } from './StaticTemplates';
 
 import { Variable } from './VariableExtension';
 import { FontSize } from './FontSizeExtension';
@@ -145,6 +146,23 @@ const AgreementBuilder = ({ initialContent = '', onSave, isSaving = false, templ
     if (onSave) onSave(content);
   }, [editor, onSave]);
 
+  const handleApplyTemplate = useCallback((selectedTemplate) => {
+    if (!editor || !selectedTemplate) return;
+
+    const shouldReplace = window.confirm(
+      `Replace current document with "${selectedTemplate.name || 'this template'}"? This cannot be undone after more edits.`
+    );
+    if (!shouldReplace) return;
+
+    if (selectedTemplate.bodyJson) {
+      editor.commands.setContent(selectedTemplate.bodyJson);
+    } else if (selectedTemplate.bodyHtml) {
+      editor.commands.setContent(selectedTemplate.bodyHtml);
+    }
+
+    toast.success(`Applied template: ${selectedTemplate.name || 'Untitled Template'}`);
+  }, [editor]);
+
   // ── Zoom controls ──
   const cycleZoom = (direction) => {
     const idx = ZOOM_LEVELS.indexOf(zoom);
@@ -224,8 +242,10 @@ const AgreementBuilder = ({ initialContent = '', onSave, isSaving = false, templ
       <FloatingToolbox 
         editor={editor} 
         templateType={templateType} 
+        templates={templateType === 'receipt' ? [] : STATIC_AGREEMENT_TEMPLATES}
         isOpen={isToolboxOpen}
         onClose={() => setIsToolboxOpen(false)}
+        onApplyTemplate={handleApplyTemplate}
       />
 
       {/* Preview Modal */}
