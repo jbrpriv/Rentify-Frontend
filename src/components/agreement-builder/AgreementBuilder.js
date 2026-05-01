@@ -171,7 +171,7 @@ const AgreementBuilder = ({ initialContent = '', onSave, isSaving = false, templ
   if (!editor) return null;
 
   return (
-    <div className="flex flex-col bg-gray-50 border border-gray-200 rounded-2xl" style={{ height: 'calc(100vh - 140px)', minHeight: '500px' }}>
+    <div className="flex flex-col h-full bg-gray-50 border border-gray-200 rounded-2xl">
       {/* Top Header / Actions */}
       <div className="bg-white border-b border-gray-200 px-6 py-3 flex items-center justify-between">
         <div className="flex items-center gap-3">
