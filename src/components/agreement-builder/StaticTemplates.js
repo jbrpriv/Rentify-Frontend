@@ -228,4 +228,314 @@ export const STATIC_AGREEMENT_TEMPLATES = [
       <div data-type="clauses-placeholder"></div>
     `,
   },
+  {
+    id: 'premium-villa-lease',
+    name: 'Premium Villa Lease',
+    description: 'High-value residential villa lease with complete variable coverage and compliance structure.',
+    bodyHtml: `
+      <h1 style="text-align: center;">PREMIUM VILLA LEASE AGREEMENT</h1>
+      <p style="text-align: center;">Agreement Reference: <span data-type="variable" data-name="agreement_id" data-label="Agreement ID" data-category="default">Agreement ID</span> | Date: <span data-type="variable" data-name="current_date" data-label="Current Date" data-category="dates">Current Date</span></p>
+      <p>This Agreement is made between <span data-type="variable" data-name="landlord_name" data-label="Landlord Name" data-category="parties">Landlord Name</span> and <span data-type="variable" data-name="tenant_name" data-label="Tenant Name" data-category="parties">Tenant Name</span> for the property titled <span data-type="variable" data-name="property_title" data-label="Property Title" data-category="property">Property Title</span>, located at <span data-type="variable" data-name="property_address" data-label="Full Address" data-category="property">Full Address</span>.</p>
+      <h2>1. Lease Tenure</h2>
+      <p>Lease starts on <span data-type="variable" data-name="start_date" data-label="Lease Start Date" data-category="dates">Lease Start Date</span> and ends on <span data-type="variable" data-name="end_date" data-label="Lease End Date" data-category="dates">Lease End Date</span>, for a total of <span data-type="variable" data-name="duration_months" data-label="Duration (months)" data-category="dates">Duration (months)</span> months.</p>
+      <h2>2. Financial Terms</h2>
+      <table class="agreement-table">
+        <tbody>
+          <tr>
+            <th><p style="text-align: center;">Item</p></th>
+            <th><p style="text-align: center;">Amount / Value</p></th>
+            <th><p style="text-align: center;">Commercial Note</p></th>
+          </tr>
+          <tr>
+            <td><p>Monthly Rent</p></td>
+            <td><p><span data-type="variable" data-name="rent_amount" data-label="Monthly Rent" data-category="financials">Monthly Rent</span></p></td>
+            <td><p>Payable monthly in advance</p></td>
+          </tr>
+          <tr>
+            <td><p>Security Deposit</p></td>
+            <td><p><span data-type="variable" data-name="security_deposit" data-label="Security Deposit" data-category="financials">Security Deposit</span></p></td>
+            <td><p>Held for contract performance</p></td>
+          </tr>
+          <tr>
+            <td><p>Total Move-in Cost</p></td>
+            <td><p><span data-type="variable" data-name="total_move_in" data-label="Total Move-in Cost" data-category="financials">Total Move-in Cost</span></p></td>
+            <td><p>Due prior to possession</p></td>
+          </tr>
+          <tr>
+            <td><p>Maintenance Fee</p></td>
+            <td><p><span data-type="variable" data-name="maintenance_fee" data-label="Maintenance Fee" data-category="financials">Maintenance Fee</span></p></td>
+            <td><p>Periodic upkeep contribution</p></td>
+          </tr>
+          <tr>
+            <td><p>Late Fee</p></td>
+            <td><p><span data-type="variable" data-name="late_fee" data-label="Late Payment Fee" data-category="financials">Late Payment Fee</span></p></td>
+            <td><p>Applies after <span data-type="variable" data-name="late_fee_grace_days" data-label="Grace Period (Days)" data-category="financials">Grace Period (Days)</span></p></td>
+          </tr>
+        </tbody>
+      </table>
+      <h2>3. Utilities and Occupancy Policies</h2>
+      <p>Utilities Included: <span data-type="variable" data-name="utilities_included" data-label="Utilities Included?" data-category="policies">Utilities Included?</span></p>
+      <p>Utilities Details: <span data-type="variable" data-name="utilities_details" data-label="Utilities Details" data-category="policies">Utilities Details</span></p>
+      <p>Pet Allowed: <span data-type="variable" data-name="pet_allowed" data-label="Pets Allowed?" data-category="policies">Pets Allowed?</span> | Pet Deposit: <span data-type="variable" data-name="pet_deposit" data-label="Pet Deposit" data-category="policies">Pet Deposit</span></p>
+      <p>Rent Escalation Enabled: <span data-type="variable" data-name="rent_escalation_enabled" data-label="Rent Escalation?" data-category="policies">Rent Escalation?</span> | Escalation Percentage: <span data-type="variable" data-name="rent_escalation_percentage" data-label="Rent Escalation %" data-category="policies">Rent Escalation %</span></p>
+      <h2>4. Termination and Enforcement</h2>
+      <p>Termination Notice Policy: <span data-type="variable" data-name="termination_policy" data-label="Termination Notice" data-category="policies">Termination Notice</span></p>
+      <div data-type="clauses-placeholder"></div>
+    `,
+  },
+  {
+    id: 'corporate-housing-master',
+    name: 'Corporate Housing Master Lease',
+    description: 'Enterprise-ready housing lease for corporate placements with complete dynamic placeholders.',
+    bodyHtml: `
+      <h1 style="text-align: center;">CORPORATE HOUSING MASTER LEASE</h1>
+      <p>This contract is entered into by <span data-type="variable" data-name="landlord_name" data-label="Landlord Name" data-category="parties">Landlord Name</span> and <span data-type="variable" data-name="tenant_name" data-label="Tenant Name" data-category="parties">Tenant Name</span> for <span data-type="variable" data-name="property_title" data-label="Property Title" data-category="property">Property Title</span> at <span data-type="variable" data-name="property_address" data-label="Full Address" data-category="property">Full Address</span>.</p>
+      <div data-type="dual-column" class="dual-column-wrapper group relative">
+        <div data-type="dual-column-side" class="dual-column-side p-4 min-h-[100px] outline-none relative">
+          <h2>Lease Window</h2>
+          <p>Start: <span data-type="variable" data-name="start_date" data-label="Lease Start Date" data-category="dates">Lease Start Date</span></p>
+          <p>End: <span data-type="variable" data-name="end_date" data-label="Lease End Date" data-category="dates">Lease End Date</span></p>
+          <p>Duration: <span data-type="variable" data-name="duration_months" data-label="Duration (months)" data-category="dates">Duration (months)</span> months</p>
+        </div>
+        <div data-type="dual-column-side" class="dual-column-side p-4 min-h-[100px] outline-none relative">
+          <h2>Charges Overview</h2>
+          <p>Monthly Rent: <span data-type="variable" data-name="rent_amount" data-label="Monthly Rent" data-category="financials">Monthly Rent</span></p>
+          <p>Security Deposit: <span data-type="variable" data-name="security_deposit" data-label="Security Deposit" data-category="financials">Security Deposit</span></p>
+          <p>Total Move-in: <span data-type="variable" data-name="total_move_in" data-label="Total Move-in Cost" data-category="financials">Total Move-in Cost</span></p>
+        </div>
+      </div>
+      <table class="agreement-table">
+        <tbody>
+          <tr>
+            <th><p style="text-align: center;">Policy Lever</p></th>
+            <th><p style="text-align: center;">Configured Value</p></th>
+            <th><p style="text-align: center;">Operational Impact</p></th>
+          </tr>
+          <tr>
+            <td><p>Maintenance Fee</p></td>
+            <td><p><span data-type="variable" data-name="maintenance_fee" data-label="Maintenance Fee" data-category="financials">Maintenance Fee</span></p></td>
+            <td><p>Recurring service contribution</p></td>
+          </tr>
+          <tr>
+            <td><p>Late Fee</p></td>
+            <td><p><span data-type="variable" data-name="late_fee" data-label="Late Payment Fee" data-category="financials">Late Payment Fee</span></p></td>
+            <td><p>Activated after <span data-type="variable" data-name="late_fee_grace_days" data-label="Grace Period (Days)" data-category="financials">Grace Period (Days)</span></p></td>
+          </tr>
+          <tr>
+            <td><p>Utilities Included</p></td>
+            <td><p><span data-type="variable" data-name="utilities_included" data-label="Utilities Included?" data-category="policies">Utilities Included?</span></p></td>
+            <td><p><span data-type="variable" data-name="utilities_details" data-label="Utilities Details" data-category="policies">Utilities Details</span></p></td>
+          </tr>
+          <tr>
+            <td><p>Pet Rules</p></td>
+            <td><p><span data-type="variable" data-name="pet_allowed" data-label="Pets Allowed?" data-category="policies">Pets Allowed?</span></p></td>
+            <td><p>Deposit: <span data-type="variable" data-name="pet_deposit" data-label="Pet Deposit" data-category="policies">Pet Deposit</span></p></td>
+          </tr>
+          <tr>
+            <td><p>Escalation Model</p></td>
+            <td><p><span data-type="variable" data-name="rent_escalation_enabled" data-label="Rent Escalation?" data-category="policies">Rent Escalation?</span></p></td>
+            <td><p><span data-type="variable" data-name="rent_escalation_percentage" data-label="Rent Escalation %" data-category="policies">Rent Escalation %</span></p></td>
+          </tr>
+        </tbody>
+      </table>
+      <p>Termination Framework: <span data-type="variable" data-name="termination_policy" data-label="Termination Notice" data-category="policies">Termination Notice</span></p>
+      <div data-type="clauses-placeholder"></div>
+    `,
+  },
+  {
+    id: 'luxury-penthouse-agreement',
+    name: 'Luxury Penthouse Agreement',
+    description: 'High-end lease framework with signature-ready premium formatting and full variable support.',
+    bodyHtml: `
+      <h1 style="text-align: center;">LUXURY PENTHOUSE OCCUPANCY AGREEMENT</h1>
+      <p style="text-align: center;">For <span data-type="variable" data-name="property_title" data-label="Property Title" data-category="property">Property Title</span> | <span data-type="variable" data-name="property_address" data-label="Full Address" data-category="property">Full Address</span></p>
+      <p><strong>Owner:</strong> <span data-type="variable" data-name="landlord_name" data-label="Landlord Name" data-category="parties">Landlord Name</span> | <strong>Resident:</strong> <span data-type="variable" data-name="tenant_name" data-label="Tenant Name" data-category="parties">Tenant Name</span></p>
+      <h2>Term and Access</h2>
+      <p>The residence is granted from <span data-type="variable" data-name="start_date" data-label="Lease Start Date" data-category="dates">Lease Start Date</span> through <span data-type="variable" data-name="end_date" data-label="Lease End Date" data-category="dates">Lease End Date</span> for <span data-type="variable" data-name="duration_months" data-label="Duration (months)" data-category="dates">Duration (months)</span> months.</p>
+      <h2>Premium Payment Sheet</h2>
+      <table class="agreement-table">
+        <tbody>
+          <tr>
+            <th><p style="text-align: center;">Category</p></th>
+            <th><p style="text-align: center;">Amount</p></th>
+            <th><p style="text-align: center;">Condition</p></th>
+          </tr>
+          <tr>
+            <td><p>Base Rent</p></td>
+            <td><p><span data-type="variable" data-name="rent_amount" data-label="Monthly Rent" data-category="financials">Monthly Rent</span></p></td>
+            <td><p>Due each month without deduction</p></td>
+          </tr>
+          <tr>
+            <td><p>Security Deposit</p></td>
+            <td><p><span data-type="variable" data-name="security_deposit" data-label="Security Deposit" data-category="financials">Security Deposit</span></p></td>
+            <td><p>Refundable under final compliance</p></td>
+          </tr>
+          <tr>
+            <td><p>Move-in Total</p></td>
+            <td><p><span data-type="variable" data-name="total_move_in" data-label="Total Move-in Cost" data-category="financials">Total Move-in Cost</span></p></td>
+            <td><p>Due prior to key handover</p></td>
+          </tr>
+          <tr>
+            <td><p>Maintenance</p></td>
+            <td><p><span data-type="variable" data-name="maintenance_fee" data-label="Maintenance Fee" data-category="financials">Maintenance Fee</span></p></td>
+            <td><p>Building operations cost sharing</p></td>
+          </tr>
+          <tr>
+            <td><p>Late Penalty</p></td>
+            <td><p><span data-type="variable" data-name="late_fee" data-label="Late Payment Fee" data-category="financials">Late Payment Fee</span></p></td>
+            <td><p>After <span data-type="variable" data-name="late_fee_grace_days" data-label="Grace Period (Days)" data-category="financials">Grace Period (Days)</span> grace days</p></td>
+          </tr>
+        </tbody>
+      </table>
+      <h2>Lifestyle and Building Policies</h2>
+      <p>Utilities Coverage: <span data-type="variable" data-name="utilities_included" data-label="Utilities Included?" data-category="policies">Utilities Included?</span> | Details: <span data-type="variable" data-name="utilities_details" data-label="Utilities Details" data-category="policies">Utilities Details</span></p>
+      <p>Pet Framework: <span data-type="variable" data-name="pet_allowed" data-label="Pets Allowed?" data-category="policies">Pets Allowed?</span> with deposit <span data-type="variable" data-name="pet_deposit" data-label="Pet Deposit" data-category="policies">Pet Deposit</span></p>
+      <p>Escalation Framework: <span data-type="variable" data-name="rent_escalation_enabled" data-label="Rent Escalation?" data-category="policies">Rent Escalation?</span> at <span data-type="variable" data-name="rent_escalation_percentage" data-label="Rent Escalation %" data-category="policies">Rent Escalation %</span></p>
+      <p>Termination: <span data-type="variable" data-name="termination_policy" data-label="Termination Notice" data-category="policies">Termination Notice</span></p>
+      <div data-type="clauses-placeholder"></div>
+    `,
+  },
+  {
+    id: 'managed-property-service-lease',
+    name: 'Managed Property Service Lease',
+    description: 'Institutional-grade managed lease designed for operators and serviced rental portfolios.',
+    bodyHtml: `
+      <h1 style="text-align: center;">MANAGED PROPERTY SERVICE LEASE</h1>
+      <p>This managed lease governs occupancy of <span data-type="variable" data-name="property_title" data-label="Property Title" data-category="property">Property Title</span> located at <span data-type="variable" data-name="property_address" data-label="Full Address" data-category="property">Full Address</span>.</p>
+      <p>The parties are <span data-type="variable" data-name="landlord_name" data-label="Landlord Name" data-category="parties">Landlord Name</span> (Provider) and <span data-type="variable" data-name="tenant_name" data-label="Tenant Name" data-category="parties">Tenant Name</span> (Occupant).</p>
+      <div data-type="dual-column" class="dual-column-wrapper group relative">
+        <div data-type="dual-column-side" class="dual-column-side p-4 min-h-[100px] outline-none relative">
+          <h2>Contract Period</h2>
+          <p>Start Date: <span data-type="variable" data-name="start_date" data-label="Lease Start Date" data-category="dates">Lease Start Date</span></p>
+          <p>End Date: <span data-type="variable" data-name="end_date" data-label="Lease End Date" data-category="dates">Lease End Date</span></p>
+          <p>Total Term: <span data-type="variable" data-name="duration_months" data-label="Duration (months)" data-category="dates">Duration (months)</span> months</p>
+        </div>
+        <div data-type="dual-column-side" class="dual-column-side p-4 min-h-[100px] outline-none relative">
+          <h2>Service and Policy Flags</h2>
+          <p>Utilities Included: <span data-type="variable" data-name="utilities_included" data-label="Utilities Included?" data-category="policies">Utilities Included?</span></p>
+          <p>Pet Allowed: <span data-type="variable" data-name="pet_allowed" data-label="Pets Allowed?" data-category="policies">Pets Allowed?</span></p>
+          <p>Rent Escalation Active: <span data-type="variable" data-name="rent_escalation_enabled" data-label="Rent Escalation?" data-category="policies">Rent Escalation?</span></p>
+        </div>
+      </div>
+      <table class="agreement-table">
+        <tbody>
+          <tr>
+            <th><p style="text-align: center;">Financial Line Item</p></th>
+            <th><p style="text-align: center;">Dynamic Value</p></th>
+            <th><p style="text-align: center;">Administration Rule</p></th>
+          </tr>
+          <tr>
+            <td><p>Monthly Rent</p></td>
+            <td><p><span data-type="variable" data-name="rent_amount" data-label="Monthly Rent" data-category="financials">Monthly Rent</span></p></td>
+            <td><p>Primary recurring charge</p></td>
+          </tr>
+          <tr>
+            <td><p>Security Deposit</p></td>
+            <td><p><span data-type="variable" data-name="security_deposit" data-label="Security Deposit" data-category="financials">Security Deposit</span></p></td>
+            <td><p>Held in trust and reconciled at exit</p></td>
+          </tr>
+          <tr>
+            <td><p>Total Move-in</p></td>
+            <td><p><span data-type="variable" data-name="total_move_in" data-label="Total Move-in Cost" data-category="financials">Total Move-in Cost</span></p></td>
+            <td><p>Due on occupancy confirmation</p></td>
+          </tr>
+          <tr>
+            <td><p>Maintenance Fee</p></td>
+            <td><p><span data-type="variable" data-name="maintenance_fee" data-label="Maintenance Fee" data-category="financials">Maintenance Fee</span></p></td>
+            <td><p>Supports common-area and systems upkeep</p></td>
+          </tr>
+          <tr>
+            <td><p>Late Fee and Grace Window</p></td>
+            <td><p><span data-type="variable" data-name="late_fee" data-label="Late Payment Fee" data-category="financials">Late Payment Fee</span> after <span data-type="variable" data-name="late_fee_grace_days" data-label="Grace Period (Days)" data-category="financials">Grace Period (Days)</span></p></td>
+            <td><p>Auto-triggered by delayed payment</p></td>
+          </tr>
+          <tr>
+            <td><p>Utilities Specification</p></td>
+            <td><p><span data-type="variable" data-name="utilities_details" data-label="Utilities Details" data-category="policies">Utilities Details</span></p></td>
+            <td><p>Controls service coverage and billing</p></td>
+          </tr>
+          <tr>
+            <td><p>Pet Deposit</p></td>
+            <td><p><span data-type="variable" data-name="pet_deposit" data-label="Pet Deposit" data-category="policies">Pet Deposit</span></p></td>
+            <td><p>Required where pets are approved</p></td>
+          </tr>
+          <tr>
+            <td><p>Escalation Percentage</p></td>
+            <td><p><span data-type="variable" data-name="rent_escalation_percentage" data-label="Rent Escalation %" data-category="policies">Rent Escalation %</span></p></td>
+            <td><p>Applied if escalation is enabled</p></td>
+          </tr>
+        </tbody>
+      </table>
+      <p>Termination and Notice Obligations: <span data-type="variable" data-name="termination_policy" data-label="Termination Notice" data-category="policies">Termination Notice</span></p>
+      <div data-type="clauses-placeholder"></div>
+    `,
+  },
+  {
+    id: 'executive-relocation-lease',
+    name: 'Executive Relocation Lease',
+    description: 'Relocation-focused premium lease with full variable instrumentation and legal-operational clarity.',
+    bodyHtml: `
+      <h1 style="text-align: center;">EXECUTIVE RELOCATION LEASE AGREEMENT</h1>
+      <p>This relocation lease is concluded by <span data-type="variable" data-name="landlord_name" data-label="Landlord Name" data-category="parties">Landlord Name</span> and <span data-type="variable" data-name="tenant_name" data-label="Tenant Name" data-category="parties">Tenant Name</span> for residence at <span data-type="variable" data-name="property_title" data-label="Property Title" data-category="property">Property Title</span>, <span data-type="variable" data-name="property_address" data-label="Full Address" data-category="property">Full Address</span>.</p>
+      <h2>Contract Summary</h2>
+      <table class="agreement-table">
+        <tbody>
+          <tr>
+            <th><p style="text-align: center;">Contract Attribute</p></th>
+            <th><p style="text-align: center;">Configured Detail</p></th>
+          </tr>
+          <tr>
+            <td><p>Lease Commencement</p></td>
+            <td><p><span data-type="variable" data-name="start_date" data-label="Lease Start Date" data-category="dates">Lease Start Date</span></p></td>
+          </tr>
+          <tr>
+            <td><p>Lease Expiry</p></td>
+            <td><p><span data-type="variable" data-name="end_date" data-label="Lease End Date" data-category="dates">Lease End Date</span></p></td>
+          </tr>
+          <tr>
+            <td><p>Duration</p></td>
+            <td><p><span data-type="variable" data-name="duration_months" data-label="Duration (months)" data-category="dates">Duration (months)</span> months</p></td>
+          </tr>
+          <tr>
+            <td><p>Monthly Rent</p></td>
+            <td><p><span data-type="variable" data-name="rent_amount" data-label="Monthly Rent" data-category="financials">Monthly Rent</span></p></td>
+          </tr>
+          <tr>
+            <td><p>Deposit</p></td>
+            <td><p><span data-type="variable" data-name="security_deposit" data-label="Security Deposit" data-category="financials">Security Deposit</span></p></td>
+          </tr>
+          <tr>
+            <td><p>Total Move-in</p></td>
+            <td><p><span data-type="variable" data-name="total_move_in" data-label="Total Move-in Cost" data-category="financials">Total Move-in Cost</span></p></td>
+          </tr>
+          <tr>
+            <td><p>Maintenance</p></td>
+            <td><p><span data-type="variable" data-name="maintenance_fee" data-label="Maintenance Fee" data-category="financials">Maintenance Fee</span></p></td>
+          </tr>
+          <tr>
+            <td><p>Late Charges</p></td>
+            <td><p><span data-type="variable" data-name="late_fee" data-label="Late Payment Fee" data-category="financials">Late Payment Fee</span> after <span data-type="variable" data-name="late_fee_grace_days" data-label="Grace Period (Days)" data-category="financials">Grace Period (Days)</span></p></td>
+          </tr>
+          <tr>
+            <td><p>Utilities</p></td>
+            <td><p><span data-type="variable" data-name="utilities_included" data-label="Utilities Included?" data-category="policies">Utilities Included?</span> - <span data-type="variable" data-name="utilities_details" data-label="Utilities Details" data-category="policies">Utilities Details</span></p></td>
+          </tr>
+          <tr>
+            <td><p>Pet Policy</p></td>
+            <td><p><span data-type="variable" data-name="pet_allowed" data-label="Pets Allowed?" data-category="policies">Pets Allowed?</span>; Deposit <span data-type="variable" data-name="pet_deposit" data-label="Pet Deposit" data-category="policies">Pet Deposit</span></p></td>
+          </tr>
+          <tr>
+            <td><p>Escalation</p></td>
+            <td><p><span data-type="variable" data-name="rent_escalation_enabled" data-label="Rent Escalation?" data-category="policies">Rent Escalation?</span> at <span data-type="variable" data-name="rent_escalation_percentage" data-label="Rent Escalation %" data-category="policies">Rent Escalation %</span></p></td>
+          </tr>
+          <tr>
+            <td><p>Termination Notice</p></td>
+            <td><p><span data-type="variable" data-name="termination_policy" data-label="Termination Notice" data-category="policies">Termination Notice</span></p></td>
+          </tr>
+        </tbody>
+      </table>
+      <h2>Additional Legal Clauses</h2>
+      <div data-type="clauses-placeholder"></div>
+    `,
+  },
 ];

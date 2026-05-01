@@ -21,6 +21,7 @@ import { ClausesPlaceholder } from './ClausesPlaceholder';
 import { DualColumn, DualColumnSide } from './DualColumnExtension';
 import Toolbar from './Toolbar';
 import FloatingToolbox from './FloatingToolbox';
+import FloatingTemplateLibrary from './FloatingTemplateLibrary';
 import PreviewModal from './PreviewModal';
 import ShortcutsModal from './ShortcutsModal';
 import './builder.css';
@@ -31,6 +32,8 @@ const AgreementBuilder = ({ initialContent = '', onSave, isSaving = false, templ
   const [showPreview, setShowPreview] = useState(false);
   const [showShortcuts, setShowShortcuts] = useState(false);
   const [isToolboxOpen, setIsToolboxOpen] = useState(false);
+  const [isTemplateLibraryOpen, setIsTemplateLibraryOpen] = useState(false);
+  const [pendingTemplate, setPendingTemplate] = useState(null);
   const [zoom, setZoom] = useState(100);
   const [autoSaveStatus, setAutoSaveStatus] = useState('idle'); // idle | saving | saved
   const autoSaveTimerRef = useRef(null);
@@ -148,20 +151,22 @@ const AgreementBuilder = ({ initialContent = '', onSave, isSaving = false, templ
 
   const handleApplyTemplate = useCallback((selectedTemplate) => {
     if (!editor || !selectedTemplate) return;
+    setPendingTemplate(selectedTemplate);
+  }, [editor]);
 
-    const shouldReplace = window.confirm(
-      `Replace current document with "${selectedTemplate.name || 'this template'}"? This cannot be undone after more edits.`
-    );
-    if (!shouldReplace) return;
+  const confirmApplyTemplate = useCallback(() => {
+    if (!editor || !pendingTemplate) return;
 
-    if (selectedTemplate.bodyJson) {
-      editor.commands.setContent(selectedTemplate.bodyJson);
-    } else if (selectedTemplate.bodyHtml) {
-      editor.commands.setContent(selectedTemplate.bodyHtml);
+    if (pendingTemplate.bodyJson) {
+      editor.commands.setContent(pendingTemplate.bodyJson);
+    } else if (pendingTemplate.bodyHtml) {
+      editor.commands.setContent(pendingTemplate.bodyHtml);
     }
 
-    toast.success(`Applied template: ${selectedTemplate.name || 'Untitled Template'}`);
-  }, [editor]);
+    toast.success(`Applied template: ${pendingTemplate.name || 'Untitled Template'}`);
+    setPendingTemplate(null);
+    setIsTemplateLibraryOpen(false);
+  }, [editor, pendingTemplate]);
 
   // ── Zoom controls ──
   const cycleZoom = (direction) => {
@@ -228,7 +233,15 @@ const AgreementBuilder = ({ initialContent = '', onSave, isSaving = false, templ
         editor={editor} 
         templateType={templateType}
         isToolboxOpen={isToolboxOpen} 
-        onToggleToolbox={() => setIsToolboxOpen(!isToolboxOpen)} 
+        onToggleToolbox={() => {
+          setIsToolboxOpen((prev) => !prev);
+          setIsTemplateLibraryOpen(false);
+        }}
+        isTemplateLibraryOpen={isTemplateLibraryOpen}
+        onToggleTemplateLibrary={() => {
+          setIsTemplateLibraryOpen((prev) => !prev);
+          setIsToolboxOpen(false);
+        }}
       />
 
       {/* Editor Main Area */}
@@ -242,9 +255,14 @@ const AgreementBuilder = ({ initialContent = '', onSave, isSaving = false, templ
       <FloatingToolbox 
         editor={editor} 
         templateType={templateType} 
-        templates={templateType === 'receipt' ? [] : STATIC_AGREEMENT_TEMPLATES}
         isOpen={isToolboxOpen}
         onClose={() => setIsToolboxOpen(false)}
+      />
+
+      <FloatingTemplateLibrary
+        templates={templateType === 'receipt' ? [] : STATIC_AGREEMENT_TEMPLATES}
+        isOpen={isTemplateLibraryOpen}
+        onClose={() => setIsTemplateLibraryOpen(false)}
         onApplyTemplate={handleApplyTemplate}
       />
 
@@ -260,6 +278,34 @@ const AgreementBuilder = ({ initialContent = '', onSave, isSaving = false, templ
         isOpen={showShortcuts}
         onClose={() => setShowShortcuts(false)}
       />
+
+      {/* Template Replace Confirmation Modal */}
+      {pendingTemplate && (
+        <div className="fixed inset-0 z-[140] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="w-full max-w-md bg-white rounded-2xl border border-gray-200 shadow-2xl overflow-hidden">
+            <div className="px-6 py-4 border-b border-gray-100">
+              <h3 className="text-lg font-extrabold text-slate-900">Replace Current Document?</h3>
+              <p className="text-sm text-slate-500 mt-1">
+                Apply template <span className="font-semibold text-slate-700">"{pendingTemplate.name || 'Untitled Template'}"</span> and replace current editor content.
+              </p>
+            </div>
+            <div className="px-6 py-4 bg-slate-50 border-t border-gray-100 flex items-center justify-end gap-2">
+              <button
+                onClick={() => setPendingTemplate(null)}
+                className="px-4 py-2 text-sm font-bold text-slate-600 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmApplyTemplate}
+                className="px-4 py-2 text-sm font-bold text-white bg-indigo-600 border border-indigo-600 rounded-xl hover:bg-indigo-700 transition-colors"
+              >
+                Replace Content
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Status Bar */}
       <div className="bg-white border-t border-gray-200 px-6 py-2 flex items-center justify-between text-[11px] font-bold text-gray-400 uppercase tracking-wider">

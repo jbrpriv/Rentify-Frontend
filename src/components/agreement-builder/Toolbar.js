@@ -4,7 +4,7 @@ import { toast } from 'react-hot-toast';
 import {
   Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight,
   ChevronDown, Image as ImageIcon, Undo2, Redo2, Sparkles,
-  ScrollText, Columns, Table as TableIcon, Check
+  ScrollText, Columns, Table as TableIcon, Check, LayoutTemplate
 } from 'lucide-react';
 
 const TableGridPicker = ({ onSelect }) => {
@@ -44,7 +44,14 @@ const TableGridPicker = ({ onSelect }) => {
   );
 };
 
-const Toolbar = ({ editor, isToolboxOpen, onToggleToolbox, templateType }) => {
+const Toolbar = ({
+  editor,
+  isToolboxOpen,
+  onToggleToolbox,
+  templateType,
+  isTemplateLibraryOpen,
+  onToggleTemplateLibrary,
+}) => {
   const [showFontSizes, setShowFontSizes] = useState(false);
   const [showTableMenu, setShowTableMenu] = useState(false);
 
@@ -124,8 +131,22 @@ const Toolbar = ({ editor, isToolboxOpen, onToggleToolbox, templateType }) => {
               }`}
           >
             <Sparkles size={14} />
-            <span className="text-xs font-bold leading-none">{templateType === 'receipt' ? 'Variables' : 'Library'}</span>
+            <span className="text-xs font-bold leading-none">Variables</span>
           </button>
+
+          {templateType !== 'receipt' && (
+            <button
+              onClick={onToggleTemplateLibrary}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border transition-colors ${
+                isTemplateLibraryOpen
+                  ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm'
+                  : 'bg-white text-indigo-600 border-indigo-200 hover:border-indigo-400 hover:bg-indigo-50'
+              }`}
+            >
+              <LayoutTemplate size={14} />
+              <span className="text-xs font-bold leading-none">Use Template</span>
+            </button>
+          )}
 
           {templateType !== 'receipt' && (
             <button
