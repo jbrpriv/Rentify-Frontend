@@ -181,17 +181,107 @@ const PreviewModal = ({ isOpen, onClose, html }) => {
                     <head>
                       <title>Agreement Preview</title>
                       <style>
-                        body { font-family: sans-serif; padding: 40px; max-width: 800px; margin: 0 auto; line-height: 1.6; color: #334155; }
-                        h1, h2, h3 { font-weight: 900; color: #0f172a; }
-                        h1 { font-size: 2.5em; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+                        *, *::before, *::after { box-sizing: border-box; }
+                        body {
+                          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                          padding: 60px 40px;
+                          max-width: 860px;
+                          margin: 0 auto;
+                          line-height: 1.6;
+                          color: #334155;
+                          background: #f3f4f6;
+                        }
+                        .a4-page {
+                          background: white;
+                          padding: 80px;
+                          box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
+                          margin-bottom: 40px;
+                        }
+                        h1 { font-size: 2.25rem; font-weight: 900; color: #0f172a; margin-bottom: 1.5rem; }
+                        h2 { font-size: 1.5rem; font-weight: 700; color: #0f172a; margin-top: 1.5rem; margin-bottom: 1rem; }
+                        h3 { font-size: 1.25rem; font-weight: 700; color: #0f172a; }
+                        p  { margin-bottom: 1rem; }
                         strong { color: #1e40af; font-weight: 800; }
-                        .document-image { display: block; margin: 2em auto; max-width: 100%; height: auto; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
-                        .preview-clauses-placeholder { border: 2px dashed #e2e8f0; padding: 40px; text-align: center; color: #94a3b8; border-radius: 12px; margin: 40px 0; }
+                        .preview-variable { color: #0f172a; font-weight: 800; }
+
+                        /* ── Images ── */
+                        .document-image {
+                          display: block; margin: 2em auto; max-width: 100%; height: auto;
+                          border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+                        }
+
+                        /* ── Dual Column ── */
+                        .dual-column-node { margin: 1.5rem 0; }
+                        .dual-column-wrapper {
+                          display: grid;
+                          grid-template-columns: minmax(0,1fr) minmax(0,1fr);
+                          gap: 0;
+                          position: relative;
+                          min-height: 100px;
+                        }
+                        .dual-column-wrapper::after {
+                          content: '';
+                          position: absolute;
+                          top: 0; bottom: 0; left: 50%;
+                          border-left: 2px dotted #cbd5e1;
+                          transform: translateX(-50%);
+                          z-index: 1;
+                          pointer-events: none;
+                        }
+                        .dual-column-side {
+                          padding: 0 20px;
+                          position: relative;
+                          z-index: 2;
+                          min-width: 0;
+                          word-wrap: break-word;
+                          overflow-wrap: break-word;
+                        }
+
+                        /* ── Tables ── */
+                        table, .agreement-table {
+                          width: 100%;
+                          margin: 1.5rem 0;
+                          border-collapse: collapse;
+                          table-layout: fixed;
+                        }
+                        th, td,
+                        .agreement-table th, .agreement-table td {
+                          min-width: 1em;
+                          border: 1px solid #cbd5e1;
+                          padding: 10px 14px;
+                          vertical-align: top;
+                        }
+                        th, .agreement-table th {
+                          font-weight: 800;
+                          text-align: left;
+                          background-color: #f8fafc;
+                          color: #334155;
+                        }
+                        td p, th p { margin: 0; }
+
+                        /* ── Clause Placeholder ── */
+                        .preview-clauses-placeholder {
+                          border: 2px dashed #bbf7d0;
+                          background: #f0fdf4;
+                          padding: 40px;
+                          text-align: center;
+                          color: #059669;
+                          border-radius: 12px;
+                          margin: 40px 0;
+                        }
+
+                        @media print {
+                          body { background: white; padding: 0; }
+                          .preview-clauses-placeholder { border: none !important; background: transparent !important; }
+                          .dual-column-wrapper::after { border-left-color: #000; }
+                        }
                       </style>
                     </head>
                     <body>${previewHtml}</body>
                   </html>
                 `);
+                win.document.close();
+
               }}
               className="flex items-center gap-2 px-4 py-2 text-sm font-bold text-blue-600 hover:bg-blue-50 rounded-xl transition-colors"
             >
