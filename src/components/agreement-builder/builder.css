@@ -204,7 +204,7 @@
   --theme-table-border: #D4C5E0;
   --theme-table-header-bg: linear-gradient(135deg, #2D1B4E 0%, #4A2D6E 100%);
   --theme-table-header-text: #FFFFFF;
-  --theme-hero-pattern: linear-gradient(135deg, #FAF7FF 0%, #F3EAFF 30%, #FFFFFF 100%);
+  --theme-hero-pattern: linear-gradient(135deg, rgba(250,247,255,0.95) 0%, rgba(243,234,255,0.7) 35%, rgba(255,255,255,0) 100%);
   --theme-header-rule: 3px solid #C4917B;
   --theme-section-rule: 1px solid #EDE5F5;
 }

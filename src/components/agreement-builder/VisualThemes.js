@@ -224,7 +224,7 @@ export const VISUAL_THEMES = [
     textures: {
       pageBackground: 'none',
       heroPattern:
-        'linear-gradient(135deg, #FAF7FF 0%, #F3EAFF 30%, #FFFFFF 100%)',
+        'linear-gradient(135deg, rgba(250,247,255,0.95) 0%, rgba(243,234,255,0.7) 35%, rgba(255,255,255,0) 100%)',
     },
     watermark: {
       enabled: false,

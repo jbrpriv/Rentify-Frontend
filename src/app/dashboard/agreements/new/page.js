@@ -314,6 +314,69 @@ function substituteVariables(text, offer, form, formatMoney) {
   return replaced;
 }
 
+const pickThemeString = (value, fallback) => (
+  typeof value === 'string' && value.trim() ? value.trim() : fallback
+);
+
+function resolveTemplateTheme(baseTheme, customizations) {
+  if (!baseTheme && !customizations) return null;
+
+  const theme = baseTheme || {};
+  const overrides = customizations || {};
+  const customWatermark = pickThemeString(overrides.customWatermark, '');
+  const watermarkEnabled = Boolean(customWatermark || theme.watermarkEnabled);
+
+  return {
+    ...theme,
+    primaryColor: pickThemeString(overrides.primaryColor, theme.primaryColor),
+    accentColor: pickThemeString(overrides.accentColor, theme.accentColor),
+    backgroundColor: pickThemeString(overrides.backgroundColor, theme.backgroundColor || '#FFFFFF'),
+    fontFamily: pickThemeString(overrides.fontFamily, theme.fontFamily),
+    fontSizeScale: typeof overrides.fontSizeScale === 'number'
+      ? overrides.fontSizeScale
+      : (typeof theme.fontSizeScale === 'number' ? theme.fontSizeScale : 1.0),
+    watermarkText: customWatermark || theme.watermarkText || '',
+    watermarkEnabled,
+    watermarkOpacity: customWatermark
+      ? 0.08
+      : (typeof theme.watermarkOpacity === 'number' ? theme.watermarkOpacity : 0.04),
+    watermarkColor: customWatermark
+      ? (theme.watermarkColor || theme.primaryColor || '#000000')
+      : (theme.watermarkColor || '#000000'),
+  };
+}
+
+function buildTemplateThemeVars(theme) {
+  const headingFont = theme?.headingFontFamily || theme?.fontFamily || "'Segoe UI', Arial, sans-serif";
+  const bodyFont = theme?.fontFamily || "'Segoe UI', Arial, sans-serif";
+  const watermarkText = theme?.watermarkEnabled && theme?.watermarkText
+    ? JSON.stringify(theme.watermarkText)
+    : '""';
+
+  return {
+    '--theme-heading-font': headingFont,
+    '--theme-body-font': bodyFont,
+    '--theme-heading-color': theme?.headingColor || '#0f172a',
+    '--theme-body-color': theme?.bodyTextColor || '#334155',
+    '--theme-primary': theme?.primaryColor || '#0f172a',
+    '--theme-accent': theme?.accentColor || '#64748b',
+    '--theme-table-border': theme?.tableBorderColor || '#cbd5e1',
+    '--theme-table-header-bg': theme?.tableHeaderBg || '#f8fafc',
+    '--theme-table-header-text': theme?.tableHeaderTextColor || '#334155',
+    '--theme-hero-pattern': theme?.heroPattern || 'none',
+    '--theme-page-texture': theme?.pageTexture || 'none',
+    '--theme-header-rule': theme?.headerRule || 'none',
+    '--theme-section-rule': theme?.sectionRule || 'none',
+    '--theme-watermark-opacity': theme?.watermarkEnabled
+      ? (typeof theme?.watermarkOpacity === 'number' ? theme.watermarkOpacity : 0.04)
+      : 0,
+    '--theme-watermark-color': theme?.watermarkEnabled ? theme?.watermarkColor || '#000000' : 'transparent',
+    '--theme-watermark-text': watermarkText,
+    '--theme-font-scale': typeof theme?.fontSizeScale === 'number' ? theme.fontSizeScale : 1,
+    '--theme-page-bg': theme?.backgroundColor || '#FFFFFF',
+  };
+}
+
 const makeBucket = (clauseId = null) => ({
   key: `bucket-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
   clauseId,
@@ -454,7 +517,8 @@ function TemplateDocument({
   templateHtml, offerData, formData, formatMoney,
   clauseBuckets, clausesById, hoveredBucketKey, setHoveredBucketKey, 
   handleDropToBucket, dragState, handleDragStart, moveBucketClause, 
-  handleRemoveClause, addClauseBucket, isClauseLimitFinite, clauseLimit 
+  handleRemoveClause, addClauseBucket, isClauseLimitFinite, clauseLimit,
+  baseTheme, customizations
 }) {
   
   const { html, hasPortal } = useMemo(() => {
@@ -544,6 +608,36 @@ function TemplateDocument({
   const lastInjectedHtml = useRef('');
   const [portalNode, setPortalNode] = useState(null);
 
+  const resolvedTheme = useMemo(
+    () => resolveTemplateTheme(baseTheme, customizations),
+    [baseTheme, customizations]
+  );
+
+  const themeVars = useMemo(
+    () => buildTemplateThemeVars(resolvedTheme),
+    [resolvedTheme]
+  );
+
+  useEffect(() => {
+    const fontUrl = resolvedTheme?.googleFontUrl;
+    const linkId = 'agreement-template-theme-font';
+    const existing = document.getElementById(linkId);
+    if (existing) existing.remove();
+
+    if (fontUrl) {
+      const link = document.createElement('link');
+      link.id = linkId;
+      link.rel = 'stylesheet';
+      link.href = fontUrl;
+      document.head.appendChild(link);
+    }
+
+    return () => {
+      const el = document.getElementById(linkId);
+      if (el) el.remove();
+    };
+  }, [resolvedTheme?.googleFontUrl]);
+
   useEffect(() => {
     if (!containerRef.current) return;
     
@@ -564,21 +658,83 @@ function TemplateDocument({
   }, [html, hasPortal, portalNode]);
 
   return (
-    <div className="prose prose-blue prose-sm max-w-none agreement-tiptap-content" ref={containerRef}>
+    <div className="agreement-template-preview" ref={containerRef}>
       <style>{`
-        .agreement-tiptap-content h1, 
-        .agreement-tiptap-content h2, 
-        .agreement-tiptap-content h3 { 
-          font-weight: 900 !important; 
-          color: #0f172a !important;
+        .template-page {
+          width: 794px;
+          min-height: 1123px;
+          padding: 80px;
+          background-color: var(--theme-page-bg, #ffffff);
+          background-image: var(--theme-page-texture, none);
+          box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+          position: relative;
+          overflow: hidden;
+          font-family: var(--theme-body-font, 'Segoe UI', Arial, sans-serif);
+          color: var(--theme-body-color, #334155);
+          font-size: calc(12pt * var(--theme-font-scale, 1));
+          line-height: 1.7;
+        }
+        .template-page::before {
+          content: var(--theme-watermark-text, "");
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%) rotate(-35deg);
+          font-size: 100px;
+          font-weight: 900;
+          letter-spacing: 0.15em;
+          color: var(--theme-watermark-color, transparent);
+          opacity: var(--theme-watermark-opacity, 0);
+          pointer-events: none;
+          z-index: 0;
+          white-space: nowrap;
+          user-select: none;
+        }
+        .template-page::after {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          height: 240px;
+          background: var(--theme-hero-pattern, none);
+          pointer-events: none;
+          z-index: 0;
+        }
+        .template-page .content-layer {
+          position: relative;
+          z-index: 1;
+        }
+        .template-page h1,
+        .template-page h2,
+        .template-page h3,
+        .template-page h4,
+        .template-page h5,
+        .template-page h6 {
+          font-family: var(--theme-heading-font, var(--theme-body-font));
+          color: var(--theme-heading-color, #0f172a);
+          font-weight: 800;
           margin-top: 1.5em;
           margin-bottom: 0.5em;
         }
-        .agreement-tiptap-content p { margin-bottom: 1em; color: #334155; line-height: 1.7; }
-        .agreement-tiptap-content .document-image { 
-          max-width: 100%; 
-          height: auto; 
-          border-radius: 8px; 
+        .template-page h1 { font-size: calc(2.25rem * var(--theme-font-scale, 1)); border-bottom: var(--theme-header-rule, none); padding-bottom: 0.5rem; }
+        .template-page h2 { font-size: calc(1.5rem * var(--theme-font-scale, 1)); border-bottom: var(--theme-section-rule, none); padding-bottom: 0.25rem; }
+        .template-page h3 { font-size: calc(1.25rem * var(--theme-font-scale, 1)); }
+        .template-page p,
+        .template-page li,
+        .template-page td,
+        .template-page span,
+        .template-page blockquote {
+          font-family: var(--theme-body-font, 'Segoe UI', Arial, sans-serif);
+          color: var(--theme-body-color, #334155);
+        }
+        .template-page p { margin-bottom: 1em; }
+        .template-page ul,
+        .template-page ol { margin-left: 1.5em; margin-bottom: 1em; }
+        .template-page .document-image {
+          max-width: 100%;
+          height: auto;
+          border-radius: 8px;
           box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
           margin-top: 1.5em;
           margin-bottom: 1.5em;
@@ -597,7 +753,7 @@ function TemplateDocument({
           top: 0;
           bottom: 0;
           left: 50%;
-          border-left: 2px dotted #cbd5e1;
+          border-left: 2px dotted var(--theme-table-border, #cbd5e1);
           transform: translateX(-50%);
           z-index: 1;
         }
@@ -619,71 +775,74 @@ function TemplateDocument({
         .agreement-table th,
         .agreement-table td {
           min-width: 1em;
-          border: 1px solid #cbd5e1;
+          border: 1px solid var(--theme-table-border, #cbd5e1);
           padding: 10px 14px;
           vertical-align: top;
         }
         .agreement-table th {
           font-weight: 800;
           text-align: left;
-          background-color: #f8fafc;
-          color: #334155;
+          background: var(--theme-table-header-bg, #f8fafc);
+          color: var(--theme-table-header-text, #334155);
         }
-        .agreement-table p {
-          margin: 0;
-        }
+        .agreement-table th p { color: var(--theme-table-header-text, #334155); }
+        .agreement-table p { margin: 0; }
         @media print {
           .dual-column-wrapper::after { border-left-color: #000; }
         }
       `}</style>
-      <div id="agreement-tiptap-html-container"></div>
+      <div className="template-page" style={themeVars}>
+        <div className="content-layer agreement-tiptap-content">
+          <div id="agreement-tiptap-html-container"></div>
 
-      {hasPortal && portalNode && createPortal(
-        <div className="not-prose my-10 border-2 border-dashed border-gray-100 rounded-2xl p-6 bg-gray-50/30">
-          <ClauseBucketsSection 
-            clauseBuckets={clauseBuckets}
-            clausesById={clausesById}
-            hoveredBucketKey={hoveredBucketKey}
-            setHoveredBucketKey={setHoveredBucketKey}
-            handleDropToBucket={handleDropToBucket}
-            handleDragStart={handleDragStart}
-            moveBucketClause={moveBucketClause}
-            handleRemoveClause={handleRemoveClause}
-            addClauseBucket={addClauseBucket}
-            isClauseLimitFinite={isClauseLimitFinite}
-            clauseLimit={clauseLimit}
-            offerData={offerData}
-            formData={formData}
-            formatMoney={formatMoney}
-          />
-        </div>,
-        portalNode
-      )}
+          {hasPortal && portalNode && createPortal(
+            <div className="not-prose my-10 border-2 border-dashed border-gray-100 rounded-2xl p-6 bg-gray-50/30">
+              <ClauseBucketsSection 
+                clauseBuckets={clauseBuckets}
+                clausesById={clausesById}
+                hoveredBucketKey={hoveredBucketKey}
+                setHoveredBucketKey={setHoveredBucketKey}
+                handleDropToBucket={handleDropToBucket}
+                handleDragStart={handleDragStart}
+                moveBucketClause={moveBucketClause}
+                handleRemoveClause={handleRemoveClause}
+                addClauseBucket={addClauseBucket}
+                isClauseLimitFinite={isClauseLimitFinite}
+                clauseLimit={clauseLimit}
+                offerData={offerData}
+                formData={formData}
+                formatMoney={formatMoney}
+              />
+            </div>,
+            portalNode
+          )}
 
-      {(!hasPortal || !portalNode) && (
-        <div className="not-prose mt-12 pt-12 border-t border-gray-100">
-          <div className="mb-6 flex flex-col items-center opacity-30">
-            <ScrollText className="text-gray-400" size={32} />
-            <p className="text-[10px] font-black uppercase tracking-[0.3em] mt-2">End of Fixed Content</p>
-          </div>
-          <ClauseBucketsSection 
-            clauseBuckets={clauseBuckets}
-            clausesById={clausesById}
-            hoveredBucketKey={hoveredBucketKey}
-            setHoveredBucketKey={setHoveredBucketKey}
-            handleDropToBucket={handleDropToBucket}
-            handleDragStart={handleDragStart}
-            moveBucketClause={moveBucketClause}
-            handleRemoveClause={handleRemoveClause}
-            addClauseBucket={addClauseBucket}
-            isClauseLimitFinite={isClauseLimitFinite}
-            clauseLimit={clauseLimit}
-            offerData={offerData}
-            formData={formData}
-            formatMoney={formatMoney}
-          />
+          {(!hasPortal || !portalNode) && (
+            <div className="not-prose mt-12 pt-12 border-t border-gray-100">
+              <div className="mb-6 flex flex-col items-center opacity-30">
+                <ScrollText className="text-gray-400" size={32} />
+                <p className="text-[10px] font-black uppercase tracking-[0.3em] mt-2">End of Fixed Content</p>
+              </div>
+              <ClauseBucketsSection 
+                clauseBuckets={clauseBuckets}
+                clausesById={clausesById}
+                hoveredBucketKey={hoveredBucketKey}
+                setHoveredBucketKey={setHoveredBucketKey}
+                handleDropToBucket={handleDropToBucket}
+                handleDragStart={handleDragStart}
+                moveBucketClause={moveBucketClause}
+                handleRemoveClause={handleRemoveClause}
+                addClauseBucket={addClauseBucket}
+                isClauseLimitFinite={isClauseLimitFinite}
+                clauseLimit={clauseLimit}
+                offerData={offerData}
+                formData={formData}
+                formatMoney={formatMoney}
+              />
+            </div>
+          )}
         </div>
-      )}
+      </div>
     </div>
   );
 }
@@ -709,6 +868,8 @@ function AgreementComposer({
   pdfSelection = null,
   templateHtml = '',
   loadingTemplate = false,
+  templateTheme = null,
+  templateCustomizations = null,
 }) {
   const { formatMoney } = useCurrency();
   const [clauses, setClauses] = useState([]);
@@ -941,6 +1102,8 @@ function AgreementComposer({
                   addClauseBucket={addClauseBucket}
                   isClauseLimitFinite={isClauseLimitFinite}
                   clauseLimit={clauseLimit}
+                  baseTheme={templateTheme}
+                  customizations={templateCustomizations}
                 />
               ) : (
                 /* ── Legacy / Fallback Layout ── */
@@ -1370,6 +1533,8 @@ function AgreementForm() {
   const [loadingTemplate, setLoadingTemplate] = useState(false);
   const [pdfSelection, setPdfSelection] = useState(null);
   const [globalDefaultHtml, setGlobalDefaultHtml] = useState(''); // preloaded global template
+  const [templateTheme, setTemplateTheme] = useState(null);
+  const [templateCustomizations, setTemplateCustomizations] = useState(null);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => { setMounted(true); }, []);
@@ -1446,14 +1611,23 @@ function AgreementForm() {
       api.get(`/agreement-templates/${pdfSelection.id}`)
         .then(({ data }) => {
           // The API wraps data inside `data.data` in some routes, handle both
-          const html = data?.bodyHtml || data?.data?.bodyHtml || '';
+          const doc = data?.data || data;
+          const html = doc?.bodyHtml || '';
           setTemplateHtml(html);
+          setTemplateTheme(doc?.baseTheme || null);
+          setTemplateCustomizations(doc?.customizations || null);
         })
-        .catch(() => setTemplateHtml(globalDefaultHtml))
+        .catch(() => {
+          setTemplateHtml(globalDefaultHtml);
+          setTemplateTheme(null);
+          setTemplateCustomizations(null);
+        })
         .finally(() => setLoadingTemplate(false));
     } else if (!pdfSelection) {
       // Reset back to global default when deselected
       setTemplateHtml(globalDefaultHtml);
+      setTemplateTheme(null);
+      setTemplateCustomizations(null);
     }
   }, [pdfSelection, globalDefaultHtml]);
 
@@ -1611,6 +1785,8 @@ function AgreementForm() {
               pdfSelection={pdfSelection}
               templateHtml={templateHtml}
               loadingTemplate={loadingTemplate}
+              templateTheme={templateTheme}
+              templateCustomizations={templateCustomizations}
             />
             </LocalErrorBoundary>
           </div>
