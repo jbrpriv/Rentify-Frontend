@@ -1604,7 +1604,7 @@ function AgreementForm() {
       .catch(() => {});
   }, []);
 
-  // When user picks an enterprise custom template, load its HTML
+  // When user picks an enterprise custom template or a global PDF theme, load its data
   useEffect(() => {
     if (pdfSelection?.type === 'template' && pdfSelection.id) {
       setLoadingTemplate(true);
@@ -1623,6 +1623,20 @@ function AgreementForm() {
           setTemplateCustomizations(null);
         })
         .finally(() => setLoadingTemplate(false));
+    } else if (pdfSelection?.type === 'theme' && pdfSelection.id) {
+      // Fetch the selected global theme so the live preview can apply its
+      // hero gradient, table colours, typography, etc. The template HTML
+      // stays as the global default — only the visual skin changes.
+      api.get(`/pdf-themes/${pdfSelection.id}`)
+        .then(({ data }) => {
+          const theme = data?.data || data;
+          setTemplateTheme(theme || null);
+          setTemplateCustomizations(null);
+        })
+        .catch(() => {
+          setTemplateTheme(null);
+          setTemplateCustomizations(null);
+        });
     } else if (!pdfSelection) {
       // Reset back to global default when deselected
       setTemplateHtml(globalDefaultHtml);
@@ -1642,7 +1656,7 @@ function AgreementForm() {
     rentEscalationEnabled: formData.rentEscalationEnabled,
     rentEscalationPercentage: Number(formData.rentEscalationPercentage) || 5,
     ...(canUseAgreementTemplates && pdfSelection?.type === 'template' ? { templateId: pdfSelection.id } : {}),
-    ...(canSelectPdfTheme && pdfSelection?.type === 'theme' ? { pdfThemeId: pdfSelection.id } : {}),
+    ...(canSelectPdfTheme && pdfSelection?.type === 'theme' ? { pdfTheme: pdfSelection.id } : {}),
   });
 
   const validateAgreementForm = () => {

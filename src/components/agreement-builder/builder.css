@@ -4,20 +4,13 @@
 
 /* ── Document Container ── */
 .document-container {
-  display: flex;
-  justify-content: center;
-  padding: 40px 20px;
-  background-color: #f3f4f6;
-  transition: background-color 0.3s ease;
-}
-
-.document-container.fullscreen-mode {
-  min-height: calc(100vh - 60px);
-}
-
-/* ── A4 Page Canvas ── */
-.a4-page {
-  /* ── Theme Variables (defaults = blank theme) ── */
+  /* ── Theme Variable Defaults (blank theme fallbacks) ──────────────────
+     IMPORTANT: These MUST live here, not on .a4-page.
+     .a4-page is the ProseMirror contenteditable node — any CSS custom
+     property declared directly on it overrides inherited values, which
+     would prevent React's inline style on this wrapper from taking effect.
+     By declaring defaults here, the inline style on .document-container
+     wins and .a4-page inherits the correct values. ── */
   --theme-heading-font: inherit;
   --theme-body-font: inherit;
   --theme-heading-color: #0f172a;
@@ -36,6 +29,19 @@
   --theme-watermark-color: transparent;
   --theme-watermark-text: "";
 
+  display: flex;
+  justify-content: center;
+  padding: 40px 20px;
+  background-color: #f3f4f6;
+  transition: background-color 0.3s ease;
+}
+
+.document-container.fullscreen-mode {
+  min-height: calc(100vh - 60px);
+}
+
+/* ── A4 Page Canvas ── */
+.a4-page {
   width: 794px;
   min-height: 1123px;
   padding: 80px;
@@ -627,7 +633,7 @@
 .agreement-table th,
 .agreement-table td {
   min-width: 1em;
-  border: 1px solid #cbd5e1;
+  border: 1px solid var(--theme-table-border, #cbd5e1);
   padding: 10px 14px;
   vertical-align: top;
   box-sizing: border-box;
@@ -643,11 +649,17 @@
   margin-bottom: 0;
 }
 
-.agreement-table th {
+.agreement-table th,
+.ProseMirror th {
   font-weight: 800;
   text-align: left;
-  background-color: #f8fafc;
-  color: #334155;
+  background: var(--theme-table-header-bg, #f8fafc);
+  color: var(--theme-table-header-text, #334155);
+}
+
+.agreement-table th p,
+.ProseMirror th p {
+  color: var(--theme-table-header-text, #334155);
 }
 
 /* Selected cells during drag selection */
