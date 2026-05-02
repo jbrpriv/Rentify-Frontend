@@ -1,7 +1,10 @@
 import React, { useMemo } from 'react';
 import { X, ExternalLink, ShieldCheck, ScrollText } from 'lucide-react';
+import { getThemeById, themeToCssVars } from './VisualThemes';
 
-const PreviewModal = ({ isOpen, onClose, html }) => {
+const PreviewModal = ({ isOpen, onClose, html, activeTheme = 'blank' }) => {
+  const theme = useMemo(() => getThemeById(activeTheme), [activeTheme]);
+  const themeVars = useMemo(() => themeToCssVars(theme), [theme]);
   const samples = useMemo(() => ({
     // Parties
     tenant_name: 'John Carter',
@@ -89,6 +92,9 @@ const PreviewModal = ({ isOpen, onClose, html }) => {
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+      {theme?.fonts?.googleFontUrl && (
+        <link rel="stylesheet" href={theme.fonts.googleFontUrl} />
+      )}
       <style>{`
         .agreement-preview-container h1, 
         .agreement-preview-container h2, 
@@ -194,13 +200,14 @@ const PreviewModal = ({ isOpen, onClose, html }) => {
                       <title>Agreement Preview</title>
                       <style>
                         *, *::before, *::after { box-sizing: border-box; }
+                        ${theme?.fonts?.googleFontUrl ? `@import url('${theme.fonts.googleFontUrl}');` : ''}
                         body {
-                          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                          font-family: ${theme?.fonts?.body || "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"};
                           padding: 60px 40px;
                           max-width: 860px;
                           margin: 0 auto;
                           line-height: 1.6;
-                          color: #334155;
+                          color: ${theme?.colors?.bodyText || '#334155'};
                           background: #f3f4f6;
                         }
                         .a4-page {
@@ -209,9 +216,9 @@ const PreviewModal = ({ isOpen, onClose, html }) => {
                           box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
                           margin-bottom: 40px;
                         }
-                        h1 { font-size: 2.25rem; font-weight: 900; color: #0f172a; margin-bottom: 1.5rem; }
-                        h2 { font-size: 1.5rem; font-weight: 700; color: #0f172a; margin-top: 1.5rem; margin-bottom: 1rem; }
-                        h3 { font-size: 1.25rem; font-weight: 700; color: #0f172a; }
+                        h1 { font-size: 2.25rem; font-weight: 900; color: ${theme?.colors?.headingColor || '#0f172a'}; margin-bottom: 1.5rem; font-family: ${theme?.fonts?.heading || 'inherit'}; padding-bottom: 0.5rem; border-bottom: ${theme?.borders?.headerRule || 'none'}; }
+                        h2 { font-size: 1.5rem; font-weight: 700; color: ${theme?.colors?.headingColor || '#0f172a'}; margin-top: 1.5rem; margin-bottom: 1rem; font-family: ${theme?.fonts?.heading || 'inherit'}; padding-bottom: 0.25rem; border-bottom: ${theme?.borders?.sectionRule || 'none'}; }
+                        h3 { font-size: 1.25rem; font-weight: 700; color: ${theme?.colors?.headingColor || '#0f172a'}; font-family: ${theme?.fonts?.heading || 'inherit'}; }
                         p  { margin-bottom: 1rem; }
                         strong { color: #1e40af; font-weight: 800; }
                         .preview-variable { color: #0f172a; font-weight: 800; }
@@ -266,9 +273,10 @@ const PreviewModal = ({ isOpen, onClose, html }) => {
                         th, .agreement-table th {
                           font-weight: 800;
                           text-align: inherit;
-                          background-color: #f8fafc;
-                          color: #334155;
+                          background: ${theme?.colors?.tableHeaderBg || '#f8fafc'};
+                          color: ${theme?.colors?.tableHeaderText || '#334155'};
                         }
+                        th p, .agreement-table th p { color: ${theme?.colors?.tableHeaderText || '#334155'}; }
                         td p, th p { margin: 0; }
 
                         /* ── Clause Placeholder ── */
@@ -310,9 +318,39 @@ const PreviewModal = ({ isOpen, onClose, html }) => {
 
         <div className="flex-1 overflow-y-auto p-12 bg-gray-100/50 flex justify-center">
           <div
-            className="agreement-preview-container bg-white w-[794px] min-h-[1123px] shadow-2xl border border-gray-200 p-[80px] max-w-none"
-            dangerouslySetInnerHTML={{ __html: previewHtml }}
-          />
+            className="agreement-preview-container bg-white w-[794px] min-h-[1123px] shadow-2xl border border-gray-200 p-[80px] max-w-none relative overflow-hidden"
+            style={{
+              backgroundImage: theme?.textures?.pageBackground !== 'none' ? theme.textures.pageBackground : undefined,
+            }}
+          >
+            {/* Hero background gradient */}
+            {theme?.textures?.heroPattern && theme.textures.heroPattern !== 'none' && (
+              <div
+                style={{
+                  position: 'absolute', top: 0, left: 0, right: 0, height: 200,
+                  background: theme.textures.heroPattern, pointerEvents: 'none', zIndex: 0,
+                }}
+              />
+            )}
+            {/* Watermark */}
+            {theme?.watermark?.enabled && (
+              <div
+                style={{
+                  position: 'absolute', top: '50%', left: '50%',
+                  transform: 'translate(-50%, -50%) rotate(-35deg)',
+                  fontSize: 100, fontWeight: 900, letterSpacing: '0.15em',
+                  color: theme.watermark.color, opacity: theme.watermark.opacity,
+                  pointerEvents: 'none', zIndex: 0, whiteSpace: 'nowrap', userSelect: 'none',
+                }}
+              >
+                {theme.watermark.text}
+              </div>
+            )}
+            <div
+              style={{ position: 'relative', zIndex: 1 }}
+              dangerouslySetInnerHTML={{ __html: previewHtml }}
+            />
+          </div>
         </div>
 
         <div className="p-4 px-6 border-t border-gray-100 flex justify-end bg-white">

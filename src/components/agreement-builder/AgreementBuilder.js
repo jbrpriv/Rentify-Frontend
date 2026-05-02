@@ -14,6 +14,7 @@ import { Eye, CheckCircle2, Loader2, Save, Keyboard, ZoomIn, ZoomOut } from 'luc
 import { CharacterCount } from '@tiptap/extension-character-count';
 import { toast } from 'react-hot-toast';
 import { STATIC_AGREEMENT_TEMPLATES } from './StaticTemplates';
+import { VISUAL_THEMES, getThemeById } from './VisualThemes';
 
 import { Variable } from './VariableExtension';
 import { FontSize } from './FontSizeExtension';
@@ -35,6 +36,7 @@ const AgreementBuilder = ({ initialContent = '', onSave, isSaving = false, templ
   const [isTemplateLibraryOpen, setIsTemplateLibraryOpen] = useState(false);
   const [pendingTemplate, setPendingTemplate] = useState(null);
   const [zoom, setZoom] = useState(100);
+  const [activeTheme, setActiveTheme] = useState('modern-minimalist');
   const [autoSaveStatus, setAutoSaveStatus] = useState('idle'); // idle | saving | saved
   const autoSaveTimerRef = useRef(null);
   const lastSavedRef = useRef(null);
@@ -140,14 +142,39 @@ const AgreementBuilder = ({ initialContent = '', onSave, isSaving = false, templ
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);   // eslint-disable-line react-hooks/exhaustive-deps
 
+  // ── Google Font injection ──
+  useEffect(() => {
+    const theme = getThemeById(activeTheme);
+    const fontUrl = theme?.fonts?.googleFontUrl;
+    const linkId = 'agreement-theme-font';
+
+    // Remove old link
+    const existing = document.getElementById(linkId);
+    if (existing) existing.remove();
+
+    if (fontUrl) {
+      const link = document.createElement('link');
+      link.id = linkId;
+      link.rel = 'stylesheet';
+      link.href = fontUrl;
+      document.head.appendChild(link);
+    }
+
+    return () => {
+      const el = document.getElementById(linkId);
+      if (el) el.remove();
+    };
+  }, [activeTheme]);
+
   const handleSave = useCallback(() => {
     if (!editor) return;
     const content = {
       html: editor.getHTML(),
       json: editor.getJSON(),
+      themeId: activeTheme,
     };
     if (onSave) onSave(content);
-  }, [editor, onSave]);
+  }, [editor, onSave, activeTheme]);
 
   const handleApplyTemplate = useCallback((selectedTemplate) => {
     if (!editor || !selectedTemplate) return;
@@ -242,10 +269,12 @@ const AgreementBuilder = ({ initialContent = '', onSave, isSaving = false, templ
           setIsTemplateLibraryOpen((prev) => !prev);
           setIsToolboxOpen(false);
         }}
+        activeTheme={activeTheme}
+        onThemeChange={setActiveTheme}
       />
 
       {/* Editor Main Area */}
-      <div className={`flex-1 document-container zoom-${zoom}`} style={{ overflowY: 'auto', overflowX: 'hidden' }}>
+      <div className={`flex-1 document-container zoom-${zoom} theme-${activeTheme}`} style={{ overflowY: 'auto', overflowX: 'hidden' }}>
         <div className="relative">
           <EditorContent editor={editor} />
         </div>
@@ -270,7 +299,8 @@ const AgreementBuilder = ({ initialContent = '', onSave, isSaving = false, templ
       <PreviewModal 
         isOpen={showPreview} 
         onClose={() => setShowPreview(false)} 
-        html={editor.getHTML()} 
+        html={editor.getHTML()}
+        activeTheme={activeTheme}
       />
 
       {/* Shortcuts Modal */}

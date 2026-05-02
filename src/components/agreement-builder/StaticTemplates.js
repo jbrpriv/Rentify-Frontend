@@ -1,5 +1,15 @@
 export const STATIC_AGREEMENT_TEMPLATES = [
   {
+    id: 'blank',
+    name: 'Blank Document',
+    description: 'Start from scratch with a clean, empty document. No pre-filled content.',
+    bodyHtml: `
+      <h1 style="text-align: center;">Agreement Title</h1>
+      <p>Begin writing your agreement here…</p>
+      <div data-type="clauses-placeholder"></div>
+    `,
+  },
+  {
     id: 'residential-standard',
     name: 'Residential Standard Lease',
     description: 'Executive-grade residential lease with premium structure, payment matrix, and legal clarity.',

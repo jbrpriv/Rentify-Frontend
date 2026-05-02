@@ -1,0 +1,254 @@
+﻿Γû▓ Next.js 16.1.6 (Turbopack)
+
+npx : ΓÜá The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: 
+https://nextjs.org/docs/messages/middleware-to-proxy
+At line:1 char:1
++ npx next build 2>&1 | Out-File -FilePath ".\build_output.txt" -Encodi ...
++ ~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (ΓÜá The "middle...leware-to-proxy:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+  Creating an optimized production build ...
+Γ£ô Compiled successfully in 13.7s
+  Running TypeScript ...
+  Collecting page data using 7 workers ...
+  Generating static pages using 7 workers (0/58) ...
+ΓÜá Unsupported metadata themeColor is configured in metadata export in /dashboard/agreement-templates/new. Please 
+move it to viewport export instead.
+Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+ΓÜá Unsupported metadata themeColor is configured in metadata export in /dashboard/pm/properties. Please move it to 
+viewport export instead.
+Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+ΓÜá Unsupported metadata themeColor is configured in metadata export in /_not-found. Please move it to viewport export 
+instead.
+Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+ΓÜá Unsupported metadata themeColor is configured in metadata export in /login. Please move it to viewport export 
+instead.
+Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+ΓÜá Unsupported metadata themeColor is configured in metadata export in /register. Please move it to viewport export 
+instead.
+Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+ΓÜá Unsupported metadata themeColor is configured in metadata export in /forgot-password. Please move it to viewport 
+export instead.
+Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+ΓÜá Unsupported metadata themeColor is configured in metadata export in /reset-password. Please move it to viewport 
+export instead.
+Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+ΓÜá Unsupported metadata themeColor is configured in metadata export in /dashboard/pm/tenants. Please move it to 
+viewport export instead.
+Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+ΓÜá Unsupported metadata themeColor is configured in metadata export in /verify-email. Please move it to viewport 
+export instead.
+Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+ΓÜá Unsupported metadata themeColor is configured in metadata export in /auth/oauth/complete-profile. Please move it 
+to viewport export instead.
+Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+ΓÜá Unsupported metadata themeColor is configured in metadata export in /dashboard/agreements/new. Please move it to 
+viewport export instead.
+Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+ΓÜá Unsupported metadata themeColor is configured in metadata export in /dashboard/agreements. Please move it to 
+viewport export instead.
+Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+ΓÜá Unsupported metadata themeColor is configured in metadata export in /dashboard/analytics. Please move it to 
+viewport export instead.
+Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+ΓÜá Unsupported metadata themeColor is configured in metadata export in /dashboard/profile/setup-2fa. Please move it 
+to viewport export instead.
+Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+ΓÜá Unsupported metadata themeColor is configured in metadata export in /dashboard/profile/verify-phone. Please move 
+it to viewport export instead.
+Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+ΓÜá Unsupported metadata themeColor is configured in metadata export in /dashboard/properties/edit. Please move it to 
+viewport export instead.
+Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+ΓÜá Unsupported metadata themeColor is configured in metadata export in /dashboard/billing. Please move it to viewport 
+export instead.
+Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+ΓÜá Unsupported metadata themeColor is configured in metadata export in /dashboard/agreement-templates. Please move it 
+to viewport export instead.
+Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+ΓÜá Unsupported metadata themeColor is configured in metadata export in /dashboard/admin/users. Please move it to 
+viewport export instead.
+Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+ΓÜá Unsupported metadata themeColor is configured in metadata export in /auth/oauth/success. Please move it to 
+viewport export instead.
+Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+ΓÜá Unsupported metadata themeColor is configured in metadata export in /dashboard/admin/verifications. Please move it 
+to viewport export instead.
+Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+ΓÜá Unsupported metadata themeColor is configured in metadata export in /dashboard/admin/agreement-templates. Please 
+move it to viewport export instead.
+Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+ΓÜá Unsupported metadata themeColor is configured in metadata export in /dashboard/properties/new. Please move it to 
+viewport export instead.
+Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+ΓÜá Unsupported metadata themeColor is configured in metadata export in /dashboard/properties. Please move it to 
+viewport export instead.
+Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+ΓÜá Unsupported metadata themeColor is configured in metadata export in /browse. Please move it to viewport export 
+instead.
+Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+ΓÜá Unsupported metadata themeColor is configured in metadata export in /dashboard/admin/agreements. Please move it to 
+viewport export instead.
+Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+ΓÜá Unsupported metadata themeColor is configured in metadata export in /dashboard/admin. Please move it to viewport 
+export instead.
+Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+ΓÜá Unsupported metadata themeColor is configured in metadata export in /dashboard/profile. Please move it to viewport 
+export instead.
+Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+  Generating static pages using 7 workers (14/58) 
+ΓÜá Unsupported metadata themeColor is configured in metadata export in /dashboard/admin/billing. Please move it to 
+viewport export instead.
+Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+ΓÜá Unsupported metadata themeColor is configured in metadata export in /dashboard/admin/payments. Please move it to 
+viewport export instead.
+Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+ΓÜá Unsupported metadata themeColor is configured in metadata export in /dashboard/admin/audit-logs. Please move it to 
+viewport export instead.
+Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+ΓÜá Unsupported metadata themeColor is configured in metadata export in /dashboard/disputes. Please move it to 
+viewport export instead.
+Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+ΓÜá Unsupported metadata themeColor is configured in metadata export in /dashboard/landlord/tenant-documents. Please 
+move it to viewport export instead.
+Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+ΓÜá Unsupported metadata themeColor is configured in metadata export in /dashboard/landlord/tenants. Please move it to 
+viewport export instead.
+Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+ΓÜá Unsupported metadata themeColor is configured in metadata export in /dashboard/maintenance. Please move it to 
+viewport export instead.
+Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+ΓÜá Unsupported metadata themeColor is configured in metadata export in /dashboard/documents. Please move it to 
+viewport export instead.
+Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+ΓÜá Unsupported metadata themeColor is configured in metadata export in /dashboard/my-lease. Please move it to 
+viewport export instead.
+Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+ΓÜá Unsupported metadata themeColor is configured in metadata export in /dashboard/verification. Please move it to 
+viewport export instead.
+Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+ΓÜá Unsupported metadata themeColor is configured in metadata export in /dashboard/messages. Please move it to 
+viewport export instead.
+Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+ΓÜá Unsupported metadata themeColor is configured in metadata export in /data-deletion. Please move it to viewport 
+export instead.
+Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+ΓÜá Unsupported metadata themeColor is configured in metadata export in /dashboard/notifications. Please move it to 
+viewport export instead.
+Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+  Generating static pages using 7 workers (28/58) 
+ΓÜá Unsupported metadata themeColor is configured in metadata export in /offline. Please move it to viewport export 
+instead.
+Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+ΓÜá Unsupported metadata themeColor is configured in metadata export in /. Please move it to viewport export instead.
+Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+ΓÜá Unsupported metadata themeColor is configured in metadata export in /dashboard/admin/pdf-editor. Please move it to 
+viewport export instead.
+Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+ΓÜá Unsupported metadata themeColor is configured in metadata export in /dashboard/admin/settings. Please move it to 
+viewport export instead.
+Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+ΓÜá Unsupported metadata themeColor is configured in metadata export in /pricing. Please move it to viewport export 
+instead.
+Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+ΓÜá Unsupported metadata themeColor is configured in metadata export in /dashboard/admin/properties. Please move it to 
+viewport export instead.
+Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+ΓÜá Unsupported metadata themeColor is configured in metadata export in /dashboard/admin/templates. Please move it to 
+viewport export instead.
+Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+ΓÜá Unsupported metadata themeColor is configured in metadata export in /privacy. Please move it to viewport export 
+instead.
+Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+  Generating static pages using 7 workers (43/58) 
+ΓÜá Unsupported metadata themeColor is configured in metadata export in /dashboard. Please move it to viewport export 
+instead.
+Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+ΓÜá Unsupported metadata themeColor is configured in metadata export in /dashboard/offers. Please move it to viewport 
+export instead.
+Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+ΓÜá Unsupported metadata themeColor is configured in metadata export in /dashboard/payments. Please move it to 
+viewport export instead.
+Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+ΓÜá Unsupported metadata themeColor is configured in metadata export in /dashboard/pm/maintenance. Please move it to 
+viewport export instead.
+Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+ΓÜá Unsupported metadata themeColor is configured in metadata export in /super-login. Please move it to viewport 
+export instead.
+Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+ΓÜá Unsupported metadata themeColor is configured in metadata export in /support. Please move it to viewport export 
+instead.
+Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+Γ£ô Generating static pages using 7 workers (58/58) in 2.3s
+  Finalizing page optimization ...
+
+Route (app)
+Γöî Γùï /
+Γö£ Γùï /_not-found
+Γö£ Γùï /auth/oauth/complete-profile
+Γö£ Γùï /auth/oauth/success
+Γö£ Γùï /browse
+Γö£ ╞Æ /browse/[id]
+Γö£ Γùï /dashboard
+Γö£ Γùï /dashboard/admin
+Γö£ Γùï /dashboard/admin/agreement-templates
+Γö£ Γùï /dashboard/admin/agreements
+Γö£ Γùï /dashboard/admin/audit-logs
+Γö£ Γùï /dashboard/admin/billing
+Γö£ Γùï /dashboard/admin/payments
+Γö£ Γùï /dashboard/admin/pdf-editor
+Γö£ Γùï /dashboard/admin/properties
+Γö£ Γùï /dashboard/admin/settings
+Γö£ Γùï /dashboard/admin/templates
+Γö£ Γùï /dashboard/admin/users
+Γö£ Γùï /dashboard/admin/verifications
+Γö£ Γùï /dashboard/agreement-templates
+Γö£ ╞Æ /dashboard/agreement-templates/[id]/edit
+Γö£ Γùï /dashboard/agreement-templates/new
+Γö£ Γùï /dashboard/agreements
+Γö£ ╞Æ /dashboard/agreements/[id]
+Γö£ ╞Æ /dashboard/agreements/[id]/history
+Γö£ ╞Æ /dashboard/agreements/[id]/tenant-documents
+Γö£ Γùï /dashboard/agreements/new
+Γö£ Γùï /dashboard/analytics
+Γö£ Γùï /dashboard/billing
+Γö£ Γùï /dashboard/disputes
+Γö£ Γùï /dashboard/documents
+Γö£ Γùï /dashboard/landlord/tenant-documents
+Γö£ Γùï /dashboard/landlord/tenants
+Γö£ Γùï /dashboard/maintenance
+Γö£ Γùï /dashboard/messages
+Γö£ Γùï /dashboard/my-lease
+Γö£ Γùï /dashboard/notifications
+Γö£ Γùï /dashboard/offers
+Γö£ Γùï /dashboard/payments
+Γö£ Γùï /dashboard/pm/maintenance
+Γö£ Γùï /dashboard/pm/properties
+Γö£ Γùï /dashboard/pm/tenants
+Γö£ Γùï /dashboard/profile
+Γö£ Γùï /dashboard/profile/setup-2fa
+Γö£ Γùï /dashboard/profile/verify-phone
+Γö£ Γùï /dashboard/properties
+Γö£ Γùï /dashboard/properties/edit
+Γö£ Γùï /dashboard/properties/new
+Γö£ Γùï /dashboard/verification
+Γö£ Γùï /data-deletion
+Γö£ Γùï /forgot-password
+Γö£ Γùï /login
+Γö£ Γùï /manifest.webmanifest
+Γö£ Γùï /offline
+Γö£ Γùï /pricing
+Γö£ Γùï /privacy
+Γö£ Γùï /register
+Γö£ Γùï /reset-password
+Γö£ Γùï /super-login
+Γö£ Γùï /support
+Γöö Γùï /verify-email
+
+
+╞Æ Proxy (Middleware)
+
+Γùï  (Static)   prerendered as static content
+╞Æ  (Dynamic)  server-rendered on demand
+

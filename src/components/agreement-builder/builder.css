@@ -17,14 +17,201 @@
 
 /* ── A4 Page Canvas ── */
 .a4-page {
+  /* ── Theme Variables (defaults = blank theme) ── */
+  --theme-heading-font: inherit;
+  --theme-body-font: inherit;
+  --theme-heading-color: #0f172a;
+  --theme-body-color: #334155;
+  --theme-primary: #000000;
+  --theme-accent: #666666;
+  --theme-table-border: #cbd5e1;
+  --theme-table-header-bg: #f8fafc;
+  --theme-table-header-text: #334155;
+  --theme-hero-bg: transparent;
+  --theme-hero-pattern: none;
+  --theme-page-texture: none;
+  --theme-header-rule: none;
+  --theme-section-rule: none;
+  --theme-watermark-opacity: 0;
+  --theme-watermark-color: transparent;
+  --theme-watermark-text: "";
+
   width: 794px;
   min-height: 1123px;
   padding: 80px;
   background-color: white;
+  background-image: var(--theme-page-texture);
   box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
   margin-bottom: 40px;
   transition: transform 0.3s ease;
   transform-origin: top center;
+  position: relative;
+  overflow: hidden;
+}
+
+/* ── Watermark Overlay ── */
+.a4-page::before {
+  content: var(--theme-watermark-text);
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(-35deg);
+  font-size: 100px;
+  font-weight: 900;
+  letter-spacing: 0.15em;
+  color: var(--theme-watermark-color);
+  opacity: var(--theme-watermark-opacity);
+  pointer-events: none;
+  z-index: 0;
+  white-space: nowrap;
+  user-select: none;
+}
+
+/* ── Hero Background (top area gradient) ── */
+.a4-page::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 200px;
+  background: var(--theme-hero-pattern);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Ensure all content sits above pseudo-elements */
+.a4-page > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* ── Theme-Driven Typography ── */
+.a4-page h1, .a4-page h2, .a4-page h3, .a4-page h4, .a4-page h5, .a4-page h6 {
+  font-family: var(--theme-heading-font);
+  color: var(--theme-heading-color);
+}
+
+.a4-page h1 {
+  padding-bottom: 0.5rem;
+  border-bottom: var(--theme-header-rule);
+}
+
+.a4-page h2 {
+  padding-bottom: 0.25rem;
+  border-bottom: var(--theme-section-rule);
+}
+
+.a4-page p, .a4-page li, .a4-page td, .a4-page span, .a4-page blockquote {
+  font-family: var(--theme-body-font);
+  color: var(--theme-body-color);
+}
+
+/* ── Theme-Driven Tables ── */
+.a4-page .agreement-table th,
+.a4-page .agreement-table td {
+  border-color: var(--theme-table-border);
+}
+.a4-page .agreement-table th {
+  background: var(--theme-table-header-bg);
+  color: var(--theme-table-header-text);
+}
+.a4-page .agreement-table th p {
+  color: var(--theme-table-header-text);
+}
+
+/* ── Theme-Driven Dual Column Divider ── */
+.a4-page .dual-column-wrapper::after {
+  border-left-color: var(--theme-table-border);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   PER-THEME OVERRIDES
+   Applied via .theme-{id} class on the document-container
+   ═══════════════════════════════════════════════════════════ */
+
+/* ── Commercial Classic ── */
+.theme-commercial-classic .a4-page {
+  --theme-heading-font: 'Playfair Display', Georgia, serif;
+  --theme-body-font: 'Lora', 'Times New Roman', serif;
+  --theme-heading-color: #1B2A4A;
+  --theme-body-color: #2D3748;
+  --theme-primary: #1B2A4A;
+  --theme-accent: #C5A55A;
+  --theme-table-border: #C5A55A;
+  --theme-table-header-bg: #1B2A4A;
+  --theme-table-header-text: #FFFFFF;
+  --theme-hero-bg: #F7F5F0;
+  --theme-hero-pattern: linear-gradient(180deg, #F7F5F0 0%, #FFFFFF 8%);
+  --theme-header-rule: 3px double #C5A55A;
+  --theme-section-rule: 1px solid #E2D9C8;
+}
+
+/* ── Modern Minimalist ── */
+.theme-modern-minimalist .a4-page {
+  --theme-heading-font: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+  --theme-body-font: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+  --theme-heading-color: #0F172A;
+  --theme-body-color: #475569;
+  --theme-primary: #1E293B;
+  --theme-accent: #3B82F6;
+  --theme-table-border: #E2E8F0;
+  --theme-table-header-bg: #F8FAFC;
+  --theme-table-header-text: #1E293B;
+  --theme-header-rule: 2px solid #3B82F6;
+  --theme-section-rule: 1px solid #F1F5F9;
+}
+
+/* ── Professional Legal ── */
+.theme-professional-legal .a4-page {
+  --theme-heading-font: 'Merriweather', Georgia, serif;
+  --theme-body-font: 'Source Sans 3', 'Segoe UI', Roboto, sans-serif;
+  --theme-heading-color: #1A1A2E;
+  --theme-body-color: #374151;
+  --theme-primary: #1A1A2E;
+  --theme-accent: #7B2D3B;
+  --theme-table-border: #D1CBC3;
+  --theme-table-header-bg: #1A1A2E;
+  --theme-table-header-text: #F5F0EB;
+  --theme-hero-pattern: linear-gradient(180deg, #FAFAF8 0%, #FFFFFF 6%);
+  --theme-page-texture: repeating-linear-gradient(0deg, transparent, transparent 27px, rgba(0,0,0,0.015) 27px, rgba(0,0,0,0.015) 28px);
+  --theme-header-rule: 2px solid #7B2D3B;
+  --theme-section-rule: 1px solid #E8E2DA;
+  --theme-watermark-opacity: 0.03;
+  --theme-watermark-color: #1A1A2E;
+  --theme-watermark-text: "CONFIDENTIAL";
+}
+
+/* ── Executive Premium ── */
+.theme-executive-premium .a4-page {
+  --theme-heading-font: 'Outfit', 'Helvetica Neue', sans-serif;
+  --theme-body-font: 'DM Sans', 'Segoe UI', sans-serif;
+  --theme-heading-color: #2D1B4E;
+  --theme-body-color: #3C3555;
+  --theme-primary: #2D1B4E;
+  --theme-accent: #C4917B;
+  --theme-table-border: #D4C5E0;
+  --theme-table-header-bg: linear-gradient(135deg, #2D1B4E 0%, #4A2D6E 100%);
+  --theme-table-header-text: #FFFFFF;
+  --theme-hero-pattern: linear-gradient(135deg, #FAF7FF 0%, #F3EAFF 30%, #FFFFFF 100%);
+  --theme-header-rule: 3px solid #C4917B;
+  --theme-section-rule: 1px solid #EDE5F5;
+}
+
+/* ── Fresh Contemporary ── */
+.theme-fresh-contemporary .a4-page {
+  --theme-heading-font: 'Poppins', 'Helvetica Neue', sans-serif;
+  --theme-body-font: 'Nunito', 'Segoe UI', sans-serif;
+  --theme-heading-color: #134E4A;
+  --theme-body-color: #334155;
+  --theme-primary: #0F766E;
+  --theme-accent: #F97066;
+  --theme-table-border: #99F6E4;
+  --theme-table-header-bg: #0F766E;
+  --theme-table-header-text: #FFFFFF;
+  --theme-hero-pattern: linear-gradient(180deg, #F0FDFA 0%, #FFFFFF 8%);
+  --theme-header-rule: 3px solid #F97066;
+  --theme-section-rule: 1px solid #CCFBF1;
 }
 
 /* ── Zoom Levels ── */
@@ -32,17 +219,6 @@
 .zoom-100 .a4-page { transform: scale(1); }
 .zoom-125 .a4-page { transform: scale(1.25); }
 .zoom-150 .a4-page { transform: scale(1.5); }
-
-/* ── Page Break Indicator ── */
-.a4-page {
-  background-image: repeating-linear-gradient(
-    transparent,
-    transparent 1122px,
-    transparent 1122px,
-    transparent 1123px
-  );
-  background-position: 0 80px;
-}
 
 .page-break-line {
   position: relative;

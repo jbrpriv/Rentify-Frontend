@@ -4,8 +4,9 @@ import { toast } from 'react-hot-toast';
 import {
   Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight,
   ChevronDown, Image as ImageIcon, Undo2, Redo2, Sparkles,
-  ScrollText, Columns, Table as TableIcon, Check, LayoutTemplate
+  ScrollText, Columns, Table as TableIcon, Check, LayoutTemplate, Palette
 } from 'lucide-react';
+import { VISUAL_THEMES } from './VisualThemes';
 
 const TableGridPicker = ({ onSelect }) => {
   const [hovered, setHovered] = useState({ r: 0, c: 0 });
@@ -51,9 +52,12 @@ const Toolbar = ({
   templateType,
   isTemplateLibraryOpen,
   onToggleTemplateLibrary,
+  activeTheme,
+  onThemeChange,
 }) => {
   const [showFontSizes, setShowFontSizes] = useState(false);
   const [showTableMenu, setShowTableMenu] = useState(false);
+  const [showThemePicker, setShowThemePicker] = useState(false);
 
   if (!editor) return null;
 
@@ -221,6 +225,80 @@ const Toolbar = ({
             )}
           </div>
         </div>
+
+        {/* Theme Picker */}
+        {templateType !== 'receipt' && (
+          <div className="relative px-2 border-r border-gray-100">
+            <button
+              onClick={() => setShowThemePicker(!showThemePicker)}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border transition-colors ${
+                showThemePicker
+                  ? 'bg-violet-600 text-white border-violet-600 shadow-sm'
+                  : 'bg-white text-violet-600 border-violet-200 hover:border-violet-400 hover:bg-violet-50'
+              }`}
+            >
+              <Palette size={14} />
+              <span className="text-xs font-bold leading-none">Theme</span>
+              <ChevronDown size={12} className="opacity-50" />
+            </button>
+
+            {showThemePicker && (
+              <>
+                <div className="fixed inset-0 z-[90]" onClick={() => setShowThemePicker(false)} />
+                <div className="absolute top-full left-0 mt-1 w-[280px] bg-white border border-gray-200 rounded-xl shadow-2xl overflow-hidden z-[100]">
+                  <div className="px-3 py-2 bg-gradient-to-r from-violet-600 to-purple-600">
+                    <p className="text-[10px] font-bold text-white uppercase tracking-wider">Visual Theme</p>
+                  </div>
+                  <div className="p-2 max-h-[340px] overflow-y-auto">
+                    {VISUAL_THEMES.map((theme) => {
+                      const isActive = activeTheme === theme.id;
+                      return (
+                        <button
+                          key={theme.id}
+                          onClick={() => {
+                            onThemeChange?.(theme.id);
+                            setShowThemePicker(false);
+                          }}
+                          className={`w-full text-left px-3 py-2.5 rounded-lg mb-1 transition-all flex items-center gap-3 ${
+                            isActive
+                              ? 'bg-violet-50 border border-violet-200 shadow-sm'
+                              : 'hover:bg-gray-50 border border-transparent'
+                          }`}
+                        >
+                          {/* Color swatches */}
+                          <div className="flex gap-0.5 flex-shrink-0">
+                            <div
+                              className="w-4 h-4 rounded-l-md border border-gray-200"
+                              style={{ backgroundColor: theme.preview.primarySwatch }}
+                            />
+                            <div
+                              className="w-4 h-4 border-t border-b border-gray-200"
+                              style={{ backgroundColor: theme.preview.accentSwatch }}
+                            />
+                            <div
+                              className="w-4 h-4 rounded-r-md border border-gray-200"
+                              style={{ backgroundColor: theme.preview.bgSwatch }}
+                            />
+                          </div>
+                          {/* Theme info */}
+                          <div className="flex-1 min-w-0">
+                            <p className={`text-xs font-bold truncate ${
+                              isActive ? 'text-violet-700' : 'text-slate-800'
+                            }`}>
+                              {theme.name}
+                              {isActive && <Check size={12} className="inline ml-1 text-violet-600" />}
+                            </p>
+                            <p className="text-[10px] text-slate-400 truncate">{theme.description}</p>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+        )}
 
         {/* Media */}
         <div className="flex items-center gap-1 px-2">
