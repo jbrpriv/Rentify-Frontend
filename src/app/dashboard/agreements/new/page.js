@@ -374,6 +374,8 @@ function buildTemplateThemeVars(theme) {
     '--theme-watermark-text': watermarkText,
     '--theme-font-scale': typeof theme?.fontSizeScale === 'number' ? theme.fontSizeScale : 1,
     '--theme-page-bg': theme?.backgroundColor || '#FFFFFF',
+    // heroBackground is used as the solid colour fallback behind the hero gradient
+    '--theme-hero-bg': theme?.heroBackground || theme?.backgroundColor || '#FFFFFF',
   };
 }
 
@@ -1608,6 +1610,10 @@ function AgreementForm() {
           setGlobalDefaultHtml(defaultAgreement.bodyHtml);
           // Pre-populate templateHtml for live preview if no custom selection
           setTemplateHtml(defaultAgreement.bodyHtml);
+          // Apply the global template's base theme so the preview renders with correct colours
+          if (defaultAgreement.baseTheme && typeof defaultAgreement.baseTheme === 'object') {
+            setTemplateTheme(defaultAgreement.baseTheme);
+          }
         }
       })
       .catch(() => {});

@@ -38,7 +38,10 @@ export default function CreateAgreementTemplatePage() {
 
     setSaving(true);
     try {
-      const baseTheme = themes.find(t => t.isDefault)?._id || themes[0]?._id;
+      // Use the visual theme the landlord selected in the builder (data.themeId = VISUAL_THEMES id = PdfTheme.themeSlug)
+      const baseTheme = themes.find(t => t.themeSlug === data.themeId)?._id
+        || themes.find(t => t.isDefault)?._id
+        || themes[0]?._id;
 
       if (!baseTheme) {
         throw new Error('No base themes available. Please contact support.');
