@@ -74,7 +74,7 @@
   top: 0;
   left: 0;
   right: 0;
-  height: 200px;
+  height: 250px;
   background: var(--theme-hero-pattern);
   pointer-events: none;
   z-index: 0;
@@ -96,6 +96,10 @@
 .a4-page .ProseMirror p, .a4-page .ProseMirror li, .a4-page .ProseMirror span, .a4-page p, .a4-page li {
   font-family: var(--theme-body-font);
   color: var(--theme-body-color);
+}
+
+.a4-page .ProseMirror p:empty, .a4-page p:empty {
+  min-height: 1.5em;
 }
 
 .a4-page .ProseMirror h1, .a4-page h1 {
@@ -152,7 +156,7 @@
   --theme-table-header-bg: #1B2A4A;
   --theme-table-header-text: #FFFFFF;
   --theme-hero-bg: #F7F5F0;
-  --theme-hero-pattern: linear-gradient(180deg, #F7F5F0 0%, #FFFFFF 8%);
+  --theme-hero-pattern: linear-gradient(180deg, #F7F5F0 0%, #FFFFFF 100%);
   --theme-header-rule: 3px double #C5A55A;
   --theme-section-rule: 1px solid #E2D9C8;
 }
@@ -183,7 +187,7 @@
   --theme-table-border: #D1CBC3;
   --theme-table-header-bg: #1A1A2E;
   --theme-table-header-text: #F5F0EB;
-  --theme-hero-pattern: linear-gradient(180deg, #FAFAF8 0%, #FFFFFF 6%);
+  --theme-hero-pattern: linear-gradient(180deg, #FAFAF8 0%, #FFFFFF 100%);
   --theme-page-texture: repeating-linear-gradient(0deg, transparent, transparent 27px, rgba(0,0,0,0.015) 27px, rgba(0,0,0,0.015) 28px);
   --theme-header-rule: 2px solid #7B2D3B;
   --theme-section-rule: 1px solid #E8E2DA;
@@ -216,10 +220,48 @@
   --theme-table-border: #99F6E4;
   --theme-table-header-bg: #0F766E;
   --theme-table-header-text: #FFFFFF;
-  --theme-hero-pattern: linear-gradient(180deg, #F0FDFA 0%, #FFFFFF 8%);
+  --theme-hero-pattern: linear-gradient(180deg, #F0FDFA 0%, #FFFFFF 100%);
   --theme-header-rule: 3px solid #F97066;
   --theme-section-rule: 1px solid #CCFBF1;
 }
+
+/* ── Elegant Serif ── */
+.theme-elegant-serif .a4-page {
+  --theme-heading-font: 'Cinzel', 'Playfair Display', serif;
+  --theme-body-font: 'Lora', 'Georgia', serif;
+  --theme-heading-color: #2C2C2C;
+  --theme-body-color: #4A4A4A;
+  --theme-primary: #111111;
+  --theme-accent: #B29B72;
+  --theme-table-border: #D8D2C4;
+  --theme-table-header-bg: #FAF9F6;
+  --theme-table-header-text: #2C2C2C;
+  --theme-hero-bg: #FAF9F6;
+  --theme-hero-pattern: linear-gradient(180deg, #FAF9F6 0%, #FFFFFF 100%);
+  --theme-page-texture: radial-gradient(#E8E5DF 1px, transparent 1px);
+  --theme-header-rule: 1px solid #B29B72;
+  --theme-section-rule: 1px dashed #D8D2C4;
+}
+.theme-elegant-serif .a4-page { background-size: 20px 20px; }
+
+/* ── Tech Innovator ── */
+.theme-tech-innovator .a4-page {
+  --theme-heading-font: 'Space Grotesk', 'Courier New', monospace;
+  --theme-body-font: 'Roboto', 'Helvetica Neue', sans-serif;
+  --theme-heading-color: #0A0A0A;
+  --theme-body-color: #333333;
+  --theme-primary: #000000;
+  --theme-accent: #3B82F6;
+  --theme-table-border: #E5E5E5;
+  --theme-table-header-bg: #0A0A0A;
+  --theme-table-header-text: #FFFFFF;
+  --theme-hero-bg: #F8FAFC;
+  --theme-hero-pattern: linear-gradient(180deg, #F8FAFC 0%, #FFFFFF 100%);
+  --theme-page-texture: linear-gradient(90deg, transparent 95%, rgba(59,130,246,0.05) 100%);
+  --theme-header-rule: 4px solid #3B82F6;
+  --theme-section-rule: 1px solid #E5E5E5;
+}
+.theme-tech-innovator .a4-page { background-size: 40px 40px; }
 
 /* ── Zoom Levels ── */
 .zoom-75 .a4-page { transform: scale(0.75); }
@@ -255,7 +297,6 @@
 .ProseMirror {
   outline: none;
   min-height: 100%;
-  background-color: transparent;
 }
 
 .ProseMirror p.is-editor-empty:first-child::before {

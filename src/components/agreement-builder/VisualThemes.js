@@ -84,7 +84,7 @@ export const VISUAL_THEMES = [
     },
     textures: {
       pageBackground: 'none',
-      heroPattern: 'linear-gradient(180deg, #F7F5F0 0%, #FFFFFF 8%)',
+      heroPattern: 'linear-gradient(180deg, #F7F5F0 0%, #FFFFFF 100%)',
     },
     watermark: {
       enabled: false,
@@ -177,7 +177,7 @@ export const VISUAL_THEMES = [
     textures: {
       pageBackground:
         'repeating-linear-gradient(0deg, transparent, transparent 27px, rgba(0,0,0,0.015) 27px, rgba(0,0,0,0.015) 28px)',
-      heroPattern: 'linear-gradient(180deg, #FAFAF8 0%, #FFFFFF 6%)',
+      heroPattern: 'linear-gradient(180deg, #FAFAF8 0%, #FFFFFF 100%)',
     },
     watermark: {
       enabled: false,
@@ -270,7 +270,7 @@ export const VISUAL_THEMES = [
     },
     textures: {
       pageBackground: 'none',
-      heroPattern: 'linear-gradient(180deg, #F0FDFA 0%, #FFFFFF 8%)',
+      heroPattern: 'linear-gradient(180deg, #F0FDFA 0%, #FFFFFF 100%)',
     },
     watermark: {
       enabled: false,
@@ -281,6 +281,96 @@ export const VISUAL_THEMES = [
     borders: {
       headerRule: '3px solid #F97066',
       sectionRule: '1px solid #CCFBF1',
+    },
+    spacing: {
+      fontSizeScale: 1.0,
+    },
+  },
+
+  // ─── 7. Elegant Serif ──────────────────────────────────────────────────
+  {
+    id: 'elegant-serif',
+    name: 'Elegant Serif',
+    description: 'A sophisticated theme using Cinzel with a subtle textured paper background.',
+    preview: {
+      primarySwatch: '#111111',
+      accentSwatch: '#B29B72',
+      bgSwatch: '#FAF9F6',
+    },
+    fonts: {
+      heading: "'Cinzel', 'Playfair Display', serif",
+      body: "'Lora', 'Georgia', serif",
+      googleFontUrl: 'https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Lora:wght@400;600;700&display=swap',
+    },
+    colors: {
+      primary: '#111111',
+      accent: '#B29B72',
+      headingColor: '#2C2C2C',
+      bodyText: '#4A4A4A',
+      tableBorder: '#D8D2C4',
+      tableHeaderBg: '#FAF9F6',
+      tableHeaderText: '#2C2C2C',
+      background: '#FFFFFF',
+      heroBackground: '#FAF9F6',
+    },
+    textures: {
+      pageBackground: 'radial-gradient(#E8E5DF 1px, transparent 1px)',
+      heroPattern: 'linear-gradient(180deg, #FAF9F6 0%, #FFFFFF 100%)',
+    },
+    watermark: {
+      enabled: false,
+      text: '',
+      opacity: 0,
+      color: '#111111',
+    },
+    borders: {
+      headerRule: '1px solid #B29B72',
+      sectionRule: '1px dashed #D8D2C4',
+    },
+    spacing: {
+      fontSizeScale: 1.0,
+    },
+  },
+
+  // ─── 8. Tech Innovator ──────────────────────────────────────────────────
+  {
+    id: 'tech-innovator',
+    name: 'Tech Innovator',
+    description: 'A tech-forward minimalist theme using monospace headers and stark contrast.',
+    preview: {
+      primarySwatch: '#000000',
+      accentSwatch: '#3B82F6',
+      bgSwatch: '#F8FAFC',
+    },
+    fonts: {
+      heading: "'Space Grotesk', 'Courier New', monospace",
+      body: "'Roboto', 'Helvetica Neue', sans-serif",
+      googleFontUrl: 'https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700;800;900&family=Roboto:wght@400;500;700&display=swap',
+    },
+    colors: {
+      primary: '#000000',
+      accent: '#3B82F6',
+      headingColor: '#0A0A0A',
+      bodyText: '#333333',
+      tableBorder: '#E5E5E5',
+      tableHeaderBg: '#0A0A0A',
+      tableHeaderText: '#FFFFFF',
+      background: '#FFFFFF',
+      heroBackground: '#F8FAFC',
+    },
+    textures: {
+      pageBackground: 'linear-gradient(90deg, transparent 95%, rgba(59,130,246,0.05) 100%)',
+      heroPattern: 'linear-gradient(180deg, #F8FAFC 0%, #FFFFFF 100%)',
+    },
+    watermark: {
+      enabled: false,
+      text: '',
+      opacity: 0,
+      color: '#0A0A0A',
+    },
+    borders: {
+      headerRule: '4px solid #3B82F6',
+      sectionRule: '1px solid #E5E5E5',
     },
     spacing: {
       fontSizeScale: 1.0,

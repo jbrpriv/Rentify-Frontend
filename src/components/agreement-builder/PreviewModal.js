@@ -124,6 +124,8 @@ const PreviewModal = ({ isOpen, onClose, html, activeTheme = 'blank', customWate
         .agreement-preview-container h3 {
           font-size: 1.25rem !important;
         }
+        .agreement-preview-container p { margin-bottom: 1em; color: ${themeVars['--theme-body-color']}; line-height: 1.7; }
+        .agreement-preview-container p:empty { min-height: 1.5em; }
         .agreement-preview-container .document-image { 
           max-width: 100%; 
           height: auto; 
