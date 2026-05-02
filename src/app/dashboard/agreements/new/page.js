@@ -619,6 +619,15 @@ function TemplateDocument({
   );
 
   useEffect(() => {
+    // Debug: ensure resolved theme contains hero/table values while troubleshooting
+    // Remove this log once the styling issue is confirmed fixed.
+    try {
+      // eslint-disable-next-line no-console
+      console.debug('[TemplateDocument] resolvedTheme:', resolvedTheme, 'themeVars:', themeVars);
+    } catch (e) {}
+  }, [resolvedTheme, themeVars]);
+
+  useEffect(() => {
     const fontUrl = resolvedTheme?.googleFontUrl;
     const linkId = 'agreement-template-theme-font';
     const existing = document.getElementById(linkId);
