@@ -14,7 +14,7 @@ import { Eye, CheckCircle2, Loader2, Save, Keyboard, ZoomIn, ZoomOut } from 'luc
 import { CharacterCount } from '@tiptap/extension-character-count';
 import { toast } from 'react-hot-toast';
 import { STATIC_AGREEMENT_TEMPLATES } from './StaticTemplates';
-import { VISUAL_THEMES, getThemeById } from './VisualThemes';
+import { VISUAL_THEMES, getThemeById, themeToCssVars } from './VisualThemes';
 
 import { Variable } from './VariableExtension';
 import { FontSize } from './FontSizeExtension';
@@ -167,6 +167,19 @@ const AgreementBuilder = ({ initialContent = '', onSave, isSaving = false, templ
     };
   }, [activeTheme]);
 
+  const themeVars = React.useMemo(() => {
+    const theme = getThemeById(activeTheme);
+    const vars = themeToCssVars(theme);
+
+    if (customWatermark) {
+      vars['--theme-watermark-text'] = JSON.stringify(customWatermark);
+      vars['--theme-watermark-color'] = '#E11D48';
+      vars['--theme-watermark-opacity'] = 0.08;
+    }
+
+    return vars;
+  }, [activeTheme, customWatermark]);
+
   const handleSave = useCallback(() => {
     if (!editor) return;
     const content = {
@@ -283,9 +296,7 @@ const AgreementBuilder = ({ initialContent = '', onSave, isSaving = false, templ
         style={{ 
           overflowY: 'auto', 
           overflowX: 'hidden',
-          '--theme-watermark-text': customWatermark ? `"${customWatermark}"` : undefined,
-          '--theme-watermark-color': customWatermark ? '#E11D48' : undefined,
-          '--theme-watermark-opacity': customWatermark ? 0.08 : undefined,
+          ...themeVars,
         }}
       >
         <div className="relative">
