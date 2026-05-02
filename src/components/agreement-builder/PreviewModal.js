@@ -8,6 +8,10 @@ const PreviewModal = ({ isOpen, onClose, html, activeTheme = 'blank', customWate
     const vars = themeToCssVars(theme);
     if (customWatermark !== undefined && customWatermark !== null) {
       vars['--theme-watermark-text'] = customWatermark ? `"${customWatermark}"` : '""';
+      if (customWatermark) {
+        vars['--theme-watermark-color'] = '#E11D48';
+        vars['--theme-watermark-opacity'] = 0.08;
+      }
     }
     return vars;
   }, [theme, customWatermark]);

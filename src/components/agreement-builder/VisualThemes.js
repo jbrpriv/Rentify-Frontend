@@ -180,8 +180,8 @@ export const VISUAL_THEMES = [
       heroPattern: 'linear-gradient(180deg, #FAFAF8 0%, #FFFFFF 6%)',
     },
     watermark: {
-      enabled: true,
-      text: 'CONFIDENTIAL',
+      enabled: false,
+      text: '',
       opacity: 0.03,
       color: '#1A1A2E',
     },

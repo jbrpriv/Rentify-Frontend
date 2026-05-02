@@ -114,14 +114,18 @@
 }
 
 /* ── Theme-Driven Tables ── */
+.a4-page .ProseMirror th,
 .a4-page .agreement-table th,
+.a4-page .ProseMirror td,
 .a4-page .agreement-table td {
   border-color: var(--theme-table-border);
 }
+.a4-page .ProseMirror th,
 .a4-page .agreement-table th {
   background: var(--theme-table-header-bg);
   color: var(--theme-table-header-text);
 }
+.a4-page .ProseMirror th p,
 .a4-page .agreement-table th p {
   color: var(--theme-table-header-text);
 }
@@ -183,9 +187,6 @@
   --theme-page-texture: repeating-linear-gradient(0deg, transparent, transparent 27px, rgba(0,0,0,0.015) 27px, rgba(0,0,0,0.015) 28px);
   --theme-header-rule: 2px solid #7B2D3B;
   --theme-section-rule: 1px solid #E8E2DA;
-  --theme-watermark-opacity: 0.03;
-  --theme-watermark-color: #1A1A2E;
-  --theme-watermark-text: "CONFIDENTIAL";
 }
 
 /* ── Executive Premium ── */

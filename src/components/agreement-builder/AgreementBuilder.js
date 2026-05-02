@@ -283,7 +283,9 @@ const AgreementBuilder = ({ initialContent = '', onSave, isSaving = false, templ
         style={{ 
           overflowY: 'auto', 
           overflowX: 'hidden',
-          '--theme-watermark-text': customWatermark ? `"${customWatermark}"` : undefined
+          '--theme-watermark-text': customWatermark ? `"${customWatermark}"` : undefined,
+          '--theme-watermark-color': customWatermark ? '#E11D48' : undefined,
+          '--theme-watermark-opacity': customWatermark ? 0.08 : undefined,
         }}
       >
         <div className="relative">
