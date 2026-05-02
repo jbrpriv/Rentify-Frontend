@@ -697,7 +697,7 @@ function TemplateDocument({
           left: 0;
           right: 0;
           height: 240px;
-          background: var(--theme-hero-pattern, none);
+          background: var(--theme-hero-pattern, none) !important;
           pointer-events: none;
           z-index: 0;
         }
@@ -782,10 +782,10 @@ function TemplateDocument({
         .agreement-table th {
           font-weight: 800;
           text-align: left;
-          background: var(--theme-table-header-bg, #f8fafc);
-          color: var(--theme-table-header-text, #334155);
+          background: var(--theme-table-header-bg, #f8fafc) !important;
+          color: var(--theme-table-header-text, #334155) !important;
         }
-        .agreement-table th p { color: var(--theme-table-header-text, #334155); }
+        .agreement-table th p { color: var(--theme-table-header-text, #334155) !important; }
         .agreement-table p { margin: 0; }
         @media print {
           .dual-column-wrapper::after { border-left-color: #000; }

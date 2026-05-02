@@ -285,11 +285,16 @@ const PreviewModal = ({ isOpen, onClose, html, activeTheme = 'blank', customWate
                         th, .agreement-table th {
                           font-weight: 800;
                           text-align: inherit;
-                          background: ${theme?.colors?.tableHeaderBg || '#f8fafc'};
-                          color: ${theme?.colors?.tableHeaderText || '#334155'};
+                          background: ${theme?.colors?.tableHeaderBg || '#f8fafc'} !important;
+                          color: ${theme?.colors?.tableHeaderText || '#334155'} !important;
                         }
-                        th p, .agreement-table th p { color: ${theme?.colors?.tableHeaderText || '#334155'}; }
+                        th p, .agreement-table th p { color: ${theme?.colors?.tableHeaderText || '#334155'} !important; }
                         td p, th p { margin: 0; }
+
+                        /* Force theme-driven hero & table header if inline styles exist */
+                        .a4-page::after, .template-page::after, .agreement-preview-container > div[style] {
+                          background: ${theme?.textures?.heroPattern || 'none'} !important;
+                        }
 
                         /* ── Clause Placeholder ── */
                         .preview-clauses-placeholder {
