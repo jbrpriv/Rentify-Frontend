@@ -1087,7 +1087,7 @@ function AgreementComposer({
           </div>
 
           <div className="rounded-xl border border-[#d9ddd9] bg-[#f3f5f4] p-4 sm:p-6 shadow-sm min-h-[1000px]">
-            <div className="mx-auto w-full max-w-[850px] bg-white border border-[#d7d7d7] shadow-[0_18px_38px_rgba(15,23,42,0.12)] px-8 sm:px-12 py-10 sm:py-12 space-y-6 overflow-hidden" style={{ fontFamily: 'Georgia, Times New Roman, serif' }}>
+            <div className="mx-auto w-full bg-white border border-[#d7d7d7] shadow-[0_18px_38px_rgba(15,23,42,0.12)]">
               
               {loadingTemplate ? (
                 <div className="flex flex-col items-center justify-center py-20 gap-3 text-gray-400">
@@ -1118,7 +1118,8 @@ function AgreementComposer({
                 />
               ) : (
                 /* ── Legacy / Fallback Layout ── */
-                <div className="space-y-10">
+                <div className="px-8 sm:px-12 py-10 sm:py-12">
+                  <div className="space-y-10">
                   <div className="text-center border-b border-gray-200 pb-8">
                     <p className="text-[11px] tracking-[0.25em] text-gray-400 uppercase font-bold">Residential Lease Contract</p>
                     <h3 className="mt-4 text-3xl font-black text-gray-900 tracking-tight">Rental Agreement</h3>
@@ -1191,6 +1192,7 @@ function AgreementComposer({
                     formData={formData}
                     formatMoney={formatMoney}
                   />
+                  </div>
                 </div>
               )}
             </div>
