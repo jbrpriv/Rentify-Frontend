@@ -56,6 +56,7 @@ export default function CreateAgreementTemplatePage() {
           backgroundColor: '',
           fontFamily: '',
           fontSizeScale: 1.0,
+          customWatermark: data.customWatermark || '',
         },
       });
 

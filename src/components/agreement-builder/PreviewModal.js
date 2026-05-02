@@ -2,9 +2,15 @@ import React, { useMemo } from 'react';
 import { X, ExternalLink, ShieldCheck, ScrollText } from 'lucide-react';
 import { getThemeById, themeToCssVars } from './VisualThemes';
 
-const PreviewModal = ({ isOpen, onClose, html, activeTheme = 'blank' }) => {
+const PreviewModal = ({ isOpen, onClose, html, activeTheme = 'blank', customWatermark }) => {
   const theme = useMemo(() => getThemeById(activeTheme), [activeTheme]);
-  const themeVars = useMemo(() => themeToCssVars(theme), [theme]);
+  const themeVars = useMemo(() => {
+    const vars = themeToCssVars(theme);
+    if (customWatermark !== undefined && customWatermark !== null) {
+      vars['--theme-watermark-text'] = customWatermark ? `"${customWatermark}"` : '""';
+    }
+    return vars;
+  }, [theme, customWatermark]);
   const samples = useMemo(() => ({
     // Parties
     tenant_name: 'John Carter',
@@ -318,8 +324,9 @@ const PreviewModal = ({ isOpen, onClose, html, activeTheme = 'blank' }) => {
 
         <div className="flex-1 overflow-y-auto p-12 bg-gray-100/50 flex justify-center">
           <div
-            className="agreement-preview-container bg-white w-[794px] min-h-[1123px] shadow-2xl border border-gray-200 p-[80px] max-w-none relative overflow-hidden"
+            className={`agreement-preview-container a4-page theme-${activeTheme} bg-white w-[794px] min-h-[1123px] shadow-2xl border border-gray-200 p-[80px] max-w-none relative overflow-hidden`}
             style={{
+              ...themeVars,
               backgroundImage: theme?.textures?.pageBackground !== 'none' ? theme.textures.pageBackground : undefined,
             }}
           >

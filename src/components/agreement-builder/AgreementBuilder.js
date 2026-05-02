@@ -37,6 +37,7 @@ const AgreementBuilder = ({ initialContent = '', onSave, isSaving = false, templ
   const [pendingTemplate, setPendingTemplate] = useState(null);
   const [zoom, setZoom] = useState(100);
   const [activeTheme, setActiveTheme] = useState('modern-minimalist');
+  const [customWatermark, setCustomWatermark] = useState('');
   const [autoSaveStatus, setAutoSaveStatus] = useState('idle'); // idle | saving | saved
   const autoSaveTimerRef = useRef(null);
   const lastSavedRef = useRef(null);
@@ -172,9 +173,10 @@ const AgreementBuilder = ({ initialContent = '', onSave, isSaving = false, templ
       html: editor.getHTML(),
       json: editor.getJSON(),
       themeId: activeTheme,
+      customWatermark,
     };
     if (onSave) onSave(content);
-  }, [editor, onSave, activeTheme]);
+  }, [editor, onSave, activeTheme, customWatermark]);
 
   const handleApplyTemplate = useCallback((selectedTemplate) => {
     if (!editor || !selectedTemplate) return;
@@ -271,10 +273,19 @@ const AgreementBuilder = ({ initialContent = '', onSave, isSaving = false, templ
         }}
         activeTheme={activeTheme}
         onThemeChange={setActiveTheme}
+        customWatermark={customWatermark}
+        onWatermarkChange={setCustomWatermark}
       />
 
       {/* Editor Main Area */}
-      <div className={`flex-1 document-container zoom-${zoom} theme-${activeTheme}`} style={{ overflowY: 'auto', overflowX: 'hidden' }}>
+      <div 
+        className={`flex-1 document-container zoom-${zoom} theme-${activeTheme}`} 
+        style={{ 
+          overflowY: 'auto', 
+          overflowX: 'hidden',
+          '--theme-watermark-text': customWatermark ? `"${customWatermark}"` : undefined
+        }}
+      >
         <div className="relative">
           <EditorContent editor={editor} />
         </div>
@@ -301,6 +312,7 @@ const AgreementBuilder = ({ initialContent = '', onSave, isSaving = false, templ
         onClose={() => setShowPreview(false)} 
         html={editor.getHTML()}
         activeTheme={activeTheme}
+        customWatermark={customWatermark}
       />
 
       {/* Shortcuts Modal */}

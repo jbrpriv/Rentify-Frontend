@@ -66,6 +66,9 @@ export default function EditAgreementTemplatePage() {
         description: description.trim(),
         bodyHtml: data.html,
         bodyJson: data.json,
+        customizations: {
+          customWatermark: data.customWatermark || '',
+        },
       });
 
       toast('Template saved and resubmitted for review', 'success');

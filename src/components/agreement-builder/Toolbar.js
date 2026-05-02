@@ -4,7 +4,7 @@ import { toast } from 'react-hot-toast';
 import {
   Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight,
   ChevronDown, Image as ImageIcon, Undo2, Redo2, Sparkles,
-  ScrollText, Columns, Table as TableIcon, Check, LayoutTemplate, Palette
+  ScrollText, Columns, Table as TableIcon, Check, LayoutTemplate, Palette, Stamp
 } from 'lucide-react';
 import { VISUAL_THEMES } from './VisualThemes';
 
@@ -54,10 +54,13 @@ const Toolbar = ({
   onToggleTemplateLibrary,
   activeTheme,
   onThemeChange,
+  customWatermark,
+  onWatermarkChange,
 }) => {
   const [showFontSizes, setShowFontSizes] = useState(false);
   const [showTableMenu, setShowTableMenu] = useState(false);
   const [showThemePicker, setShowThemePicker] = useState(false);
+  const [showWatermarkMenu, setShowWatermarkMenu] = useState(false);
 
   if (!editor) return null;
 
@@ -293,6 +296,64 @@ const Toolbar = ({
                         </button>
                       );
                     })}
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+        )}
+
+        {/* Watermark Picker */}
+        {templateType !== 'receipt' && (
+          <div className="relative px-2 border-r border-gray-100">
+            <button
+              onClick={() => setShowWatermarkMenu(!showWatermarkMenu)}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border transition-colors ${
+                showWatermarkMenu || customWatermark
+                  ? 'bg-rose-600 text-white border-rose-600 shadow-sm'
+                  : 'bg-white text-rose-600 border-rose-200 hover:border-rose-400 hover:bg-rose-50'
+              }`}
+            >
+              <Stamp size={14} />
+              <span className="text-xs font-bold leading-none">Watermark</span>
+              <ChevronDown size={12} className="opacity-50" />
+            </button>
+
+            {showWatermarkMenu && (
+              <>
+                <div className="fixed inset-0 z-[90]" onClick={() => setShowWatermarkMenu(false)} />
+                <div className="absolute top-full left-0 mt-1 w-[260px] bg-white border border-gray-200 rounded-xl shadow-2xl overflow-hidden z-[100]">
+                  <div className="px-3 py-2 bg-gradient-to-r from-rose-600 to-pink-600">
+                    <p className="text-[10px] font-bold text-white uppercase tracking-wider">Document Watermark</p>
+                  </div>
+                  <div className="p-3 bg-slate-50 flex flex-col gap-2">
+                    <input
+                      type="text"
+                      value={customWatermark || ''}
+                      onChange={(e) => onWatermarkChange(e.target.value)}
+                      placeholder="e.g. CONFIDENTIAL or DRAFT"
+                      className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500 outline-none"
+                    />
+                    <div className="flex gap-2 mt-1">
+                      <button 
+                        onClick={() => { onWatermarkChange('DRAFT'); setShowWatermarkMenu(false); }}
+                        className="flex-1 py-1.5 text-xs font-bold text-slate-600 bg-white border border-slate-200 rounded-md hover:bg-slate-100 transition-colors"
+                      >
+                        DRAFT
+                      </button>
+                      <button 
+                        onClick={() => { onWatermarkChange('CONFIDENTIAL'); setShowWatermarkMenu(false); }}
+                        className="flex-1 py-1.5 text-xs font-bold text-slate-600 bg-white border border-slate-200 rounded-md hover:bg-slate-100 transition-colors"
+                      >
+                        CONFIDENTIAL
+                      </button>
+                    </div>
+                    <button 
+                      onClick={() => { onWatermarkChange(''); setShowWatermarkMenu(false); }}
+                      className="w-full py-1.5 mt-1 text-xs font-bold text-rose-600 bg-rose-50 border border-rose-200 rounded-md hover:bg-rose-100 transition-colors"
+                    >
+                      Clear Watermark
+                    </button>
                   </div>
                 </div>
               </>

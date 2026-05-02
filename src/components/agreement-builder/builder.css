@@ -62,7 +62,7 @@
   color: var(--theme-watermark-color);
   opacity: var(--theme-watermark-opacity);
   pointer-events: none;
-  z-index: 0;
+  z-index: 10;
   white-space: nowrap;
   user-select: none;
 }
@@ -87,12 +87,18 @@
 }
 
 /* ── Theme-Driven Typography ── */
+.a4-page .ProseMirror h1, .a4-page .ProseMirror h2, .a4-page .ProseMirror h3, .a4-page .ProseMirror h4, .a4-page .ProseMirror h5, .a4-page .ProseMirror h6,
 .a4-page h1, .a4-page h2, .a4-page h3, .a4-page h4, .a4-page h5, .a4-page h6 {
   font-family: var(--theme-heading-font);
   color: var(--theme-heading-color);
 }
 
-.a4-page h1 {
+.a4-page .ProseMirror p, .a4-page .ProseMirror li, .a4-page .ProseMirror span, .a4-page p, .a4-page li {
+  font-family: var(--theme-body-font);
+  color: var(--theme-body-color);
+}
+
+.a4-page .ProseMirror h1, .a4-page h1 {
   padding-bottom: 0.5rem;
   border-bottom: var(--theme-header-rule);
 }
@@ -248,6 +254,7 @@
 .ProseMirror {
   outline: none;
   min-height: 100%;
+  background-color: transparent;
 }
 
 .ProseMirror p.is-editor-empty:first-child::before {
