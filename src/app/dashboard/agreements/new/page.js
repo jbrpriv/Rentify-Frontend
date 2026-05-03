@@ -344,7 +344,7 @@ function resolveThemeObject(baseTheme, customizations) {
   return { 
     theme, 
     themeVars, 
-    logoUrl: customizations?.logoUrl || customizations?.customLogo || '' 
+    logoUrl: customizations?.logoUrl || customizations?.customLogo || customizations?.logo || customizations?.brandingLogo || '' 
   };
 }
 
@@ -1629,17 +1629,18 @@ function AgreementForm() {
         .finally(() => setLoadingTemplate(false));
     } else if (pdfSelection?.type === 'theme' && pdfSelection.id) {
       // Fetch the selected global theme so the live preview can apply its
-      // hero gradient, table colours, typography, etc. The template HTML
-      // stays as the global default — only the visual skin changes.
+      // hero gradient, table colours, typography, etc. 
+      // We PRESERVE the current templateHtml and templateCustomizations 
+      // so the theme is applied ON TOP of the selected template.
       api.get(`/pdf-themes/${pdfSelection.id}`)
         .then(({ data }) => {
           const theme = data?.data || data;
           setTemplateTheme(theme || null);
-          setTemplateCustomizations(null);
+          // Do NOT clear templateCustomizations here, as we want to keep 
+          // template-specific branding (like logos) if a template is active.
         })
         .catch(() => {
           setTemplateTheme(null);
-          setTemplateCustomizations(null);
         });
     } else if (!pdfSelection) {
       // Reset back to global default when deselected
@@ -1661,7 +1662,11 @@ function AgreementForm() {
     rentEscalationPercentage: Number(formData.rentEscalationPercentage) || 5,
     ...(canUseAgreementTemplates && pdfSelection?.type === 'template' ? { templateId: pdfSelection.id } : {}),
     ...(canSelectPdfTheme && pdfSelection?.type === 'theme' ? { pdfTheme: pdfSelection.id } : {}),
-    logoUrl: templateCustomizations?.logoUrl || templateCustomizations?.customLogo || globalBrandingLogo || '',
+    logoUrl: templateCustomizations?.logoUrl || 
+             templateCustomizations?.customLogo || 
+             templateCustomizations?.logo || 
+             templateCustomizations?.brandingLogo || 
+             globalBrandingLogo || '',
   });
 
   const validateAgreementForm = () => {
