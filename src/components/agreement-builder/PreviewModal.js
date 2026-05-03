@@ -22,22 +22,28 @@ const applyThemeLayout = (html, layoutStyle = 'minimalist') => {
   working = afterClauses;
 
   const safeHeading = heading || '<h1>Rental Agreement</h1>';
+  
+  const wrap = (content, type, role) => content ? `<div class="document-section section-${type}" data-layout-role="${role}">${content}</div>` : '';
 
   switch (layoutStyle) {
     case 'premium':
-      return `<div class="layout-premium-hero"><div>${safeHeading}${intro || ''}</div>${clauses ? `<div class="layout-premium-summary" data-layout-role="primary-sidebar-item">${clauses}</div>` : ''}</div>${working}`;
-    case 'contemporary':
-      return `${safeHeading}<div class="layout-contemporary-top">${clauses ? `<div class="layout-contemporary-card" data-layout-role="primary-sidebar-item">${clauses}</div>` : ''}${intro ? `<div class="layout-contemporary-card">${intro}</div>` : ''}</div>${working}`;
     case 'modern':
-      return `<div class="layout-modern-hero-grid"><div>${safeHeading}${intro || ''}</div>${clauses ? `<aside class="layout-modern-summary" data-layout-role="primary-sidebar-item">${clauses}</aside>` : ''}</div>${working}`;
+      return `
+        <div data-layout-role="primary-heading">${safeHeading}</div>
+        ${wrap(intro, 'intro', 'intro-paragraph')}
+        ${wrap(clauses, 'clauses', 'primary-sidebar-item')}
+        <div class="a4-page-content">${working}</div>
+      `;
     case 'ledger':
-      return `<div class="layout-meta-strip"><span>Ledger View</span><span>${new Date().toLocaleDateString()}</span></div>${safeHeading}${working}`;
-    case 'classic':
-      return `${safeHeading}${intro || ''}${working}`;
+      return `
+        <div class="layout-meta-strip"><span>Ledger View</span><span>${new Date().toLocaleDateString()}</span></div>
+        <div data-layout-role="primary-heading">${safeHeading}</div>
+        ${wrap(clauses, 'clauses', 'primary-sidebar-item')}
+        <div class="a4-page-content">${working}</div>
+      `;
     case 'legal':
-      return `<div class="layout-meta-strip"><span>Agreement Preview</span><span>${new Date().toLocaleDateString()}</span></div>${safeHeading}${intro || ''}${working}`;
     case 'editorial':
-      return `<div class="layout-editorial-header">${safeHeading}${intro || ''}</div>${working}`;
+    case 'classic':
     case 'minimalist':
     default:
       return html;

@@ -19,7 +19,15 @@
 export function applyLayoutRoles(editorDom, layoutStyle) {
   if (!editorDom) return;
   
-  // Clear previous role attributes
+  // Clear previous role attributes and injected wrappers
+  editorDom.querySelectorAll('[data-layout-injected="true"]').forEach(el => {
+    // Move children back to parent before removing wrapper
+    while (el.firstChild) {
+      el.parentNode.insertBefore(el.firstChild, el);
+    }
+    el.remove();
+  });
+
   editorDom.querySelectorAll('[data-layout-role]').forEach(el => {
     el.removeAttribute('data-layout-role');
   });
@@ -29,22 +37,37 @@ export function applyLayoutRoles(editorDom, layoutStyle) {
   const proseMirror = editorDom.querySelector('.ProseMirror');
   if (!proseMirror) return;
   
+  // Identify key blocks
   const firstH1 = proseMirror.querySelector('h1');
   const firstP = proseMirror.querySelector('p:not(:empty)');
   const firstTable = proseMirror.querySelector('table.agreement-table');
   const clausesPlaceholder = proseMirror.querySelector('[data-type="clauses-placeholder"]');
-  
-  if (firstH1) firstH1.setAttribute('data-layout-role', 'primary-heading');
-  if (firstP) firstP.setAttribute('data-layout-role', 'intro-paragraph');
-  
-  // Tables now span full width, but we still mark them for potential styling
-  if (firstTable) {
-    const wrapper = firstTable.closest('.tableWrapper') || firstTable;
-    wrapper.setAttribute('data-layout-role', 'primary-table');
+
+  // Wrap Hero elements
+  if (firstH1) {
+    firstH1.setAttribute('data-layout-role', 'primary-heading');
   }
 
-  // Clauses Placeholder now takes the sidebar role in modern/premium layouts
+  // Wrap Clauses in a modular section
   if (clausesPlaceholder) {
-    clausesPlaceholder.setAttribute('data-layout-role', 'primary-sidebar-item');
+    wrapInSection(clausesPlaceholder, 'clauses', 'primary-sidebar-item');
   }
+
+  // Wrap Table in a modular section
+  if (firstTable) {
+    const tableWrapper = firstTable.closest('.tableWrapper') || firstTable;
+    wrapInSection(tableWrapper, 'table', 'primary-table');
+  }
+}
+
+function wrapInSection(element, type, role) {
+  if (!element || element.parentNode.hasAttribute('data-layout-injected')) return;
+  
+  const wrapper = document.createElement('div');
+  wrapper.className = `document-section section-${type}`;
+  wrapper.setAttribute('data-layout-injected', 'true');
+  wrapper.setAttribute('data-layout-role', role);
+  
+  element.parentNode.insertBefore(wrapper, element);
+  wrapper.appendChild(element);
 }

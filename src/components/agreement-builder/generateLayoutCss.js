@@ -60,79 +60,81 @@ export function generateLayoutCss(theme, themeVars) {
       ${themeVars['--theme-logo-align'] === 'center' ? 'margin-left: auto !important; margin-right: auto !important;' : 'margin-left: 0; margin-right: auto;'}
     }
 
-    /* ── Grid Layouts (Shared by Editor & Preview) ── */
-    .layout-modern-hero-grid, 
-    .layout-premium-hero,
-    .layout-modern .ProseMirror,
-    .layout-premium .ProseMirror {
-      display: grid !important;
-      gap: 40px;
-      grid-template-columns: minmax(0, 1.8fr) minmax(240px, 1fr);
-      grid-template-rows: auto auto 1fr;
-      margin-bottom: 32px;
-      align-items: start;
+    /* ── Modular Block Layout (Shared by Editor & Preview) ── */
+    .a4-page .ProseMirror, .a4-page-content {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      padding: 60px 40px !important;
+    }
+
+    /* Standard Section Style */
+    .document-section, [data-layout-role] {
+      background: white;
+      padding: 32px;
+      border-radius: 12px;
+      border: 1px solid rgba(0,0,0,0.05);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.02);
       position: relative;
-      z-index: 1;
-    }
-
-    /* Column spans for grid layouts */
-    .layout-modern .ProseMirror > *:not([data-layout-role]),
-    .layout-premium .ProseMirror > *:not([data-layout-role]),
-    [data-layout-role="primary-table"] {
-      grid-column: 1 / -1 !important;
-    }
-
-    /* Sidebar Items (Previously the table, now the Clauses) */
-    .layout-modern-summary, 
-    .layout-premium-summary,
-    [data-layout-role="primary-sidebar-item"] {
-      border: 1px solid ${tableBorder};
-      border-radius: 16px;
-      padding: 24px;
-      background: rgba(255, 255, 255, 0.9);
-      min-width: 240px;
-      max-width: 100%;
-      box-shadow: 0 8px 30px rgba(0,0,0,0.04);
-      grid-column: 2;
-      grid-row: 1 / span 10; /* Stretch sidebar */
-      position: sticky;
-      top: 40px;
-      overflow: visible !important;
+      transition: transform 0.2s;
     }
     
-    [data-layout-role="primary-heading"] { grid-column: 1; grid-row: 1; text-align: left !important; }
-    [data-layout-role="intro-paragraph"] { grid-column: 1; grid-row: 2; text-align: left !important; }
+    /* Hero Section (always at top) */
+    [data-layout-role="primary-heading"], [data-layout-role="hero"] {
+      background: transparent !important;
+      border: none !important;
+      box-shadow: none !important;
+      padding: 0 !important;
+      margin-bottom: 24px;
+      text-align: left !important;
+    }
 
-    /* Premium specific override - Glassmorphism for the Clauses Sidebar */
-    .layout-premium-summary,
+    /* Ledger Theme specific block style */
+    .layout-ledger .document-section, 
+    .layout-ledger [data-layout-role]:not([data-layout-role="primary-heading"]) {
+      border-radius: 0;
+      border: 2px solid #000000;
+      box-shadow: 8px 8px 0 rgba(0,0,0,0.1);
+      margin-bottom: 12px;
+    }
+    
+    /* Premium Theme specific block style (Glass Cards) */
+    .layout-premium .document-section,
+    .layout-premium [data-layout-role]:not([data-layout-role="primary-heading"]) {
+      background: rgba(255, 255, 255, 0.7) !important;
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.05);
+      border-radius: 24px;
+    }
+
+    /* Table Section Fixes (Middle flow) */
+    [data-layout-role="primary-table"], .agreement-table {
+      width: 100% !important;
+      margin: 0 !important;
+      grid-column: span 2;
+    }
+
+    /* Clauses Section (Full width now, no more sidebar squeeze) */
+    [data-layout-role="primary-sidebar-item"], .preview-clauses-placeholder {
+      width: 100% !important;
+      background: rgba(0,0,0,0.02);
+      border: 1px dashed ${tableBorder};
+      border-radius: 12px;
+      padding: 40px !important;
+    }
+
+    /* Premium Clauses Styling */
     .layout-premium [data-layout-role="primary-sidebar-item"] {
-      background: rgba(255, 255, 255, 0.12) !important;
-      border-color: rgba(255, 255, 255, 0.25) !important;
-      backdrop-filter: blur(16px);
-      color: #FFFFFF !important;
-      box-shadow: 0 20px 50px rgba(0,0,0,0.2);
-    }
-    
-    .layout-premium [data-layout-role="primary-sidebar-item"] * {
-      color: #FFFFFF !important;
+      background: rgba(255, 255, 255, 0.4) !important;
+      border: 1px solid rgba(255, 255, 255, 0.6) !important;
     }
 
-    /* ── Editorial Layout ── */
-    .layout-editorial-header {
-      border-left: 6px solid ${primary};
-      padding-left: 24px;
-      margin-bottom: 32px;
-    }
-
-    /* ── Typography ── */
+    /* Typography scale fix for blocks */
     h1 { 
-      font-family: var(--theme-heading-font); 
-      color: var(--theme-heading-color); 
-      font-size: 2.8rem; 
-      margin-bottom: 0.5em; 
-      line-height: 1.1;
-      position: relative;
-      z-index: 2;
+      font-size: 3rem !important;
+      line-height: 1 !important;
+      margin-bottom: 0.5em !important;
     }
     
     /* Dark Hero Adjustments (Enforce contrast for H1/H2 in hero sections) */
