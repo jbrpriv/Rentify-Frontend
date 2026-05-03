@@ -55,6 +55,26 @@ export const VISUAL_THEMES = [
       fontSizeScale: 1.0,
       headingScale: 1.0,
       asideWidth: '360px',
+      contentPadding: '80px',
+    },
+    pageBackground: '#FFFFFF',
+    hero: {
+      enabled: false,
+      height: 0,
+      background: 'transparent',
+      titleColor: '#000000',
+      titleFontSize: '2.25rem',
+    },
+    logo: {
+      maxHeight: '120px',
+      alignment: 'left',
+    },
+    table: {
+      containerRadius: '0px',
+      alternateRowBg: 'none',
+    },
+    body: {
+      lineHeight: 1.7,
     },
   },
 
@@ -67,7 +87,7 @@ export const VISUAL_THEMES = [
     preview: {
       primarySwatch: '#1B2A4A',
       accentSwatch: '#C5A55A',
-      bgSwatch: '#F7F5F0',
+      bgSwatch: '#FAF8F4',
     },
     fonts: {
       heading: "'Playfair Display', Georgia, serif",
@@ -82,28 +102,48 @@ export const VISUAL_THEMES = [
       bodyText: '#2D3748',
       tableBorder: '#C5A55A',
       tableHeaderBg: '#1B2A4A',
-      tableHeaderText: '#FFFFFF',
+      tableHeaderText: '#F5DFA0',
       background: '#FFFFFF',
-      heroBackground: '#F7F5F0',
+      heroBackground: '#F2EDE3',
     },
     textures: {
       pageBackground: 'none',
-      heroPattern: 'linear-gradient(180deg, #F7F5F0 0%, #FFFFFF 100%)',
+      heroPattern: 'linear-gradient(180deg, #F2EDE3 0%, #FAF8F4 100%)',
     },
     watermark: {
       enabled: false,
       text: '',
-      opacity: 0.04,
+      opacity: 0,
       color: '#1B2A4A',
     },
     borders: {
-      headerRule: '3px double #C5A55A',
-      sectionRule: '1px solid #E2D9C8',
+      headerRule: '4px double #C5A55A',
+      sectionRule: '1px solid #D4BC8A',
     },
     spacing: {
       fontSizeScale: 1.0,
-      headingScale: 1.05,
+      headingScale: 1.1,
       asideWidth: '340px',
+      contentPadding: '80px',
+    },
+    pageBackground: '#FAF8F4',
+    hero: {
+      enabled: true,
+      height: 320,
+      background: 'linear-gradient(180deg, #F2EDE3 0%, #FAF8F4 100%)',
+      titleColor: '#1B2A4A',
+      titleFontSize: '3.2rem',
+    },
+    logo: {
+      maxHeight: '100px',
+      alignment: 'center',
+    },
+    table: {
+      containerRadius: '0px',
+      alternateRowBg: '#F9F6EF',
+    },
+    body: {
+      lineHeight: 1.8,
     },
   },
 
@@ -146,13 +186,33 @@ export const VISUAL_THEMES = [
       color: '#1E293B',
     },
     borders: {
-      headerRule: '2px solid #3B82F6',
-      sectionRule: '1px solid #F1F5F9',
+      headerRule: '4px solid #3B82F6',
+      sectionRule: '1px solid #E2E8F0',
     },
     spacing: {
       fontSizeScale: 0.98,
-      headingScale: 0.95,
+      headingScale: 1.0,
       asideWidth: '360px',
+      contentPadding: '80px',
+    },
+    pageBackground: '#FFFFFF',
+    hero: {
+      enabled: false,
+      height: 0,
+      background: 'transparent',
+      titleColor: '#0F172A',
+      titleFontSize: '2.5rem',
+    },
+    logo: {
+      maxHeight: '80px',
+      alignment: 'left',
+    },
+    table: {
+      containerRadius: '10px',
+      alternateRowBg: 'transparent',
+    },
+    body: {
+      lineHeight: 1.6,
     },
   },
 
@@ -164,8 +224,8 @@ export const VISUAL_THEMES = [
     layoutStyle: 'legal',
     preview: {
       primarySwatch: '#1A1A2E',
-      accentSwatch: '#7B2D3B',
-      bgSwatch: '#FAFAF8',
+      accentSwatch: '#8B2635',
+      bgSwatch: '#FDFCFA',
     },
     fonts: {
       heading: "'Merriweather', Georgia, serif",
@@ -182,12 +242,12 @@ export const VISUAL_THEMES = [
       tableHeaderBg: '#1A1A2E',
       tableHeaderText: '#E8D5C4',
       background: '#FFFFFF',
-      heroBackground: '#FAFAF8',
+      heroBackground: '#FDFCFA',
     },
     textures: {
       pageBackground:
-        'repeating-linear-gradient(0deg, transparent, transparent 27px, rgba(0,0,0,0.015) 27px, rgba(0,0,0,0.015) 28px)',
-      heroPattern: 'linear-gradient(180deg, #FAFAF8 0%, #FFFFFF 100%)',
+        'repeating-linear-gradient(0deg, transparent, transparent 27px, rgba(0,0,0,0.04) 27px, rgba(0,0,0,0.04) 28px)',
+      heroPattern: 'none',
     },
     watermark: {
       enabled: false,
@@ -203,6 +263,26 @@ export const VISUAL_THEMES = [
       fontSizeScale: 1.08,
       headingScale: 1.25,
       asideWidth: '300px',
+      contentPadding: '80px',
+    },
+    pageBackground: '#FDFCFA',
+    hero: {
+      enabled: false,
+      height: 0,
+      background: 'transparent',
+      titleColor: '#0F1419',
+      titleFontSize: '1.9rem',
+    },
+    logo: {
+      maxHeight: '90px',
+      alignment: 'left',
+    },
+    table: {
+      containerRadius: '0px',
+      alternateRowBg: 'transparent',
+    },
+    body: {
+      lineHeight: 1.7,
     },
   },
 
@@ -214,8 +294,8 @@ export const VISUAL_THEMES = [
     layoutStyle: 'premium',
     preview: {
       primarySwatch: '#2D1B4E',
-      accentSwatch: '#C4917B',
-      bgSwatch: '#FAF7FF',
+      accentSwatch: '#D4A574',
+      bgSwatch: '#FEFCFF',
     },
     fonts: {
       heading: "'Outfit', 'Helvetica Neue', sans-serif",
@@ -226,18 +306,17 @@ export const VISUAL_THEMES = [
     colors: {
       primary: '#2D1B4E',
       accent: '#D4A574',
-      headingColor: '#1A0E2E',
+      headingColor: '#2D1B4E',
       bodyText: '#4A3F5C',
       tableBorder: '#E8D5C4',
       tableHeaderBg: 'linear-gradient(135deg, #2D1B4E 0%, #5A3D7E 100%)',
       tableHeaderText: '#FFFFFF',
       background: '#FFFFFF',
-      heroBackground: '#FAF7FF',
+      heroBackground: '#FEFCFF',
     },
     textures: {
       pageBackground: 'none',
-      heroPattern:
-        'linear-gradient(180deg, rgba(250,247,255,0.95) 0%, rgba(243,234,255,0.55) 45%, rgba(255,255,255,0) 100%)',
+      heroPattern: 'linear-gradient(135deg, #2D1B4E 0%, #5A3D7E 55%, #8B5CF6 100%)',
     },
     watermark: {
       enabled: false,
@@ -251,8 +330,28 @@ export const VISUAL_THEMES = [
     },
     spacing: {
       fontSizeScale: 1.15,
-      headingScale: 1.30,
+      headingScale: 1.3,
       asideWidth: '400px',
+      contentPadding: '80px',
+    },
+    pageBackground: '#FEFCFF',
+    hero: {
+      enabled: true,
+      height: 400,
+      background: 'linear-gradient(135deg, #2D1B4E 0%, #5A3D7E 55%, #8B5CF6 100%)',
+      titleColor: '#FFFFFF',
+      titleFontSize: '3rem',
+    },
+    logo: {
+      maxHeight: '80px',
+      alignment: 'left',
+    },
+    table: {
+      containerRadius: '12px',
+      alternateRowBg: 'transparent',
+    },
+    body: {
+      lineHeight: 1.7,
     },
   },
 
@@ -278,7 +377,7 @@ export const VISUAL_THEMES = [
       accent: '#F97066',
       headingColor: '#134E4A',
       bodyText: '#334155',
-      tableBorder: '#99F6E4',
+      tableBorder: '#2DD4BF',
       tableHeaderBg: '#0F766E',
       tableHeaderText: '#FFFFFF',
       background: '#FFFFFF',
@@ -286,7 +385,7 @@ export const VISUAL_THEMES = [
     },
     textures: {
       pageBackground: 'none',
-      heroPattern: 'linear-gradient(180deg, #F0FDFA 0%, #FFFFFF 100%)',
+      heroPattern: 'linear-gradient(160deg, #0F766E 0%, #0D9488 100%)',
     },
     watermark: {
       enabled: false,
@@ -296,12 +395,32 @@ export const VISUAL_THEMES = [
     },
     borders: {
       headerRule: '3px solid #F97066',
-      sectionRule: '1px solid #CCFBF1',
+      sectionRule: '1px solid #F97066',
     },
     spacing: {
       fontSizeScale: 1.0,
       headingScale: 1.0,
       asideWidth: '360px',
+      contentPadding: '80px',
+    },
+    pageBackground: '#F0FDFA',
+    hero: {
+      enabled: true,
+      height: 200,
+      background: 'linear-gradient(160deg, #0F766E 0%, #0D9488 100%)',
+      titleColor: '#FFFFFF',
+      titleFontSize: '2.8rem',
+    },
+    logo: {
+      maxHeight: '100px',
+      alignment: 'left',
+    },
+    table: {
+      containerRadius: '12px',
+      alternateRowBg: '#F0FDFA',
+    },
+    body: {
+      lineHeight: 1.7,
     },
   },
 
@@ -313,7 +432,7 @@ export const VISUAL_THEMES = [
     layoutStyle: 'editorial',
     preview: {
       primarySwatch: '#111111',
-      accentSwatch: '#B29B72',
+      accentSwatch: '#9B8467',
       bgSwatch: '#FAF9F6',
     },
     fonts: {
@@ -322,19 +441,19 @@ export const VISUAL_THEMES = [
       googleFontUrl: 'https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Lora:wght@400;600;700&display=swap',
     },
     colors: {
-      primary: '#0A0A0A',
+      primary: '#111111',
       accent: '#9B8467',
-      headingColor: '#1A1A1A',
+      headingColor: '#111111',
       bodyText: '#3D3D3D',
       tableBorder: '#C5B5A5',
       tableHeaderBg: '#F5F2ED',
-      tableHeaderText: '#1A1A1A',
+      tableHeaderText: '#111111',
       background: '#FFFFFF',
       heroBackground: '#FAF9F6',
     },
     textures: {
-      pageBackground: 'radial-gradient(#E8E5DF 2px, transparent 2px)',
-      heroPattern: 'linear-gradient(180deg, #FAF9F6 0%, #FFFFFF 100%)',
+      pageBackground: 'radial-gradient(circle, #E0DBD0 1px, transparent 1px)',
+      heroPattern: 'none',
     },
     watermark: {
       enabled: false,
@@ -343,13 +462,33 @@ export const VISUAL_THEMES = [
       color: '#111111',
     },
     borders: {
-      headerRule: '3px solid #9B8467',
+      headerRule: 'none',
       sectionRule: '2px dotted #C5B5A5',
     },
     spacing: {
       fontSizeScale: 1.12,
       headingScale: 1.35,
       asideWidth: '340px',
+      contentPadding: '80px',
+    },
+    pageBackground: '#FAF9F6',
+    hero: {
+      enabled: false,
+      height: 0,
+      background: 'transparent',
+      titleColor: '#111111',
+      titleFontSize: '3.5rem',
+    },
+    logo: {
+      maxHeight: '110px',
+      alignment: 'center',
+    },
+    table: {
+      containerRadius: '0px',
+      alternateRowBg: 'transparent',
+    },
+    body: {
+      lineHeight: 1.7,
     },
   },
 
@@ -360,9 +499,9 @@ export const VISUAL_THEMES = [
     description: 'A tech-forward minimalist theme using monospace headers and stark contrast.',
     layoutStyle: 'ledger',
     preview: {
-      primarySwatch: '#000000',
-      accentSwatch: '#3B82F6',
-      bgSwatch: '#F8FAFC',
+      primarySwatch: '#0A0A0A',
+      accentSwatch: '#2563EB',
+      bgSwatch: '#FFFFFF',
     },
     fonts: {
       heading: "'Space Grotesk', 'Courier New', monospace",
@@ -370,19 +509,19 @@ export const VISUAL_THEMES = [
       googleFontUrl: 'https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700;800;900&family=Roboto:wght@400;500;700&display=swap',
     },
     colors: {
-      primary: '#000000',
+      primary: '#0A0A0A',
       accent: '#2563EB',
       headingColor: '#000000',
       bodyText: '#1F2937',
-      tableBorder: '#E5E7EB',
-      tableHeaderBg: '#000000',
+      tableBorder: '#000000',
+      tableHeaderBg: '#0A0A0A',
       tableHeaderText: '#FFFFFF',
       background: '#FFFFFF',
-      heroBackground: '#F8FAFC',
+      heroBackground: '#0A0A0A',
     },
     textures: {
-      pageBackground: 'linear-gradient(90deg, transparent 98%, rgba(37,99,235,0.08) 100%)',
-      heroPattern: 'linear-gradient(180deg, #F8FAFC 0%, #FFFFFF 100%)',
+      pageBackground: 'repeating-linear-gradient(90deg, transparent, transparent 119px, rgba(37,99,235,0.04) 119px, rgba(37,99,235,0.04) 120px)',
+      heroPattern: 'none',
     },
     watermark: {
       enabled: false,
@@ -391,13 +530,33 @@ export const VISUAL_THEMES = [
       color: '#0A0A0A',
     },
     borders: {
-      headerRule: '6px solid #2563EB',
+      headerRule: 'none',
       sectionRule: '3px solid #E5E7EB',
     },
     spacing: {
-      fontSizeScale: 1.05,
+      fontSizeScale: 1.0,
       headingScale: 1.15,
       asideWidth: '380px',
+      contentPadding: '80px',
+    },
+    pageBackground: '#FFFFFF',
+    hero: {
+      enabled: true,
+      height: 160,
+      background: '#0A0A0A',
+      titleColor: '#FFFFFF',
+      titleFontSize: '2rem',
+    },
+    logo: {
+      maxHeight: '70px',
+      alignment: 'left',
+    },
+    table: {
+      containerRadius: '0px',
+      alternateRowBg: '#F9FAFB',
+    },
+    body: {
+      lineHeight: 1.6,
     },
   },
 ];
@@ -425,7 +584,7 @@ export function themeToCssVars(theme) {
     '--theme-table-border': theme.colors.tableBorder,
     '--theme-table-header-bg': theme.colors.tableHeaderBg,
     '--theme-table-header-text': theme.colors.tableHeaderText,
-    '--theme-hero-bg': theme.colors.heroBackground,
+    '--theme-hero-bg': theme.hero?.background || theme.colors.heroBackground || 'transparent',
     '--theme-hero-pattern': theme.textures.heroPattern || 'none',
     '--theme-page-texture': theme.textures.pageBackground || 'none',
     '--theme-header-rule': theme.borders.headerRule || 'none',
@@ -436,5 +595,18 @@ export function themeToCssVars(theme) {
     '--theme-font-scale': theme.spacing?.fontSizeScale || 1,
     '--theme-heading-scale': theme.spacing?.headingScale || 1,
     '--theme-aside-width': theme.spacing?.asideWidth || '360px',
+    
+    // NEW vars from Step 2.2
+    '--theme-page-bg': theme.pageBackground || '#FFFFFF',
+    '--theme-hero-enabled': theme.hero?.enabled ? '1' : '0',
+    '--theme-hero-height': `${theme.hero?.height || 200}px`,
+    '--theme-hero-title-color': theme.hero?.titleColor || theme.colors.headingColor,
+    '--theme-hero-title-size': theme.hero?.titleFontSize || '2.25rem',
+    '--theme-logo-max-height': theme.logo?.maxHeight || '120px',
+    '--theme-logo-align': theme.logo?.alignment || 'left',
+    '--theme-table-radius': theme.table?.containerRadius || '0px',
+    '--theme-table-alt-row': theme.table?.alternateRowBg || 'transparent',
+    '--theme-body-line-height': theme.body?.lineHeight || 1.7,
+    '--theme-content-padding': theme.spacing?.contentPadding || '80px',
   };
 }

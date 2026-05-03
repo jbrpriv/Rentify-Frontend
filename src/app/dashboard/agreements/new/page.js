@@ -13,6 +13,8 @@ import {
   GripVertical, Eye, EyeOff, AlertTriangle, X, LayoutTemplate,
   ArrowRight, CheckCircle2, PawPrint, Zap, ScrollText,
 } from 'lucide-react';
+import { getThemeById, themeToCssVars, VISUAL_THEMES } from '@/components/agreement-builder/VisualThemes';
+import { generateLayoutCss } from '@/components/agreement-builder/generateLayoutCss';
 
 // ─── Flow Tracker ─────────────────────────────────────────────────────────────
 function FlowTracker({ offerData }) {
@@ -273,8 +275,8 @@ function substituteVariables(text, offer, form, formatMoney) {
     '{{utilities_details}}': utilDetails || '[Utilities Details]',
     '{{rent_escalation_enabled}}': form?.rentEscalationEnabled ? 'Enabled' : 'Disabled',
     '{{rent_escalation_percentage}}': form?.rentEscalationEnabled
-                                     ? `${form.rentEscalationPercentage || 5}%`
-                                     : 'N/A',
+      ? `${form.rentEscalationPercentage || 5}%`
+      : 'N/A',
     '{{pet_allowed}}': petLabel,
     '{{pet_policy}}': petLabel,
     '{{pet_deposit}}': petDeposit,
@@ -298,8 +300,8 @@ function substituteVariables(text, offer, form, formatMoney) {
     '{{utilitiesDetails}}': utilDetails || '[Utilities Details]',
     '{{rentEscalationEnabled}}': form?.rentEscalationEnabled ? 'Enabled' : 'Disabled',
     '{{rentEscalationPercentage}}': form?.rentEscalationEnabled
-                                     ? `${form.rentEscalationPercentage || 5}%`
-                                     : 'N/A',
+      ? `${form.rentEscalationPercentage || 5}%`
+      : 'N/A',
     '{{terminationPolicy}}': termPolicy || '[Termination Policy]',
     '{{currentDate}}': new Date().toLocaleDateString(),
     '{{agreementId}}': '[Draft ID]',
@@ -318,53 +320,45 @@ const pickThemeString = (value, fallback) => (
   typeof value === 'string' && value.trim() ? value.trim() : fallback
 );
 
-function resolveTemplateTheme(baseTheme, customizations) {
-  if (!baseTheme && !customizations) return null;
 
-  const theme = baseTheme || {};
-  const overrides = customizations || {};
-  const customWatermark = pickThemeString(overrides.customWatermark, '');
-  const watermarkEnabled = Boolean(customWatermark || theme.watermarkEnabled);
+/**
+ * resolveThemeObject(baseTheme, customizations)
+ * Robustly extract the theme ID slug from various possible input formats
+ * and returns the full theme object along with generated CSS variables.
+ */
+function resolveThemeObject(baseTheme, customizations) {
+  const themeId = (typeof baseTheme === 'string') 
+    ? baseTheme 
+    : (baseTheme?.themeSlug || baseTheme?.id || baseTheme?._id || 'blank');
+    
+  const theme = getThemeById(themeId);
+  const themeVars = themeToCssVars(theme);
 
-  return {
-    ...theme,
-    primaryColor: pickThemeString(overrides.primaryColor, theme.primaryColor),
-    accentColor: pickThemeString(overrides.accentColor, theme.accentColor),
-    backgroundColor: pickThemeString(overrides.backgroundColor, theme.backgroundColor || '#FFFFFF'),
-    fontFamily: pickThemeString(overrides.fontFamily, theme.fontFamily),
-    fontSizeScale: typeof overrides.fontSizeScale === 'number'
-      ? overrides.fontSizeScale
-      : (typeof theme.fontSizeScale === 'number' ? theme.fontSizeScale : 1.0),
-    watermarkText: customWatermark || theme.watermarkText || '',
-    watermarkEnabled,
-    watermarkOpacity: customWatermark
-      ? 0.08
-      : (typeof theme.watermarkOpacity === 'number' ? theme.watermarkOpacity : 0.04),
-    watermarkColor: customWatermark
-      ? (theme.watermarkColor || theme.primaryColor || '#000000')
-      : (theme.watermarkColor || '#000000'),
-  };
-}
+  // Apply customizations if any
+  if (customizations?.customWatermark) {
+    themeVars['--theme-watermark-text'] = `"${customizations.customWatermark}"`;
+    themeVars['--theme-watermark-opacity'] = customizations.watermarkOpacity || 0.05;
+  }
 
-function extractFirstHtmlBlock(html, regex) {
-  const match = html.match(regex);
-  if (!match) return { block: '', rest: html };
-  const block = match[0];
-  return {
-    block,
-    rest: html.replace(block, ''),
-  };
+  return { theme, themeVars };
 }
 
 function applyThemeLayout(html, layoutStyle = 'minimalist') {
   if (!html) return html;
 
+  // Local helper for structure extraction
+  const extract = (h, regex) => {
+    const match = h.match(regex);
+    if (!match) return { block: '', rest: h };
+    return { block: match[0], rest: h.replace(match[0], '') };
+  };
+
   let working = html;
-  const { block: heading, rest: afterHeading } = extractFirstHtmlBlock(working, /<h1\b[^>]*>[\s\S]*?<\/h1>/i);
+  const { block: heading, rest: afterHeading } = extract(working, /<h1\b[^>]*>[\s\S]*?<\/h1>/i);
   working = afterHeading;
-  const { block: intro, rest: afterIntro } = extractFirstHtmlBlock(working, /<p\b[^>]*>[\s\S]*?<\/p>/i);
+  const { block: intro, rest: afterIntro } = extract(working, /<p\b[^>]*>[\s\S]*?<\/p>/i);
   working = afterIntro;
-  const { block: table, rest: afterTable } = extractFirstHtmlBlock(working, /<table\b[^>]*>[\s\S]*?<\/table>/i);
+  const { block: table, rest: afterTable } = extract(working, /<table\b[^>]*>[\s\S]*?<\/table>/i);
   working = afterTable;
 
   const safeHeading = heading || '<h1>Rental Agreement</h1>';
@@ -373,7 +367,7 @@ function applyThemeLayout(html, layoutStyle = 'minimalist') {
     case 'classic':
       return `${safeHeading}${intro || ''}${table ? `<div class="layout-classic-table">${table}</div>` : ''}${working}`;
     case 'legal':
-      return `<div class="layout-meta-strip"><span>Legal Format</span><span>${new Date().toLocaleDateString()}</span></div>${safeHeading}${intro || ''}${table ? `<div class="layout-legal-table">${table}</div>` : ''}${working}`;
+      return `<div class="layout-meta-strip"><span>Agreement Preview</span><span>${new Date().toLocaleDateString()}</span></div>${safeHeading}${intro || ''}${table ? `<div class="layout-legal-table">${table}</div>` : ''}${working}`;
     case 'premium':
       return `<div class="layout-premium-hero"><div>${safeHeading}${intro || ''}</div>${table ? `<div class="layout-premium-summary">${table}</div>` : ''}</div>${working}`;
     case 'contemporary':
@@ -384,43 +378,9 @@ function applyThemeLayout(html, layoutStyle = 'minimalist') {
       return `<div class="layout-meta-strip"><span>Ledger View</span><span>${new Date().toLocaleDateString()}</span></div>${safeHeading}${table ? `<div class="layout-ledger-block">${table}</div>` : ''}${intro || ''}${working}`;
     case 'modern':
       return `<div class="layout-modern-hero-grid"><div>${safeHeading}${intro || ''}</div>${table ? `<aside class="layout-modern-summary">${table}</aside>` : ''}</div>${working}`;
-    case 'minimalist':
     default:
       return html;
   }
-}
-
-function buildTemplateThemeVars(theme) {
-  const headingFont = theme?.headingFontFamily || theme?.fontFamily || "'Segoe UI', Arial, sans-serif";
-  const bodyFont = theme?.fontFamily || "'Segoe UI', Arial, sans-serif";
-  const watermarkText = theme?.watermarkEnabled && theme?.watermarkText
-    ? JSON.stringify(theme.watermarkText)
-    : '""';
-
-  return {
-    '--theme-heading-font': headingFont,
-    '--theme-body-font': bodyFont,
-    '--theme-heading-color': theme?.headingColor || '#0f172a',
-    '--theme-body-color': theme?.bodyTextColor || '#334155',
-    '--theme-primary': theme?.primaryColor || '#0f172a',
-    '--theme-accent': theme?.accentColor || '#64748b',
-    '--theme-table-border': theme?.tableBorderColor || '#cbd5e1',
-    '--theme-table-header-bg': theme?.tableHeaderBg || '#f8fafc',
-    '--theme-table-header-text': theme?.tableHeaderTextColor || '#334155',
-    '--theme-hero-pattern': theme?.heroPattern || 'none',
-    '--theme-page-texture': theme?.pageTexture || 'none',
-    '--theme-header-rule': theme?.headerRule || 'none',
-    '--theme-section-rule': theme?.sectionRule || 'none',
-    '--theme-watermark-opacity': theme?.watermarkEnabled
-      ? (typeof theme?.watermarkOpacity === 'number' ? theme.watermarkOpacity : 0.04)
-      : 0,
-    '--theme-watermark-color': theme?.watermarkEnabled ? theme?.watermarkColor || '#000000' : 'transparent',
-    '--theme-watermark-text': watermarkText,
-    '--theme-font-scale': typeof theme?.fontSizeScale === 'number' ? theme.fontSizeScale : 1,
-    '--theme-page-bg': theme?.backgroundColor || '#FFFFFF',
-    // heroBackground is used as the solid colour fallback behind the hero gradient
-    '--theme-hero-bg': theme?.heroBackground || theme?.backgroundColor || '#FFFFFF',
-  };
 }
 
 const makeBucket = (clauseId = null) => ({
@@ -456,11 +416,11 @@ function Toggle({ enabled, onChange, label, description }) {
 }
 
 // ─── Clause Buckets Section ──────────────────────────────────────────────────
-function ClauseBucketsSection({ 
-  clauseBuckets, idxOffset = 0, clausesById, hoveredBucketKey, 
-  setHoveredBucketKey, handleDropToBucket, handleDragStart, 
-  moveBucketClause, handleRemoveClause, addClauseBucket, 
-  isClauseLimitFinite, clauseLimit, offerData, formData, formatMoney 
+function ClauseBucketsSection({
+  clauseBuckets, idxOffset = 0, clausesById, hoveredBucketKey,
+  setHoveredBucketKey, handleDropToBucket, handleDragStart,
+  moveBucketClause, handleRemoveClause, addClauseBucket,
+  isClauseLimitFinite, clauseLimit, offerData, formData, formatMoney
 }) {
   return (
     <div className="space-y-4 my-8">
@@ -559,14 +519,14 @@ function ClauseBucketsSection({
 }
 
 // ─── Template Document Renderer ───────────────────────────────────────────────
-function TemplateDocument({ 
+function TemplateDocument({
   templateHtml, offerData, formData, formatMoney,
-  clauseBuckets, clausesById, hoveredBucketKey, setHoveredBucketKey, 
-  handleDropToBucket, dragState, handleDragStart, moveBucketClause, 
+  clauseBuckets, clausesById, hoveredBucketKey, setHoveredBucketKey,
+  handleDropToBucket, dragState, handleDragStart, moveBucketClause,
   handleRemoveClause, addClauseBucket, isClauseLimitFinite, clauseLimit,
   baseTheme, customizations
 }) {
-  
+
   const { html, hasPortal } = useMemo(() => {
     if (!templateHtml) return { html: '', hasPortal: false };
     try {
@@ -596,10 +556,10 @@ function TemplateDocument({
         utilities_included: formData?.utilitiesIncluded ? 'Included' : 'Not Included',
         utilities: formData?.utilitiesIncluded ? 'Included' : 'Not Included',
         utilities_details: formData?.utilitiesDetails || '[Utilities Details]',
-        rent_escalation_enabled:     formData?.rentEscalationEnabled ? 'Enabled' : 'Disabled',
-        rent_escalation_percentage:  formData?.rentEscalationEnabled
-                                       ? `${formData.rentEscalationPercentage || 5}%`
-                                       : 'N/A',
+        rent_escalation_enabled: formData?.rentEscalationEnabled ? 'Enabled' : 'Disabled',
+        rent_escalation_percentage: formData?.rentEscalationEnabled
+          ? `${formData.rentEscalationPercentage || 5}%`
+          : 'N/A',
         pet_allowed: formData?.petAllowed ? 'Allowed' : 'Not Allowed',
         pet_policy: formData?.petAllowed ? 'Allowed' : 'Not Allowed',
         pet_deposit: formData?.petDeposit ? formatMoney(Number(formData.petDeposit)) : '[Pet Deposit]',
@@ -637,10 +597,10 @@ function TemplateDocument({
       // 2. Look for Placeholder and setup portal
       const placeholder = doc.querySelector('div[data-type="clauses-placeholder"]');
       if (placeholder) {
-          const portalRoot = doc.createElement('div');
-          portalRoot.id = 'clause-buckets-portal-root';
-          placeholder.parentNode.replaceChild(portalRoot, placeholder);
-          return { html: doc.body.innerHTML, hasPortal: true };
+        const portalRoot = doc.createElement('div');
+        portalRoot.id = 'clause-buckets-portal-root';
+        placeholder.parentNode.replaceChild(portalRoot, placeholder);
+        return { html: doc.body.innerHTML, hasPortal: true };
       }
 
       return { html: doc.body.innerHTML, hasPortal: false };
@@ -654,33 +614,27 @@ function TemplateDocument({
   const lastInjectedHtml = useRef('');
   const [portalNode, setPortalNode] = useState(null);
 
-  const resolvedTheme = useMemo(
-    () => resolveTemplateTheme(baseTheme, customizations),
+  const { theme, themeVars } = useMemo(
+    () => resolveThemeObject(baseTheme, customizations),
     [baseTheme, customizations]
   );
 
-  const layoutStyle = resolvedTheme?.layoutStyle || 'minimalist';
+  const layoutStyle = theme?.layoutStyle || 'minimalist';
   const laidOutHtml = useMemo(
     () => applyThemeLayout(html, layoutStyle),
     [html, layoutStyle]
   );
 
-  const themeVars = useMemo(
-    () => buildTemplateThemeVars(resolvedTheme),
-    [resolvedTheme]
-  );
-
   useEffect(() => {
     // Debug: ensure resolved theme contains hero/table values while troubleshooting
-    // Remove this log once the styling issue is confirmed fixed.
     try {
       // eslint-disable-next-line no-console
-      console.debug('[TemplateDocument] resolvedTheme:', resolvedTheme, 'themeVars:', themeVars);
-    } catch (e) {}
-  }, [resolvedTheme, themeVars]);
+      console.debug('[TemplateDocument] theme:', theme, 'themeVars:', themeVars);
+    } catch (e) { }
+  }, [theme, themeVars]);
 
   useEffect(() => {
-    const fontUrl = resolvedTheme?.googleFontUrl;
+    const fontUrl = theme?.fonts?.googleFontUrl;
     const linkId = 'agreement-template-theme-font';
     const existing = document.getElementById(linkId);
     if (existing) existing.remove();
@@ -697,11 +651,11 @@ function TemplateDocument({
       const el = document.getElementById(linkId);
       if (el) el.remove();
     };
-  }, [resolvedTheme?.googleFontUrl]);
+  }, [theme?.fonts?.googleFontUrl]);
 
   useEffect(() => {
     if (!containerRef.current) return;
-    
+
     const htmlContainer = containerRef.current.querySelector('#agreement-tiptap-html-container');
     if (htmlContainer && lastInjectedHtml.current !== laidOutHtml) {
       htmlContainer.innerHTML = laidOutHtml;
@@ -721,202 +675,27 @@ function TemplateDocument({
   return (
     <div className="agreement-template-preview" ref={containerRef}>
       <style>{`
-        .template-page {
-          width: 794px;
-          min-height: 1123px;
-          padding: 80px;
-          background-color: var(--theme-page-bg, #ffffff);
-          background-image: var(--theme-page-texture, none);
-          box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
-          position: relative;
-          overflow: hidden;
-          font-family: var(--theme-body-font, 'Segoe UI', Arial, sans-serif);
-          color: var(--theme-body-color, #334155);
-          font-size: calc(12pt * var(--theme-font-scale, 1));
-          line-height: 1.7;
-        }
-        .template-page::before {
-          content: var(--theme-watermark-text, "");
-          position: absolute;
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%) rotate(-35deg);
-          font-size: 100px;
-          font-weight: 900;
-          letter-spacing: 0.15em;
-          color: var(--theme-watermark-color, transparent);
-          opacity: var(--theme-watermark-opacity, 0);
-          pointer-events: none;
-          z-index: 0;
-          white-space: nowrap;
-          user-select: none;
-        }
-        .template-page::after {
-          content: '';
-          position: absolute;
-          top: 0;
-          left: 0;
-          right: 0;
-          height: 240px;
-          background: var(--theme-hero-pattern, none) !important;
-          pointer-events: none;
-          z-index: 0;
-        }
-        .template-page .content-layer {
-          position: relative;
-          z-index: 1;
-        }
-        .template-page h1,
-        .template-page h2,
-        .template-page h3,
-        .template-page h4,
-        .template-page h5,
-        .template-page h6 {
-          font-family: var(--theme-heading-font, var(--theme-body-font));
-          color: var(--theme-heading-color, #0f172a);
-          font-weight: 800;
-          margin-top: 1.5em;
-          margin-bottom: 0.5em;
-        }
-        .template-page h1 { font-size: calc(2.25rem * var(--theme-font-scale, 1)); border-bottom: var(--theme-header-rule, none); padding-bottom: 0.5rem; }
-        .template-page h2 { font-size: calc(1.5rem * var(--theme-font-scale, 1)); border-bottom: var(--theme-section-rule, none); padding-bottom: 0.25rem; }
-        .template-page h3 { font-size: calc(1.25rem * var(--theme-font-scale, 1)); }
-        .template-page p,
-        .template-page li,
-        .template-page td,
-        .template-page span,
-        .template-page blockquote {
-          font-family: var(--theme-body-font, 'Segoe UI', Arial, sans-serif);
-          color: var(--theme-body-color, #334155);
-        }
-        .template-page p { margin-bottom: 1em; }
-        .template-page ul,
-        .template-page ol { margin-left: 1.5em; margin-bottom: 1em; }
-        .template-page .document-image {
-          max-width: 100%;
-          height: auto;
-          border-radius: 8px;
-          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-          margin-top: 1.5em;
-          margin-bottom: 1.5em;
-        }
-        .dual-column-wrapper {
-          display: grid;
-          grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-          gap: 0;
-          position: relative;
-          min-height: 100px;
-          margin: 1.5rem 0;
-        }
-        .dual-column-wrapper::after {
-          content: '';
-          position: absolute;
-          top: 0;
-          bottom: 0;
-          left: 50%;
-          border-left: 2px dotted var(--theme-table-border, #cbd5e1);
-          transform: translateX(-50%);
-          z-index: 1;
-        }
-        .dual-column-side {
-          padding: 0 20px;
-          position: relative;
-          z-index: 2;
-          min-width: 0;
-          word-wrap: break-word;
-          overflow-wrap: break-word;
-          max-width: 100%;
-        }
-        .agreement-table {
-          width: 100%;
-          margin: 1.5rem 0;
-          border-collapse: collapse;
-          table-layout: fixed;
-        }
-        .agreement-table th,
-        .agreement-table td {
-          min-width: 1em;
-          border: 1px solid var(--theme-table-border, #cbd5e1);
-          padding: 10px 14px;
-          vertical-align: top;
-        }
-        .agreement-table th {
-          font-weight: 800;
-          text-align: left;
-          background: var(--theme-table-header-bg, #f8fafc) !important;
-          color: var(--theme-table-header-text, #334155) !important;
-        }
-        .agreement-table th p { color: var(--theme-table-header-text, #334155) !important; }
-        .agreement-table p { margin: 0; }
-
-        .layout-meta-strip { display: flex; justify-content: space-between; gap: 12px; border: 1px solid var(--theme-table-border, #cbd5e1); border-radius: 10px; padding: 8px 12px; margin-bottom: 12px; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .04em; color: var(--theme-body-color, #334155); }
-        .layout-modern-hero-grid,
-        .layout-premium-hero,
-        .layout-contemporary-top { display: grid; gap: 14px; grid-template-columns: minmax(0,1.7fr) minmax(0,1fr); align-items: start; margin-bottom: 12px; }
-        .layout-modern-summary,
-        .layout-premium-summary,
-        .layout-classic-table,
-        .layout-legal-table,
-        .layout-contemporary-card,
-        .layout-editorial-feature,
-        .layout-ledger-block { border: 1px solid var(--theme-table-border, #cbd5e1); border-radius: 12px; padding: 10px; background: rgba(255,255,255,0.85); }
-        .layout-modern-summary .agreement-table,
-        .layout-premium-summary .agreement-table,
-        .layout-classic-table .agreement-table,
-        .layout-legal-table .agreement-table,
-        .layout-contemporary-card .agreement-table,
-        .layout-editorial-feature .agreement-table,
-        .layout-ledger-block .agreement-table { margin: 0; }
-        .layout-editorial-header { border-left: 4px solid var(--theme-primary, #0f172a); padding-left: 12px; margin-bottom: 10px; }
-
-        .signature-preview {
-          margin-top: 48px;
-          border-top: 1px solid #e2e8f0;
-          padding-top: 20px;
-          page-break-inside: avoid;
-        }
-        .signature-preview-grid {
-          display: grid;
-          grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-          gap: 30px;
-          margin-top: 12px;
-        }
-        .signature-preview-label {
-          font-size: 10px;
-          font-weight: 800;
-          text-transform: uppercase;
-          letter-spacing: 0.08em;
-          color: #64748b;
-          margin-bottom: 24px;
-        }
-        .signature-preview-line {
-          border-top: 1.5px solid #0f172a;
-          margin-bottom: 8px;
-        }
-        .signature-preview-name {
-          font-size: 13px;
-          font-weight: 700;
-          color: #0f172a;
-        }
-
-        @media (max-width: 900px) {
-          .layout-modern-hero-grid,
-          .layout-premium-hero,
-          .layout-contemporary-top,
-          .signature-preview-grid { grid-template-columns: minmax(0,1fr); }
-        }
-
-        @media print {
-          .dual-column-wrapper::after { border-left-color: #000; }
+        ${generateLayoutCss(theme, themeVars)}
+        .agreement-template-preview { display: flex; justify-content: center; padding: 40px 0; }
+        .template-page { 
+          transform: scale(0.9); 
+          transform-origin: top center;
         }
       `}</style>
-      <div className={`template-page layout-${layoutStyle}`} style={themeVars}>
-        <div className="content-layer agreement-tiptap-content">
-          <div id="agreement-tiptap-html-container"></div>
+      <div className="agreement-preview-container theme-hero-band-host" style={themeVars}>
+        <div className="theme-hero-band" />
+        <div 
+          className={`template-page a4-page layout-${layoutStyle}`}
+          style={{
+            backgroundImage: theme?.textures?.pageBackground !== 'none' ? theme.textures.pageBackground : undefined,
+          }}
+        >
+          <div className="content-layer agreement-tiptap-content">
+            <div id="agreement-tiptap-html-container"></div>
 
           {hasPortal && portalNode && createPortal(
             <div className="not-prose my-10 border-2 border-dashed border-gray-100 rounded-2xl p-6 bg-gray-50/30">
-              <ClauseBucketsSection 
+              <ClauseBucketsSection
                 clauseBuckets={clauseBuckets}
                 clausesById={clausesById}
                 hoveredBucketKey={hoveredBucketKey}
@@ -942,7 +721,7 @@ function TemplateDocument({
                 <ScrollText className="text-gray-400" size={32} />
                 <p className="text-[10px] font-black uppercase tracking-[0.3em] mt-2">End of Fixed Content</p>
               </div>
-              <ClauseBucketsSection 
+              <ClauseBucketsSection
                 clauseBuckets={clauseBuckets}
                 clausesById={clausesById}
                 hoveredBucketKey={hoveredBucketKey}
@@ -979,7 +758,8 @@ function TemplateDocument({
         </div>
       </div>
     </div>
-  );
+  </div>
+);
 }
 
 function AgreementComposer({
@@ -990,16 +770,16 @@ function AgreementComposer({
   showEditor = true,
   canUseClauses = false,
   clauseLimit = Number.POSITIVE_INFINITY,
-  onClauseLimitReached = () => {},
+  onClauseLimitReached = () => { },
   canUseAgreementTemplates = true,
   canSelectPdfTheme = true,
   formErrors = {},
-  setField = () => {},
-  clearFieldError = () => {},
-  onOpenTemplate = () => {},
-  onFinish = () => {},
+  setField = () => { },
+  clearFieldError = () => { },
+  onOpenTemplate = () => { },
+  onFinish = () => { },
   saving = false,
-  onCancel = () => {},
+  onCancel = () => { },
   pdfSelection = null,
   templateHtml = '',
   loadingTemplate = false,
@@ -1205,14 +985,39 @@ function AgreementComposer({
               <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Live Agreement</p>
               <p className="text-sm text-gray-600">Styled as final document preview. Updates instantly as you edit.</p>
             </div>
-            <span className="text-xs px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-100 font-semibold">
-              {selectedClauseIds.length} clause{selectedClauseIds.length !== 1 ? 's' : ''}
-            </span>
+
+            <div className="flex items-center gap-3">
+              {/* Theme Selector Row (Step 6.2) */}
+              {canSelectPdfTheme && (
+                <div className="flex items-center gap-1.5 px-3 py-1 bg-gray-50 border border-gray-200 rounded-full mr-2">
+                  <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mr-1">Theme:</span>
+                  {VISUAL_THEMES.filter(t => t.id !== 'blank').slice(0, 8).map(t => (
+                    <button
+                      key={t.id}
+                      type="button"
+                      onClick={() => {
+                        onOpenTemplate(); // Reuse picker logic or directly set theme
+                        // For now, since we have templateTheme state in parent, 
+                        // we might need a direct callback. But if we want it 
+                        // simple, we just show they can click the template button.
+                      }}
+                      title={t.name}
+                      className={`w-4 h-4 rounded-full border transition-all ${((templateTheme?.id || templateTheme) === t.id) ? 'ring-2 ring-blue-500 scale-110' : 'border-gray-300 hover:scale-110'}`}
+                      style={{ background: t.preview?.primarySwatch || t.colors?.primary }}
+                    />
+                  ))}
+                </div>
+              )}
+              
+              <span className="text-xs px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-100 font-semibold">
+                {selectedClauseIds.length} clause{selectedClauseIds.length !== 1 ? 's' : ''}
+              </span>
+            </div>
           </div>
 
           <div className="rounded-xl border border-[#d9ddd9] bg-[#f3f5f4] p-4 sm:p-6 shadow-sm min-h-[1000px]">
             <div className="mx-auto w-full bg-white border border-[#d7d7d7] shadow-[0_18px_38px_rgba(15,23,42,0.12)]">
-              
+
               {loadingTemplate ? (
                 <div className="flex flex-col items-center justify-center py-20 gap-3 text-gray-400">
                   <Loader2 className="animate-spin w-8 h-8" />
@@ -1220,7 +1025,7 @@ function AgreementComposer({
                 </div>
               ) : templateHtml ? (
                 /* ── Template-Driven Layout ── */
-                <TemplateDocument 
+                <TemplateDocument
                   templateHtml={templateHtml}
                   offerData={offerData}
                   formData={formData}
@@ -1244,78 +1049,78 @@ function AgreementComposer({
                 /* ── Legacy / Fallback Layout ── */
                 <div className="px-8 sm:px-12 py-10 sm:py-12">
                   <div className="space-y-10">
-                  <div className="text-center border-b border-gray-200 pb-8">
-                    <p className="text-[11px] tracking-[0.25em] text-gray-400 uppercase font-bold">Residential Lease Contract</p>
-                    <h3 className="mt-4 text-3xl font-black text-gray-900 tracking-tight">Rental Agreement</h3>
-                    <p className="mt-2 text-sm text-gray-500 font-medium">Draft Version · Final Review Pending</p>
-                  </div>
+                    <div className="text-center border-b border-gray-200 pb-8">
+                      <p className="text-[11px] tracking-[0.25em] text-gray-400 uppercase font-bold">Residential Lease Contract</p>
+                      <h3 className="mt-4 text-3xl font-black text-gray-900 tracking-tight">Rental Agreement</h3>
+                      <p className="mt-2 text-sm text-gray-500 font-medium">Draft Version · Final Review Pending</p>
+                    </div>
 
-                  <div className="space-y-6">
-                    <div className="rounded-xl bg-gray-50/50 border border-gray-100 p-6">
-                      <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest mb-4">I. Parties and Property</p>
-                      <div className="space-y-2">
-                        <p className="text-sm text-gray-800">This agreement is made between <strong>{offerData?.landlord?.name || offerData?.property?.landlord?.name || 'Landlord'}</strong> and <strong>{offerData?.tenant?.name || 'Tenant'}</strong>.</p>
-                        <p className="text-sm text-gray-800">The premises are located at: <strong>{offerData?.property?.title || 'Property'}{offerData?.property?.address?.street ? `, ${offerData.property.address.street}, ${offerData.property.address.city}` : ''}</strong>.</p>
+                    <div className="space-y-6">
+                      <div className="rounded-xl bg-gray-50/50 border border-gray-100 p-6">
+                        <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest mb-4">I. Parties and Property</p>
+                        <div className="space-y-2">
+                          <p className="text-sm text-gray-800">This agreement is made between <strong>{offerData?.landlord?.name || offerData?.property?.landlord?.name || 'Landlord'}</strong> and <strong>{offerData?.tenant?.name || 'Tenant'}</strong>.</p>
+                          <p className="text-sm text-gray-800">The premises are located at: <strong>{offerData?.property?.title || 'Property'}{offerData?.property?.address?.street ? `, ${offerData.property.address.street}, ${offerData.property.address.city}` : ''}</strong>.</p>
+                        </div>
+                      </div>
+
+                      <div className="rounded-xl bg-gray-50/50 border border-gray-100 p-6">
+                        <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest mb-4">II. Core Lease Terms</p>
+                        <div className="grid grid-cols-2 gap-y-4 gap-x-8">
+                          <div>
+                            <p className="text-[10px] text-gray-400 font-bold uppercase">Start Date</p>
+                            <p className="text-sm text-gray-800 font-bold">{formData?.startDate || '—'}</p>
+                          </div>
+                          <div>
+                            <p className="text-[10px] text-gray-400 font-bold uppercase">End Date</p>
+                            <p className="text-sm text-gray-800 font-bold">{formData?.endDate || '—'}</p>
+                          </div>
+                          <div>
+                            <p className="text-[10px] text-gray-400 font-bold uppercase">Monthly Rent</p>
+                            <p className="text-sm text-gray-800 font-bold">{formatMoney(Number(formData?.rentAmount || 0))}</p>
+                          </div>
+                          <div>
+                            <p className="text-[10px] text-gray-400 font-bold uppercase">Security Deposit</p>
+                            <p className="text-sm text-gray-800 font-bold">{formatMoney(Number(formData?.depositAmount || 0))}</p>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="rounded-xl bg-gray-50/50 border border-gray-100 p-6">
+                        <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest mb-4">III. Standard Policies</p>
+                        <div className="grid grid-cols-2 gap-y-4 gap-x-8">
+                          <div>
+                            <p className="text-[10px] text-gray-400 font-bold uppercase">Pets</p>
+                            <p className="text-sm text-gray-800 font-bold">{formData?.petAllowed ? `Allowed (${formatMoney(Number(formData?.petDeposit || 0))} dep)` : 'Strictly Prohibited'}</p>
+                          </div>
+                          <div>
+                            <p className="text-[10px] text-gray-400 font-bold uppercase">Utilities</p>
+                            <p className="text-sm text-gray-800 font-bold">{formData?.utilitiesIncluded ? 'Landlord Paid' : 'Tenant Paid'}</p>
+                          </div>
+                        </div>
+                        <div className="mt-4 pt-4 border-t border-gray-100">
+                          <p className="text-[10px] text-gray-400 font-bold uppercase">Termination Policy</p>
+                          <p className="text-sm text-gray-800 mt-1 leading-relaxed">{formData?.terminationPolicy || 'Standard 30-day notice applies.'}</p>
+                        </div>
                       </div>
                     </div>
 
-                    <div className="rounded-xl bg-gray-50/50 border border-gray-100 p-6">
-                      <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest mb-4">II. Core Lease Terms</p>
-                      <div className="grid grid-cols-2 gap-y-4 gap-x-8">
-                        <div>
-                          <p className="text-[10px] text-gray-400 font-bold uppercase">Start Date</p>
-                          <p className="text-sm text-gray-800 font-bold">{formData?.startDate || '—'}</p>
-                        </div>
-                        <div>
-                          <p className="text-[10px] text-gray-400 font-bold uppercase">End Date</p>
-                          <p className="text-sm text-gray-800 font-bold">{formData?.endDate || '—'}</p>
-                        </div>
-                        <div>
-                          <p className="text-[10px] text-gray-400 font-bold uppercase">Monthly Rent</p>
-                          <p className="text-sm text-gray-800 font-bold">{formatMoney(Number(formData?.rentAmount || 0))}</p>
-                        </div>
-                        <div>
-                          <p className="text-[10px] text-gray-400 font-bold uppercase">Security Deposit</p>
-                          <p className="text-sm text-gray-800 font-bold">{formatMoney(Number(formData?.depositAmount || 0))}</p>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="rounded-xl bg-gray-50/50 border border-gray-100 p-6">
-                      <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest mb-4">III. Standard Policies</p>
-                      <div className="grid grid-cols-2 gap-y-4 gap-x-8">
-                        <div>
-                          <p className="text-[10px] text-gray-400 font-bold uppercase">Pets</p>
-                          <p className="text-sm text-gray-800 font-bold">{formData?.petAllowed ? `Allowed (${formatMoney(Number(formData?.petDeposit || 0))} dep)` : 'Strictly Prohibited'}</p>
-                        </div>
-                        <div>
-                          <p className="text-[10px] text-gray-400 font-bold uppercase">Utilities</p>
-                          <p className="text-sm text-gray-800 font-bold">{formData?.utilitiesIncluded ? 'Landlord Paid' : 'Tenant Paid'}</p>
-                        </div>
-                      </div>
-                      <div className="mt-4 pt-4 border-t border-gray-100">
-                        <p className="text-[10px] text-gray-400 font-bold uppercase">Termination Policy</p>
-                        <p className="text-sm text-gray-800 mt-1 leading-relaxed">{formData?.terminationPolicy || 'Standard 30-day notice applies.'}</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <ClauseBucketsSection 
-                    clauseBuckets={clauseBuckets}
-                    clausesById={clausesById}
-                    hoveredBucketKey={hoveredBucketKey}
-                    setHoveredBucketKey={setHoveredBucketKey}
-                    handleDropToBucket={handleDropToBucket}
-                    handleDragStart={handleDragStart}
-                    moveBucketClause={moveBucketClause}
-                    handleRemoveClause={handleRemoveClause}
-                    addClauseBucket={addClauseBucket}
-                    isClauseLimitFinite={isClauseLimitFinite}
-                    clauseLimit={clauseLimit}
-                    offerData={offerData}
-                    formData={formData}
-                    formatMoney={formatMoney}
-                  />
+                    <ClauseBucketsSection
+                      clauseBuckets={clauseBuckets}
+                      clausesById={clausesById}
+                      hoveredBucketKey={hoveredBucketKey}
+                      setHoveredBucketKey={setHoveredBucketKey}
+                      handleDropToBucket={handleDropToBucket}
+                      handleDragStart={handleDragStart}
+                      moveBucketClause={moveBucketClause}
+                      handleRemoveClause={handleRemoveClause}
+                      addClauseBucket={addClauseBucket}
+                      isClauseLimitFinite={isClauseLimitFinite}
+                      clauseLimit={clauseLimit}
+                      offerData={offerData}
+                      formData={formData}
+                      formatMoney={formatMoney}
+                    />
                   </div>
                 </div>
               )}
@@ -1326,316 +1131,316 @@ function AgreementComposer({
 
 
       {showEditor && (
-      <div
-        ref={panelRef}
-        className={isMobile ? `fixed z-[70] left-2 right-2 bottom-2 ${mobilePanelOpen ? 'max-h-[72vh]' : 'max-h-[170px]'}` : 'fixed z-[70] w-[330px] max-w-[calc(100%-1rem)]'}
-        style={isMobile ? undefined : { left: panelPosition.x, top: panelPosition.y }}
-      >
-        <div className="bg-white/95 backdrop-blur border border-gray-200 rounded-2xl shadow-xl overflow-hidden h-full">
-          <div onMouseDown={handlePanelMouseDown} className="px-4 py-3 border-b bg-gray-50 cursor-move select-none flex items-center justify-between">
-            <div>
-              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Editor</p>
-              <p className="text-sm font-semibold text-gray-800">Clause Library</p>
-            </div>
-            <div className="flex items-center gap-2">
-              {isMobile && (
-                <button
-                  type="button"
-                  onClick={() => setMobilePanelOpen((v) => !v)}
-                  className="text-gray-500 hover:text-gray-700"
-                >
-                  {mobilePanelOpen ? <ChevronDown className="w-4 h-4" /> : <ChevronUp className="w-4 h-4" />}
-                </button>
-              )}
-              {!isMobile && <GripVertical className="w-4 h-4 text-gray-400" />}
-            </div>
-          </div>
-
-          <div className="px-3 py-2 border-b bg-white">
-            <div className="grid grid-cols-3 gap-1 bg-gray-100 p-1 rounded-lg">
-              {[
-                { key: 'terms', label: 'Terms', locked: false },
-                { key: 'library', label: 'Library', locked: !canUseClauses },
-                { key: 'selected', label: 'Selected', locked: !canUseClauses },
-              ].map(tab => (
-                <button
-                  key={tab.key}
-                  type="button"
-                  onClick={() => { if (!tab.locked) setEditorTab(tab.key); }}
-                  className={`text-[11px] py-1.5 rounded-md font-semibold transition ${editorTab === tab.key ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'} ${tab.locked ? 'opacity-50 cursor-not-allowed' : ''}`}
-                >
-                  {tab.label}
-                </button>
-              ))}
-            </div>
-
-            <div className="mt-2 rounded-lg border border-green-200 bg-green-50 px-2.5 py-2 text-[11px] text-green-800">
-              <p className="font-semibold">Offer: {offerData?.tenant?.name || 'Tenant'} · {formatMoney(Number(formData?.rentAmount || 0))}/mo</p>
-              <p className="text-green-700">{offerData?.property?.title || 'Property'} · {leaseDurationMonths || '—'} months</p>
-            </div>
-          </div>
-
-          {(!isMobile || mobilePanelOpen) && (
-          <>
-          <div className={`p-3 space-y-3 overflow-y-auto ${isMobile ? 'max-h-[38vh]' : 'max-h-[62vh]'}`}>
-            {editorTab === 'terms' && (
-              <div className="space-y-3">
-                <div className="grid grid-cols-2 gap-2">
-                  <div>
-                    <label className="block text-[11px] font-semibold text-gray-600 mb-1">Start Date</label>
-                    <input
-                      type="date"
-                      value={formData.startDate}
-                      onChange={(e) => { setField('startDate', e.target.value); clearFieldError('startDate'); }}
-                      className={`w-full rounded-md border px-2 py-1.5 text-xs ${formErrors.startDate ? 'border-red-400 bg-red-50' : 'border-gray-300'}`}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[11px] font-semibold text-gray-600 mb-1">End Date</label>
-                    <input
-                      type="date"
-                      value={formData.endDate}
-                      onChange={(e) => { setField('endDate', e.target.value); clearFieldError('endDate'); }}
-                      className={`w-full rounded-md border px-2 py-1.5 text-xs ${formErrors.endDate ? 'border-red-400 bg-red-50' : 'border-gray-300'}`}
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-2">
-                  <div>
-                    <label className="block text-[11px] font-semibold text-gray-600 mb-1">Rent</label>
-                    <input value={formData.rentAmount} disabled className="w-full rounded-md border border-gray-300 px-2 py-1.5 text-xs bg-gray-50 text-gray-500" />
-                  </div>
-                  <div>
-                    <label className="block text-[11px] font-semibold text-gray-600 mb-1">Deposit</label>
-                    <input value={formData.depositAmount} disabled className="w-full rounded-md border border-gray-300 px-2 py-1.5 text-xs bg-gray-50 text-gray-500" />
-                  </div>
-                </div>
-
-                <div className="rounded-lg border border-gray-200 p-2.5 space-y-2">
-                  <Toggle
-                    enabled={formData.rentEscalationEnabled}
-                    onChange={(v) => setField('rentEscalationEnabled', v)}
-                    label="Annual Escalation"
-                    description="Increase each anniversary"
-                  />
-                  {formData.rentEscalationEnabled && (
-                    <input
-                      type="number"
-                      min="1"
-                      max="50"
-                      value={formData.rentEscalationPercentage}
-                      onChange={(e) => setField('rentEscalationPercentage', e.target.value)}
-                      className="w-full rounded-md border border-gray-300 px-2 py-1.5 text-xs"
-                      placeholder="Escalation %"
-                    />
-                  )}
-                  <Toggle
-                    enabled={formData.petAllowed}
-                    onChange={(v) => setField('petAllowed', v)}
-                    label="Pets Allowed"
-                  />
-                  {formData.petAllowed && (
-                    <input
-                      type="number"
-                      min="0"
-                      value={formData.petDeposit}
-                      onChange={(e) => setField('petDeposit', e.target.value)}
-                      className="w-full rounded-md border border-gray-300 px-2 py-1.5 text-xs"
-                      placeholder="Pet deposit"
-                    />
-                  )}
-                  <Toggle
-                    enabled={formData.utilitiesIncluded}
-                    onChange={(v) => setField('utilitiesIncluded', v)}
-                    label="Utilities Included"
-                  />
-                  {formData.utilitiesIncluded && (
-                    <input
-                      type="text"
-                      value={formData.utilitiesDetails}
-                      onChange={(e) => setField('utilitiesDetails', e.target.value)}
-                      className="w-full rounded-md border border-gray-300 px-2 py-1.5 text-xs"
-                      placeholder="Utilities details"
-                    />
-                  )}
-                  <textarea
-                    rows={2}
-                    value={formData.terminationPolicy}
-                    onChange={(e) => setField('terminationPolicy', e.target.value)}
-                    className="w-full rounded-md border border-gray-300 px-2 py-1.5 text-xs resize-none"
-                    placeholder="Termination policy"
-                  />
-                </div>
+        <div
+          ref={panelRef}
+          className={isMobile ? `fixed z-[70] left-2 right-2 bottom-2 ${mobilePanelOpen ? 'max-h-[72vh]' : 'max-h-[170px]'}` : 'fixed z-[70] w-[330px] max-w-[calc(100%-1rem)]'}
+          style={isMobile ? undefined : { left: panelPosition.x, top: panelPosition.y }}
+        >
+          <div className="bg-white/95 backdrop-blur border border-gray-200 rounded-2xl shadow-xl overflow-hidden h-full">
+            <div onMouseDown={handlePanelMouseDown} className="px-4 py-3 border-b bg-gray-50 cursor-move select-none flex items-center justify-between">
+              <div>
+                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Editor</p>
+                <p className="text-sm font-semibold text-gray-800">Clause Library</p>
               </div>
-            )}
+              <div className="flex items-center gap-2">
+                {isMobile && (
+                  <button
+                    type="button"
+                    onClick={() => setMobilePanelOpen((v) => !v)}
+                    className="text-gray-500 hover:text-gray-700"
+                  >
+                    {mobilePanelOpen ? <ChevronDown className="w-4 h-4" /> : <ChevronUp className="w-4 h-4" />}
+                  </button>
+                )}
+                {!isMobile && <GripVertical className="w-4 h-4 text-gray-400" />}
+              </div>
+            </div>
 
-            {editorTab === 'library' && (
+            <div className="px-3 py-2 border-b bg-white">
+              <div className="grid grid-cols-3 gap-1 bg-gray-100 p-1 rounded-lg">
+                {[
+                  { key: 'terms', label: 'Terms', locked: false },
+                  { key: 'library', label: 'Library', locked: !canUseClauses },
+                  { key: 'selected', label: 'Selected', locked: !canUseClauses },
+                ].map(tab => (
+                  <button
+                    key={tab.key}
+                    type="button"
+                    onClick={() => { if (!tab.locked) setEditorTab(tab.key); }}
+                    className={`text-[11px] py-1.5 rounded-md font-semibold transition ${editorTab === tab.key ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'} ${tab.locked ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
+
+              <div className="mt-2 rounded-lg border border-green-200 bg-green-50 px-2.5 py-2 text-[11px] text-green-800">
+                <p className="font-semibold">Offer: {offerData?.tenant?.name || 'Tenant'} · {formatMoney(Number(formData?.rentAmount || 0))}/mo</p>
+                <p className="text-green-700">{offerData?.property?.title || 'Property'} · {leaseDurationMonths || '—'} months</p>
+              </div>
+            </div>
+
+            {(!isMobile || mobilePanelOpen) && (
               <>
-                <div className="space-y-2">
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
-                    <input
-                      type="text"
-                      placeholder="Search title or content..."
-                      value={search}
-                      onChange={e => setSearch(e.target.value)}
-                      className="w-full pl-8 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[11px] font-semibold text-gray-600 mb-1">Jurisdiction</label>
-                    <select
-                      value={jurisdictionFilter}
-                      onChange={(e) => setJurisdictionFilter(e.target.value)}
-                      className="w-full px-2.5 py-2 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-                    >
-                      <option value="">All jurisdictions</option>
-                      {jurisdictions.map((jurisdiction) => (
-                        <option key={jurisdiction} value={jurisdiction}>{jurisdiction}</option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="flex gap-1.5 flex-wrap">
-                    <button type="button" onClick={() => setCategoryFilter('')}
-                      className={`text-[11px] px-2.5 py-1 rounded-full border ${!categoryFilter ? 'bg-blue-600 text-white border-blue-600' : 'border-gray-300 text-gray-600 hover:bg-gray-50'}`}>
-                      All
-                    </button>
-                    {categories.map(cat => (
-                      <button key={cat} type="button" onClick={() => setCategoryFilter(cat)}
-                        className={`text-[11px] px-2.5 py-1 rounded-full border capitalize ${categoryFilter === cat ? 'bg-blue-600 text-white border-blue-600' : 'border-gray-300 text-gray-600 hover:bg-gray-50'}`}>
-                        {cat.replace(/_/g, ' ')}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  {loading && (
-                    <div className="flex items-center justify-center gap-2 text-xs text-gray-400 py-6">
-                      <Loader2 className="animate-spin w-3.5 h-3.5" /> Loading clauses...
-                    </div>
-                  )}
-                  {!loading && clauses.length === 0 && (
-                    <p className="text-xs text-gray-400 py-3 text-center italic">
-                      No approved clauses available yet. Ask admin to approve clauses.
-                    </p>
-                  )}
-                  {!loading && clauses.length > 0 && availableClauses.length === 0 && (
-                    <p className="text-sm text-gray-400 py-3 text-center italic">No matching clauses found.</p>
-                  )}
-                  {!loading && availableClauses.map((clause) => (
-                    <div
-                      key={clause._id}
-                      draggable
-                      onDragStart={() => handleDragStart(clause._id, 'library')}
-                      className="border rounded-lg border-gray-200 hover:border-blue-300 transition bg-white p-2.5 cursor-grab active:cursor-grabbing"
-                    >
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="min-w-0">
-                          <p className="font-medium text-xs text-gray-900 truncate">{clause.title}</p>
-                          <div className="mt-1 flex flex-wrap gap-1">
-                            <span className="text-[10px] px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full capitalize">
-                              {clause.category?.replace(/_/g, ' ')}
-                            </span>
-                            {getClauseJurisdiction(clause) && (
-                              <span className="text-[10px] px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full">
-                                {getClauseJurisdiction(clause)}
-                              </span>
-                            )}
-                            {clause.isDefault && (
-                              <span className="text-[10px] px-2 py-0.5 bg-green-100 text-green-700 rounded-full">Recommended</span>
-                            )}
-                          </div>
+                <div className={`p-3 space-y-3 overflow-y-auto ${isMobile ? 'max-h-[38vh]' : 'max-h-[62vh]'}`}>
+                  {editorTab === 'terms' && (
+                    <div className="space-y-3">
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <label className="block text-[11px] font-semibold text-gray-600 mb-1">Start Date</label>
+                          <input
+                            type="date"
+                            value={formData.startDate}
+                            onChange={(e) => { setField('startDate', e.target.value); clearFieldError('startDate'); }}
+                            className={`w-full rounded-md border px-2 py-1.5 text-xs ${formErrors.startDate ? 'border-red-400 bg-red-50' : 'border-gray-300'}`}
+                          />
                         </div>
-                        <GripVertical className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                        <div>
+                          <label className="block text-[11px] font-semibold text-gray-600 mb-1">End Date</label>
+                          <input
+                            type="date"
+                            value={formData.endDate}
+                            onChange={(e) => { setField('endDate', e.target.value); clearFieldError('endDate'); }}
+                            className={`w-full rounded-md border px-2 py-1.5 text-xs ${formErrors.endDate ? 'border-red-400 bg-red-50' : 'border-gray-300'}`}
+                          />
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <label className="block text-[11px] font-semibold text-gray-600 mb-1">Rent</label>
+                          <input value={formData.rentAmount} disabled className="w-full rounded-md border border-gray-300 px-2 py-1.5 text-xs bg-gray-50 text-gray-500" />
+                        </div>
+                        <div>
+                          <label className="block text-[11px] font-semibold text-gray-600 mb-1">Deposit</label>
+                          <input value={formData.depositAmount} disabled className="w-full rounded-md border border-gray-300 px-2 py-1.5 text-xs bg-gray-50 text-gray-500" />
+                        </div>
+                      </div>
+
+                      <div className="rounded-lg border border-gray-200 p-2.5 space-y-2">
+                        <Toggle
+                          enabled={formData.rentEscalationEnabled}
+                          onChange={(v) => setField('rentEscalationEnabled', v)}
+                          label="Annual Escalation"
+                          description="Increase each anniversary"
+                        />
+                        {formData.rentEscalationEnabled && (
+                          <input
+                            type="number"
+                            min="1"
+                            max="50"
+                            value={formData.rentEscalationPercentage}
+                            onChange={(e) => setField('rentEscalationPercentage', e.target.value)}
+                            className="w-full rounded-md border border-gray-300 px-2 py-1.5 text-xs"
+                            placeholder="Escalation %"
+                          />
+                        )}
+                        <Toggle
+                          enabled={formData.petAllowed}
+                          onChange={(v) => setField('petAllowed', v)}
+                          label="Pets Allowed"
+                        />
+                        {formData.petAllowed && (
+                          <input
+                            type="number"
+                            min="0"
+                            value={formData.petDeposit}
+                            onChange={(e) => setField('petDeposit', e.target.value)}
+                            className="w-full rounded-md border border-gray-300 px-2 py-1.5 text-xs"
+                            placeholder="Pet deposit"
+                          />
+                        )}
+                        <Toggle
+                          enabled={formData.utilitiesIncluded}
+                          onChange={(v) => setField('utilitiesIncluded', v)}
+                          label="Utilities Included"
+                        />
+                        {formData.utilitiesIncluded && (
+                          <input
+                            type="text"
+                            value={formData.utilitiesDetails}
+                            onChange={(e) => setField('utilitiesDetails', e.target.value)}
+                            className="w-full rounded-md border border-gray-300 px-2 py-1.5 text-xs"
+                            placeholder="Utilities details"
+                          />
+                        )}
+                        <textarea
+                          rows={2}
+                          value={formData.terminationPolicy}
+                          onChange={(e) => setField('terminationPolicy', e.target.value)}
+                          className="w-full rounded-md border border-gray-300 px-2 py-1.5 text-xs resize-none"
+                          placeholder="Termination policy"
+                        />
                       </div>
                     </div>
-                  ))}
-                </div>
-              </>
-            )}
-
-            {editorTab === 'selected' && (
-              <>
-                <p className="text-xs text-gray-500">Assigned clauses: <strong>{assignedClauses.length}</strong></p>
-                <div className="space-y-2">
-                  {assignedClauses.length === 0 && (
-                    <p className="text-xs text-gray-400 italic">No clauses assigned yet.</p>
                   )}
-                  {assignedClauses.map((clause) => (
-                    <div key={clause._id} className="border border-gray-200 rounded-lg p-2.5 bg-white">
-                      <div className="flex items-center justify-between gap-2">
-                        <p className="text-xs font-semibold text-gray-800 truncate">{clause.title}</p>
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveClause(clause._id)}
-                          className="text-[10px] px-2 py-0.5 rounded border border-red-200 text-red-600 hover:bg-red-50"
-                        >
-                          Remove
-                        </button>
+
+                  {editorTab === 'library' && (
+                    <>
+                      <div className="space-y-2">
+                        <div className="relative">
+                          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
+                          <input
+                            type="text"
+                            placeholder="Search title or content..."
+                            value={search}
+                            onChange={e => setSearch(e.target.value)}
+                            className="w-full pl-8 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-[11px] font-semibold text-gray-600 mb-1">Jurisdiction</label>
+                          <select
+                            value={jurisdictionFilter}
+                            onChange={(e) => setJurisdictionFilter(e.target.value)}
+                            className="w-full px-2.5 py-2 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                          >
+                            <option value="">All jurisdictions</option>
+                            {jurisdictions.map((jurisdiction) => (
+                              <option key={jurisdiction} value={jurisdiction}>{jurisdiction}</option>
+                            ))}
+                          </select>
+                        </div>
+                        <div className="flex gap-1.5 flex-wrap">
+                          <button type="button" onClick={() => setCategoryFilter('')}
+                            className={`text-[11px] px-2.5 py-1 rounded-full border ${!categoryFilter ? 'bg-blue-600 text-white border-blue-600' : 'border-gray-300 text-gray-600 hover:bg-gray-50'}`}>
+                            All
+                          </button>
+                          {categories.map(cat => (
+                            <button key={cat} type="button" onClick={() => setCategoryFilter(cat)}
+                              className={`text-[11px] px-2.5 py-1 rounded-full border capitalize ${categoryFilter === cat ? 'bg-blue-600 text-white border-blue-600' : 'border-gray-300 text-gray-600 hover:bg-gray-50'}`}>
+                              {cat.replace(/_/g, ' ')}
+                            </button>
+                          ))}
+                        </div>
                       </div>
+
+                      <div className="space-y-2">
+                        {loading && (
+                          <div className="flex items-center justify-center gap-2 text-xs text-gray-400 py-6">
+                            <Loader2 className="animate-spin w-3.5 h-3.5" /> Loading clauses...
+                          </div>
+                        )}
+                        {!loading && clauses.length === 0 && (
+                          <p className="text-xs text-gray-400 py-3 text-center italic">
+                            No approved clauses available yet. Ask admin to approve clauses.
+                          </p>
+                        )}
+                        {!loading && clauses.length > 0 && availableClauses.length === 0 && (
+                          <p className="text-sm text-gray-400 py-3 text-center italic">No matching clauses found.</p>
+                        )}
+                        {!loading && availableClauses.map((clause) => (
+                          <div
+                            key={clause._id}
+                            draggable
+                            onDragStart={() => handleDragStart(clause._id, 'library')}
+                            className="border rounded-lg border-gray-200 hover:border-blue-300 transition bg-white p-2.5 cursor-grab active:cursor-grabbing"
+                          >
+                            <div className="flex items-start justify-between gap-2">
+                              <div className="min-w-0">
+                                <p className="font-medium text-xs text-gray-900 truncate">{clause.title}</p>
+                                <div className="mt-1 flex flex-wrap gap-1">
+                                  <span className="text-[10px] px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full capitalize">
+                                    {clause.category?.replace(/_/g, ' ')}
+                                  </span>
+                                  {getClauseJurisdiction(clause) && (
+                                    <span className="text-[10px] px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full">
+                                      {getClauseJurisdiction(clause)}
+                                    </span>
+                                  )}
+                                  {clause.isDefault && (
+                                    <span className="text-[10px] px-2 py-0.5 bg-green-100 text-green-700 rounded-full">Recommended</span>
+                                  )}
+                                </div>
+                              </div>
+                              <GripVertical className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </>
+                  )}
+
+                  {editorTab === 'selected' && (
+                    <>
+                      <p className="text-xs text-gray-500">Assigned clauses: <strong>{assignedClauses.length}</strong></p>
+                      <div className="space-y-2">
+                        {assignedClauses.length === 0 && (
+                          <p className="text-xs text-gray-400 italic">No clauses assigned yet.</p>
+                        )}
+                        {assignedClauses.map((clause) => (
+                          <div key={clause._id} className="border border-gray-200 rounded-lg p-2.5 bg-white">
+                            <div className="flex items-center justify-between gap-2">
+                              <p className="text-xs font-semibold text-gray-800 truncate">{clause.title}</p>
+                              <button
+                                type="button"
+                                onClick={() => handleRemoveClause(clause._id)}
+                                className="text-[10px] px-2 py-0.5 rounded border border-red-200 text-red-600 hover:bg-red-50"
+                              >
+                                Remove
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </>
+                  )}
+
+                  {!canUseClauses && (
+                    <div className="rounded-lg border border-blue-200 bg-blue-50 p-2.5 text-[11px] text-blue-700">
+                      Clause drag-and-drop is available on Pro/Enterprise plans.
                     </div>
-                  ))}
+                  )}
+
+                  {isClauseLimitFinite && (
+                    <div className="rounded-lg border border-amber-200 bg-amber-50 p-2.5 text-[11px] text-amber-800">
+                      Free plan limit: up to {clauseLimit} clauses per agreement. Upgrade to Pro for unlimited clauses.
+                    </div>
+                  )}
+
+                  {pdfSelection && (
+                    <div className="rounded-lg border border-green-200 bg-green-50 p-2.5 text-[11px] text-green-700 flex items-center justify-between gap-2">
+                      <span>PDF {pdfSelection.type === 'template' ? 'template' : 'theme'}: <strong>{pdfSelection.name}</strong></span>
+                    </div>
+                  )}
                 </div>
               </>
             )}
 
-            {!canUseClauses && (
-              <div className="rounded-lg border border-blue-200 bg-blue-50 p-2.5 text-[11px] text-blue-700">
-                Clause drag-and-drop is available on Pro/Enterprise plans.
-              </div>
-            )}
-
-            {isClauseLimitFinite && (
-              <div className="rounded-lg border border-amber-200 bg-amber-50 p-2.5 text-[11px] text-amber-800">
-                Free plan limit: up to {clauseLimit} clauses per agreement. Upgrade to Pro for unlimited clauses.
-              </div>
-            )}
-
-            {pdfSelection && (
-              <div className="rounded-lg border border-green-200 bg-green-50 p-2.5 text-[11px] text-green-700 flex items-center justify-between gap-2">
-                <span>PDF {pdfSelection.type === 'template' ? 'template' : 'theme'}: <strong>{pdfSelection.name}</strong></span>
+            {(!isMobile || mobilePanelOpen) && (
+              <div className="px-3 py-2.5 border-t bg-gray-50 flex items-center gap-2">
+                {canUseAgreementTemplates ? (
+                  <button
+                    type="button"
+                    onClick={onOpenTemplate}
+                    className="px-2.5 py-1.5 text-[11px] font-semibold text-blue-700 border border-blue-200 bg-blue-50 rounded-lg hover:bg-blue-100 transition"
+                  >
+                    {pdfSelection?.type === 'template' ? `Template: ${pdfSelection.name}` : 'Select My Template'}
+                  </button>
+                ) : (
+                  <span className="px-2.5 py-1.5 text-[11px] font-semibold text-gray-400 border border-gray-200 bg-gray-50 rounded-lg cursor-not-allowed">
+                    Using Admin Default Template
+                  </span>
+                )}
+                <button
+                  type="button"
+                  onClick={onCancel}
+                  className="px-2.5 py-1.5 text-[11px] font-semibold text-gray-600 border border-gray-300 bg-white rounded-lg hover:bg-gray-100"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={onFinish}
+                  disabled={saving}
+                  className="ml-auto px-3 py-1.5 text-[11px] font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-60"
+                >
+                  {saving ? 'Saving...' : 'Finish Draft'}
+                </button>
               </div>
             )}
           </div>
-          </>
-          )}
-
-          {(!isMobile || mobilePanelOpen) && (
-          <div className="px-3 py-2.5 border-t bg-gray-50 flex items-center gap-2">
-            {canUseAgreementTemplates ? (
-              <button
-                type="button"
-                onClick={onOpenTemplate}
-                className="px-2.5 py-1.5 text-[11px] font-semibold text-blue-700 border border-blue-200 bg-blue-50 rounded-lg hover:bg-blue-100 transition"
-              >
-                {pdfSelection?.type === 'template' ? `Template: ${pdfSelection.name}` : 'Select My Template'}
-              </button>
-            ) : (
-              <span className="px-2.5 py-1.5 text-[11px] font-semibold text-gray-400 border border-gray-200 bg-gray-50 rounded-lg cursor-not-allowed">
-                Using Admin Default Template
-              </span>
-            )}
-            <button
-              type="button"
-              onClick={onCancel}
-              className="px-2.5 py-1.5 text-[11px] font-semibold text-gray-600 border border-gray-300 bg-white rounded-lg hover:bg-gray-100"
-            >
-              Cancel
-            </button>
-            <button
-              type="button"
-              onClick={onFinish}
-              disabled={saving}
-              className="ml-auto px-3 py-1.5 text-[11px] font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-60"
-            >
-              {saving ? 'Saving...' : 'Finish Draft'}
-            </button>
-          </div>
-          )}
         </div>
-      </div>
       )}
     </div>
   );
@@ -1742,7 +1547,7 @@ function AgreementForm() {
           }
         }
       })
-      .catch(() => {});
+      .catch(() => { });
   }, []);
 
   // When user picks an enterprise custom template or a global PDF theme, load its data
@@ -1913,36 +1718,36 @@ function AgreementForm() {
         <>
           <div className="mb-8">
             <LocalErrorBoundary>
-            <AgreementComposer
-              selectedClauseIds={selectedClauseIds}
-              onReorder={handleReorderClauses}
-              offerData={offerData}
-              formData={formData}
-              showEditor={true}
-              canUseClauses={canUseClauses}
-              clauseLimit={clauseLimit}
-              onClauseLimitReached={handleClauseLimitReached}
-              canUseAgreementTemplates={canUseAgreementTemplates}
-              canSelectPdfTheme={canSelectPdfTheme}
-              formErrors={formErrors}
-              setField={set}
-              clearFieldError={(key) => setFormErrors((prev) => ({ ...prev, [key]: null }))}
-              onOpenTemplate={() => {
-                if (!canUseAgreementTemplates && !canSelectPdfTheme) {
-                  toast('Pro and Free tiers use the admin global default PDF theme.', 'error');
-                  return;
-                }
-                setShowTemplatePicker(true);
-              }}
-              onFinish={handleSaveClauses}
-              saving={savingClauses}
-              onCancel={() => router.push('/dashboard/agreements')}
-              pdfSelection={pdfSelection}
-              templateHtml={templateHtml}
-              loadingTemplate={loadingTemplate}
-              templateTheme={templateTheme}
-              templateCustomizations={templateCustomizations}
-            />
+              <AgreementComposer
+                selectedClauseIds={selectedClauseIds}
+                onReorder={handleReorderClauses}
+                offerData={offerData}
+                formData={formData}
+                showEditor={true}
+                canUseClauses={canUseClauses}
+                clauseLimit={clauseLimit}
+                onClauseLimitReached={handleClauseLimitReached}
+                canUseAgreementTemplates={canUseAgreementTemplates}
+                canSelectPdfTheme={canSelectPdfTheme}
+                formErrors={formErrors}
+                setField={set}
+                clearFieldError={(key) => setFormErrors((prev) => ({ ...prev, [key]: null }))}
+                onOpenTemplate={() => {
+                  if (!canUseAgreementTemplates && !canSelectPdfTheme) {
+                    toast('Pro and Free tiers use the admin global default PDF theme.', 'error');
+                    return;
+                  }
+                  setShowTemplatePicker(true);
+                }}
+                onFinish={handleSaveClauses}
+                saving={savingClauses}
+                onCancel={() => router.push('/dashboard/agreements')}
+                pdfSelection={pdfSelection}
+                templateHtml={templateHtml}
+                loadingTemplate={loadingTemplate}
+                templateTheme={templateTheme}
+                templateCustomizations={templateCustomizations}
+              />
             </LocalErrorBoundary>
           </div>
 

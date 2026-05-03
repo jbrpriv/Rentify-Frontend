@@ -15,6 +15,7 @@ import { CharacterCount } from '@tiptap/extension-character-count';
 import { toast } from 'react-hot-toast';
 import { STATIC_AGREEMENT_TEMPLATES } from './StaticTemplates';
 import { VISUAL_THEMES, getThemeById, themeToCssVars } from './VisualThemes';
+import { applyLayoutRoles } from './LayoutEngine';
 
 import { Variable } from './VariableExtension';
 import { FontSize } from './FontSizeExtension';
@@ -42,6 +43,7 @@ const AgreementBuilder = ({ initialContent = '', onSave, isSaving = false, templ
   const [autoSaveStatus, setAutoSaveStatus] = useState('idle'); // idle | saving | saved
   const autoSaveTimerRef = useRef(null);
   const lastSavedRef = useRef(null);
+  const editorWrapperRef = useRef(null);
 
   const extensions = React.useMemo(() => [
     StarterKit.configure({
@@ -124,6 +126,23 @@ const AgreementBuilder = ({ initialContent = '', onSave, isSaving = false, templ
       if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
     };
   }, [editor, templateType]);
+
+  // ── Layout Engine Hook ──
+  useEffect(() => {
+    if (!editor) return;
+
+    const handleLayoutUpdate = () => {
+      if (editorWrapperRef.current) {
+        applyLayoutRoles(editorWrapperRef.current, activeLayoutStyle);
+      }
+    };
+
+    editor.on('update', handleLayoutUpdate);
+    // Initial apply
+    handleLayoutUpdate();
+
+    return () => editor.off('update', handleLayoutUpdate);
+  }, [editor, activeLayoutStyle]);
 
   // ── Keyboard shortcuts ──
   useEffect(() => {
@@ -343,7 +362,7 @@ const AgreementBuilder = ({ initialContent = '', onSave, isSaving = false, templ
           ...themeVars,
         }}
       >
-        <div className="relative">
+        <div ref={editorWrapperRef} className="relative">
           <EditorContent editor={editor} />
         </div>
       </div>

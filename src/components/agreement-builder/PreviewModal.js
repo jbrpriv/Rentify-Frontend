@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import { X, ExternalLink, ShieldCheck, ScrollText } from 'lucide-react';
 import { getThemeById, themeToCssVars } from './VisualThemes';
+import { generateLayoutCss } from './generateLayoutCss';
 
 const extractFirstBlock = (html, regex) => {
   const match = html.match(regex);
@@ -146,34 +147,16 @@ const PreviewModal = ({ isOpen, onClose, html, activeTheme = 'blank', customWate
         <link rel="stylesheet" href={theme.fonts.googleFontUrl} />
       )}
       <style>{`
-        .agreement-preview-container h1, 
-        .agreement-preview-container h2, 
-        .agreement-preview-container h3 { 
-          font-weight: 900 !important; 
-          color: #0f172a !important;
+        ${generateLayoutCss(theme, themeVars)}
+        
+        .agreement-preview-container { 
+          transform: scale(0.85); 
+          transform-origin: top center;
+          margin-top: 20px;
         }
-        .agreement-preview-container h1 {
-          font-size: calc(2.25rem * var(--theme-heading-scale, 1)) !important;
-          margin-bottom: 1.5rem;
-        }
-        .agreement-preview-container h2 {
-          font-size: calc(1.5rem * var(--theme-heading-scale, 1)) !important;
-          margin-top: 1.5rem;
-          margin-bottom: 1rem;
-        }
-        .agreement-preview-container h3 {
-          font-size: 1.25rem !important;
-        }
-        .agreement-preview-container p { margin-bottom: 1em; color: ${themeVars['--theme-body-color']}; line-height: 1.7; }
-        .agreement-preview-container p:empty { min-height: 1.5em; }
-        .agreement-preview-container .document-image { 
-          max-width: 100%; 
-          height: auto; 
-          border-radius: 8px; 
-          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); 
-          margin-top: 1.5em;
-          margin-bottom: 1.5em;
-        }
+
+        .preview-variable { color: #0f172a; font-weight: 800; }
+        
         .dual-column-wrapper {
           display: grid;
           grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
@@ -201,60 +184,9 @@ const PreviewModal = ({ isOpen, onClose, html, activeTheme = 'blank', customWate
           overflow-wrap: break-word;
           max-width: 100%;
         }
-        
-        .agreement-table {
-          width: 100%;
-          margin: 1.5rem 0;
-          border-collapse: collapse;
-          table-layout: fixed;
-        }
-        .agreement-table th,
-        .agreement-table td {
-          min-width: 1em;
-          border: 1px solid #cbd5e1;
-          padding: 10px 14px;
-          vertical-align: top;
-        }
-        .agreement-table th {
-          font-weight: 800;
-          text-align: inherit;
-          background-color: #f8fafc;
-          color: #334155;
-        }
-        .agreement-table p {
-          margin: 0;
-        }
 
-        .layout-meta-strip { display: flex; justify-content: space-between; gap: 12px; border: 1px solid #d1d5db; border-radius: 10px; padding: 8px 12px; margin-bottom: 14px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: #334155; }
-        .layout-modern-hero-grid,
-        .layout-premium-hero,
-        .layout-contemporary-top { display: grid; gap: 14px; grid-template-columns: minmax(0,1.7fr) minmax(0,1fr); margin-bottom: 14px; }
-        .layout-modern-summary,
-        .layout-premium-summary,
-        .layout-classic-table,
-        .layout-legal-table,
-        .layout-contemporary-card,
-        .layout-editorial-feature,
-        .layout-ledger-block { border: 1px solid #d1d5db; border-radius: 12px; padding: 10px; background: rgba(255,255,255,0.85); }
-        .layout-modern-summary .agreement-table,
-        .layout-premium-summary .agreement-table,
-        .layout-classic-table .agreement-table,
-        .layout-legal-table .agreement-table,
-        .layout-contemporary-card .agreement-table,
-        .layout-editorial-feature .agreement-table,
-        .layout-ledger-block .agreement-table { margin: 0; }
-        .layout-editorial-header { border-left: 4px solid ${themeVars['--theme-primary'] || '#0f172a'}; padding-left: 12px; margin-bottom: 12px; }
-
-        @media (max-width: 900px) {
-          .layout-modern-hero-grid,
-          .layout-premium-hero,
-          .layout-contemporary-top { grid-template-columns: minmax(0,1fr); }
-        }
-        
-        /* Inline font-size styles should apply directly; no override here. */
         @media print {
           .preview-clauses-placeholder { border: none !important; background: transparent !important; }
-          .dual-column-wrapper::after { border-left-color: #000; }
         }
       `}</style>
       <div className="bg-white rounded-2xl w-full max-w-5xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
@@ -281,107 +213,37 @@ const PreviewModal = ({ isOpen, onClose, html, activeTheme = 'blank', customWate
                           --theme-font-scale: ${themeVars['--theme-font-scale'] || 1};
                           --theme-heading-scale: ${themeVars['--theme-heading-scale'] || 1};
                           --theme-aside-width: ${themeVars['--theme-aside-width'] || '360px'};
+                          --theme-heading-font: ${theme?.fonts?.heading || 'inherit'};
+                          --theme-body-font: ${theme?.fonts?.body || 'inherit'};
+                          --theme-heading-color: ${theme?.colors?.headingColor || '#0f172a'};
+                          --theme-body-color: ${theme?.colors?.bodyText || '#334155'};
                         }
                         *, *::before, *::after { box-sizing: border-box; }
                         ${theme?.fonts?.googleFontUrl ? `@import url('${theme.fonts.googleFontUrl}');` : ''}
                         body {
-                          font-family: ${theme?.fonts?.body || "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"};
+                          font-family: var(--theme-body-font);
                           padding: 60px 40px;
-                          max-width: 860px;
-                          margin: 0 auto;
-                          line-height: 1.6;
-                          color: ${theme?.colors?.bodyText || '#334155'};
+                          margin: 0;
                           background: #f3f4f6;
                         }
-                        .a4-page {
-                          background: white;
-                          padding: 80px;
-                          box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
-                          margin-bottom: 40px;
-                        }
-                        h1 { font-size: calc(2.25rem * var(--theme-heading-scale, 1)); font-weight: 900; color: ${theme?.colors?.headingColor || '#0f172a'}; margin-bottom: 1.5rem; font-family: ${theme?.fonts?.heading || 'inherit'}; padding-bottom: 0.5rem; border-bottom: ${theme?.borders?.headerRule || 'none'}; }
-                        h2 { font-size: calc(1.5rem * var(--theme-heading-scale, 1)); font-weight: 700; color: ${theme?.colors?.headingColor || '#0f172a'}; margin-top: 1.5rem; margin-bottom: 1rem; font-family: ${theme?.fonts?.heading || 'inherit'}; padding-bottom: 0.25rem; border-bottom: ${theme?.borders?.sectionRule || 'none'}; }
-                        h3 { font-size: 1.25rem; font-weight: 700; color: ${theme?.colors?.headingColor || '#0f172a'}; font-family: ${theme?.fonts?.heading || 'inherit'}; }
-                        p  { margin-bottom: 1rem; }
-                        strong { color: #1e40af; font-weight: 800; }
-                        .preview-variable { color: #0f172a; font-weight: 800; }
-
-                        /* ── Images ── */
-                        .document-image {
-                          display: block; margin: 2em auto; max-width: 100%; height: auto;
-                          border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
-                        }
-
-                        /* ── Dual Column ── */
-                        .dual-column-node { margin: 1.5rem 0; }
-                        .dual-column-wrapper {
-                          display: grid;
-                          grid-template-columns: minmax(0,1fr) minmax(0,1fr);
-                          gap: 0;
-                          position: relative;
-                          min-height: 100px;
-                        }
-                        .dual-column-wrapper::after {
-                          content: '';
+                        ${generateLayoutCss(theme, themeVars)}
+                        
+                        /* Watermark override */
+                        .a4-page::before {
+                          content: ${themeVars['--theme-watermark-text'] || '""'};
                           position: absolute;
-                          top: 0; bottom: 0; left: 50%;
-                          border-left: 2px dotted #cbd5e1;
-                          transform: translateX(-50%);
-                          z-index: 1;
-                          pointer-events: none;
-                        }
-                        .dual-column-side {
-                          padding: 0 20px;
-                          position: relative;
-                          z-index: 2;
-                          min-width: 0;
-                          word-wrap: break-word;
-                          overflow-wrap: break-word;
-                        }
-
-                        /* ── Tables ── */
-                        table, .agreement-table {
-                          width: 100%;
-                          margin: 1.5rem 0;
-                          border-collapse: collapse;
-                          table-layout: fixed;
-                        }
-                        th, td,
-                        .agreement-table th, .agreement-table td {
-                          min-width: 1em;
-                          border: 1px solid #cbd5e1;
-                          padding: 10px 14px;
-                          vertical-align: top;
-                        }
-                        th, .agreement-table th {
-                          font-weight: 800;
-                          text-align: inherit;
-                          background: ${theme?.colors?.tableHeaderBg || '#f8fafc'} !important;
-                          color: ${theme?.colors?.tableHeaderText || '#334155'} !important;
-                        }
-                        th p, .agreement-table th p { color: ${theme?.colors?.tableHeaderText || '#334155'} !important; }
-                        td p, th p { margin: 0; }
-
-                        /* Force theme-driven hero & table header if inline styles exist */
-                        .a4-page::after, .template-page::after, .agreement-preview-container > div[style] {
-                          background: ${theme?.textures?.heroPattern || 'none'} !important;
-                        }
-
-                        /* ── Clause Placeholder ── */
-                        .preview-clauses-placeholder {
-                          border: 2px dashed #bbf7d0;
-                          background: #f0fdf4;
-                          padding: 40px;
-                          text-align: center;
-                          color: #059669;
-                          border-radius: 12px;
-                          margin: 40px 0;
+                          top: 50%; left: 50%;
+                          transform: translate(-50%, -50%) rotate(-35deg);
+                          font-size: 100px; font-weight: 900;
+                          color: ${themeVars['--theme-watermark-color'] || 'transparent'};
+                          opacity: ${themeVars['--theme-watermark-opacity'] || 0};
+                          pointer-events: none; z-index: 10;
+                          white-space: nowrap;
                         }
 
                         @media print {
                           body { background: white; padding: 0; }
                           .preview-clauses-placeholder { border: none !important; background: transparent !important; }
-                          .dual-column-wrapper::after { border-left-color: #000; }
                         }
                       </style>
                     </head>
@@ -406,37 +268,21 @@ const PreviewModal = ({ isOpen, onClose, html, activeTheme = 'blank', customWate
 
         <div className="flex-1 overflow-y-auto p-12 bg-gray-100/50 flex justify-center">
           <div
-            className={`agreement-preview-container a4-page theme-${activeTheme} bg-white w-[794px] min-h-[1123px] shadow-2xl border border-gray-200 p-[80px] max-w-none relative overflow-hidden`}
+            className="agreement-preview-container theme-hero-band-host"
             style={{
               ...themeVars,
-              backgroundImage: theme?.textures?.pageBackground !== 'none' ? theme.textures.pageBackground : undefined,
             }}
           >
-            {/* Hero background gradient */}
-            {theme?.textures?.heroPattern && theme.textures.heroPattern !== 'none' && (
-              <div
-                style={{
-                  position: 'absolute', top: 0, left: 0, right: 0, height: 200,
-                  background: theme.textures.heroPattern, pointerEvents: 'none', zIndex: 0,
-                }}
-              />
-            )}
-            {/* Watermark */}
-            {theme?.watermark?.enabled && (
-              <div
-                style={{
-                  position: 'absolute', top: '50%', left: '50%',
-                  transform: 'translate(-50%, -50%) rotate(-35deg)',
-                  fontSize: 100, fontWeight: 900, letterSpacing: '0.15em',
-                  color: theme.watermark.color, opacity: theme.watermark.opacity,
-                  pointerEvents: 'none', zIndex: 0, whiteSpace: 'nowrap', userSelect: 'none',
-                }}
-              >
-                {theme.watermark.text}
-              </div>
-            )}
+            {/* Hero band */}
+            <div className="theme-hero-band" />
+
             <div
-              style={{ position: 'relative', zIndex: 1 }}
+              className="a4-page"
+              style={{
+                backgroundImage: theme?.textures?.pageBackground !== 'none' ? theme.textures.pageBackground : undefined,
+                position: 'relative',
+                zIndex: 1
+              }}
               dangerouslySetInnerHTML={{ __html: previewHtml }}
             />
           </div>

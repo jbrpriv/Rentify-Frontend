@@ -340,161 +340,145 @@
   height: 0;
 }
 
-/* ── Live Canvas Theme Layout Engine ── */
-.document-container[class*="layout-"] .ProseMirror {
-  min-height: 100%;
-}
+/* ── Live Canvas Theme Layout Engine (NEW) ── */
 
-.document-container.layout-modern .ProseMirror,
-.document-container.layout-premium .ProseMirror,
-.document-container.layout-contemporary .ProseMirror {
+/* Base grid for layouts that need sidebars */
+.document-container.layout-modern .a4-page .ProseMirror,
+.document-container.layout-premium .a4-page .ProseMirror {
   display: grid;
-  /* main column grows, aside uses theme supplied width */
-  grid-template-columns: minmax(0, 1fr) minmax(250px, var(--theme-aside-width, 360px));
-  gap: 14px;
-  align-content: start;
+  grid-template-columns: minmax(0, 1.7fr) minmax(220px, 1fr);
+  grid-template-rows: auto auto 1fr;
+  column-gap: 32px;
+  align-items: start;
 }
 
-/* Large content handling - prevent layout break */
-.document-container.layout-modern .ProseMirror > table:first-of-type,
-.document-container.layout-premium .ProseMirror > table:first-of-type,
-.document-container.layout-contemporary .ProseMirror > table:first-of-type,
-.document-container.layout-modern .ProseMirror > .agreement-table:first-of-type,
-.document-container.layout-premium .ProseMirror > .agreement-table:first-of-type,
-.document-container.layout-contemporary .ProseMirror > .agreement-table:first-of-type {
-  grid-column: 2 / 3;
-  grid-row: 1 / span 3;
-  margin: 0;
+/* Common role assignments */
+.a4-page [data-layout-role="primary-heading"] {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.a4-page [data-layout-role="intro-paragraph"] {
+  grid-column: 1;
+  grid-row: 2;
+}
+
+.a4-page [data-layout-role="primary-table"] {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  min-width: 220px;
+  background: rgba(255, 255, 255, 0.85);
   border: 1px solid var(--theme-table-border);
-  border-radius: 10px;
-  overflow: auto;
-  max-height: 600px;
-  overflow-y: auto;
-  min-width: 300px;
+  border-radius: var(--theme-table-radius, 10px);
+  padding: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.03);
 }
 
-/* Enhanced table scrolling for wide content */
-.document-container .agreement-table {
-  display: table;
-  width: 100%;
-  overflow: auto;
-  max-height: 500px;
-  table-layout: auto;
-}
-
-.document-container .agreement-table.wide-content {
-  overflow-x: auto;
-  white-space: normal;
-}
-
-.document-container .agreement-table th,
-.document-container .agreement-table td {
-  white-space: normal;
-  min-width: auto;
-  width: auto;
-  padding: 10px 14px;
-}
-
-/* Dynamic column width for large tables */
-.document-container .agreement-table.large-table th,
-.document-container .agreement-table.large-table td {
-  min-width: auto;
-  width: auto;
-  padding: 8px 12px;
-}
-
-.document-container.layout-modern .ProseMirror > h1:first-of-type,
-.document-container.layout-premium .ProseMirror > h1:first-of-type,
-.document-container.layout-contemporary .ProseMirror > h1:first-of-type {
-  grid-column: 1 / 2;
-  margin-bottom: 0.25rem;
-}
-
-.document-container.layout-modern .ProseMirror > p:first-of-type,
-.document-container.layout-premium .ProseMirror > p:first-of-type,
-.document-container.layout-contemporary .ProseMirror > p:first-of-type {
-  grid-column: 1 / 2;
-  margin-top: 0;
-}
-
-.document-container.layout-modern .ProseMirror > table:first-of-type,
-.document-container.layout-premium .ProseMirror > table:first-of-type,
-.document-container.layout-contemporary .ProseMirror > table:first-of-type,
-.document-container.layout-modern .ProseMirror > .agreement-table:first-of-type,
-.document-container.layout-premium .ProseMirror > .agreement-table:first-of-type,
-.document-container.layout-contemporary .ProseMirror > .agreement-table:first-of-type {
-  grid-column: 2 / 3;
-  grid-row: 1 / span 3;
-  margin: 0;
-  border: 1px solid var(--theme-table-border);
-  border-radius: 10px;
-  overflow: hidden;
-  max-width: var(--theme-aside-width, 360px);
-}
-
-/* Ensure wide tables in the aside do not collapse layout — allow scroll */
-.document-container .agreement-table {
-  display: block;
-  width: 100%;
-  overflow: auto;
-}
-
-.document-container .agreement-table th,
-.document-container .agreement-table td {
-  white-space: nowrap;
-}
-
-.document-container.layout-modern .ProseMirror > *:not(h1):not(p):not(table):not(.agreement-table),
-.document-container.layout-premium .ProseMirror > *:not(h1):not(p):not(table):not(.agreement-table),
-.document-container.layout-contemporary .ProseMirror > *:not(h1):not(p):not(table):not(.agreement-table) {
+/* Elements that don't have roles span full width */
+.document-container.layout-modern .a4-page .ProseMirror > *:not([data-layout-role]),
+.document-container.layout-premium .a4-page .ProseMirror > *:not([data-layout-role]) {
   grid-column: 1 / -1;
 }
 
-.document-container.layout-legal .ProseMirror > h1:first-of-type,
-.document-container.layout-editorial .ProseMirror > h1:first-of-type,
-.document-container.layout-ledger .ProseMirror > h1:first-of-type,
-.document-container.layout-classic .ProseMirror > h1:first-of-type {
-  margin-top: 0.25rem;
+/* ── Specific Layout Adjustments ── */
+
+/* Premium: Hero treatment */
+.document-container.layout-premium .a4-page {
+  padding: 0;
 }
 
-.document-container.layout-editorial .ProseMirror > h1:first-of-type {
-  border-left: 4px solid var(--theme-primary);
-  padding-left: 12px;
+.document-container.layout-premium .a4-page .ProseMirror {
+  padding: var(--theme-content-padding, 80px);
+  padding-top: 100px; /* offset for hero visual */
 }
 
-.document-container.layout-legal .ProseMirror > table:first-of-type,
-.document-container.layout-editorial .ProseMirror > table:first-of-type,
-.document-container.layout-ledger .ProseMirror > table:first-of-type,
-.document-container.layout-legal .ProseMirror > .agreement-table:first-of-type,
-.document-container.layout-editorial .ProseMirror > .agreement-table:first-of-type,
-.document-container.layout-ledger .ProseMirror > .agreement-table:first-of-type {
-  border: 1px solid var(--theme-table-border);
-  border-radius: 10px;
-  overflow: hidden;
-  margin-top: 0.5rem;
-  margin-bottom: 1rem;
+.document-container.layout-premium .a4-page [data-layout-role="primary-heading"] {
+  color: var(--theme-hero-title-color) !important;
+  font-size: var(--theme-hero-title-size) !important;
+  position: relative;
+  z-index: 5;
 }
 
+.document-container.layout-premium .a4-page [data-layout-role="intro-paragraph"] {
+  color: rgba(255, 255, 255, 0.9) !important;
+  position: relative;
+  z-index: 5;
+}
+
+.document-container.layout-premium .a4-page [data-layout-role="primary-table"] {
+  background: rgba(255, 255, 255, 0.15) !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  backdrop-filter: blur(12px);
+  position: relative;
+  z-index: 5;
+}
+
+.document-container.layout-premium .a4-page [data-layout-role="primary-table"] th {
+  background: rgba(255, 255, 255, 0.2) !important;
+  color: #FFFFFF !important;
+}
+
+/* Editorial: Left border heading */
+.document-container.layout-editorial [data-layout-role="primary-heading"] {
+  border-left: 6px solid var(--theme-primary);
+  padding-left: 20px;
+  margin-bottom: 24px;
+}
+
+/* Contemporary: Heading in hero */
+.document-container.layout-contemporary .a4-page [data-layout-role="primary-heading"] {
+  color: var(--theme-hero-title-color) !important;
+  position: relative;
+  z-index: 5;
+}
+
+/* Ledger: Meta Strip simulation (using roles if we had more, but for now simple styling) */
+.document-container.layout-ledger .ProseMirror {
+  /* could use a meta-strip div if injected */
+}
+
+/* ── Theme Specific Canvas Colors ── */
+.theme-commercial-classic .a4-page { background-color: #FAF8F4; }
+.theme-fresh-contemporary .a4-page { background-color: #F0FDFA; }
+.theme-elegant-serif      .a4-page { background-color: #FAF9F6; }
+.theme-executive-premium  .a4-page { background-color: #FEFCFF; }
+.theme-professional-legal .a4-page { background-color: #FDFCFA; }
+
+/* Hero heights & treatments */
+.a4-page::after {
+  height: var(--theme-hero-height, 250px);
+  background: var(--theme-hero-bg);
+  opacity: var(--theme-hero-enabled, 0);
+  transition: all 0.4s ease;
+}
+
+/* Logo treatments */
+.a4-page img.document-image:first-of-type {
+  max-height: var(--theme-logo-max-height, 120px) !important;
+  width: auto !important;
+  margin-bottom: 1.5rem;
+}
+
+.theme-tech-innovator .a4-page img.document-image:first-of-type {
+  filter: brightness(0) invert(1); /* logo becomes white in black header */
+}
+
+.theme-commercial-classic .a4-page img.document-image:first-of-type {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* ── Responsive Fixes ── */
 @media (max-width: 900px) {
-  .document-container.layout-modern .ProseMirror,
-  .document-container.layout-premium .ProseMirror,
-  .document-container.layout-contemporary .ProseMirror {
-    grid-template-columns: minmax(0, 1fr);
+  .document-container[class*="layout-"] .a4-page .ProseMirror {
+    display: block;
   }
-
-  .document-container.layout-modern .ProseMirror > table:first-of-type,
-  .document-container.layout-premium .ProseMirror > table:first-of-type,
-  .document-container.layout-contemporary .ProseMirror > table:first-of-type,
-  .document-container.layout-modern .ProseMirror > .agreement-table:first-of-type,
-  .document-container.layout-premium .ProseMirror > .agreement-table:first-of-type,
-  .document-container.layout-contemporary .ProseMirror > .agreement-table:first-of-type {
-    grid-column: 1 / -1;
-    grid-row: auto;
-    margin-top: 0.25rem;
-    margin-bottom: 0.5rem;
-    max-height: 400px;
+  .a4-page [data-layout-role="primary-table"] {
+    width: 100% !important;
+    margin: 20px 0 !important;
   }
 }
+
 
 /* Enhanced responsive breakpoints */
 @media (max-width: 1200px) {
