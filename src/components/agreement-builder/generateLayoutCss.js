@@ -1,192 +1,206 @@
 /**
  * generateLayoutCss(theme, themeVars)
- * Returns the CSS string for all layout classes, properly themed.
- * Used by both PreviewModal (inline <style>) and the new-tab window.
+ * Returns the CSS string for all layout classes used by PreviewModal and new-tab window.
  */
 export function generateLayoutCss(theme, themeVars) {
-  const primary = themeVars['--theme-primary'] || '#0f172a';
   const tableBorder = themeVars['--theme-table-border'] || '#cbd5e1';
   const tableHeaderBg = themeVars['--theme-table-header-bg'] || '#f8fafc';
   const tableHeaderText = themeVars['--theme-table-header-text'] || '#334155';
-  const heroHeight = themeVars['--theme-hero-height'] || '200px';
+  const heroHeight = themeVars['--theme-hero-height'] || '0px';
   const heroBg = themeVars['--theme-hero-bg'] || 'transparent';
   const pageBg = themeVars['--theme-page-bg'] || '#FFFFFF';
   const tableRadius = themeVars['--theme-table-radius'] || '0px';
+  const logoAlign = themeVars['--theme-logo-align'] || 'left';
+  const logoMaxH = themeVars['--theme-logo-max-height'] || '100px';
+  const headingFont = themeVars['--theme-heading-font'] || 'inherit';
+  const bodyFont = themeVars['--theme-body-font'] || 'inherit';
+  const headingColor = themeVars['--theme-heading-color'] || '#0f172a';
+  const bodyColor = themeVars['--theme-body-color'] || '#334155';
+  const headerRule = themeVars['--theme-header-rule'] || 'none';
+  const sectionRule = themeVars['--theme-section-rule'] || 'none';
+  const heroTitleColor = themeVars['--theme-hero-title-color'] || '#FFFFFF';
+  const heroTitleSize = themeVars['--theme-hero-title-size'] || '2.5rem';
+  const contentPad = themeVars['--theme-content-padding'] || '80px';
+  const pageTexture = themeVars['--theme-page-texture'] || 'none';
+  const heroEnabled = theme?.hero?.enabled;
+
+  const logoAlignCss = logoAlign === 'center'
+    ? 'margin-left: auto; margin-right: auto;'
+    : 'margin-left: 0; margin-right: auto;';
 
   return `
+    /* ── Reset & Base ── */
+    *, *::before, *::after { box-sizing: border-box; }
+
     /* ── Page ── */
-    .a4-page, .agreement-preview-container { 
-      background-color: ${pageBg} !important; 
+    .a4-page, .agreement-preview-container {
+      background-color: ${pageBg} !important;
+      background-image: ${pageTexture !== 'none' ? pageTexture : 'none'};
       min-height: 1123px;
       width: 794px;
       margin: 0 auto;
-      padding: 80px;
       position: relative;
-      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
       box-sizing: border-box;
-      text-align: left; /* Ensure centering is only for the page block, not content */
+      overflow: hidden;
     }
 
-    /* ── Hero band ── */
+    /* ── Hero Band ── */
     .theme-hero-band {
-      position: absolute; top: 0; left: 0; right: 0;
-      height: ${heroHeight};
+      width: 100%;
       background: ${heroBg};
-      pointer-events: none; z-index: 0;
-    }
-    
-    /* Hero bleed fix for specific layouts */
-    .layout-premium .a4-page,
-    .layout-premium-hero-host .a4-page,
-    .layout-contemporary .a4-page {
-      padding-top: 0 !important;
-    }
-    
-    .layout-premium .ProseMirror,
-    .layout-premium-hero,
-    .layout-contemporary .ProseMirror,
-    .layout-contemporary-top {
-       padding-top: 60px;
+      display: ${heroEnabled ? 'flex' : 'none'};
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: ${heroEnabled ? heroHeight : '0px'};
+      min-height: ${heroEnabled ? heroHeight : '0px'};
+      overflow: hidden;
+      position: relative;
+      z-index: 1;
     }
 
-    /* ── Logo Treatment (First Image) ── */
-    .a4-page img:first-of-type,
-    .a4-page [data-layout-role="primary-logo"] img {
-      max-height: var(--theme-logo-max-height, 100px);
+    .theme-hero-band .hero-title {
+      font-family: ${headingFont};
+      color: ${heroTitleColor} !important;
+      font-size: ${heroTitleSize};
+      font-weight: 900;
+      text-align: center;
+      padding: 0 60px;
+      margin: 0;
+      line-height: 1.15;
+    }
+
+    .theme-hero-band .hero-logo {
+      max-height: ${logoMaxH};
+      width: auto;
+      object-fit: contain;
+      margin-bottom: 16px;
+      display: block;
+    }
+
+    /* ── Page Body (content below hero) ── */
+    .a4-page-body {
+      padding: ${contentPad};
+      position: relative;
+      z-index: 2;
+    }
+
+    /* ── Logo in body ── */
+    .a4-page-body img:first-of-type {
+      max-height: ${logoMaxH};
       width: auto !important;
       display: block;
       margin-bottom: 2rem;
       object-fit: contain;
-      ${themeVars['--theme-logo-align'] === 'center' ? 'margin-left: auto !important; margin-right: auto !important;' : 'margin-left: 0; margin-right: auto;'}
+      ${logoAlignCss}
     }
 
-    /* ── Modular Block Layout (Shared by Editor & Preview) ── */
-    .a4-page .ProseMirror, .a4-page-content {
-      display: flex;
-      flex-direction: column;
-      gap: 24px;
-      padding: 60px 40px !important;
+    /* ── Typography ── */
+    .a4-page-body h1, .a4-page-body h2, .a4-page-body h3 {
+      font-family: ${headingFont};
+      color: ${headingColor};
+    }
+    .a4-page-body h1 {
+      font-size: 2.5rem;
+      line-height: 1.15;
+      font-weight: 900;
+      margin-bottom: 0.5em;
+      padding-bottom: 0.5rem;
+      border-bottom: ${headerRule};
+    }
+    .a4-page-body h2 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin-top: 1.5em;
+      margin-bottom: 0.5em;
+      padding-bottom: 0.25rem;
+      border-bottom: ${sectionRule};
+    }
+    .a4-page-body p, .a4-page-body li, .a4-page-body span {
+      font-family: ${bodyFont};
+      color: ${bodyColor};
+      line-height: 1.7;
+      margin-bottom: 0.75em;
     }
 
-    /* Standard Section Style */
-    .document-section, [data-layout-role] {
-      background: white;
-      padding: 32px;
-      border-radius: 12px;
-      border: 1px solid rgba(0,0,0,0.05);
-      box-shadow: 0 4px 20px rgba(0,0,0,0.02);
+    /* ── Tables ── */
+    .agreement-table, .a4-page-body table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+      border-radius: ${tableRadius};
+      overflow: hidden;
+    }
+    .agreement-table th, .a4-page-body table th,
+    .agreement-table td, .a4-page-body table td {
+      border: 1px solid ${tableBorder};
+      padding: 10px 14px;
+      text-align: left;
+    }
+    .agreement-table th, .a4-page-body table th {
+      background: ${tableHeaderBg};
+      color: ${tableHeaderText};
+      font-weight: 700;
+    }
+    .agreement-table th p, .a4-page-body table th p {
+      color: ${tableHeaderText};
+      margin: 0;
+    }
+
+    /* ── Dual Column ── */
+    .dual-column-wrapper {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
       position: relative;
-      transition: transform 0.2s;
+      margin: 1.5rem 0;
     }
-    
-    /* Hero Section (always at top) */
-    [data-layout-role="primary-heading"], [data-layout-role="hero"] {
-      background: transparent !important;
-      border: none !important;
-      box-shadow: none !important;
-      padding: 0 !important;
-      margin-bottom: 24px;
-      text-align: left !important;
+    .dual-column-wrapper::after {
+      content: '';
+      position: absolute;
+      top: 0; bottom: 0; left: 50%;
+      border-left: 2px dotted ${tableBorder};
+      transform: translateX(-50%);
+      z-index: 1;
     }
-
-    /* Ledger Theme specific block style */
-    .layout-ledger .document-section, 
-    .layout-ledger [data-layout-role]:not([data-layout-role="primary-heading"]) {
-      border-radius: 0;
-      border: 2px solid #000000;
-      box-shadow: 8px 8px 0 rgba(0,0,0,0.1);
-      margin-bottom: 12px;
-    }
-    
-    /* Premium Theme specific block style (Glass Cards) */
-    .layout-premium .document-section,
-    .layout-premium [data-layout-role]:not([data-layout-role="primary-heading"]) {
-      background: rgba(255, 255, 255, 0.7) !important;
-      backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 255, 255, 0.4);
-      box-shadow: 0 20px 40px rgba(0,0,0,0.05);
-      border-radius: 24px;
+    .dual-column-side {
+      padding: 0 20px;
+      position: relative;
+      z-index: 2;
+      min-width: 0;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
     }
 
-    /* Table Section Fixes (Middle flow) */
-    [data-layout-role="primary-table"], .agreement-table {
-      width: 100% !important;
-      margin: 0 !important;
-      grid-column: span 2;
-    }
-
-    /* Clauses Section (Full width now, no more sidebar squeeze) */
-    [data-layout-role="primary-sidebar-item"], .preview-clauses-placeholder {
-      width: 100% !important;
+    /* ── Clauses Placeholder ── */
+    .preview-clauses-placeholder {
+      width: 100%;
       background: rgba(0,0,0,0.02);
       border: 1px dashed ${tableBorder};
       border-radius: 12px;
-      padding: 40px !important;
+      padding: 32px;
+      margin: 1.5rem 0;
     }
 
-    /* Premium Clauses Styling */
-    .layout-premium [data-layout-role="primary-sidebar-item"] {
-      background: rgba(255, 255, 255, 0.4) !important;
-      border: 1px solid rgba(255, 255, 255, 0.6) !important;
+    /* ── Preview variable highlight ── */
+    .preview-variable { color: #0f172a; font-weight: 800; }
+
+    /* ── Watermark ── */
+    .a4-page::before {
+      content: var(--theme-watermark-text, "");
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%) rotate(-35deg);
+      font-size: 100px; font-weight: 900;
+      color: var(--theme-watermark-color, transparent);
+      opacity: var(--theme-watermark-opacity, 0);
+      pointer-events: none; z-index: 100;
+      white-space: nowrap;
     }
 
-    /* Typography scale fix for blocks */
-    h1 { 
-      font-size: 3rem !important;
-      line-height: 1 !important;
-      margin-bottom: 0.5em !important;
+    @media print {
+      .preview-clauses-placeholder { border: none !important; background: transparent !important; }
     }
-    
-    /* Dark Hero Adjustments (Enforce contrast for H1/H2 in hero sections) */
-    .layout-premium-hero h1,
-    .layout-modern-hero-grid h1,
-    .layout-ledger-wrap h1,
-    .layout-premium h1,
-    .layout-modern h1,
-    .layout-ledger h1,
-    .layout-premium-hero h2,
-    .layout-modern-hero-grid h2,
-    .layout-ledger-wrap h2,
-    [data-layout-role="primary-heading"] {
-      color: var(--theme-hero-title-color, #FFFFFF) !important;
-    }
-
-    /* ── Meta Strip (Ledger/Legal) ── */
-    .layout-meta-strip {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 12px 20px;
-      margin-bottom: 40px;
-      background: rgba(0, 0, 0, 0.03);
-      border-radius: 8px;
-      font-size: 0.7rem;
-      text-transform: uppercase;
-      letter-spacing: 0.15em;
-      color: #64748b;
-      border: 1px solid rgba(0,0,0,0.05);
-      position: relative;
-      z-index: 10;
-    }
-    
-    /* Clauses Sidebar Header */
-    [data-layout-role="primary-sidebar-item"]::before {
-      content: 'Legal Provisions';
-      display: block;
-      font-size: 0.75rem;
-      font-weight: 900;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      margin-bottom: 16px;
-      opacity: 0.6;
-      border-bottom: 1px solid currentColor;
-      padding-bottom: 8px;
-    }
-
-    h2 { font-family: var(--theme-heading-font); color: var(--theme-heading-color); font-size: 1.5em; margin-top: 1.5em; margin-bottom: 0.75em; }
-    p { font-family: var(--theme-body-font); color: var(--theme-body-color); line-height: 1.7; margin-bottom: 1em; position: relative; z-index: 2; }
-    
-    /* Image centering (general) */
-    .document-image { max-width: 100%; height: auto; border-radius: 8px; }
   `;
 }

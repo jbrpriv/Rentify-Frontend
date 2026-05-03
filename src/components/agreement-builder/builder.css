@@ -4,13 +4,6 @@
 
 /* ── Document Container ── */
 .document-container {
-  /* ── Theme Variable Defaults (blank theme fallbacks) ──────────────────
-     IMPORTANT: These MUST live here, not on .a4-page.
-     .a4-page is the ProseMirror contenteditable node — any CSS custom
-     property declared directly on it overrides inherited values, which
-     would prevent React's inline style on this wrapper from taking effect.
-     By declaring defaults here, the inline style on .document-container
-     wins and .a4-page inherits the correct values. ── */
   --theme-heading-font: inherit;
   --theme-body-font: inherit;
   --theme-heading-color: #0f172a;
@@ -28,19 +21,26 @@
   --theme-watermark-opacity: 0;
   --theme-watermark-color: transparent;
   --theme-watermark-text: "";
+  --theme-font-scale: 1;
+  --theme-heading-scale: 1;
+  --theme-aside-width: 360px;
+  --theme-page-bg: #FFFFFF;
+  --theme-hero-enabled: 0;
+  --theme-hero-height: 0px;
+  --theme-hero-title-color: #000000;
+  --theme-hero-title-size: 2.25rem;
+  --theme-logo-max-height: 120px;
+  --theme-logo-align: left;
+  --theme-table-radius: 0px;
+  --theme-table-alt-row: transparent;
+  --theme-body-line-height: 1.7;
+  --theme-content-padding: 80px;
 
   display: flex;
   justify-content: center;
   padding: 40px 20px;
   background-color: #f3f4f6;
   transition: background-color 0.3s ease;
-}
-
-.document-container {
-  /* new theme spacing tokens (used by layout engine) */
-  --theme-font-scale: 1;
-  --theme-heading-scale: 1;
-  --theme-aside-width: 360px;
 }
 
 .document-container.fullscreen-mode {
@@ -51,17 +51,78 @@
 .a4-page {
   width: 794px;
   min-height: 1123px;
-  padding: 80px;
-  background-color: white;
-  background-image: var(--theme-page-texture);
+  background-color: var(--theme-page-bg, white);
+  background-image: var(--theme-page-texture, none);
   box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
   margin-bottom: 40px;
   transition: transform 0.3s ease;
   transform-origin: top center;
   position: relative;
   overflow: hidden;
-  /* scale base font with theme token */
   font-size: calc(16px * var(--theme-font-scale, 1));
+  /* NO global padding — hero themes handle it via .a4-page-body */
+}
+
+/* ── Page body wrapper — all content below hero sits here ── */
+.a4-page-body {
+  padding: var(--theme-content-padding, 80px);
+  position: relative;
+  z-index: 2;
+}
+
+/* Themes WITHOUT a hero still need padding on ProseMirror directly */
+.a4-page>.ProseMirror {
+  padding: var(--theme-content-padding, 80px);
+  position: relative;
+  z-index: 2;
+  min-height: 900px;
+}
+
+/* ── Hero Band — rendered as a real block above content ── */
+.theme-hero-band {
+  width: 100%;
+  background: var(--theme-hero-bg, transparent);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 1;
+  overflow: hidden;
+}
+
+/* Hero enabled: show the band */
+.has-hero .theme-hero-band {
+  height: var(--theme-hero-height, 200px);
+  min-height: var(--theme-hero-height, 200px);
+}
+
+/* Hero disabled: hide the band entirely */
+.no-hero .theme-hero-band {
+  display: none;
+}
+
+/* Hero title inside the band */
+.theme-hero-band .hero-title {
+  font-family: var(--theme-heading-font);
+  color: var(--theme-hero-title-color, #FFFFFF) !important;
+  font-size: var(--theme-hero-title-size, 2.5rem);
+  font-weight: 900;
+  text-align: center;
+  padding: 0 60px;
+  margin: 0;
+  line-height: 1.15;
+  position: relative;
+  z-index: 2;
+}
+
+/* Hero logo inside the band */
+.theme-hero-band .hero-logo {
+  max-height: var(--theme-logo-max-height, 80px);
+  width: auto;
+  object-fit: contain;
+  margin-bottom: 16px;
+  display: block;
 }
 
 /* ── Watermark Overlay ── */
@@ -77,47 +138,64 @@
   color: var(--theme-watermark-color);
   opacity: var(--theme-watermark-opacity);
   pointer-events: none;
-  z-index: 10;
+  z-index: 100;
   white-space: nowrap;
   user-select: none;
 }
 
-/* ── Hero Background (top area gradient) ── */
-.a4-page::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 250px;
-  background: var(--theme-hero-pattern);
-  pointer-events: none;
-  z-index: 0;
+/* ── Logo Treatment (First Image in body — NOT in hero) ── */
+.a4-page-body img:first-of-type,
+.a4-page>.ProseMirror img:first-of-type {
+  max-height: var(--theme-logo-max-height, 100px);
+  width: auto !important;
+  display: block;
+  margin-bottom: 2rem;
+  object-fit: contain;
 }
 
-/* Ensure all content sits above pseudo-elements */
-.a4-page > * {
-  position: relative;
-  z-index: 1;
+/* Logo alignment variants */
+.logo-align-center img:first-of-type,
+.a4-page-body.logo-align-center img:first-of-type,
+.a4-page>.ProseMirror.logo-align-center img:first-of-type {
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+.logo-align-left img:first-of-type,
+.a4-page-body.logo-align-left img:first-of-type {
+  margin-left: 0;
+  margin-right: auto;
 }
 
 /* ── Theme-Driven Typography ── */
-.a4-page .ProseMirror h1, .a4-page .ProseMirror h2, .a4-page .ProseMirror h3, .a4-page .ProseMirror h4, .a4-page .ProseMirror h5, .a4-page .ProseMirror h6,
-.a4-page h1, .a4-page h2, .a4-page h3, .a4-page h4, .a4-page h5, .a4-page h6 {
+.a4-page h1,
+.a4-page h2,
+.a4-page h3,
+.a4-page h4,
+.a4-page h5,
+.a4-page h6,
+.a4-page .ProseMirror h1,
+.a4-page .ProseMirror h2,
+.a4-page .ProseMirror h3 {
   font-family: var(--theme-heading-font);
   color: var(--theme-heading-color);
 }
 
-.a4-page .ProseMirror p, .a4-page .ProseMirror li, .a4-page .ProseMirror span, .a4-page p, .a4-page li {
+.a4-page .ProseMirror p,
+.a4-page .ProseMirror li,
+.a4-page p,
+.a4-page li {
   font-family: var(--theme-body-font);
   color: var(--theme-body-color);
 }
 
-.a4-page .ProseMirror p:empty, .a4-page p:empty {
+.a4-page .ProseMirror p:empty,
+.a4-page p:empty {
   min-height: 1.5em;
 }
 
-.a4-page .ProseMirror h1, .a4-page h1 {
+.a4-page .ProseMirror h1,
+.a4-page h1 {
   padding-bottom: 0.5rem;
   border-bottom: var(--theme-header-rule);
 }
@@ -127,7 +205,11 @@
   border-bottom: var(--theme-section-rule);
 }
 
-.a4-page p, .a4-page li, .a4-page td, .a4-page span, .a4-page blockquote {
+.a4-page p,
+.a4-page li,
+.a4-page td,
+.a4-page span,
+.a4-page blockquote {
   font-family: var(--theme-body-font);
   color: var(--theme-body-color);
 }
@@ -139,11 +221,13 @@
 .a4-page .agreement-table td {
   border-color: var(--theme-table-border);
 }
+
 .a4-page .ProseMirror th,
 .a4-page .agreement-table th {
   background: var(--theme-table-header-bg);
   color: var(--theme-table-header-text);
 }
+
 .a4-page .ProseMirror th p,
 .a4-page .agreement-table th p {
   color: var(--theme-table-header-text);
@@ -154,36 +238,28 @@
   border-left-color: var(--theme-table-border);
 }
 
-/* ═══════════════════════════════════════════════════════════
-   PER-THEME OVERRIDES
-   Applied via .theme-{id} class on the document-container
-   ═══════════════════════════════════════════════════════════ */
-
 /* ── Zoom Levels ── */
-.zoom-75 .a4-page { transform: scale(0.75); }
-.zoom-100 .a4-page { transform: scale(1); }
-.zoom-125 .a4-page { transform: scale(1.25); }
-.zoom-150 .a4-page { transform: scale(1.5); }
+.zoom-75 .a4-page {
+  transform: scale(0.75);
+}
+
+.zoom-100 .a4-page {
+  transform: scale(1);
+}
+
+.zoom-125 .a4-page {
+  transform: scale(1.25);
+}
+
+.zoom-150 .a4-page {
+  transform: scale(1.5);
+}
 
 /* ── Responsive Fixes ── */
 @media (max-width: 900px) {
-  .document-container[class*="layout-"] .a4-page .ProseMirror {
-    display: block;
-  }
   .a4-page [data-layout-role="primary-table"] {
     width: 100% !important;
     margin: 20px 0 !important;
-  }
-}
-
-
-/* Enhanced responsive breakpoints */
-@media (max-width: 1200px) {
-  .document-container.layout-modern .ProseMirror,
-  .document-container.layout-premium .ProseMirror,
-  .document-container.layout-contemporary .ProseMirror {
-    grid-template-columns: minmax(0, 1fr) minmax(200px, 300px);
-    gap: 12px;
   }
 }
 
@@ -191,292 +267,54 @@
   .document-container .agreement-table {
     max-height: 300px;
   }
-  
+
   .document-container .agreement-table th,
   .document-container .agreement-table td {
     padding: 8px 10px;
     font-size: 14px;
   }
-  
-  .ProseMirror table,
-  .agreement-table {
-    font-size: 14px;
-  }
 }
 
-/* ── Variable Styling ── */
-.variable-node {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 2px 8px;
-  margin: 0 4px;
-  border-radius: 6px;
-  border: 1px solid transparent;
-  font-weight: 700;
-  font-size: inherit;
-  cursor: default;
-  user-select: none;
-  font-family: inherit;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-  transition: box-shadow 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
-}
-
-.variable-node.is-selected,
-.ProseMirror .ProseMirror-selectednode .variable-node {
-  border-color: #2563eb !important;
-  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.25), 0 1px 2px rgba(0, 0, 0, 0.08);
-  transform: translateY(-1px);
-}
-
-.variable-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-
-/* ── Typography ── */
-.ProseMirror h1 {
-  font-size: calc(2.25rem * var(--theme-heading-scale, 1));
-  font-weight: 800;
-  margin-bottom: 1.5rem;
-}
-
-.ProseMirror h2 {
-  font-size: 1.5rem;
-  font-weight: 700;
-  margin-top: 1.5rem;
-  margin-bottom: 1rem;
-}
-
-.ProseMirror p {
-  margin-bottom: 1rem;
-  line-height: 1.6;
-}
-
-/* ── Document Images ── */
-.document-image {
-  border-radius: 0.5rem;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  transition: all 0.2s;
-}
-
-.resizable-image-wrapper {
+/* ── Agreement Table Base ── */
+.agreement-table {
+  width: 100%;
+  border-collapse: collapse;
   margin: 1.5rem 0;
-  line-height: 0;
-}
-
-.resizable-image-wrapper.is-selected div {
-  outline: 2px solid #2563eb;
-  border-radius: 8px;
-}
-
-.a4-page .document-image {
-  max-width: 100%;
-}
-
-/* ═══════════════════════════════════
-   Floating Toolbox
-   ═══════════════════════════════════ */
-.floating-toolbox {
-  position: fixed;
-  z-index: 80;
-  width: 280px;
-  max-height: 70vh;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(148, 163, 184, 0.25);
-  border-radius: 16px;
-  box-shadow:
-    0 20px 60px -15px rgba(0, 0, 0, 0.15),
-    0 0 0 1px rgba(255, 255, 255, 0.5) inset;
-  display: flex;
-  flex-direction: column;
+  border-radius: var(--theme-table-radius, 0px);
   overflow: hidden;
-  transition: box-shadow 0.3s ease;
 }
 
-.floating-toolbox:hover {
-  box-shadow:
-    0 25px 70px -15px rgba(0, 0, 0, 0.2),
-    0 0 0 1px rgba(255, 255, 255, 0.5) inset;
+.agreement-table th,
+.agreement-table td {
+  border: 1px solid var(--theme-table-border);
+  padding: 12px 16px;
+  text-align: left;
 }
 
-.floating-toolbox-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px 14px;
-  background: linear-gradient(135deg, #1e40af, #3b82f6);
-  cursor: grab;
-  user-select: none;
-  flex-shrink: 0;
+.agreement-table th {
+  background: var(--theme-table-header-bg);
+  color: var(--theme-table-header-text);
+  font-weight: 700;
 }
 
-.floating-toolbox-header:active {
-  cursor: grabbing;
-}
-
-.floating-toolbox-header h3 {
-  font-size: 12px;
-  font-weight: 800;
-  color: white;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-}
-
-.floating-toolbox-body {
-  flex: 1;
-  overflow-y: auto;
-  padding: 8px;
-}
-
-.floating-toolbox-body::-webkit-scrollbar {
-  width: 4px;
-}
-
-.floating-toolbox-body::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.floating-toolbox-body::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 2px;
-}
-
-.floating-toolbox-search {
-  width: 100%;
-  padding: 8px 12px;
-  border: 1px solid #e2e8f0;
-  border-radius: 10px;
-  font-size: 12px;
-  font-weight: 500;
-  outline: none;
-  background: #f8fafc;
-  margin-bottom: 8px;
-  transition: border-color 0.2s, box-shadow 0.2s;
-}
-
-.floating-toolbox-search:focus {
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-}
-
-.toolbox-section {
-  margin-bottom: 4px;
-}
-
-.toolbox-section-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 6px 10px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 10px;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: #64748b;
-  transition: background 0.15s;
-}
-
-.toolbox-section-header:hover {
-  background: #f1f5f9;
-}
-
-.toolbox-section-items {
-  padding: 2px 0;
-}
-
-.toolbox-var-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 4px 10px;
-  margin: 2px;
-  border-radius: 8px;
-  font-size: 11px;
-  font-weight: 600;
-  cursor: pointer;
-  border: 1px solid #e2e8f0;
-  background: white;
-  color: #334155;
-  transition: all 0.15s;
-  user-select: none;
-}
-
-.toolbox-var-chip:hover {
-  background: #dbeafe;
-  border-color: #93c5fd;
-  color: #1d4ed8;
-  transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.15);
-}
-
-.toolbox-var-chip:active {
-  transform: scale(0.97);
-}
-
-.toolbox-block-btn {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  width: 100%;
-  padding: 8px 12px;
-  border-radius: 10px;
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  border: 1px solid #e2e8f0;
-  background: white;
-  color: #334155;
-  transition: all 0.15s;
-  margin-bottom: 4px;
-}
-
-.toolbox-block-btn:hover {
-  background: #f0fdf4;
-  border-color: #86efac;
-  color: #166534;
-}
-
-.toolbox-block-btn:active {
-  transform: scale(0.98);
-}
-
-/* (Toolbox Pill Removed) */
-
-/* ═══════════════════════════════════
-   Dual Column Block
-   ═══════════════════════════════════ */
-.dual-column-node {
-  margin: 1.5rem 0;
-}
-
+/* ── Dual Column ── */
 .dual-column-wrapper {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-columns: 1fr 1fr;
   gap: 0;
   position: relative;
-  min-height: 100px;
-  max-height: 800px;
-  overflow: hidden;
+  margin: 1.5rem 0;
 }
 
-/* Dotted vertical divider */
 .dual-column-wrapper::after {
   content: '';
   position: absolute;
   top: 0;
   bottom: 0;
   left: 50%;
-  border-left: 2px dotted #cbd5e1;
+  border-left: 2px dotted var(--theme-table-border, #cbd5e1);
   transform: translateX(-50%);
   z-index: 1;
-  pointer-events: none;
 }
 
 .dual-column-side {
@@ -486,190 +324,9 @@
   min-width: 0;
   word-wrap: break-word;
   overflow-wrap: break-word;
-  max-width: 100%;
-  overflow-y: auto;
-  max-height: 800px;
 }
 
-.dual-column-content {
-  outline: none;
-  min-height: 80px;
-  font-size: 14px;
-  line-height: 1.6;
-  color: #334155;
-}
-
-.dual-column-content:empty::before {
-  content: attr(data-placeholder);
-  color: #cbd5e1;
-  font-style: italic;
-  pointer-events: none;
-}
-
-/* Responsive dual column */
-@media (max-width: 768px) {
-  .dual-column-wrapper {
-    grid-template-columns: 1fr;
-    gap: 20px;
-  }
-  
-  .dual-column-wrapper::after {
-    display: none;
-  }
-  
-  .dual-column-side {
-    padding: 0;
-  }
-  
-  .dual-column-side:first-child {
-    border-bottom: 2px dotted #cbd5e1;
-    padding-bottom: 20px;
-    margin-bottom: 20px;
-  }
-}
-
-/* Print rendering */
-@media print {
-  .dual-column-wrapper::after {
-    border-left-color: #000;
-  }
-}
-
-/* ═══════════════════════════════════
-   Table Block
-   ═══════════════════════════════════ */
-.ProseMirror table {
-  border-collapse: collapse;
-  table-layout: auto;
-  width: 100%;
-  margin: 1.5rem 0;
-  overflow: auto;
-}
-
-.agreement-table {
-  width: 100%;
-  margin: 1.5rem 0;
-  border-collapse: collapse;
-  table-layout: auto;
-}
-
-.ProseMirror td,
-.ProseMirror th,
-.agreement-table th,
-.agreement-table td {
-  min-width: auto;
-  width: auto;
-  border: 1px solid var(--theme-table-border, #cbd5e1);
-  padding: 10px 14px;
-  vertical-align: top;
-  box-sizing: border-box;
-  position: relative;
-  white-space: normal;
-}
-
-/* Ensure empty cells have min-height and display paragraphs correctly */
-.ProseMirror td > *,
-.ProseMirror th > *,
-.agreement-table td > *,
-.agreement-table th > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.agreement-table th,
-.ProseMirror th {
-  font-weight: 800;
-  text-align: left;
-  background: var(--theme-table-header-bg, #f8fafc);
-  color: var(--theme-table-header-text, #334155);
-}
-
-.agreement-table th p,
-.ProseMirror th p {
-  color: var(--theme-table-header-text, #334155);
-}
-
-/* Selected cells during drag selection */
-.agreement-table .selectedCell:after {
-  z-index: 2;
-  position: absolute;
-  content: "";
-  left: 0; right: 0; top: 0; bottom: 0;
-  background: rgba(59, 130, 246, 0.08); /* light blue highlight */
-  pointer-events: none;
-}
-
-.agreement-table .column-resize-handle {
-  position: absolute;
-  right: -2px;
-  top: 0;
-  bottom: -2px;
-  width: 4px;
-  background-color: #93c5fd;
-  pointer-events: none;
-  z-index: 10;
-}
-
-/* ═══════════════════════════════════
-   Shortcuts Modal
-   ═══════════════════════════════════ */
-.shortcuts-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 200;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(4px);
-  animation: fadeIn 0.15s ease;
-}
-
-.shortcuts-modal {
-  background: white;
-  border-radius: 20px;
-  padding: 32px;
-  width: 420px;
-  max-width: 90vw;
-  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.2);
-  animation: slideUp 0.2s ease;
-}
-
-.shortcut-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 8px 0;
-  border-bottom: 1px solid #f1f5f9;
-}
-
-.shortcut-row:last-child {
-  border-bottom: none;
-}
-
-.shortcut-keys {
-  display: flex;
-  gap: 4px;
-}
-
-.shortcut-key {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 28px;
-  padding: 2px 8px;
-  background: #f1f5f9;
-  border: 1px solid #e2e8f0;
-  border-radius: 6px;
-  font-size: 11px;
-  font-weight: 700;
-  color: #475569;
-  font-family: 'SF Mono', 'Fira Code', monospace;
-}
-
-/* ═══════════════════════════════════
-   Auto-save Indicator
-   ═══════════════════════════════════ */
+/* ── Autosave Indicator ── */
 .autosave-indicator {
   display: flex;
   align-items: center;
@@ -693,9 +350,7 @@
   color: #94a3b8;
 }
 
-/* ═══════════════════════════════════
-   Full-Screen Builder Layout
-   ═══════════════════════════════════ */
+/* ── Fullscreen Builder ── */
 .builder-fullscreen-wrapper {
   position: relative;
   width: 100%;
@@ -754,20 +409,53 @@
   font-weight: 500;
 }
 
+/* ── ProseMirror inside the canvas gets body padding ── */
+.a4-page>.ProseMirror {
+  padding: var(--theme-content-padding, 80px);
+  min-height: 900px;
+  position: relative;
+  z-index: 2;
+}
+
+/* When a hero is present, remove top padding from ProseMirror
+   so content starts flush below the hero band */
+.a4-page.has-hero>.ProseMirror {
+  padding-top: 40px;
+}
+
 /* ── Animations ── */
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes slideUp {
-  from { opacity: 0; transform: translateY(12px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes pulse-save {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.5;
+  }
 }
 
 .saving-pulse {

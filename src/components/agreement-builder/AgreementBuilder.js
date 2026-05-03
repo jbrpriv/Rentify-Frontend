@@ -87,7 +87,7 @@ const AgreementBuilder = ({ initialContent = '', onSave, isSaving = false, templ
     content: initialContent || '<h1>Rental Agreement</h1><p>Type your agreement here. Insert variables or clauses using the toolbox on the right.</p>',
     editorProps: {
       attributes: {
-        class: 'a4-page outline-none',
+        class: 'outline-none',
       },
     },
   });
@@ -327,7 +327,7 @@ const AgreementBuilder = ({ initialContent = '', onSave, isSaving = false, templ
           >
             <Eye size={16} /> Preview
           </button>
-          
+
           <div className="h-6 w-[1px] bg-gray-200 mx-1" />
 
           <button
@@ -342,10 +342,10 @@ const AgreementBuilder = ({ initialContent = '', onSave, isSaving = false, templ
       </div>
 
       {/* Toolbar */}
-      <Toolbar 
-        editor={editor} 
+      <Toolbar
+        editor={editor}
         templateType={templateType}
-        isToolboxOpen={isToolboxOpen} 
+        isToolboxOpen={isToolboxOpen}
         onToggleToolbox={() => {
           setIsToolboxOpen((prev) => !prev);
           setIsTemplateLibraryOpen(false);
@@ -362,23 +362,56 @@ const AgreementBuilder = ({ initialContent = '', onSave, isSaving = false, templ
       />
 
       {/* Editor Main Area */}
-      <div 
-        className={`flex-1 document-container zoom-${zoom} theme-${activeTheme} layout-${activeLayoutStyle}`} 
-        style={{ 
-          overflowY: 'auto', 
+      <div
+        className={`flex-1 document-container zoom-${zoom} theme-${activeTheme} layout-${activeLayoutStyle}`}
+        style={{
+          overflowY: 'auto',
           overflowX: 'hidden',
           ...themeVars,
         }}
       >
-        <div ref={editorWrapperRef} className="relative">
+        {/* A4 page wrapper — hero band sits above ProseMirror */}
+        <div
+          ref={editorWrapperRef}
+          className="relative a4-page"
+          style={{ backgroundColor: getThemeById(activeTheme)?.pageBackground || '#FFFFFF' }}
+        >
+          {/* Hero Band — real DOM block, NOT a CSS pseudo-element */}
+          {(() => {
+            const t = getThemeById(activeTheme);
+            if (!t?.hero?.enabled) return null;
+            return (
+              <div
+                className="theme-hero-band"
+                style={{
+                  height: t.hero.height,
+                  minHeight: t.hero.height,
+                  background: t.hero.background || t.colors.heroBackground || 'transparent',
+                }}
+              >
+                <div
+                  className="hero-title"
+                  style={{
+                    fontFamily: t.fonts.heading,
+                    color: t.hero.titleColor || '#FFFFFF',
+                    fontSize: t.hero.titleFontSize || '2.5rem',
+                  }}
+                >
+                  {editor?.state?.doc?.firstChild?.type?.name === 'heading'
+                    ? editor.state.doc.firstChild.textContent
+                    : 'Document Title'}
+                </div>
+              </div>
+            );
+          })()}
           <EditorContent editor={editor} />
         </div>
       </div>
 
       {/* Floating Toolbox */}
-      <FloatingToolbox 
-        editor={editor} 
-        templateType={templateType} 
+      <FloatingToolbox
+        editor={editor}
+        templateType={templateType}
         isOpen={isToolboxOpen}
         onClose={() => setIsToolboxOpen(false)}
       />
@@ -391,9 +424,9 @@ const AgreementBuilder = ({ initialContent = '', onSave, isSaving = false, templ
       />
 
       {/* Preview Modal */}
-      <PreviewModal 
-        isOpen={showPreview} 
-        onClose={() => setShowPreview(false)} 
+      <PreviewModal
+        isOpen={showPreview}
+        onClose={() => setShowPreview(false)}
         html={editor.getHTML()}
         activeTheme={activeTheme}
         customWatermark={customWatermark}
@@ -438,7 +471,7 @@ const AgreementBuilder = ({ initialContent = '', onSave, isSaving = false, templ
         <div className="flex items-center gap-4">
           <span>Words: {getWordCount()}</span>
           <span>Characters: {getCharCount()}</span>
-          
+
           {/* Auto-save indicator */}
           <span className={`autosave-indicator ${autoSaveStatus === 'saved' ? 'saved' : autoSaveStatus === 'saving' ? 'saving saving-pulse' : 'unsaved'}`}>
             {autoSaveStatus === 'saved' && (
