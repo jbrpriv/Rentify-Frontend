@@ -346,6 +346,50 @@ function resolveTemplateTheme(baseTheme, customizations) {
   };
 }
 
+function extractFirstHtmlBlock(html, regex) {
+  const match = html.match(regex);
+  if (!match) return { block: '', rest: html };
+  const block = match[0];
+  return {
+    block,
+    rest: html.replace(block, ''),
+  };
+}
+
+function applyThemeLayout(html, layoutStyle = 'minimalist') {
+  if (!html) return html;
+
+  let working = html;
+  const { block: heading, rest: afterHeading } = extractFirstHtmlBlock(working, /<h1\b[^>]*>[\s\S]*?<\/h1>/i);
+  working = afterHeading;
+  const { block: intro, rest: afterIntro } = extractFirstHtmlBlock(working, /<p\b[^>]*>[\s\S]*?<\/p>/i);
+  working = afterIntro;
+  const { block: table, rest: afterTable } = extractFirstHtmlBlock(working, /<table\b[^>]*>[\s\S]*?<\/table>/i);
+  working = afterTable;
+
+  const safeHeading = heading || '<h1>Rental Agreement</h1>';
+
+  switch (layoutStyle) {
+    case 'classic':
+      return `${safeHeading}${intro || ''}${table ? `<div class="layout-classic-table">${table}</div>` : ''}${working}`;
+    case 'legal':
+      return `<div class="layout-meta-strip"><span>Legal Format</span><span>${new Date().toLocaleDateString()}</span></div>${safeHeading}${intro || ''}${table ? `<div class="layout-legal-table">${table}</div>` : ''}${working}`;
+    case 'premium':
+      return `<div class="layout-premium-hero"><div>${safeHeading}${intro || ''}</div>${table ? `<div class="layout-premium-summary">${table}</div>` : ''}</div>${working}`;
+    case 'contemporary':
+      return `${safeHeading}<div class="layout-contemporary-top">${table ? `<div class="layout-contemporary-card">${table}</div>` : ''}${intro ? `<div class="layout-contemporary-card">${intro}</div>` : ''}</div>${working}`;
+    case 'editorial':
+      return `<div class="layout-editorial-header">${safeHeading}${intro || ''}</div>${table ? `<div class="layout-editorial-feature">${table}</div>` : ''}${working}`;
+    case 'ledger':
+      return `<div class="layout-meta-strip"><span>Ledger View</span><span>${new Date().toLocaleDateString()}</span></div>${safeHeading}${table ? `<div class="layout-ledger-block">${table}</div>` : ''}${intro || ''}${working}`;
+    case 'modern':
+      return `<div class="layout-modern-hero-grid"><div>${safeHeading}${intro || ''}</div>${table ? `<aside class="layout-modern-summary">${table}</aside>` : ''}</div>${working}`;
+    case 'minimalist':
+    default:
+      return html;
+  }
+}
+
 function buildTemplateThemeVars(theme) {
   const headingFont = theme?.headingFontFamily || theme?.fontFamily || "'Segoe UI', Arial, sans-serif";
   const bodyFont = theme?.fontFamily || "'Segoe UI', Arial, sans-serif";
@@ -615,6 +659,12 @@ function TemplateDocument({
     [baseTheme, customizations]
   );
 
+  const layoutStyle = resolvedTheme?.layoutStyle || 'minimalist';
+  const laidOutHtml = useMemo(
+    () => applyThemeLayout(html, layoutStyle),
+    [html, layoutStyle]
+  );
+
   const themeVars = useMemo(
     () => buildTemplateThemeVars(resolvedTheme),
     [resolvedTheme]
@@ -653,9 +703,9 @@ function TemplateDocument({
     if (!containerRef.current) return;
     
     const htmlContainer = containerRef.current.querySelector('#agreement-tiptap-html-container');
-    if (htmlContainer && lastInjectedHtml.current !== html) {
-      htmlContainer.innerHTML = html;
-      lastInjectedHtml.current = html;
+    if (htmlContainer && lastInjectedHtml.current !== laidOutHtml) {
+      htmlContainer.innerHTML = laidOutHtml;
+      lastInjectedHtml.current = laidOutHtml;
     }
 
     if (hasPortal) {
@@ -666,7 +716,7 @@ function TemplateDocument({
     } else if (portalNode !== null) {
       setPortalNode(null);
     }
-  }, [html, hasPortal, portalNode]);
+  }, [laidOutHtml, hasPortal, portalNode]);
 
   return (
     <div className="agreement-template-preview" ref={containerRef}>
@@ -798,11 +848,69 @@ function TemplateDocument({
         }
         .agreement-table th p { color: var(--theme-table-header-text, #334155) !important; }
         .agreement-table p { margin: 0; }
+
+        .layout-meta-strip { display: flex; justify-content: space-between; gap: 12px; border: 1px solid var(--theme-table-border, #cbd5e1); border-radius: 10px; padding: 8px 12px; margin-bottom: 12px; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .04em; color: var(--theme-body-color, #334155); }
+        .layout-modern-hero-grid,
+        .layout-premium-hero,
+        .layout-contemporary-top { display: grid; gap: 14px; grid-template-columns: minmax(0,1.7fr) minmax(0,1fr); align-items: start; margin-bottom: 12px; }
+        .layout-modern-summary,
+        .layout-premium-summary,
+        .layout-classic-table,
+        .layout-legal-table,
+        .layout-contemporary-card,
+        .layout-editorial-feature,
+        .layout-ledger-block { border: 1px solid var(--theme-table-border, #cbd5e1); border-radius: 12px; padding: 10px; background: rgba(255,255,255,0.85); }
+        .layout-modern-summary .agreement-table,
+        .layout-premium-summary .agreement-table,
+        .layout-classic-table .agreement-table,
+        .layout-legal-table .agreement-table,
+        .layout-contemporary-card .agreement-table,
+        .layout-editorial-feature .agreement-table,
+        .layout-ledger-block .agreement-table { margin: 0; }
+        .layout-editorial-header { border-left: 4px solid var(--theme-primary, #0f172a); padding-left: 12px; margin-bottom: 10px; }
+
+        .signature-preview {
+          margin-top: 48px;
+          border-top: 1px solid #e2e8f0;
+          padding-top: 20px;
+          page-break-inside: avoid;
+        }
+        .signature-preview-grid {
+          display: grid;
+          grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+          gap: 30px;
+          margin-top: 12px;
+        }
+        .signature-preview-label {
+          font-size: 10px;
+          font-weight: 800;
+          text-transform: uppercase;
+          letter-spacing: 0.08em;
+          color: #64748b;
+          margin-bottom: 24px;
+        }
+        .signature-preview-line {
+          border-top: 1.5px solid #0f172a;
+          margin-bottom: 8px;
+        }
+        .signature-preview-name {
+          font-size: 13px;
+          font-weight: 700;
+          color: #0f172a;
+        }
+
+        @media (max-width: 900px) {
+          .layout-modern-hero-grid,
+          .layout-premium-hero,
+          .layout-contemporary-top,
+          .signature-preview-grid { grid-template-columns: minmax(0,1fr); }
+        }
+
         @media print {
           .dual-column-wrapper::after { border-left-color: #000; }
         }
       `}</style>
-      <div className="template-page" style={themeVars}>
+      <div className={`template-page layout-${layoutStyle}`} style={themeVars}>
         <div className="content-layer agreement-tiptap-content">
           <div id="agreement-tiptap-html-container"></div>
 
@@ -852,6 +960,22 @@ function TemplateDocument({
               />
             </div>
           )}
+
+          <div className="signature-preview">
+            <h2>Signatures</h2>
+            <div className="signature-preview-grid">
+              <div>
+                <p className="signature-preview-label">Landlord Signature</p>
+                <div className="signature-preview-line"></div>
+                <p className="signature-preview-name">{offerData?.landlord?.name || offerData?.property?.landlord?.name || 'Landlord'}</p>
+              </div>
+              <div>
+                <p className="signature-preview-label">Tenant Signature</p>
+                <div className="signature-preview-line"></div>
+                <p className="signature-preview-name">{offerData?.tenant?.name || 'Tenant'}</p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

@@ -313,6 +313,99 @@
   height: 0;
 }
 
+/* ── Live Canvas Theme Layout Engine ── */
+.document-container[class*="layout-"] .ProseMirror {
+  min-height: 100%;
+}
+
+.document-container.layout-modern .ProseMirror,
+.document-container.layout-premium .ProseMirror,
+.document-container.layout-contemporary .ProseMirror {
+  display: grid;
+  grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr);
+  gap: 14px;
+  align-content: start;
+}
+
+.document-container.layout-modern .ProseMirror > h1:first-of-type,
+.document-container.layout-premium .ProseMirror > h1:first-of-type,
+.document-container.layout-contemporary .ProseMirror > h1:first-of-type {
+  grid-column: 1 / 2;
+  margin-bottom: 0.25rem;
+}
+
+.document-container.layout-modern .ProseMirror > p:first-of-type,
+.document-container.layout-premium .ProseMirror > p:first-of-type,
+.document-container.layout-contemporary .ProseMirror > p:first-of-type {
+  grid-column: 1 / 2;
+  margin-top: 0;
+}
+
+.document-container.layout-modern .ProseMirror > table:first-of-type,
+.document-container.layout-premium .ProseMirror > table:first-of-type,
+.document-container.layout-contemporary .ProseMirror > table:first-of-type,
+.document-container.layout-modern .ProseMirror > .agreement-table:first-of-type,
+.document-container.layout-premium .ProseMirror > .agreement-table:first-of-type,
+.document-container.layout-contemporary .ProseMirror > .agreement-table:first-of-type {
+  grid-column: 2 / 3;
+  grid-row: 1 / span 3;
+  margin: 0;
+  border: 1px solid var(--theme-table-border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.document-container.layout-modern .ProseMirror > *:not(h1):not(p):not(table):not(.agreement-table),
+.document-container.layout-premium .ProseMirror > *:not(h1):not(p):not(table):not(.agreement-table),
+.document-container.layout-contemporary .ProseMirror > *:not(h1):not(p):not(table):not(.agreement-table) {
+  grid-column: 1 / -1;
+}
+
+.document-container.layout-legal .ProseMirror > h1:first-of-type,
+.document-container.layout-editorial .ProseMirror > h1:first-of-type,
+.document-container.layout-ledger .ProseMirror > h1:first-of-type,
+.document-container.layout-classic .ProseMirror > h1:first-of-type {
+  margin-top: 0.25rem;
+}
+
+.document-container.layout-editorial .ProseMirror > h1:first-of-type {
+  border-left: 4px solid var(--theme-primary);
+  padding-left: 12px;
+}
+
+.document-container.layout-legal .ProseMirror > table:first-of-type,
+.document-container.layout-editorial .ProseMirror > table:first-of-type,
+.document-container.layout-ledger .ProseMirror > table:first-of-type,
+.document-container.layout-legal .ProseMirror > .agreement-table:first-of-type,
+.document-container.layout-editorial .ProseMirror > .agreement-table:first-of-type,
+.document-container.layout-ledger .ProseMirror > .agreement-table:first-of-type {
+  border: 1px solid var(--theme-table-border);
+  border-radius: 10px;
+  overflow: hidden;
+  margin-top: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+@media (max-width: 900px) {
+  .document-container.layout-modern .ProseMirror,
+  .document-container.layout-premium .ProseMirror,
+  .document-container.layout-contemporary .ProseMirror {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .document-container.layout-modern .ProseMirror > table:first-of-type,
+  .document-container.layout-premium .ProseMirror > table:first-of-type,
+  .document-container.layout-contemporary .ProseMirror > table:first-of-type,
+  .document-container.layout-modern .ProseMirror > .agreement-table:first-of-type,
+  .document-container.layout-premium .ProseMirror > .agreement-table:first-of-type,
+  .document-container.layout-contemporary .ProseMirror > .agreement-table:first-of-type {
+    grid-column: 1 / -1;
+    grid-row: auto;
+    margin-top: 0.25rem;
+    margin-bottom: 0.5rem;
+  }
+}
+
 /* ── Variable Styling ── */
 .variable-node {
   display: inline-flex;
@@ -323,11 +416,19 @@
   border-radius: 6px;
   border: 1px solid transparent;
   font-weight: 700;
-  font-size: 0.9em;
+  font-size: inherit;
   cursor: default;
   user-select: none;
   font-family: inherit;
   box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+  transition: box-shadow 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+}
+
+.variable-node.is-selected,
+.ProseMirror .ProseMirror-selectednode .variable-node {
+  border-color: #2563eb !important;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.25), 0 1px 2px rgba(0, 0, 0, 0.08);
+  transform: translateY(-1px);
 }
 
 .variable-dot {

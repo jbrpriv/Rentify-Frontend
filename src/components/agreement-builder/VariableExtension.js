@@ -14,16 +14,17 @@ const CATEGORY_STYLES = {
   default:    { bg: '#F8FAFC', border: '#E2E8F0', text: '#475569', dot: '#94A3B8' }, // Slate
 };
 
-const VariableComponent = ({ node }) => {
+const VariableComponent = ({ node, selected }) => {
   const { label, category } = node.attrs;
   const style = CATEGORY_STYLES[category] || CATEGORY_STYLES.default;
 
   return (
     <NodeViewWrapper className="inline" style={{ lineHeight: 'normal' }}>
       <span
-        className="variable-node"
+        className={`variable-node ${selected ? 'is-selected' : ''}`}
         data-name={node.attrs.name}
         title={`Variable: ${label}`}
+        aria-selected={selected ? 'true' : 'false'}
         style={{
           background: style.bg,
           borderColor: style.border,

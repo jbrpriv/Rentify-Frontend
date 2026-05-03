@@ -28,6 +28,7 @@ import ShortcutsModal from './ShortcutsModal';
 import './builder.css';
 
 const ZOOM_LEVELS = [75, 100, 125, 150];
+const FONT_SIZE_STEPS = ['12px', '14px', '16px', '18px', '20px', '24px', '32px', '48px'];
 
 const AgreementBuilder = ({ initialContent = '', onSave, isSaving = false, templateType = 'agreement' }) => {
   const [showPreview, setShowPreview] = useState(false);
@@ -127,11 +128,49 @@ const AgreementBuilder = ({ initialContent = '', onSave, isSaving = false, templ
   // ── Keyboard shortcuts ──
   useEffect(() => {
     const handleKeyDown = (e) => {
+      const stepFontSize = (direction) => {
+        if (!editor) return;
+
+        const activeSize = editor.getAttributes('fontSize')?.size;
+        const normalized = FONT_SIZE_STEPS.includes(activeSize) ? activeSize : '16px';
+        const currentIndex = FONT_SIZE_STEPS.indexOf(normalized);
+        const nextIndex = direction === 'up'
+          ? Math.min(currentIndex + 1, FONT_SIZE_STEPS.length - 1)
+          : Math.max(currentIndex - 1, 0);
+
+        editor.chain().focus().setFontSize(FONT_SIZE_STEPS[nextIndex]).run();
+      };
+
       // Ctrl+S → Save
       if ((e.ctrlKey || e.metaKey) && e.key === 's') {
         e.preventDefault();
         handleSave();
       }
+
+      // Ctrl+Shift+> / Ctrl+Shift+< → Font size up/down
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === '>' || e.key === '.')) {
+        e.preventDefault();
+        stepFontSize('up');
+      }
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === '<' || e.key === ',')) {
+        e.preventDefault();
+        stepFontSize('down');
+      }
+
+      // Ctrl+Shift+E/R/L → Align center/right/left
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 'e') {
+        e.preventDefault();
+        editor.chain().focus().setTextAlign('center').run();
+      }
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 'r') {
+        e.preventDefault();
+        editor.chain().focus().setTextAlign('right').run();
+      }
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 'l') {
+        e.preventDefault();
+        editor.chain().focus().setTextAlign('left').run();
+      }
+
       // ? → Show shortcuts (only when not typing in an input)
       if (e.key === '?' && !['INPUT', 'TEXTAREA'].includes(e.target.tagName) && !e.target.closest('.ProseMirror')) {
         e.preventDefault();
@@ -179,6 +218,11 @@ const AgreementBuilder = ({ initialContent = '', onSave, isSaving = false, templ
 
     return vars;
   }, [activeTheme, customWatermark]);
+
+  const activeLayoutStyle = React.useMemo(() => {
+    const theme = getThemeById(activeTheme);
+    return theme?.layoutStyle || 'minimalist';
+  }, [activeTheme]);
 
   const handleSave = useCallback(() => {
     if (!editor) return;
@@ -292,7 +336,7 @@ const AgreementBuilder = ({ initialContent = '', onSave, isSaving = false, templ
 
       {/* Editor Main Area */}
       <div 
-        className={`flex-1 document-container zoom-${zoom} theme-${activeTheme}`} 
+        className={`flex-1 document-container zoom-${zoom} theme-${activeTheme} layout-${activeLayoutStyle}`} 
         style={{ 
           overflowY: 'auto', 
           overflowX: 'hidden',

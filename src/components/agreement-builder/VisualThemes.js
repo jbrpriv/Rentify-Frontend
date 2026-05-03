@@ -15,6 +15,7 @@ export const VISUAL_THEMES = [
     id: 'blank',
     name: 'Blank',
     description: 'No styling — raw document with system fonts.',
+    layoutStyle: 'minimalist',
     preview: {
       primarySwatch: '#000000',
       accentSwatch: '#666666',
@@ -60,6 +61,7 @@ export const VISUAL_THEMES = [
     id: 'commercial-classic',
     name: 'Commercial Classic',
     description: 'Traditional serif typography with navy & gold accents.',
+    layoutStyle: 'classic',
     preview: {
       primarySwatch: '#1B2A4A',
       accentSwatch: '#C5A55A',
@@ -106,6 +108,7 @@ export const VISUAL_THEMES = [
     id: 'modern-minimalist',
     name: 'Modern Minimalist',
     description: 'Clean sans-serif with generous whitespace and soft blue accents.',
+    layoutStyle: 'modern',
     preview: {
       primarySwatch: '#1E293B',
       accentSwatch: '#3B82F6',
@@ -152,6 +155,7 @@ export const VISUAL_THEMES = [
     id: 'professional-legal',
     name: 'Professional Legal',
     description: 'Formal serif with dark slate & burgundy — built for legal documents.',
+    layoutStyle: 'legal',
     preview: {
       primarySwatch: '#1A1A2E',
       accentSwatch: '#7B2D3B',
@@ -199,6 +203,7 @@ export const VISUAL_THEMES = [
     id: 'executive-premium',
     name: 'Executive Premium',
     description: 'Luxury feel with deep purple, rose gold, and gradient hero.',
+    layoutStyle: 'premium',
     preview: {
       primarySwatch: '#2D1B4E',
       accentSwatch: '#C4917B',
@@ -246,6 +251,7 @@ export const VISUAL_THEMES = [
     id: 'fresh-contemporary',
     name: 'Fresh Contemporary',
     description: 'Vibrant teal & coral with rounded elements and modern energy.',
+    layoutStyle: 'contemporary',
     preview: {
       primarySwatch: '#0F766E',
       accentSwatch: '#F97066',
@@ -292,6 +298,7 @@ export const VISUAL_THEMES = [
     id: 'elegant-serif',
     name: 'Elegant Serif',
     description: 'A sophisticated theme using Cinzel with a subtle textured paper background.',
+    layoutStyle: 'editorial',
     preview: {
       primarySwatch: '#111111',
       accentSwatch: '#B29B72',
@@ -337,6 +344,7 @@ export const VISUAL_THEMES = [
     id: 'tech-innovator',
     name: 'Tech Innovator',
     description: 'A tech-forward minimalist theme using monospace headers and stark contrast.',
+    layoutStyle: 'ledger',
     preview: {
       primarySwatch: '#000000',
       accentSwatch: '#3B82F6',
