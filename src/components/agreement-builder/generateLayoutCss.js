@@ -129,7 +129,7 @@ export function generateLayoutCss(theme, themeVars) {
     }
 
     /* ── Page Body (content below hero) ── */
-    .a4-page-body {
+    .a4-page-body, .a4-page .agreement-tiptap-content {
       padding: ${contentPad};
       ${!heroEnabled ? 'padding-top: 20px;' : ''}
       position: relative;
@@ -145,7 +145,7 @@ export function generateLayoutCss(theme, themeVars) {
     }
 
     /* ── Logo ── */
-    .a4-page-body img:first-of-type {
+    .a4-page img:first-of-type {
       max-height: ${logoMaxH};
       width: auto !important;
       display: block;
@@ -155,57 +155,57 @@ export function generateLayoutCss(theme, themeVars) {
     }
 
     /* ── Typography ── */
-    .a4-page-body h1, .a4-page-body h2, .a4-page-body h3 {
+    .a4-page h1, .a4-page h2, .a4-page h3 {
       font-family: ${headingFont};
       color: ${headingColor};
     }
-    .a4-page-body h1 {
+    .a4-page h1 {
       font-size: calc(2.25rem * ${headingScale});
       font-weight: 900; line-height: 1.15;
       margin-bottom: 0.5em; padding-bottom: 0.5rem;
       border-bottom: ${headerRule};
     }
-    .a4-page-body h2 {
+    .a4-page h2 {
       font-size: calc(1.4rem * ${headingScale});
       font-weight: 700;
       margin-top: 1.5em; margin-bottom: 0.5em;
       padding-bottom: 0.25rem;
       border-bottom: ${sectionRule};
     }
-    .a4-page-body h3 {
+    .a4-page h3 {
       font-size: calc(1.15rem * ${headingScale});
       font-weight: 700;
       margin-top: 1.2em; margin-bottom: 0.4em;
     }
-    .a4-page-body p, .a4-page-body li {
+    .a4-page p, .a4-page li {
       font-family: ${bodyFont};
       color: ${bodyColor};
       line-height: ${bodyLineH};
       margin-bottom: 0.75em;
     }
-    .a4-page-body span, .a4-page-body blockquote {
+    .a4-page span, .a4-page blockquote {
       font-family: ${bodyFont};
       color: ${bodyColor};
     }
 
     /* ── Tables ── */
-    .a4-page-body table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; }
-    .a4-page-body .tableWrapper {
+    .a4-page table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; }
+    .a4-page .tableWrapper {
       border-radius: ${tableRadius};
       overflow: hidden;
       margin: 1.5rem 0;
     }
-    .a4-page-body th, .a4-page-body td {
+    .a4-page th, .a4-page td {
       border: 1px solid ${tableBorder};
       padding: 10px 14px; text-align: left;
     }
-    .a4-page-body th {
+    .a4-page th {
       background: ${tableHeaderBg};
       color: ${tableHeaderText};
       font-weight: 700;
       font-family: ${headingFont};
     }
-    .a4-page-body th p { color: ${tableHeaderText}; margin: 0; }
+    .a4-page th p { color: ${tableHeaderText}; margin: 0; }
 
     /* ── Dual Column ── */
     .dual-column-wrapper {
