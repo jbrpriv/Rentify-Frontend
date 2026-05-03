@@ -53,6 +53,8 @@ export const VISUAL_THEMES = [
     },
     spacing: {
       fontSizeScale: 1.0,
+      headingScale: 1.0,
+      asideWidth: '360px',
     },
   },
 
@@ -100,6 +102,8 @@ export const VISUAL_THEMES = [
     },
     spacing: {
       fontSizeScale: 1.0,
+      headingScale: 1.05,
+      asideWidth: '340px',
     },
   },
 
@@ -146,7 +150,9 @@ export const VISUAL_THEMES = [
       sectionRule: '1px solid #F1F5F9',
     },
     spacing: {
-      fontSizeScale: 1.0,
+      fontSizeScale: 0.98,
+      headingScale: 0.95,
+      asideWidth: '360px',
     },
   },
 
@@ -194,7 +200,9 @@ export const VISUAL_THEMES = [
       sectionRule: '1px solid #E8E2DA',
     },
     spacing: {
-      fontSizeScale: 1.0,
+      fontSizeScale: 1.02,
+      headingScale: 1.12,
+      asideWidth: '320px',
     },
   },
 
@@ -242,7 +250,9 @@ export const VISUAL_THEMES = [
       sectionRule: '1px solid #EDE5F5',
     },
     spacing: {
-      fontSizeScale: 1.0,
+      fontSizeScale: 1.12,
+      headingScale: 1.18,
+      asideWidth: '380px',
     },
   },
 
@@ -290,6 +300,8 @@ export const VISUAL_THEMES = [
     },
     spacing: {
       fontSizeScale: 1.0,
+      headingScale: 1.0,
+      asideWidth: '360px',
     },
   },
 
@@ -335,7 +347,9 @@ export const VISUAL_THEMES = [
       sectionRule: '1px dashed #D8D2C4',
     },
     spacing: {
-      fontSizeScale: 1.0,
+      fontSizeScale: 1.06,
+      headingScale: 1.22,
+      asideWidth: '320px',
     },
   },
 
@@ -382,6 +396,8 @@ export const VISUAL_THEMES = [
     },
     spacing: {
       fontSizeScale: 1.0,
+      headingScale: 1.05,
+      asideWidth: '360px',
     },
   },
 ];
@@ -417,5 +433,8 @@ export function themeToCssVars(theme) {
     '--theme-watermark-opacity': theme.watermark.enabled ? theme.watermark.opacity : 0,
     '--theme-watermark-color': theme.watermark.color || 'transparent',
     '--theme-watermark-text': theme.watermark.enabled ? `"${theme.watermark.text}"` : '""',
+    '--theme-font-scale': theme.spacing?.fontSizeScale || 1,
+    '--theme-heading-scale': theme.spacing?.headingScale || 1,
+    '--theme-aside-width': theme.spacing?.asideWidth || '360px',
   };
 }

@@ -153,11 +153,11 @@ const PreviewModal = ({ isOpen, onClose, html, activeTheme = 'blank', customWate
           color: #0f172a !important;
         }
         .agreement-preview-container h1 {
-          font-size: 2.25rem !important;
+          font-size: calc(2.25rem * var(--theme-heading-scale, 1)) !important;
           margin-bottom: 1.5rem;
         }
         .agreement-preview-container h2 {
-          font-size: 1.5rem !important;
+          font-size: calc(1.5rem * var(--theme-heading-scale, 1)) !important;
           margin-top: 1.5rem;
           margin-bottom: 1rem;
         }
@@ -277,6 +277,11 @@ const PreviewModal = ({ isOpen, onClose, html, activeTheme = 'blank', customWate
                     <head>
                       <title>Agreement Preview</title>
                       <style>
+                        :root {
+                          --theme-font-scale: ${themeVars['--theme-font-scale'] || 1};
+                          --theme-heading-scale: ${themeVars['--theme-heading-scale'] || 1};
+                          --theme-aside-width: ${themeVars['--theme-aside-width'] || '360px'};
+                        }
                         *, *::before, *::after { box-sizing: border-box; }
                         ${theme?.fonts?.googleFontUrl ? `@import url('${theme.fonts.googleFontUrl}');` : ''}
                         body {
@@ -294,8 +299,8 @@ const PreviewModal = ({ isOpen, onClose, html, activeTheme = 'blank', customWate
                           box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
                           margin-bottom: 40px;
                         }
-                        h1 { font-size: 2.25rem; font-weight: 900; color: ${theme?.colors?.headingColor || '#0f172a'}; margin-bottom: 1.5rem; font-family: ${theme?.fonts?.heading || 'inherit'}; padding-bottom: 0.5rem; border-bottom: ${theme?.borders?.headerRule || 'none'}; }
-                        h2 { font-size: 1.5rem; font-weight: 700; color: ${theme?.colors?.headingColor || '#0f172a'}; margin-top: 1.5rem; margin-bottom: 1rem; font-family: ${theme?.fonts?.heading || 'inherit'}; padding-bottom: 0.25rem; border-bottom: ${theme?.borders?.sectionRule || 'none'}; }
+                        h1 { font-size: calc(2.25rem * var(--theme-heading-scale, 1)); font-weight: 900; color: ${theme?.colors?.headingColor || '#0f172a'}; margin-bottom: 1.5rem; font-family: ${theme?.fonts?.heading || 'inherit'}; padding-bottom: 0.5rem; border-bottom: ${theme?.borders?.headerRule || 'none'}; }
+                        h2 { font-size: calc(1.5rem * var(--theme-heading-scale, 1)); font-weight: 700; color: ${theme?.colors?.headingColor || '#0f172a'}; margin-top: 1.5rem; margin-bottom: 1rem; font-family: ${theme?.fonts?.heading || 'inherit'}; padding-bottom: 0.25rem; border-bottom: ${theme?.borders?.sectionRule || 'none'}; }
                         h3 { font-size: 1.25rem; font-weight: 700; color: ${theme?.colors?.headingColor || '#0f172a'}; font-family: ${theme?.fonts?.heading || 'inherit'}; }
                         p  { margin-bottom: 1rem; }
                         strong { color: #1e40af; font-weight: 800; }

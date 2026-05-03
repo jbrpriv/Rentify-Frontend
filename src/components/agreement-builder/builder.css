@@ -36,6 +36,13 @@
   transition: background-color 0.3s ease;
 }
 
+.document-container {
+  /* new theme spacing tokens (used by layout engine) */
+  --theme-font-scale: 1;
+  --theme-heading-scale: 1;
+  --theme-aside-width: 360px;
+}
+
 .document-container.fullscreen-mode {
   min-height: calc(100vh - 60px);
 }
@@ -53,6 +60,8 @@
   transform-origin: top center;
   position: relative;
   overflow: hidden;
+  /* scale base font with theme token */
+  font-size: calc(16px * var(--theme-font-scale, 1));
 }
 
 /* ── Watermark Overlay ── */
@@ -322,7 +331,8 @@
 .document-container.layout-premium .ProseMirror,
 .document-container.layout-contemporary .ProseMirror {
   display: grid;
-  grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr);
+  /* main column grows, aside uses theme supplied width */
+  grid-template-columns: minmax(0, 1fr) minmax(0, var(--theme-aside-width, 360px));
   gap: 14px;
   align-content: start;
 }
@@ -353,6 +363,19 @@
   border: 1px solid var(--theme-table-border);
   border-radius: 10px;
   overflow: hidden;
+  max-width: var(--theme-aside-width, 360px);
+}
+
+/* Ensure wide tables in the aside do not collapse layout — allow scroll */
+.document-container .agreement-table {
+  display: block;
+  width: 100%;
+  overflow: auto;
+}
+
+.document-container .agreement-table th,
+.document-container .agreement-table td {
+  white-space: nowrap;
 }
 
 .document-container.layout-modern .ProseMirror > *:not(h1):not(p):not(table):not(.agreement-table),
@@ -440,7 +463,7 @@
 
 /* ── Typography ── */
 .ProseMirror h1 {
-  font-size: 2.25rem;
+  font-size: calc(2.25rem * var(--theme-heading-scale, 1));
   font-weight: 800;
   margin-bottom: 1.5rem;
 }

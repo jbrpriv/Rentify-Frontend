@@ -147,12 +147,12 @@ const AgreementBuilder = ({ initialContent = '', onSave, isSaving = false, templ
         handleSave();
       }
 
-      // Ctrl+Shift+> / Ctrl+Shift+< → Font size up/down
-      if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === '>' || e.key === '.')) {
+      // Ctrl+Shift+Period/Comma → Font size up/down (use physical key code to avoid locale differences)
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.code === 'Period') {
         e.preventDefault();
         stepFontSize('up');
       }
-      if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === '<' || e.key === ',')) {
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.code === 'Comma') {
         e.preventDefault();
         stepFontSize('down');
       }
