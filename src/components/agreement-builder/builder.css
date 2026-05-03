@@ -35,12 +35,29 @@
   --theme-body-line-height: 1.7;
   --theme-content-padding: 80px;
 
+  box-sizing: border-box;
   display: flex;
-  justify-content: center;
-  padding: 40px 20px 80px;
-  background-color: #e5e7eb;
+  flex-direction: column;
+  align-items: center;
+  padding: 60px 20px 120px;
+  background-color: #f1f5f9; /* Slate 100 — matches preview */
   transition: background-color 0.3s ease;
-  min-height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  height: 100%;
+  flex: 1;
+}
+
+.document-container * {
+  box-sizing: border-box;
+}
+
+.document-zoom-wrapper {
+  transition: transform 0.2s ease-out;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
 }
 
 /* ═══════════════════════════════════════════
@@ -50,10 +67,8 @@
   width: 794px;
   min-height: 1123px;
   background-color: var(--theme-page-bg, #FFFFFF);
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 20px 40px -8px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
   margin-bottom: 40px;
-  transition: transform 0.3s ease;
-  transform-origin: top center;
   position: relative;
   overflow: hidden;
   font-size: calc(16px * var(--theme-font-scale, 1));
@@ -113,10 +128,10 @@
 /* ═══════════════════════════════════════════
    PROSEMIRROR — the actual editable content
    ═══════════════════════════════════════════ */
-.a4-page>.ProseMirror {
-  /* Content padding — top shrinks when hero is present (set via inline style by AgreementBuilder) */
+.a4-page>.ProseMirror,
+.a4-page-body {
   padding: var(--theme-content-padding, 80px);
-  min-height: 800px;
+  min-height: 1000px;
   position: relative;
   z-index: 2;
   outline: none;
@@ -321,26 +336,40 @@
 }
 
 /* ═══════════════════════════════════════════
-   ZOOM LEVELS
+   VARIABLE NODES (Editor Specific)
    ═══════════════════════════════════════════ */
-.zoom-75 .a4-page {
-  transform: scale(0.75);
-  margin-bottom: calc(40px - (1123px * 0.25));
+.variable-node {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 6px;
+  border-radius: 4px;
+  border: 1px solid transparent;
+  font-weight: 800; /* Match preview's bold look */
+  cursor: pointer;
+  transition: all 0.2s;
+  user-select: none;
 }
 
-.zoom-100 .a4-page {
-  transform: scale(1);
+.variable-node.is-selected {
+  box-shadow: 0 0 0 2px #3b82f6;
 }
 
-.zoom-125 .a4-page {
-  transform: scale(1.25);
-  margin-bottom: calc(40px + (1123px * 0.25));
+.variable-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  display: inline-block;
 }
 
-.zoom-150 .a4-page {
-  transform: scale(1.5);
-  margin-bottom: calc(40px + (1123px * 0.5));
-}
+/* ═══════════════════════════════════════════
+   ZOOM CLASSES (Legacy — now handled by wrapper)
+   ═══════════════════════════════════════════ */
+/* Keeping these for safety but using JS scale primarily */
+.zoom-75 .a4-page { scale: 0.75; }
+.zoom-100 .a4-page { scale: 1; }
+.zoom-125 .a4-page { scale: 1.25; }
+.zoom-150 .a4-page { scale: 1.5; }
 
 /* ═══════════════════════════════════════════
    AUTOSAVE INDICATOR

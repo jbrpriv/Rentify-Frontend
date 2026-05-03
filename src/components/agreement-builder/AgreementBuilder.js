@@ -377,57 +377,58 @@ const AgreementBuilder = ({ initialContent = '', onSave, isSaving = false, templ
       <div
         className={`flex-1 document-container zoom-${zoom} theme-${activeTheme} layout-${activeLayoutStyle}`}
         style={{
-          overflowY: 'auto',
-          overflowX: 'hidden',
           ...themeVars,
         }}
       >
-        {/* A4 page wrapper — hero band sits above ProseMirror */}
-        <div
-          ref={editorWrapperRef}
-          className="relative a4-page"
-          data-layout-style={activeLayoutStyle}
-          style={{
-            backgroundColor: getThemeById(activeTheme)?.pageBackground || '#FFFFFF',
-            backgroundImage: getThemeById(activeTheme)?.textures?.pageBackground !== 'none'
-              ? getThemeById(activeTheme)?.textures?.pageBackground
-              : undefined,
-          }}
-        >
-          {/* Hero Band — real DOM block, NOT a CSS pseudo-element */}
-          {(() => {
-            const t = getThemeById(activeTheme);
-            if (!t?.hero?.enabled) return null;
-            return (
-              <div
-                className="theme-hero-band"
-                style={{
-                  height: t.hero.height,
-                  minHeight: t.hero.height,
-                  background: t.hero.background || t.colors.heroBackground || 'transparent',
-                }}
-              >
+        <div className="document-zoom-wrapper" style={{ transform: `scale(${zoom / 100})`, transformOrigin: 'top center' }}>
+          {/* A4 page wrapper — hero band sits above ProseMirror */}
+          <div
+            ref={editorWrapperRef}
+            className="relative a4-page"
+            data-layout-style={activeLayoutStyle}
+            style={{
+              backgroundColor: getThemeById(activeTheme)?.pageBackground || '#FFFFFF',
+              backgroundImage: getThemeById(activeTheme)?.textures?.pageBackground !== 'none'
+                ? getThemeById(activeTheme)?.textures?.pageBackground
+                : undefined,
+            }}
+          >
+            {/* Hero Band — real DOM block, NOT a CSS pseudo-element */}
+            {(() => {
+              const t = getThemeById(activeTheme);
+              if (!t?.hero?.enabled) return null;
+              return (
                 <div
-                  className="hero-title"
+                  className="theme-hero-band"
                   style={{
-                    fontFamily: t.fonts.heading,
-                    color: t.hero.titleColor || '#FFFFFF',
-                    fontSize: t.hero.titleFontSize || '2.5rem',
+                    height: t.hero.height,
+                    minHeight: t.hero.height,
+                    background: t.hero.background || t.colors.heroBackground || 'transparent',
                   }}
                 >
-                  {editor?.state?.doc?.firstChild?.type?.name === 'heading'
-                    ? editor.state.doc.firstChild.textContent
-                    : 'Document Title'}
+                  <div
+                    className="hero-title"
+                    style={{
+                      fontFamily: t.fonts.heading,
+                      color: t.hero.titleColor || '#FFFFFF',
+                      fontSize: t.hero.titleFontSize || '2.5rem',
+                    }}
+                  >
+                    {editor?.state?.doc?.firstChild?.type?.name === 'heading'
+                      ? editor.state.doc.firstChild.textContent
+                      : 'Document Title'}
+                  </div>
                 </div>
-              </div>
-            );
-          })()}
-          <EditorContent
-            editor={editor}
-            style={{
-              // Shrink top padding when hero band is present — content starts just below it
-            }}
-          />
+              );
+            })()}
+            <EditorContent
+              editor={editor}
+              className="a4-page-body"
+              style={{
+                '--theme-content-padding': getThemeById(activeTheme)?.hero?.enabled ? '40px 80px 80px' : '80px',
+              }}
+            />
+          </div>
         </div>
       </div>
 
