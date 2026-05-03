@@ -151,8 +151,9 @@ const PreviewModal = ({ isOpen, onClose, html, activeTheme = 'blank', customWate
         
         .agreement-preview-container { 
           transform: scale(0.85); 
-          transform-origin: top center;
-          margin-top: 20px;
+          transform-origin: center top;
+          margin: 0 auto;
+          display: block;
         }
 
         .preview-variable { color: #0f172a; font-weight: 800; }
