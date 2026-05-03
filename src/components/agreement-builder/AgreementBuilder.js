@@ -127,6 +127,11 @@ const AgreementBuilder = ({ initialContent = '', onSave, isSaving = false, templ
     };
   }, [editor, templateType]);
 
+  const activeLayoutStyle = React.useMemo(() => {
+    const theme = getThemeById(activeTheme);
+    return theme?.layoutStyle || 'minimalist';
+  }, [activeTheme]);
+
   // ── Layout Engine Hook ──
   useEffect(() => {
     if (!editor) return;
@@ -238,10 +243,6 @@ const AgreementBuilder = ({ initialContent = '', onSave, isSaving = false, templ
     return vars;
   }, [activeTheme, customWatermark]);
 
-  const activeLayoutStyle = React.useMemo(() => {
-    const theme = getThemeById(activeTheme);
-    return theme?.layoutStyle || 'minimalist';
-  }, [activeTheme]);
 
   const handleSave = useCallback(() => {
     if (!editor) return;
