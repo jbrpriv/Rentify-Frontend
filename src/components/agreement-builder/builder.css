@@ -221,6 +221,10 @@
   outline: none;
 }
 
+.a4-page.no-hero .a4-page-body {
+  padding-top: 20px;
+}
+
 /* ── Typography ── */
 .a4-page .ProseMirror h1,
 .a4-page .ProseMirror h2,

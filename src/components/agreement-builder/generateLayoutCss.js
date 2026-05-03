@@ -128,6 +128,7 @@ export function generateLayoutCss(theme, themeVars) {
     /* ── Page Body (content below hero) ── */
     .a4-page-body {
       padding: ${contentPad};
+      ${!heroEnabled ? 'padding-top: 20px;' : ''}
       position: relative;
       z-index: 2;
     }

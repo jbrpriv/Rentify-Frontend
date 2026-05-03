@@ -40,14 +40,12 @@ const buildPreviewHtml = (html, samples, theme, logoUrl) => {
       p.parentNode.replaceChild(div, p);
     });
 
-    // 3. Extract the first H1 for the hero title (only when hero is enabled)
+    // 3. Extract the first H1 for the hero title (Unified Header System)
     let heroTitleHtml = '';
-    if (theme?.hero?.enabled) {
-      const firstH1 = doc.body.querySelector('h1');
-      if (firstH1) {
-        heroTitleHtml = `<div class="hero-title">${firstH1.innerHTML}</div>`;
-        firstH1.remove(); // Remove from body so it doesn't duplicate
-      }
+    const firstH1 = doc.body.querySelector('h1');
+    if (firstH1) {
+      heroTitleHtml = firstH1.innerHTML;
+      firstH1.remove(); // Remove from body so it doesn't duplicate
     }
 
     // 4. Wrap in hero + body structure
@@ -58,7 +56,7 @@ const buildPreviewHtml = (html, samples, theme, logoUrl) => {
     return `
       <div class="${isHero ? 'theme-hero-band' : 'standard-header-box'}">
         ${logoHtml}
-        <div class="hero-title">${heroTitleHtml}</div>
+        <div class="hero-title">${heroTitleHtml || 'Untitled Document'}</div>
       </div>
       <div class="a4-page-body">${bodyContent}</div>
     `;
