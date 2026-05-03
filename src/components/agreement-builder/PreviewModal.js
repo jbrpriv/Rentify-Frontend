@@ -18,26 +18,26 @@ const applyThemeLayout = (html, layoutStyle = 'minimalist') => {
   working = afterHeading;
   const { block: intro, rest: afterIntro } = extractFirstBlock(working, /<p\b[^>]*>[\s\S]*?<\/p>/i);
   working = afterIntro;
-  const { block: table, rest: afterTable } = extractFirstBlock(working, /<table\b[^>]*>[\s\S]*?<\/table>/i);
-  working = afterTable;
+  const { block: clauses, rest: afterClauses } = extractFirstBlock(working, /<div\b[^>]*sidebar-clauses-target[\s\S]*?<\/div>/i);
+  working = afterClauses;
 
   const safeHeading = heading || '<h1>Rental Agreement</h1>';
 
   switch (layoutStyle) {
-    case 'classic':
-      return `${safeHeading}${intro || ''}${table ? `<div class="layout-classic-table">${table}</div>` : ''}${working}`;
-    case 'legal':
-      return `<div class="layout-meta-strip"><span>Agreement Preview</span><span>${new Date().toLocaleDateString()}</span></div>${safeHeading}${intro || ''}${table ? `<div class="layout-legal-table">${table}</div>` : ''}${working}`;
     case 'premium':
-      return `<div class="layout-premium-hero"><div>${safeHeading}${intro || ''}</div>${table ? `<div class="layout-premium-summary">${table}</div>` : ''}</div>${working}`;
+      return `<div class="layout-premium-hero"><div>${safeHeading}${intro || ''}</div>${clauses ? `<div class="layout-premium-summary" data-layout-role="primary-sidebar-item">${clauses}</div>` : ''}</div>${working}`;
     case 'contemporary':
-      return `${safeHeading}<div class="layout-contemporary-top">${table ? `<div class="layout-contemporary-card">${table}</div>` : ''}${intro ? `<div class="layout-contemporary-card">${intro}</div>` : ''}</div>${working}`;
-    case 'editorial':
-      return `<div class="layout-editorial-header">${safeHeading}${intro || ''}</div>${table ? `<div class="layout-editorial-feature">${table}</div>` : ''}${working}`;
-    case 'ledger':
-      return `<div class="layout-meta-strip"><span>Ledger View</span><span>${new Date().toLocaleDateString()}</span></div>${safeHeading}${table ? `<div class="layout-ledger-block">${table}</div>` : ''}${intro || ''}${working}`;
+      return `${safeHeading}<div class="layout-contemporary-top">${clauses ? `<div class="layout-contemporary-card" data-layout-role="primary-sidebar-item">${clauses}</div>` : ''}${intro ? `<div class="layout-contemporary-card">${intro}</div>` : ''}</div>${working}`;
     case 'modern':
-      return `<div class="layout-modern-hero-grid"><div>${safeHeading}${intro || ''}</div>${table ? `<aside class="layout-modern-summary">${table}</aside>` : ''}</div>${working}`;
+      return `<div class="layout-modern-hero-grid"><div>${safeHeading}${intro || ''}</div>${clauses ? `<aside class="layout-modern-summary" data-layout-role="primary-sidebar-item">${clauses}</aside>` : ''}</div>${working}`;
+    case 'ledger':
+      return `<div class="layout-meta-strip"><span>Ledger View</span><span>${new Date().toLocaleDateString()}</span></div>${safeHeading}${working}`;
+    case 'classic':
+      return `${safeHeading}${intro || ''}${working}`;
+    case 'legal':
+      return `<div class="layout-meta-strip"><span>Agreement Preview</span><span>${new Date().toLocaleDateString()}</span></div>${safeHeading}${intro || ''}${working}`;
+    case 'editorial':
+      return `<div class="layout-editorial-header">${safeHeading}${intro || ''}</div>${working}`;
     case 'minimalist':
     default:
       return html;
@@ -116,22 +116,24 @@ const PreviewModal = ({ isOpen, onClose, html, activeTheme = 'blank', customWate
         v.parentNode.replaceChild(span, v);
       });
 
-      // 2. Handle Clauses Placeholder
+      // 3. Handle Clauses Placeholder
       const placeholders = doc.querySelectorAll('div[data-type="clauses-placeholder"]');
       placeholders.forEach(p => {
         const div = doc.createElement('div');
-        div.className = 'preview-clauses-placeholder my-6 p-6 border-2 border-dashed border-green-200 bg-green-50 rounded-xl text-center';
+        div.className = 'preview-clauses-placeholder sidebar-clauses-target my-6 p-6 border-2 border-dashed border-green-200 bg-green-50 rounded-xl text-center';
+        div.setAttribute('data-layout-role', 'primary-sidebar-item');
         div.innerHTML = `
           <div style="display: flex; flex-direction: column; align-items: center; gap: 8px; color: #059669;">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-scroll-text"><path d="M15 12h-5"/><path d="M15 8h-5"/><path d="M19 17V5a2 2 0 0 0-2-2H4"/><path d="M8 21h12a2 2 0 0 0 2-2v-1a1 1 0 0 0-1-1H11a1 1 0 0 0-1 1v1a2 2 0 1 1-4 0V5a2 2 0 1 0-4 0v2a1 1 0 0 0 1 1h3"/></svg>
-            <span style="font-weight: 800; font-size: 14px; text-transform: uppercase; letter-spacing: 1px;">Selected Clauses Injection Point</span>
-            <span style="font-size: 12px; opacity: 0.8; font-weight: 500;">Dynamic content from the clause library will populate here.</span>
+            <span style="font-weight: 800; font-size: 14px; text-transform: uppercase; letter-spacing: 1px;">Clauses Sidebar</span>
+            <span style="font-size: 11px; opacity: 0.8; font-weight: 500;">Dynamic legal clauses will be injected here in the final document.</span>
           </div>
         `;
         p.parentNode.replaceChild(div, p);
       });
 
-      // 3. Apply layout transformation so themes can alter structure, not only colors
+      // 4. Apply layout transformation
+      // Note: applyThemeLayout now handles the structural shift for sidebars
       return applyThemeLayout(doc.body.innerHTML, theme?.layoutStyle || 'minimalist');
     } catch (error) {
       console.error('Preview replacement error:', error);
@@ -150,10 +152,9 @@ const PreviewModal = ({ isOpen, onClose, html, activeTheme = 'blank', customWate
         ${generateLayoutCss(theme, themeVars)}
         
         .agreement-preview-container { 
-          transform: scale(0.85); 
-          transform-origin: center top;
           margin: 0 auto;
           display: block;
+          position: relative;
         }
 
         .preview-variable { color: #0f172a; font-weight: 800; }
@@ -267,7 +268,7 @@ const PreviewModal = ({ isOpen, onClose, html, activeTheme = 'blank', customWate
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-12 bg-gray-100/50 flex justify-center">
+        <div className="flex-1 overflow-y-auto p-12 bg-slate-50 flex justify-center">
           <div
             className="agreement-preview-container theme-hero-band-host"
             style={{

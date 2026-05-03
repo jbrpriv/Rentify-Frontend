@@ -66,10 +66,10 @@ export function generateLayoutCss(theme, themeVars) {
     .layout-modern .ProseMirror,
     .layout-premium .ProseMirror {
       display: grid !important;
-      gap: 32px;
-      grid-template-columns: minmax(0, 1.7fr) minmax(220px, 1fr);
+      gap: 40px;
+      grid-template-columns: minmax(0, 1.8fr) minmax(240px, 1fr);
       grid-template-rows: auto auto 1fr;
-      margin-bottom: 24px;
+      margin-bottom: 32px;
       align-items: start;
       position: relative;
       z-index: 1;
@@ -77,48 +77,43 @@ export function generateLayoutCss(theme, themeVars) {
 
     /* Column spans for grid layouts */
     .layout-modern .ProseMirror > *:not([data-layout-role]),
-    .layout-premium .ProseMirror > *:not([data-layout-role]) {
-      grid-column: 1 / -1;
+    .layout-premium .ProseMirror > *:not([data-layout-role]),
+    [data-layout-role="primary-table"] {
+      grid-column: 1 / -1 !important;
     }
 
+    /* Sidebar Items (Previously the table, now the Clauses) */
     .layout-modern-summary, 
     .layout-premium-summary,
-    [data-layout-role="primary-table"] {
+    [data-layout-role="primary-sidebar-item"] {
       border: 1px solid ${tableBorder};
-      border-radius: ${tableRadius};
-      padding: 16px;
-      background: rgba(255, 255, 255, 0.85);
-      min-width: 220px;
+      border-radius: 16px;
+      padding: 24px;
+      background: rgba(255, 255, 255, 0.9);
+      min-width: 240px;
       max-width: 100%;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.03);
-      overflow: hidden;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.04);
       grid-column: 2;
-      grid-row: 1 / span 2;
+      grid-row: 1 / span 10; /* Stretch sidebar */
+      position: sticky;
+      top: 40px;
+      overflow: visible !important;
     }
     
-    [data-layout-role="primary-heading"] { grid-column: 1; grid-row: 1; }
-    [data-layout-role="intro-paragraph"] { grid-column: 1; grid-row: 2; }
-    
-    .layout-modern-summary .agreement-table,
-    .layout-premium-summary .agreement-table {
-      margin: 0;
-      font-size: 0.8em;
-    }
+    [data-layout-role="primary-heading"] { grid-column: 1; grid-row: 1; text-align: left !important; }
+    [data-layout-role="intro-paragraph"] { grid-column: 1; grid-row: 2; text-align: left !important; }
 
-    /* Premium specific override */
-    .layout-premium-summary {
-      background: rgba(255, 255, 255, 0.15);
-      border-color: rgba(255, 255, 255, 0.3);
-      backdrop-filter: blur(12px);
+    /* Premium specific override - Glassmorphism for the Clauses Sidebar */
+    .layout-premium-summary,
+    .layout-premium [data-layout-role="primary-sidebar-item"] {
+      background: rgba(255, 255, 255, 0.12) !important;
+      border-color: rgba(255, 255, 255, 0.25) !important;
+      backdrop-filter: blur(16px);
       color: #FFFFFF !important;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.2);
     }
-    .layout-premium-summary .agreement-table th {
-      background: rgba(255, 255, 255, 0.2) !important;
-      color: #FFFFFF !important;
-      border-color: rgba(255, 255, 255, 0.3);
-    }
-    .layout-premium-summary .agreement-table td {
-      border-color: rgba(255, 255, 255, 0.3);
+    
+    .layout-premium [data-layout-role="primary-sidebar-item"] * {
       color: #FFFFFF !important;
     }
 
@@ -133,8 +128,9 @@ export function generateLayoutCss(theme, themeVars) {
     h1 { 
       font-family: var(--theme-heading-font); 
       color: var(--theme-heading-color); 
-      font-size: 2.25em; 
-      margin-bottom: 0.75em; 
+      font-size: 2.8rem; 
+      margin-bottom: 0.5em; 
+      line-height: 1.1;
       position: relative;
       z-index: 2;
     }
@@ -143,11 +139,46 @@ export function generateLayoutCss(theme, themeVars) {
     .layout-premium-hero h1,
     .layout-modern-hero-grid h1,
     .layout-ledger-wrap h1,
+    .layout-premium h1,
+    .layout-modern h1,
+    .layout-ledger h1,
     .layout-premium-hero h2,
     .layout-modern-hero-grid h2,
     .layout-ledger-wrap h2,
     [data-layout-role="primary-heading"] {
       color: var(--theme-hero-title-color, #FFFFFF) !important;
+    }
+
+    /* ── Meta Strip (Ledger/Legal) ── */
+    .layout-meta-strip {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 20px;
+      margin-bottom: 40px;
+      background: rgba(0, 0, 0, 0.03);
+      border-radius: 8px;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: #64748b;
+      border: 1px solid rgba(0,0,0,0.05);
+      position: relative;
+      z-index: 10;
+    }
+    
+    /* Clauses Sidebar Header */
+    [data-layout-role="primary-sidebar-item"]::before {
+      content: 'Legal Provisions';
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 16px;
+      opacity: 0.6;
+      border-bottom: 1px solid currentColor;
+      padding-bottom: 8px;
     }
 
     h2 { font-family: var(--theme-heading-font); color: var(--theme-heading-color); font-size: 1.5em; margin-top: 1.5em; margin-bottom: 0.75em; }

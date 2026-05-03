@@ -32,13 +32,19 @@ export function applyLayoutRoles(editorDom, layoutStyle) {
   const firstH1 = proseMirror.querySelector('h1');
   const firstP = proseMirror.querySelector('p:not(:empty)');
   const firstTable = proseMirror.querySelector('table.agreement-table');
+  const clausesPlaceholder = proseMirror.querySelector('[data-type="clauses-placeholder"]');
   
   if (firstH1) firstH1.setAttribute('data-layout-role', 'primary-heading');
   if (firstP) firstP.setAttribute('data-layout-role', 'intro-paragraph');
   
-  // Tables in ProseMirror are often wrapped in a .tableWrapper div
+  // Tables now span full width, but we still mark them for potential styling
   if (firstTable) {
     const wrapper = firstTable.closest('.tableWrapper') || firstTable;
     wrapper.setAttribute('data-layout-role', 'primary-table');
+  }
+
+  // Clauses Placeholder now takes the sidebar role in modern/premium layouts
+  if (clausesPlaceholder) {
+    clausesPlaceholder.setAttribute('data-layout-role', 'primary-sidebar-item');
   }
 }
