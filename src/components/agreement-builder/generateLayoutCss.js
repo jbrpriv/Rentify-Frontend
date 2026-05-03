@@ -91,7 +91,7 @@ export function generateLayoutCss(theme, themeVars) {
 
     .standard-header-box {
       width: 100%;
-      padding: 60px 80px 20px;
+      padding: 40px 80px 10px;
       display: ${heroEnabled ? 'none' : 'flex'};
       flex-direction: column;
       align-items: center;
@@ -99,7 +99,13 @@ export function generateLayoutCss(theme, themeVars) {
     }
 
     .hero-logo-container {
-      margin-bottom: 1.5rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .standard-header-box .hero-title {
+      border-bottom: ${headerRule};
+      padding-bottom: 0.5rem;
+      margin-bottom: 0.5rem;
     }
 
     .hero-logo-img {

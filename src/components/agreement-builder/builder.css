@@ -147,9 +147,16 @@
   box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.05);
 }
 
+.standard-header-box .hero-title {
+  border-bottom: var(--theme-header-rule, none);
+  padding-bottom: 0.5rem !important;
+  margin-bottom: 0.5rem !important;
+  min-width: 200px;
+}
+
 /* ── Logo Area ── */
 .hero-logo-container {
-  margin-bottom: 1.5rem;
+  margin-bottom: 0.75rem;
   cursor: pointer;
   transition: transform 0.2s;
   position: relative;
@@ -188,7 +195,7 @@
 
 .standard-header-box {
   width: 100%;
-  padding: 60px 80px 20px;
+  padding: 40px 80px 10px;
   display: flex;
   flex-direction: column;
   align-items: center;
