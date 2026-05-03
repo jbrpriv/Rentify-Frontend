@@ -10,7 +10,7 @@ import { generateLayoutCss } from './generateLayoutCss';
  *  3. Wrap the content in .theme-hero-band + .a4-page-body so the hero
  *     is a real block above the content — not a pseudo-element overlay.
  */
-const buildPreviewHtml = (html, samples, theme) => {
+const buildPreviewHtml = (html, samples, theme, logoUrl) => {
   if (!html) return '';
   try {
     const parser = new DOMParser();
@@ -52,8 +52,14 @@ const buildPreviewHtml = (html, samples, theme) => {
 
     // 4. Wrap in hero + body structure
     const bodyContent = doc.body.innerHTML;
+    const isHero = theme?.hero?.enabled;
+    const logoHtml = logoUrl ? `<div class="hero-logo-container"><img src="${logoUrl}" class="hero-logo-img" /></div>` : '';
+    
     return `
-      <div class="theme-hero-band">${heroTitleHtml}</div>
+      <div class="${isHero ? 'theme-hero-band' : 'standard-header-box'}">
+        ${logoHtml}
+        <div class="hero-title">${heroTitleHtml}</div>
+      </div>
       <div class="a4-page-body">${bodyContent}</div>
     `;
   } catch (err) {
@@ -97,7 +103,7 @@ const SAMPLES = {
   termination_clause: 'Either party may terminate this agreement with 30 days prior written notice.',
 };
 
-const PreviewModal = ({ isOpen, onClose, html, activeTheme = 'blank', customWatermark }) => {
+const PreviewModal = ({ isOpen, onClose, html, activeTheme = 'blank', customWatermark, logoUrl }) => {
   const theme = useMemo(() => getThemeById(activeTheme), [activeTheme]);
   const themeVars = useMemo(() => {
     const vars = themeToCssVars(theme);
@@ -110,8 +116,8 @@ const PreviewModal = ({ isOpen, onClose, html, activeTheme = 'blank', customWate
   }, [theme, customWatermark]);
 
   const previewHtml = useMemo(
-    () => buildPreviewHtml(html, SAMPLES, theme),
-    [html, theme]
+    () => buildPreviewHtml(html, SAMPLES, theme, logoUrl),
+    [html, theme, logoUrl]
   );
 
   const layoutCss = useMemo(

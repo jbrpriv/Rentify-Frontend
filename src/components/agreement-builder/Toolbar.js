@@ -174,9 +174,19 @@ const Toolbar = ({
               ],
             }).run()}
             className="flex items-center gap-1.5 px-3 py-1.5 bg-white text-indigo-600 border border-indigo-200 hover:border-indigo-400 hover:bg-indigo-50 rounded-lg transition-colors"
+            title="Split page into two columns"
           >
             <Columns size={14} />
             <span className="text-xs font-bold leading-none">Split Column</span>
+          </button>
+
+          <button
+            onClick={() => editor.chain().focus().setHorizontalRule().run()}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-white text-slate-600 border border-slate-200 hover:border-slate-400 hover:bg-slate-50 rounded-lg transition-colors"
+            title="Insert a horizontal divider line"
+          >
+            <Undo2 size={14} className="rotate-90" />
+            <span className="text-xs font-bold leading-none">Insert Line</span>
           </button>
 
           <div className="relative">

@@ -41,6 +41,7 @@ const AgreementBuilder = ({ initialContent = '', onSave, isSaving = false, templ
   const [zoom, setZoom] = useState(100);
   const [activeTheme, setActiveTheme] = useState('modern-minimalist');
   const [customWatermark, setCustomWatermark] = useState('');
+  const [logoUrl, setLogoUrl] = useState('');
   const [autoSaveStatus, setAutoSaveStatus] = useState('idle'); // idle | saving | saved
   const autoSaveTimerRef = useRef(null);
   const lastSavedRef = useRef(null);
@@ -259,13 +260,14 @@ const AgreementBuilder = ({ initialContent = '', onSave, isSaving = false, templ
 
   const handleSave = useCallback(() => {
     if (!editor) return;
-    const content = {
-      html: editor.getHTML(),
-      json: editor.getJSON(),
-      themeId: activeTheme,
-      customWatermark,
-    };
-    if (onSave) onSave(content);
+      const content = {
+        html: editor.getHTML(),
+        json: editor.getJSON(),
+        themeId: activeTheme,
+        customWatermark,
+        logoUrl,
+      };
+      if (onSave) onSave(content);
   }, [editor, onSave, activeTheme, customWatermark]);
 
   const handleApplyTemplate = useCallback((selectedTemplate) => {
@@ -381,10 +383,10 @@ const AgreementBuilder = ({ initialContent = '', onSave, isSaving = false, templ
         }}
       >
         <div className="document-zoom-wrapper" style={{ transform: `scale(${zoom / 100})`, transformOrigin: 'top center' }}>
-          {/* A4 page wrapper — hero band sits above ProseMirror */}
+          {/* A4 page wrapper */}
           <div
             ref={editorWrapperRef}
-            className={`relative a4-page ${getThemeById(activeTheme)?.hero?.enabled ? 'has-hero' : ''}`}
+            className={`relative a4-page ${getThemeById(activeTheme)?.hero?.enabled ? 'has-hero' : 'no-hero'}`}
             data-layout-style={activeLayoutStyle}
             style={{
               backgroundColor: getThemeById(activeTheme)?.pageBackground || '#FFFFFF',
@@ -393,19 +395,50 @@ const AgreementBuilder = ({ initialContent = '', onSave, isSaving = false, templ
                 : undefined,
             }}
           >
-            {/* Hero Band — real DOM block, NOT a CSS pseudo-element */}
+            {/* Hero Band or Standard Header Box */}
             {(() => {
               const t = getThemeById(activeTheme);
-              if (!t?.hero?.enabled) return null;
+              const isHero = t?.hero?.enabled;
+              
               return (
                 <div
-                  className="theme-hero-band"
-                  style={{
+                  className={isHero ? "theme-hero-band" : "standard-header-box"}
+                  style={isHero ? {
                     height: t.hero.height,
                     minHeight: t.hero.height,
                     background: t.hero.background || t.colors.heroBackground || 'transparent',
-                  }}
+                  } : {}}
                 >
+                  {/* Logo Area */}
+                  <div 
+                    className="hero-logo-container"
+                    onClick={() => {
+                      if (!window.cloudinary) {
+                        const url = window.prompt('Enter Logo URL:');
+                        if (url) setLogoUrl(url);
+                        return;
+                      }
+                      window.cloudinary.openUploadWidget(
+                        { cloudName: 'dj4a5robb', uploadPreset: 'rentify_unsigned', sources: ['local', 'url'], resourceType: 'image', multiple: false },
+                        (error, result) => {
+                          if (!error && result && result.event === 'success') {
+                            setLogoUrl(result.info.secure_url);
+                          }
+                        }
+                      );
+                    }}
+                  >
+                    {logoUrl ? (
+                      <img src={logoUrl} alt="Logo" className="hero-logo-img" />
+                    ) : (
+                      <div className="logo-placeholder">
+                        <ImageIcon size={24} />
+                        <span>Add Logo</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Heading Box (Unified for all themes) */}
                   <div
                     className="hero-title"
                     contentEditable
@@ -417,7 +450,6 @@ const AgreementBuilder = ({ initialContent = '', onSave, isSaving = false, templ
                         if (firstNode && firstNode.type.name === 'heading') {
                           tr.insertText(newTitle, 1, firstNode.nodeSize - 1);
                         } else {
-                          // If no heading exists, prepend one
                           editor.commands.insertContentAt(0, {
                             type: 'heading',
                             attrs: { level: 1 },
@@ -435,8 +467,8 @@ const AgreementBuilder = ({ initialContent = '', onSave, isSaving = false, templ
                     }}
                     style={{
                       fontFamily: t.fonts.heading,
-                      color: t.hero.titleColor || '#FFFFFF',
-                      fontSize: t.hero.titleFontSize || '2.5rem',
+                      color: isHero ? (t.hero.titleColor || '#FFFFFF') : t.colors.heading,
+                      fontSize: isHero ? (t.hero.titleFontSize || '2.5rem') : '2rem',
                       outline: 'none',
                       cursor: 'text',
                     }}
@@ -448,11 +480,12 @@ const AgreementBuilder = ({ initialContent = '', onSave, isSaving = false, templ
                 </div>
               );
             })()}
+
             <EditorContent
               editor={editor}
               className="a4-page-body"
               style={{
-                '--theme-content-padding': getThemeById(activeTheme)?.hero?.enabled ? '40px 80px 80px' : '80px',
+                '--theme-content-padding': getThemeById(activeTheme)?.hero?.enabled ? '40px 80px 80px' : '20px 80px 80px',
               }}
             />
           </div>
@@ -481,6 +514,7 @@ const AgreementBuilder = ({ initialContent = '', onSave, isSaving = false, templ
         html={editor.getHTML()}
         activeTheme={activeTheme}
         customWatermark={customWatermark}
+        logoUrl={logoUrl}
       />
 
       {/* Shortcuts Modal */}

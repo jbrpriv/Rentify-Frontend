@@ -89,6 +89,25 @@ export function generateLayoutCss(theme, themeVars) {
       z-index: 1;
     }
 
+    .standard-header-box {
+      width: 100%;
+      padding: 60px 80px 20px;
+      display: ${heroEnabled ? 'none' : 'flex'};
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .hero-logo-container {
+      margin-bottom: 1.5rem;
+    }
+
+    .hero-logo-img {
+      max-height: 80px;
+      width: auto;
+      object-fit: contain;
+    }
+
     .theme-hero-band .hero-title {
       font-family: ${headingFont};
       color: ${heroTitleColor} !important;
@@ -105,6 +124,14 @@ export function generateLayoutCss(theme, themeVars) {
       padding: ${contentPad};
       position: relative;
       z-index: 2;
+    }
+
+    /* ── Horizontal Rule ── */
+    hr {
+      border: none;
+      border-top: 2px solid ${accent};
+      margin: 2rem 0;
+      opacity: 0.3;
     }
 
     /* ── Logo ── */

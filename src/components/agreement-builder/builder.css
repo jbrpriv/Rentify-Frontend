@@ -108,7 +108,8 @@
   overflow: hidden;
 }
 
-.theme-hero-band .hero-title {
+.theme-hero-band .hero-title,
+.standard-header-box .hero-title {
   font-weight: 900;
   text-align: center;
   padding: 0 60px;
@@ -121,15 +122,77 @@
   z-index: 2;
 }
 
-.theme-hero-band .hero-title:hover {
+.theme-hero-band .hero-title:hover,
+.standard-header-box .hero-title:hover {
   background: rgba(255, 255, 255, 0.1);
   border-color: rgba(255, 255, 255, 0.2);
 }
 
-.theme-hero-band .hero-title:focus {
+.standard-header-box .hero-title:hover {
+  background: rgba(0, 0, 0, 0.03);
+  border-color: rgba(0, 0, 0, 0.1);
+}
+
+.theme-hero-band .hero-title:focus,
+.standard-header-box .hero-title:focus {
   background: rgba(255, 255, 255, 0.15);
   border-color: rgba(255, 255, 255, 0.3);
   box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.1);
+  outline: none;
+}
+
+.standard-header-box .hero-title:focus {
+  background: white;
+  border-color: var(--theme-primary);
+  box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.05);
+}
+
+/* ── Logo Area ── */
+.hero-logo-container {
+  margin-bottom: 1.5rem;
+  cursor: pointer;
+  transition: transform 0.2s;
+  position: relative;
+  z-index: 3;
+}
+
+.hero-logo-container:hover {
+  transform: scale(1.05);
+}
+
+.hero-logo-img {
+  max-height: 80px;
+  width: auto;
+  object-fit: contain;
+}
+
+.logo-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 12px 24px;
+  border: 2px dashed rgba(255, 255, 255, 0.3);
+  border-radius: 12px;
+  color: white;
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.standard-header-box .logo-placeholder {
+  border-color: #e2e8f0;
+  color: #94a3b8;
+}
+
+.standard-header-box {
+  width: 100%;
+  padding: 60px 80px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
 .theme-hero-band .hero-logo {
@@ -173,8 +236,9 @@
   color: var(--theme-heading-color);
 }
 
-/* Hide first heading in editor when Hero is active to prevent duplication */
-.a4-page.has-hero .ProseMirror h1:first-child {
+/* Hide first heading in editor when Hero or Header Box is active to prevent duplication */
+.a4-page.has-hero .ProseMirror h1:first-child,
+.a4-page.no-hero .ProseMirror h1:first-child {
   display: none !important;
 }
 
@@ -205,6 +269,15 @@
 .a4-page .ProseMirror p:empty {
   min-height: 1.5em;
 }
+
+/* ── Horizontal Rule ── */
+.a4-page .ProseMirror hr {
+  border: none;
+  border-top: 2px solid var(--theme-primary, #e2e8f0);
+  margin: 2rem 0;
+  opacity: 0.3;
+}
+
 
 .a4-page .ProseMirror span,
 .a4-page .ProseMirror td,
