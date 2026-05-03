@@ -165,6 +165,11 @@ export function generateLayoutCss(theme, themeVars) {
       margin-bottom: 0.5em; padding-bottom: 0.5rem;
       border-bottom: ${headerRule};
     }
+
+    /* Hide the first h1 in the content area as it's already rendered in the hero-title */
+    .a4-page h1:first-of-type {
+      display: none !important;
+    }
     .a4-page h2 {
       font-size: calc(1.4rem * ${headingScale});
       font-weight: 700;

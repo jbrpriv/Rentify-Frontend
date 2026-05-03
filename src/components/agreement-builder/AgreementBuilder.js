@@ -23,6 +23,7 @@ import { ClausesPlaceholder } from './ClausesPlaceholder';
 import { DualColumn, DualColumnSide } from './DualColumnExtension';
 import Toolbar from './Toolbar';
 import { generateLayoutCss } from './generateLayoutCss';
+import { useBranding } from '@/context/BrandingContext';
 import FloatingToolbox from './FloatingToolbox';
 import FloatingTemplateLibrary from './FloatingTemplateLibrary';
 import PreviewModal from './PreviewModal';
@@ -43,6 +44,7 @@ const AgreementBuilder = ({ initialContent = '', onSave, isSaving = false, templ
   const [customWatermark, setCustomWatermark] = useState('');
   const [logoUrl, setLogoUrl] = useState('');
   const [autoSaveStatus, setAutoSaveStatus] = useState('idle'); // idle | saving | saved
+  const { logoUrl: globalBrandingLogo } = useBranding();
   const autoSaveTimerRef = useRef(null);
   const lastSavedRef = useRef(null);
   const editorWrapperRef = useRef(null);
@@ -514,7 +516,7 @@ const AgreementBuilder = ({ initialContent = '', onSave, isSaving = false, templ
         html={editor.getHTML()}
         activeTheme={activeTheme}
         customWatermark={customWatermark}
-        logoUrl={logoUrl}
+        logoUrl={logoUrl || globalBrandingLogo}
       />
 
       {/* Shortcuts Modal */}
