@@ -10,7 +10,7 @@ import { Table } from '@tiptap/extension-table';
 import { TableRow } from '@tiptap/extension-table-row';
 import { TableCell } from '@tiptap/extension-table-cell';
 import { TableHeader } from '@tiptap/extension-table-header';
-import { Eye, CheckCircle2, Loader2, Save, Keyboard, ZoomIn, ZoomOut } from 'lucide-react';
+import { Eye, CheckCircle2, Loader2, Save, Keyboard, ZoomIn, ZoomOut, Image as ImageIcon } from 'lucide-react';
 import { CharacterCount } from '@tiptap/extension-character-count';
 import { toast } from 'react-hot-toast';
 import { STATIC_AGREEMENT_TEMPLATES } from './StaticTemplates';
