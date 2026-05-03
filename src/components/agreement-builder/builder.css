@@ -332,9 +332,53 @@
 .document-container.layout-contemporary .ProseMirror {
   display: grid;
   /* main column grows, aside uses theme supplied width */
-  grid-template-columns: minmax(0, 1fr) minmax(0, var(--theme-aside-width, 360px));
+  grid-template-columns: minmax(0, 1fr) minmax(250px, var(--theme-aside-width, 360px));
   gap: 14px;
   align-content: start;
+}
+
+/* Large content handling - prevent layout break */
+.document-container.layout-modern .ProseMirror > table:first-of-type,
+.document-container.layout-premium .ProseMirror > table:first-of-type,
+.document-container.layout-contemporary .ProseMirror > table:first-of-type,
+.document-container.layout-modern .ProseMirror > .agreement-table:first-of-type,
+.document-container.layout-premium .ProseMirror > .agreement-table:first-of-type,
+.document-container.layout-contemporary .ProseMirror > .agreement-table:first-of-type {
+  grid-column: 2 / 3;
+  grid-row: 1 / span 3;
+  margin: 0;
+  border: 1px solid var(--theme-table-border);
+  border-radius: 10px;
+  overflow: hidden;
+  max-width: var(--theme-aside-width, 360px);
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+/* Enhanced table scrolling for wide content */
+.document-container .agreement-table {
+  display: block;
+  width: 100%;
+  overflow: auto;
+  max-height: 500px;
+}
+
+.document-container .agreement-table.wide-content {
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
+.document-container .agreement-table th,
+.document-container .agreement-table td {
+  white-space: nowrap;
+  min-width: 120px;
+}
+
+/* Dynamic column width for large tables */
+.document-container .agreement-table.large-table th,
+.document-container .agreement-table.large-table td {
+  min-width: 150px;
+  padding: 8px 12px;
 }
 
 .document-container.layout-modern .ProseMirror > h1:first-of-type,
@@ -426,6 +470,29 @@
     grid-row: auto;
     margin-top: 0.25rem;
     margin-bottom: 0.5rem;
+    max-height: 400px;
+  }
+}
+
+/* Enhanced responsive breakpoints */
+@media (max-width: 1200px) {
+  .document-container.layout-modern .ProseMirror,
+  .document-container.layout-premium .ProseMirror,
+  .document-container.layout-contemporary .ProseMirror {
+    grid-template-columns: minmax(0, 1fr) minmax(200px, 300px);
+    gap: 12px;
+  }
+}
+
+@media (max-width: 768px) {
+  .document-container .agreement-table {
+    max-height: 300px;
+  }
+  
+  .document-container .agreement-table th,
+  .document-container .agreement-table td {
+    min-width: 100px;
+    padding: 6px 8px;
   }
 }
 
@@ -687,6 +754,8 @@
   gap: 0;
   position: relative;
   min-height: 100px;
+  max-height: 800px;
+  overflow: hidden;
 }
 
 /* Dotted vertical divider */
@@ -710,6 +779,8 @@
   word-wrap: break-word;
   overflow-wrap: break-word;
   max-width: 100%;
+  overflow-y: auto;
+  max-height: 800px;
 }
 
 .dual-column-content {
@@ -725,6 +796,28 @@
   color: #cbd5e1;
   font-style: italic;
   pointer-events: none;
+}
+
+/* Responsive dual column */
+@media (max-width: 768px) {
+  .dual-column-wrapper {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  
+  .dual-column-wrapper::after {
+    display: none;
+  }
+  
+  .dual-column-side {
+    padding: 0;
+  }
+  
+  .dual-column-side:first-child {
+    border-bottom: 2px dotted #cbd5e1;
+    padding-bottom: 20px;
+    margin-bottom: 20px;
+  }
 }
 
 /* Print rendering */
