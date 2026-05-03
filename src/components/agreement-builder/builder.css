@@ -215,13 +215,31 @@
   --theme-heading-color: #2D1B4E;
   --theme-body-color: #3C3555;
   --theme-primary: #2D1B4E;
-  --theme-accent: #C4917B;
-  --theme-table-border: #D4C5E0;
-  --theme-table-header-bg: linear-gradient(135deg, #2D1B4E 0%, #4A2D6E 100%);
+  --theme-accent: #D4A574;
+  --theme-table-border: #E8D5C4;
+  --theme-table-header-bg: linear-gradient(135deg, #2D1B4E 0%, #5A3D7E 100%);
   --theme-table-header-text: #FFFFFF;
   --theme-hero-pattern: linear-gradient(135deg, rgba(250,247,255,0.95) 0%, rgba(243,234,255,0.7) 35%, rgba(255,255,255,0) 100%);
-  --theme-header-rule: 3px solid #C4917B;
-  --theme-section-rule: 1px solid #EDE5F5;
+  --theme-header-rule: 5px solid #D4A574;
+  --theme-section-rule: 2px dashed #E8D5C4;
+}
+
+/* Executive Premium specific table fixes */
+.theme-executive-premium .layout-premium .ProseMirror > .agreement-table:first-of-type {
+  min-width: 350px !important;
+  overflow-x: auto !important;
+  table-layout: auto !important;
+}
+
+.theme-executive-premium .agreement-table {
+  table-layout: auto !important;
+}
+
+.theme-executive-premium .agreement-table th,
+.theme-executive-premium .agreement-table td {
+  white-space: normal !important;
+  min-width: auto !important;
+  width: auto !important;
 }
 
 /* ── Fresh Contemporary ── */
@@ -349,35 +367,39 @@
   margin: 0;
   border: 1px solid var(--theme-table-border);
   border-radius: 10px;
-  overflow: hidden;
-  max-width: var(--theme-aside-width, 360px);
+  overflow: auto;
   max-height: 600px;
   overflow-y: auto;
+  min-width: 300px;
 }
 
 /* Enhanced table scrolling for wide content */
 .document-container .agreement-table {
-  display: block;
+  display: table;
   width: 100%;
   overflow: auto;
   max-height: 500px;
+  table-layout: auto;
 }
 
 .document-container .agreement-table.wide-content {
   overflow-x: auto;
-  white-space: nowrap;
+  white-space: normal;
 }
 
 .document-container .agreement-table th,
 .document-container .agreement-table td {
-  white-space: nowrap;
-  min-width: 120px;
+  white-space: normal;
+  min-width: auto;
+  width: auto;
+  padding: 10px 14px;
 }
 
 /* Dynamic column width for large tables */
 .document-container .agreement-table.large-table th,
 .document-container .agreement-table.large-table td {
-  min-width: 150px;
+  min-width: auto;
+  width: auto;
   padding: 8px 12px;
 }
 
@@ -491,8 +513,13 @@
   
   .document-container .agreement-table th,
   .document-container .agreement-table td {
-    min-width: 100px;
-    padding: 6px 8px;
+    padding: 8px 10px;
+    font-size: 14px;
+  }
+  
+  .ProseMirror table,
+  .agreement-table {
+    font-size: 14px;
   }
 }
 
@@ -832,29 +859,31 @@
    ═══════════════════════════════════ */
 .ProseMirror table {
   border-collapse: collapse;
-  table-layout: fixed;
+  table-layout: auto;
   width: 100%;
   margin: 1.5rem 0;
-  overflow: hidden;
+  overflow: auto;
 }
 
 .agreement-table {
   width: 100%;
   margin: 1.5rem 0;
   border-collapse: collapse;
-  table-layout: fixed;
+  table-layout: auto;
 }
 
 .ProseMirror td,
 .ProseMirror th,
 .agreement-table th,
 .agreement-table td {
-  min-width: 1em;
+  min-width: auto;
+  width: auto;
   border: 1px solid var(--theme-table-border, #cbd5e1);
   padding: 10px 14px;
   vertical-align: top;
   box-sizing: border-box;
   position: relative;
+  white-space: normal;
 }
 
 /* Ensure empty cells have min-height and display paragraphs correctly */
