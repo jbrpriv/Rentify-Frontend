@@ -60,6 +60,7 @@ export default function CreateAgreementTemplatePage() {
           fontFamily: '',
           fontSizeScale: 1.0,
           customWatermark: data.customWatermark || '',
+          logoUrl: data.logoUrl || '',
         },
       });
 

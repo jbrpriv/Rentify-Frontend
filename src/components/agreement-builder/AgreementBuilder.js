@@ -33,16 +33,24 @@ import './builder.css';
 const ZOOM_LEVELS = [75, 100, 125, 150];
 const FONT_SIZE_STEPS = ['12px', '14px', '16px', '18px', '20px', '24px', '32px', '48px'];
 
-const AgreementBuilder = ({ initialContent = '', onSave, isSaving = false, templateType = 'agreement' }) => {
+const AgreementBuilder = ({
+  initialContent = '',
+  initialTheme = 'modern-minimalist',
+  initialLogoUrl = '',
+  initialWatermark = '',
+  onSave,
+  isSaving = false,
+  templateType = 'agreement'
+}) => {
   const [showPreview, setShowPreview] = useState(false);
   const [showShortcuts, setShowShortcuts] = useState(false);
   const [isToolboxOpen, setIsToolboxOpen] = useState(false);
   const [isTemplateLibraryOpen, setIsTemplateLibraryOpen] = useState(false);
   const [pendingTemplate, setPendingTemplate] = useState(null);
   const [zoom, setZoom] = useState(100);
-  const [activeTheme, setActiveTheme] = useState('modern-minimalist');
-  const [customWatermark, setCustomWatermark] = useState('');
-  const [logoUrl, setLogoUrl] = useState('');
+  const [activeTheme, setActiveTheme] = useState(initialTheme);
+  const [customWatermark, setCustomWatermark] = useState(initialWatermark);
+  const [logoUrl, setLogoUrl] = useState(initialLogoUrl);
   const [autoSaveStatus, setAutoSaveStatus] = useState('idle'); // idle | saving | saved
   const { logoUrl: globalBrandingLogo } = useBranding();
   const autoSaveTimerRef = useRef(null);
@@ -270,7 +278,7 @@ const AgreementBuilder = ({ initialContent = '', onSave, isSaving = false, templ
         logoUrl,
       };
       if (onSave) onSave(content);
-  }, [editor, onSave, activeTheme, customWatermark]);
+  }, [editor, onSave, activeTheme, customWatermark, logoUrl]);
 
   const handleApplyTemplate = useCallback((selectedTemplate) => {
     if (!editor || !selectedTemplate) return;

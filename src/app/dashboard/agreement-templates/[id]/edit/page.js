@@ -143,6 +143,9 @@ export default function EditAgreementTemplatePage() {
       <div className="flex-1 min-h-0">
         <AgreementBuilder
           initialContent={initialContent}
+          initialTheme={template?.baseTheme?.themeSlug || template?.baseTheme || 'modern-minimalist'}
+          initialLogoUrl={template?.customizations?.logoUrl || template?.customizations?.customLogo || ''}
+          initialWatermark={template?.customizations?.customWatermark || ''}
           onSave={handleSave}
           isSaving={saving}
         />
