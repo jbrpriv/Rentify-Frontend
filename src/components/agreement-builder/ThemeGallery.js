@@ -125,7 +125,7 @@ const ThemeGallery = ({ activeTheme, onThemeChange, onClose }) => {
 
   return (
     <div 
-      className={`fixed inset-0 z-[110] flex items-center justify-center p-6 bg-slate-900/70 backdrop-blur-md transition-all duration-300
+      className={`fixed inset-0 z-[9999] flex items-center justify-center p-6 bg-slate-900/70 backdrop-blur-md transition-all duration-300
         ${isMounted && !isClosing ? 'opacity-100' : 'opacity-0'}`}
       onClick={handleClose}
     >

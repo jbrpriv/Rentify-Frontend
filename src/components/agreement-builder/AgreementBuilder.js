@@ -386,7 +386,7 @@ const AgreementBuilder = ({ initialContent = '', onSave, isSaving = false, templ
           {/* A4 page wrapper */}
           <div
             ref={editorWrapperRef}
-            className={`relative a4-page ${getThemeById(activeTheme)?.hero?.enabled ? 'has-hero' : 'no-hero'}`}
+            className={`relative a4-page ${getThemeById(activeTheme)?.hero?.enabled ? 'has-hero' : 'no-hero'} theme-${activeTheme}`}
             data-layout-style={activeLayoutStyle}
             style={{
               backgroundColor: getThemeById(activeTheme)?.pageBackground || '#FFFFFF',
@@ -468,7 +468,7 @@ const AgreementBuilder = ({ initialContent = '', onSave, isSaving = false, templ
                     style={{
                       fontFamily: t.fonts.heading,
                       color: isHero ? (t.hero.titleColor || '#FFFFFF') : t.colors.heading,
-                      fontSize: isHero ? (t.hero.titleFontSize || '2.5rem') : '2rem',
+                      fontSize: isHero ? (t.hero.titleFontSize || '2.5rem') : `calc(2.25rem * ${t.spacing?.headingScale || 1})`,
                       outline: 'none',
                       cursor: 'text',
                     }}

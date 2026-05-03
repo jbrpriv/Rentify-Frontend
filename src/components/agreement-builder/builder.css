@@ -152,6 +152,17 @@
   padding-bottom: 0.5rem !important;
   margin-bottom: 0.5rem !important;
   min-width: 200px;
+  font-size: calc(2.25rem * var(--theme-heading-scale, 1));
+}
+
+.theme-commercial-classic .hero-title,
+.theme-professional-legal .hero-title,
+.theme-elegant-serif .hero-title {
+  text-transform: uppercase;
+}
+
+.theme-professional-legal .hero-title {
+  letter-spacing: 0.1em;
 }
 
 /* ── Logo Area ── */

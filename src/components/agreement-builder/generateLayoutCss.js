@@ -106,6 +106,9 @@ export function generateLayoutCss(theme, themeVars) {
       border-bottom: ${headerRule};
       padding-bottom: 0.5rem;
       margin-bottom: 0.5rem;
+      font-size: calc(2.25rem * ${headingScale});
+      text-transform: ${['commercial-classic', 'professional-legal', 'elegant-serif'].includes(theme.id) ? 'uppercase' : 'none'};
+      letter-spacing: ${theme.id === 'professional-legal' ? '0.1em' : 'normal'};
     }
 
     .hero-logo-img {
