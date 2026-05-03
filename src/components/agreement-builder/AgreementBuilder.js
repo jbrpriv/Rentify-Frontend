@@ -384,7 +384,7 @@ const AgreementBuilder = ({ initialContent = '', onSave, isSaving = false, templ
           {/* A4 page wrapper — hero band sits above ProseMirror */}
           <div
             ref={editorWrapperRef}
-            className="relative a4-page"
+            className={`relative a4-page ${getThemeById(activeTheme)?.hero?.enabled ? 'has-hero' : ''}`}
             data-layout-style={activeLayoutStyle}
             style={{
               backgroundColor: getThemeById(activeTheme)?.pageBackground || '#FFFFFF',
@@ -408,10 +408,37 @@ const AgreementBuilder = ({ initialContent = '', onSave, isSaving = false, templ
                 >
                   <div
                     className="hero-title"
+                    contentEditable
+                    suppressContentEditableWarning
+                    onBlur={(e) => {
+                      const newTitle = e.target.innerText;
+                      editor.commands.command(({ tr, state }) => {
+                        const firstNode = state.doc.firstChild;
+                        if (firstNode && firstNode.type.name === 'heading') {
+                          tr.insertText(newTitle, 1, firstNode.nodeSize - 1);
+                        } else {
+                          // If no heading exists, prepend one
+                          editor.commands.insertContentAt(0, {
+                            type: 'heading',
+                            attrs: { level: 1 },
+                            content: [{ type: 'text', text: newTitle }]
+                          });
+                        }
+                        return true;
+                      });
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        e.target.blur();
+                      }
+                    }}
                     style={{
                       fontFamily: t.fonts.heading,
                       color: t.hero.titleColor || '#FFFFFF',
                       fontSize: t.hero.titleFontSize || '2.5rem',
+                      outline: 'none',
+                      cursor: 'text',
                     }}
                   >
                     {editor?.state?.doc?.firstChild?.type?.name === 'heading'

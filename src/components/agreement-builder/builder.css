@@ -114,8 +114,22 @@
   padding: 0 60px;
   margin: 0;
   line-height: 1.15;
+  transition: all 0.2s;
+  border-radius: 8px;
+  border: 2px solid transparent;
   position: relative;
   z-index: 2;
+}
+
+.theme-hero-band .hero-title:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.theme-hero-band .hero-title:focus {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.1);
 }
 
 .theme-hero-band .hero-logo {
@@ -152,9 +166,16 @@
   font-size: calc(2.25rem * var(--theme-heading-scale, 1));
   font-weight: 900;
   line-height: 1.15;
+  margin-top: 0;
   margin-bottom: 0.5em;
   padding-bottom: 0.5rem;
   border-bottom: var(--theme-header-rule, none);
+  color: var(--theme-heading-color);
+}
+
+/* Hide first heading in editor when Hero is active to prevent duplication */
+.a4-page.has-hero .ProseMirror h1:first-child {
+  display: none !important;
 }
 
 .a4-page .ProseMirror h2 {
