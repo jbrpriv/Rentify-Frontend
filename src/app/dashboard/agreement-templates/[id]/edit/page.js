@@ -68,6 +68,7 @@ export default function EditAgreementTemplatePage() {
         bodyJson: data.json,
         customizations: {
           customWatermark: data.customWatermark || '',
+          logoUrl: data.logoUrl || '',
         },
       });
 

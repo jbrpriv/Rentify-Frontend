@@ -340,7 +340,11 @@ function resolveThemeObject(baseTheme, customizations) {
     themeVars['--theme-watermark-opacity'] = customizations.watermarkOpacity || 0.05;
   }
 
-  return { theme, themeVars };
+  return { 
+    theme, 
+    themeVars, 
+    logoUrl: customizations?.logoUrl || customizations?.customLogo || '' 
+  };
 }
 
 function applyThemeLayout(html, layoutStyle = 'minimalist') {
@@ -614,7 +618,7 @@ function TemplateDocument({
   const lastInjectedHtml = useRef('');
   const [portalNode, setPortalNode] = useState(null);
 
-  const { theme, themeVars } = useMemo(
+  const { theme, themeVars, logoUrl } = useMemo(
     () => resolveThemeObject(baseTheme, customizations),
     [baseTheme, customizations]
   );
@@ -683,7 +687,45 @@ function TemplateDocument({
         }
       `}</style>
       <div className="agreement-preview-container theme-hero-band-host" style={themeVars}>
-        <div className="theme-hero-band" />
+        {/* Unified Header System */}
+        {(() => {
+          const isHero = theme?.hero?.enabled;
+          const t = theme;
+          
+          return (
+            <div
+              className={isHero ? "theme-hero-band" : "standard-header-box"}
+              style={isHero ? {
+                height: t.hero.height,
+                minHeight: t.hero.height,
+                background: t.hero.background || t.colors.heroBackground || 'transparent',
+              } : {}}
+            >
+              {logoUrl && (
+                <div className="hero-logo-container">
+                  <img src={logoUrl} alt="Logo" className="hero-logo-img" />
+                </div>
+              )}
+              <div
+                className="hero-title"
+                style={{
+                  fontFamily: t.fonts.heading,
+                  color: isHero ? (t.hero.titleColor || '#FFFFFF') : t.colors.heading,
+                  fontSize: isHero ? (t.hero.titleFontSize || '2.5rem') : `calc(2.25rem * ${t.spacing?.headingScale || 1})`,
+                }}
+              >
+                {/* We rely on the CSS to hide the first H1 in the content layer if needed */}
+                {(() => {
+                  const parser = new DOMParser();
+                  const doc = parser.parseFromString(templateHtml, 'text/html');
+                  const h1 = doc.querySelector('h1');
+                  return h1 ? h1.textContent : 'Agreement';
+                })()}
+              </div>
+            </div>
+          );
+        })()}
+
         <div 
           className={`template-page a4-page layout-${layoutStyle}`}
           style={{
