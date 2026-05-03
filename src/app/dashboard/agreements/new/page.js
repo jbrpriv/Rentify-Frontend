@@ -328,6 +328,11 @@ const pickThemeString = (value, fallback) => (
  * and returns the full theme object along with generated CSS variables.
  */
 function resolveThemeObject(baseTheme, customizations) {
+  let actualCustoms = customizations;
+  if (typeof customizations === 'string') {
+    try { actualCustoms = JSON.parse(customizations); } catch (e) { }
+  }
+
   const themeId = (typeof baseTheme === 'string') 
     ? baseTheme 
     : (baseTheme?.themeSlug || baseTheme?.id || baseTheme?._id || 'blank');
@@ -344,7 +349,12 @@ function resolveThemeObject(baseTheme, customizations) {
   return { 
     theme, 
     themeVars, 
-    logoUrl: customizations?.logoUrl || customizations?.customLogo || customizations?.logo || customizations?.brandingLogo || '' 
+    logoUrl: actualCustoms?.logoUrl || 
+             actualCustoms?.customLogo || 
+             actualCustoms?.logo || 
+             actualCustoms?.brandingLogo || 
+             actualCustoms?.headerLogo || 
+             actualCustoms?.templateLogo || '' 
   };
 }
 
@@ -1603,6 +1613,17 @@ function AgreementForm() {
           if (defaultAgreement.baseTheme && typeof defaultAgreement.baseTheme === 'object') {
             setTemplateTheme(defaultAgreement.baseTheme);
           }
+          const logo = defaultAgreement?.customizations?.logoUrl || 
+                       defaultAgreement?.customizations?.customLogo || 
+                       defaultAgreement?.logoUrl || 
+                       defaultAgreement?.customLogo || 
+                       defaultAgreement?.brandingLogo || 
+                       defaultAgreement?.templateLogo || '';
+
+          setTemplateCustomizations({
+            ...(defaultAgreement?.customizations || {}),
+            logoUrl: logo
+          });
         }
       })
       .catch(() => { });
@@ -1619,7 +1640,17 @@ function AgreementForm() {
           const html = doc?.bodyHtml || '';
           setTemplateHtml(html);
           setTemplateTheme(doc?.baseTheme || null);
-          setTemplateCustomizations(doc?.customizations || null);
+          const logo = doc?.customizations?.logoUrl || 
+                       doc?.customizations?.customLogo || 
+                       doc?.logoUrl || 
+                       doc?.customLogo || 
+                       doc?.brandingLogo || 
+                       doc?.templateLogo || '';
+
+          setTemplateCustomizations({
+            ...(doc?.customizations || {}),
+            logoUrl: logo
+          });
         })
         .catch(() => {
           setTemplateHtml(globalDefaultHtml);
