@@ -1,13 +1,14 @@
 /**
  * generateLayoutCss(theme, themeVars)
- * Returns the CSS string for all layout classes used by PreviewModal and new-tab window.
+ * Returns the CSS string injected by PreviewModal and the new-tab window.
+ * Mirrors the structure of builder.css for pixel-perfect preview accuracy.
  */
 export function generateLayoutCss(theme, themeVars) {
   const tableBorder = themeVars['--theme-table-border'] || '#cbd5e1';
   const tableHeaderBg = themeVars['--theme-table-header-bg'] || '#f8fafc';
   const tableHeaderText = themeVars['--theme-table-header-text'] || '#334155';
-  const heroHeight = themeVars['--theme-hero-height'] || '0px';
   const heroBg = themeVars['--theme-hero-bg'] || 'transparent';
+  const heroHeight = themeVars['--theme-hero-height'] || '0px';
   const pageBg = themeVars['--theme-page-bg'] || '#FFFFFF';
   const tableRadius = themeVars['--theme-table-radius'] || '0px';
   const logoAlign = themeVars['--theme-logo-align'] || 'left';
@@ -22,27 +23,55 @@ export function generateLayoutCss(theme, themeVars) {
   const heroTitleSize = themeVars['--theme-hero-title-size'] || '2.5rem';
   const contentPad = themeVars['--theme-content-padding'] || '80px';
   const pageTexture = themeVars['--theme-page-texture'] || 'none';
+  const fontScale = themeVars['--theme-font-scale'] || 1;
+  const headingScale = themeVars['--theme-heading-scale'] || 1;
+  const bodyLineH = themeVars['--theme-body-line-height'] || 1.7;
   const heroEnabled = theme?.hero?.enabled;
+  const layoutStyle = theme?.layoutStyle || 'minimalist';
+  const accent = themeVars['--theme-primary'] || '#000';
 
   const logoAlignCss = logoAlign === 'center'
     ? 'margin-left: auto; margin-right: auto;'
     : 'margin-left: 0; margin-right: auto;';
 
+  // Per-layout clause positioning (mirrors builder.css)
+  const clausePositioningMap = {
+    modern: `border-left: 4px solid ${accent}; padding-left: 4px; margin-left: -4px;`,
+    premium: `margin-top: 40px;`,
+    legal: `margin-top: 32px; padding-top: 24px; border-top: 2px double ${accent};`,
+    classic: `margin: 32px 0;`,
+    contemporary: `margin: 32px -4px;`,
+    ledger: `margin: 32px 0; border-top: 3px solid #000; padding-top: 24px;`,
+    editorial: `margin: 32px 20px;`,
+  };
+  const clausePositioning = clausePositioningMap[layoutStyle] || 'margin: 24px 0;';
+
   return `
-    /* ── Reset & Base ── */
     *, *::before, *::after { box-sizing: border-box; }
 
-    /* ── Page ── */
-    .a4-page, .agreement-preview-container {
-      background-color: ${pageBg} !important;
+    /* ── A4 Page ── */
+    .a4-page {
+      background-color: ${pageBg};
       background-image: ${pageTexture !== 'none' ? pageTexture : 'none'};
       min-height: 1123px;
       width: 794px;
       margin: 0 auto;
       position: relative;
-      box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
-      box-sizing: border-box;
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.07), 0 20px 40px -8px rgba(0,0,0,0.15);
       overflow: hidden;
+      font-size: calc(16px * ${fontScale});
+      font-family: ${bodyFont};
+    }
+
+    /* ── Watermark ── */
+    .a4-page::before {
+      content: var(--theme-watermark-text, "");
+      position: absolute; top: 50%; left: 50%;
+      transform: translate(-50%, -50%) rotate(-35deg);
+      font-size: 100px; font-weight: 900; letter-spacing: 0.15em;
+      color: var(--theme-watermark-color, transparent);
+      opacity: var(--theme-watermark-opacity, 0);
+      pointer-events: none; z-index: 100; white-space: nowrap;
     }
 
     /* ── Hero Band ── */
@@ -71,14 +100,6 @@ export function generateLayoutCss(theme, themeVars) {
       line-height: 1.15;
     }
 
-    .theme-hero-band .hero-logo {
-      max-height: ${logoMaxH};
-      width: auto;
-      object-fit: contain;
-      margin-bottom: 16px;
-      display: block;
-    }
-
     /* ── Page Body (content below hero) ── */
     .a4-page-body {
       padding: ${contentPad};
@@ -86,7 +107,7 @@ export function generateLayoutCss(theme, themeVars) {
       z-index: 2;
     }
 
-    /* ── Logo in body ── */
+    /* ── Logo ── */
     .a4-page-body img:first-of-type {
       max-height: ${logoMaxH};
       width: auto !important;
@@ -102,102 +123,81 @@ export function generateLayoutCss(theme, themeVars) {
       color: ${headingColor};
     }
     .a4-page-body h1 {
-      font-size: 2.5rem;
-      line-height: 1.15;
-      font-weight: 900;
-      margin-bottom: 0.5em;
-      padding-bottom: 0.5rem;
+      font-size: calc(2.25rem * ${headingScale});
+      font-weight: 900; line-height: 1.15;
+      margin-bottom: 0.5em; padding-bottom: 0.5rem;
       border-bottom: ${headerRule};
     }
     .a4-page-body h2 {
-      font-size: 1.4rem;
+      font-size: calc(1.4rem * ${headingScale});
       font-weight: 700;
-      margin-top: 1.5em;
-      margin-bottom: 0.5em;
+      margin-top: 1.5em; margin-bottom: 0.5em;
       padding-bottom: 0.25rem;
       border-bottom: ${sectionRule};
     }
-    .a4-page-body p, .a4-page-body li, .a4-page-body span {
+    .a4-page-body h3 {
+      font-size: calc(1.15rem * ${headingScale});
+      font-weight: 700;
+      margin-top: 1.2em; margin-bottom: 0.4em;
+    }
+    .a4-page-body p, .a4-page-body li {
       font-family: ${bodyFont};
       color: ${bodyColor};
-      line-height: 1.7;
+      line-height: ${bodyLineH};
       margin-bottom: 0.75em;
+    }
+    .a4-page-body span, .a4-page-body blockquote {
+      font-family: ${bodyFont};
+      color: ${bodyColor};
     }
 
     /* ── Tables ── */
-    .agreement-table, .a4-page-body table {
-      width: 100%;
-      border-collapse: collapse;
-      margin: 1.5rem 0;
+    .a4-page-body table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; }
+    .a4-page-body .tableWrapper {
       border-radius: ${tableRadius};
       overflow: hidden;
+      margin: 1.5rem 0;
     }
-    .agreement-table th, .a4-page-body table th,
-    .agreement-table td, .a4-page-body table td {
+    .a4-page-body th, .a4-page-body td {
       border: 1px solid ${tableBorder};
-      padding: 10px 14px;
-      text-align: left;
+      padding: 10px 14px; text-align: left;
     }
-    .agreement-table th, .a4-page-body table th {
+    .a4-page-body th {
       background: ${tableHeaderBg};
       color: ${tableHeaderText};
       font-weight: 700;
+      font-family: ${headingFont};
     }
-    .agreement-table th p, .a4-page-body table th p {
-      color: ${tableHeaderText};
-      margin: 0;
-    }
+    .a4-page-body th p { color: ${tableHeaderText}; margin: 0; }
 
     /* ── Dual Column ── */
     .dual-column-wrapper {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 0;
-      position: relative;
-      margin: 1.5rem 0;
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 0; position: relative; margin: 1.5rem 0;
     }
     .dual-column-wrapper::after {
-      content: '';
-      position: absolute;
+      content: ''; position: absolute;
       top: 0; bottom: 0; left: 50%;
       border-left: 2px dotted ${tableBorder};
-      transform: translateX(-50%);
-      z-index: 1;
+      transform: translateX(-50%); z-index: 1;
     }
     .dual-column-side {
-      padding: 0 20px;
-      position: relative;
-      z-index: 2;
-      min-width: 0;
-      word-wrap: break-word;
-      overflow-wrap: break-word;
+      padding: 0 20px; position: relative; z-index: 2;
+      min-width: 0; word-wrap: break-word; overflow-wrap: break-word;
     }
 
     /* ── Clauses Placeholder ── */
     .preview-clauses-placeholder {
       width: 100%;
+      ${clausePositioning}
       background: rgba(0,0,0,0.02);
       border: 1px dashed ${tableBorder};
-      border-radius: 12px;
+      border-radius: ${tableRadius || '8px'};
       padding: 32px;
-      margin: 1.5rem 0;
     }
 
-    /* ── Preview variable highlight ── */
+    /* ── Preview variable ── */
     .preview-variable { color: #0f172a; font-weight: 800; }
-
-    /* ── Watermark ── */
-    .a4-page::before {
-      content: var(--theme-watermark-text, "");
-      position: absolute;
-      top: 50%; left: 50%;
-      transform: translate(-50%, -50%) rotate(-35deg);
-      font-size: 100px; font-weight: 900;
-      color: var(--theme-watermark-color, transparent);
-      opacity: var(--theme-watermark-opacity, 0);
-      pointer-events: none; z-index: 100;
-      white-space: nowrap;
-    }
 
     @media print {
       .preview-clauses-placeholder { border: none !important; background: transparent !important; }

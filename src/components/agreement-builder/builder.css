@@ -2,10 +2,11 @@
    Agreement Builder — Document Engine CSS
    ======================================== */
 
-/* ── Document Container ── */
+/* ── Document Container (the gray scroll area) ── */
 .document-container {
-  --theme-heading-font: inherit;
-  --theme-body-font: inherit;
+  /* CSS var defaults — overridden by React inline style on this element */
+  --theme-heading-font: system-ui, sans-serif;
+  --theme-body-font: system-ui, sans-serif;
   --theme-heading-color: #0f172a;
   --theme-body-color: #334155;
   --theme-primary: #000000;
@@ -14,7 +15,6 @@
   --theme-table-header-bg: #f8fafc;
   --theme-table-header-text: #334155;
   --theme-hero-bg: transparent;
-  --theme-hero-pattern: none;
   --theme-page-texture: none;
   --theme-header-rule: none;
   --theme-section-rule: none;
@@ -25,7 +25,6 @@
   --theme-heading-scale: 1;
   --theme-aside-width: 360px;
   --theme-page-bg: #FFFFFF;
-  --theme-hero-enabled: 0;
   --theme-hero-height: 0px;
   --theme-hero-title-color: #000000;
   --theme-hero-title-size: 2.25rem;
@@ -38,75 +37,63 @@
 
   display: flex;
   justify-content: center;
-  padding: 40px 20px;
-  background-color: #f3f4f6;
+  padding: 40px 20px 80px;
+  background-color: #e5e7eb;
   transition: background-color 0.3s ease;
+  min-height: 100%;
 }
 
-.document-container.fullscreen-mode {
-  min-height: calc(100vh - 60px);
-}
-
-/* ── A4 Page Canvas ── */
+/* ═══════════════════════════════════════════
+   A4 PAGE — the white paper canvas
+   ═══════════════════════════════════════════ */
 .a4-page {
   width: 794px;
   min-height: 1123px;
-  background-color: var(--theme-page-bg, white);
-  background-image: var(--theme-page-texture, none);
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  background-color: var(--theme-page-bg, #FFFFFF);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 20px 40px -8px rgba(0, 0, 0, 0.15);
   margin-bottom: 40px;
   transition: transform 0.3s ease;
   transform-origin: top center;
   position: relative;
   overflow: hidden;
   font-size: calc(16px * var(--theme-font-scale, 1));
-  /* NO global padding — hero themes handle it via .a4-page-body */
+  font-family: var(--theme-body-font);
 }
 
-/* ── Page body wrapper — all content below hero sits here ── */
-.a4-page-body {
-  padding: var(--theme-content-padding, 80px);
-  position: relative;
-  z-index: 2;
+/* ── Watermark ── */
+.a4-page::before {
+  content: var(--theme-watermark-text, "");
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(-35deg);
+  font-size: 100px;
+  font-weight: 900;
+  letter-spacing: 0.15em;
+  color: var(--theme-watermark-color, transparent);
+  opacity: var(--theme-watermark-opacity, 0);
+  pointer-events: none;
+  z-index: 100;
+  white-space: nowrap;
+  user-select: none;
 }
 
-/* Themes WITHOUT a hero still need padding on ProseMirror directly */
-.a4-page>.ProseMirror {
-  padding: var(--theme-content-padding, 80px);
-  position: relative;
-  z-index: 2;
-  min-height: 900px;
-}
-
-/* ── Hero Band — rendered as a real block above content ── */
+/* ═══════════════════════════════════════════
+   HERO BAND — sits at the very top of .a4-page
+   as a real block element (not a pseudo-element)
+   ═══════════════════════════════════════════ */
 .theme-hero-band {
   width: 100%;
-  background: var(--theme-hero-bg, transparent);
+  position: relative;
+  z-index: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  position: relative;
-  z-index: 1;
   overflow: hidden;
 }
 
-/* Hero enabled: show the band */
-.has-hero .theme-hero-band {
-  height: var(--theme-hero-height, 200px);
-  min-height: var(--theme-hero-height, 200px);
-}
-
-/* Hero disabled: hide the band entirely */
-.no-hero .theme-hero-band {
-  display: none;
-}
-
-/* Hero title inside the band */
 .theme-hero-band .hero-title {
-  font-family: var(--theme-heading-font);
-  color: var(--theme-hero-title-color, #FFFFFF) !important;
-  font-size: var(--theme-hero-title-size, 2.5rem);
   font-weight: 900;
   text-align: center;
   padding: 0 60px;
@@ -116,36 +103,82 @@
   z-index: 2;
 }
 
-/* Hero logo inside the band */
 .theme-hero-band .hero-logo {
-  max-height: var(--theme-logo-max-height, 80px);
   width: auto;
   object-fit: contain;
   margin-bottom: 16px;
   display: block;
 }
 
-/* ── Watermark Overlay ── */
-.a4-page::before {
-  content: var(--theme-watermark-text);
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%) rotate(-35deg);
-  font-size: 100px;
-  font-weight: 900;
-  letter-spacing: 0.15em;
-  color: var(--theme-watermark-color);
-  opacity: var(--theme-watermark-opacity);
-  pointer-events: none;
-  z-index: 100;
-  white-space: nowrap;
-  user-select: none;
+/* ═══════════════════════════════════════════
+   PROSEMIRROR — the actual editable content
+   ═══════════════════════════════════════════ */
+.a4-page>.ProseMirror {
+  /* Content padding — top shrinks when hero is present (set via inline style by AgreementBuilder) */
+  padding: var(--theme-content-padding, 80px);
+  min-height: 800px;
+  position: relative;
+  z-index: 2;
+  outline: none;
 }
 
-/* ── Logo Treatment (First Image in body — NOT in hero) ── */
-.a4-page-body img:first-of-type,
-.a4-page>.ProseMirror img:first-of-type {
+/* ── Typography ── */
+.a4-page .ProseMirror h1,
+.a4-page .ProseMirror h2,
+.a4-page .ProseMirror h3,
+.a4-page .ProseMirror h4,
+.a4-page .ProseMirror h5,
+.a4-page .ProseMirror h6 {
+  font-family: var(--theme-heading-font);
+  color: var(--theme-heading-color);
+}
+
+.a4-page .ProseMirror h1 {
+  font-size: calc(2.25rem * var(--theme-heading-scale, 1));
+  font-weight: 900;
+  line-height: 1.15;
+  margin-bottom: 0.5em;
+  padding-bottom: 0.5rem;
+  border-bottom: var(--theme-header-rule, none);
+}
+
+.a4-page .ProseMirror h2 {
+  font-size: calc(1.4rem * var(--theme-heading-scale, 1));
+  font-weight: 700;
+  margin-top: 1.5em;
+  margin-bottom: 0.5em;
+  padding-bottom: 0.25rem;
+  border-bottom: var(--theme-section-rule, none);
+}
+
+.a4-page .ProseMirror h3 {
+  font-size: calc(1.15rem * var(--theme-heading-scale, 1));
+  font-weight: 700;
+  margin-top: 1.2em;
+  margin-bottom: 0.4em;
+}
+
+.a4-page .ProseMirror p,
+.a4-page .ProseMirror li {
+  font-family: var(--theme-body-font);
+  color: var(--theme-body-color);
+  line-height: var(--theme-body-line-height, 1.7);
+  margin-bottom: 0.75em;
+}
+
+.a4-page .ProseMirror p:empty {
+  min-height: 1.5em;
+}
+
+.a4-page .ProseMirror span,
+.a4-page .ProseMirror td,
+.a4-page .ProseMirror blockquote {
+  font-family: var(--theme-body-font);
+  color: var(--theme-body-color);
+}
+
+/* ── Logo (first image in editor) ── */
+.a4-page .ProseMirror img:first-of-type {
   max-height: var(--theme-logo-max-height, 100px);
   width: auto !important;
   display: block;
@@ -153,130 +186,25 @@
   object-fit: contain;
 }
 
-/* Logo alignment variants */
-.logo-align-center img:first-of-type,
-.a4-page-body.logo-align-center img:first-of-type,
-.a4-page>.ProseMirror.logo-align-center img:first-of-type {
-  margin-left: auto !important;
-  margin-right: auto !important;
-}
-
-.logo-align-left img:first-of-type,
-.a4-page-body.logo-align-left img:first-of-type {
+/* Logo alignment — applied via class on .ProseMirror by AgreementBuilder */
+.a4-page .ProseMirror.logo-left img:first-of-type {
   margin-left: 0;
   margin-right: auto;
 }
 
-/* ── Theme-Driven Typography ── */
-.a4-page h1,
-.a4-page h2,
-.a4-page h3,
-.a4-page h4,
-.a4-page h5,
-.a4-page h6,
-.a4-page .ProseMirror h1,
-.a4-page .ProseMirror h2,
-.a4-page .ProseMirror h3 {
-  font-family: var(--theme-heading-font);
-  color: var(--theme-heading-color);
+.a4-page .ProseMirror.logo-center img:first-of-type {
+  margin-left: auto !important;
+  margin-right: auto !important;
 }
 
-.a4-page .ProseMirror p,
-.a4-page .ProseMirror li,
-.a4-page p,
-.a4-page li {
-  font-family: var(--theme-body-font);
-  color: var(--theme-body-color);
+/* Default fallback */
+.a4-page .ProseMirror img:first-of-type {
+  margin-left: 0;
+  margin-right: auto;
 }
 
-.a4-page .ProseMirror p:empty,
-.a4-page p:empty {
-  min-height: 1.5em;
-}
-
-.a4-page .ProseMirror h1,
-.a4-page h1 {
-  padding-bottom: 0.5rem;
-  border-bottom: var(--theme-header-rule);
-}
-
-.a4-page h2 {
-  padding-bottom: 0.25rem;
-  border-bottom: var(--theme-section-rule);
-}
-
-.a4-page p,
-.a4-page li,
-.a4-page td,
-.a4-page span,
-.a4-page blockquote {
-  font-family: var(--theme-body-font);
-  color: var(--theme-body-color);
-}
-
-/* ── Theme-Driven Tables ── */
-.a4-page .ProseMirror th,
-.a4-page .agreement-table th,
-.a4-page .ProseMirror td,
-.a4-page .agreement-table td {
-  border-color: var(--theme-table-border);
-}
-
-.a4-page .ProseMirror th,
-.a4-page .agreement-table th {
-  background: var(--theme-table-header-bg);
-  color: var(--theme-table-header-text);
-}
-
-.a4-page .ProseMirror th p,
-.a4-page .agreement-table th p {
-  color: var(--theme-table-header-text);
-}
-
-/* ── Theme-Driven Dual Column Divider ── */
-.a4-page .dual-column-wrapper::after {
-  border-left-color: var(--theme-table-border);
-}
-
-/* ── Zoom Levels ── */
-.zoom-75 .a4-page {
-  transform: scale(0.75);
-}
-
-.zoom-100 .a4-page {
-  transform: scale(1);
-}
-
-.zoom-125 .a4-page {
-  transform: scale(1.25);
-}
-
-.zoom-150 .a4-page {
-  transform: scale(1.5);
-}
-
-/* ── Responsive Fixes ── */
-@media (max-width: 900px) {
-  .a4-page [data-layout-role="primary-table"] {
-    width: 100% !important;
-    margin: 20px 0 !important;
-  }
-}
-
-@media (max-width: 768px) {
-  .document-container .agreement-table {
-    max-height: 300px;
-  }
-
-  .document-container .agreement-table th,
-  .document-container .agreement-table td {
-    padding: 8px 10px;
-    font-size: 14px;
-  }
-}
-
-/* ── Agreement Table Base ── */
-.agreement-table {
+/* ── Tables ── */
+.a4-page .ProseMirror table.agreement-table {
   width: 100%;
   border-collapse: collapse;
   margin: 1.5rem 0;
@@ -284,21 +212,34 @@
   overflow: hidden;
 }
 
-.agreement-table th,
-.agreement-table td {
+.a4-page .ProseMirror th,
+.a4-page .ProseMirror td {
   border: 1px solid var(--theme-table-border);
-  padding: 12px 16px;
+  padding: 10px 14px;
   text-align: left;
 }
 
-.agreement-table th {
+.a4-page .ProseMirror th {
   background: var(--theme-table-header-bg);
   color: var(--theme-table-header-text);
   font-weight: 700;
+  font-family: var(--theme-heading-font);
+}
+
+.a4-page .ProseMirror th p {
+  color: var(--theme-table-header-text);
+  margin: 0;
+}
+
+/* Table radius hack — needs overflow:hidden on a wrapper */
+.a4-page .ProseMirror .tableWrapper {
+  border-radius: var(--theme-table-radius, 0px);
+  overflow: hidden;
+  margin: 1.5rem 0;
 }
 
 /* ── Dual Column ── */
-.dual-column-wrapper {
+.a4-page .ProseMirror .dual-column-wrapper {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 0;
@@ -306,7 +247,7 @@
   margin: 1.5rem 0;
 }
 
-.dual-column-wrapper::after {
+.a4-page .ProseMirror .dual-column-wrapper::after {
   content: '';
   position: absolute;
   top: 0;
@@ -317,7 +258,7 @@
   z-index: 1;
 }
 
-.dual-column-side {
+.a4-page .ProseMirror .dual-column-side {
   padding: 0 20px;
   position: relative;
   z-index: 2;
@@ -326,7 +267,84 @@
   overflow-wrap: break-word;
 }
 
-/* ── Autosave Indicator ── */
+/* ═══════════════════════════════════════════
+   PER-LAYOUT CLAUSE ZONE POSITIONING
+   These control WHERE the clause block sits
+   on the page for each theme.
+   ═══════════════════════════════════════════ */
+
+/* Default — clause block is inline (between other content) */
+.a4-page .ProseMirror .clauses-placeholder-wrapper {
+  margin: 24px 0;
+  width: 100%;
+}
+
+/* Modern — clause block gets a slight indent + left accent */
+.layout-modern .a4-page .ProseMirror .clauses-placeholder-wrapper {
+  margin-left: -4px;
+  padding-left: 4px;
+  border-left: 4px solid var(--theme-accent, #3B82F6);
+}
+
+/* Premium — float clause to bottom of content area, full bleed */
+.layout-premium .a4-page .ProseMirror .clauses-placeholder-wrapper {
+  margin-top: 40px;
+}
+
+/* Legal — clause block sits after a hard rule */
+.layout-legal .a4-page .ProseMirror .clauses-placeholder-wrapper {
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 2px double var(--theme-accent, #7B2D3B);
+}
+
+/* Classic — indented, centered feel */
+.layout-classic .a4-page .ProseMirror .clauses-placeholder-wrapper {
+  margin: 32px 0;
+}
+
+/* Contemporary — full bleed with margin */
+.layout-contemporary .a4-page .ProseMirror .clauses-placeholder-wrapper {
+  margin: 32px -4px;
+}
+
+/* Ledger — stark, full width with top border */
+.layout-ledger .a4-page .ProseMirror .clauses-placeholder-wrapper {
+  margin: 32px 0;
+  border-top: 3px solid #000;
+  padding-top: 24px;
+}
+
+/* Editorial — pull-quote style, indented */
+.layout-editorial .a4-page .ProseMirror .clauses-placeholder-wrapper {
+  margin: 32px 20px;
+}
+
+/* ═══════════════════════════════════════════
+   ZOOM LEVELS
+   ═══════════════════════════════════════════ */
+.zoom-75 .a4-page {
+  transform: scale(0.75);
+  margin-bottom: calc(40px - (1123px * 0.25));
+}
+
+.zoom-100 .a4-page {
+  transform: scale(1);
+}
+
+.zoom-125 .a4-page {
+  transform: scale(1.25);
+  margin-bottom: calc(40px + (1123px * 0.25));
+}
+
+.zoom-150 .a4-page {
+  transform: scale(1.5);
+  margin-bottom: calc(40px + (1123px * 0.5));
+}
+
+/* ═══════════════════════════════════════════
+   AUTOSAVE INDICATOR
+   ═══════════════════════════════════════════ */
 .autosave-indicator {
   display: flex;
   align-items: center;
@@ -350,7 +368,9 @@
   color: #94a3b8;
 }
 
-/* ── Fullscreen Builder ── */
+/* ═══════════════════════════════════════════
+   FULLSCREEN BUILDER CHROME
+   ═══════════════════════════════════════════ */
 .builder-fullscreen-wrapper {
   position: relative;
   width: 100%;
@@ -409,18 +429,11 @@
   font-weight: 500;
 }
 
-/* ── ProseMirror inside the canvas gets body padding ── */
-.a4-page>.ProseMirror {
-  padding: var(--theme-content-padding, 80px);
-  min-height: 900px;
-  position: relative;
-  z-index: 2;
-}
-
-/* When a hero is present, remove top padding from ProseMirror
-   so content starts flush below the hero band */
-.a4-page.has-hero>.ProseMirror {
-  padding-top: 40px;
+/* ── Responsive ── */
+@media (max-width: 900px) {
+  .a4-page .ProseMirror {
+    padding: 40px 32px;
+  }
 }
 
 /* ── Animations ── */

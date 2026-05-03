@@ -86,8 +86,10 @@ const AgreementBuilder = ({ initialContent = '', onSave, isSaving = false, templ
     extensions,
     content: initialContent || '<h1>Rental Agreement</h1><p>Type your agreement here. Insert variables or clauses using the toolbox on the right.</p>',
     editorProps: {
-      attributes: {
-        class: 'outline-none',
+      attributes: () => {
+        const theme = getThemeById(activeTheme);
+        const logoAlign = theme?.logo?.alignment || 'left';
+        return { class: `outline-none logo-${logoAlign}` };
       },
     },
   });
@@ -230,6 +232,16 @@ const AgreementBuilder = ({ initialContent = '', onSave, isSaving = false, templ
       if (el) el.remove();
     };
   }, [activeTheme]);
+
+  // ── Sync logo alignment class on ProseMirror when theme changes ──
+  useEffect(() => {
+    if (!editor) return;
+    const theme = getThemeById(activeTheme);
+    const logoAlign = theme?.logo?.alignment || 'left';
+    const pm = editor.view.dom;
+    pm.classList.remove('logo-left', 'logo-center', 'logo-right');
+    pm.classList.add(`logo-${logoAlign}`);
+  }, [editor, activeTheme]);
 
   const themeVars = React.useMemo(() => {
     const theme = getThemeById(activeTheme);
@@ -374,7 +386,13 @@ const AgreementBuilder = ({ initialContent = '', onSave, isSaving = false, templ
         <div
           ref={editorWrapperRef}
           className="relative a4-page"
-          style={{ backgroundColor: getThemeById(activeTheme)?.pageBackground || '#FFFFFF' }}
+          data-layout-style={activeLayoutStyle}
+          style={{
+            backgroundColor: getThemeById(activeTheme)?.pageBackground || '#FFFFFF',
+            backgroundImage: getThemeById(activeTheme)?.textures?.pageBackground !== 'none'
+              ? getThemeById(activeTheme)?.textures?.pageBackground
+              : undefined,
+          }}
         >
           {/* Hero Band — real DOM block, NOT a CSS pseudo-element */}
           {(() => {
@@ -404,7 +422,12 @@ const AgreementBuilder = ({ initialContent = '', onSave, isSaving = false, templ
               </div>
             );
           })()}
-          <EditorContent editor={editor} />
+          <EditorContent
+            editor={editor}
+            style={{
+              // Shrink top padding when hero band is present — content starts just below it
+            }}
+          />
         </div>
       </div>
 
