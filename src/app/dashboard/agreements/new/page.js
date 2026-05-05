@@ -1542,6 +1542,8 @@ function AgreementForm() {
   const [loadingTemplate, setLoadingTemplate] = useState(false);
   const [pdfSelection, setPdfSelection] = useState(null);
   const [globalDefaultHtml, setGlobalDefaultHtml] = useState(''); // preloaded global template
+  const [globalDefaultTheme, setGlobalDefaultTheme] = useState(null);
+  const [globalDefaultCustomizations, setGlobalDefaultCustomizations] = useState(null);
   const [templateTheme, setTemplateTheme] = useState(null);
   const [templateCustomizations, setTemplateCustomizations] = useState(null);
   const [mounted, setMounted] = useState(false);
@@ -1607,12 +1609,13 @@ function AgreementForm() {
           : null;
         if (defaultAgreement?.bodyHtml) {
           setGlobalDefaultHtml(defaultAgreement.bodyHtml);
-          // Pre-populate templateHtml for live preview if no custom selection
           setTemplateHtml(defaultAgreement.bodyHtml);
-          // Apply the global template's base theme so the preview renders with correct colours
+
           if (defaultAgreement.baseTheme) {
+            setGlobalDefaultTheme(defaultAgreement.baseTheme);
             setTemplateTheme(defaultAgreement.baseTheme);
           }
+
           const logo = defaultAgreement?.customizations?.logoUrl || 
                        defaultAgreement?.customizations?.customLogo || 
                        defaultAgreement?.logoUrl || 
@@ -1620,10 +1623,12 @@ function AgreementForm() {
                        defaultAgreement?.brandingLogo || 
                        defaultAgreement?.templateLogo || '';
 
-          setTemplateCustomizations({
+          const customs = {
             ...(defaultAgreement?.customizations || {}),
             logoUrl: logo
-          });
+          };
+          setGlobalDefaultCustomizations(customs);
+          setTemplateCustomizations(customs);
         }
       })
       .catch(() => { });
@@ -1654,8 +1659,8 @@ function AgreementForm() {
         })
         .catch(() => {
           setTemplateHtml(globalDefaultHtml);
-          setTemplateTheme(null);
-          setTemplateCustomizations(null);
+          setTemplateTheme(globalDefaultTheme);
+          setTemplateCustomizations(globalDefaultCustomizations);
         })
         .finally(() => setLoadingTemplate(false));
     } else if (pdfSelection?.type === 'theme' && pdfSelection.id) {
@@ -1671,15 +1676,15 @@ function AgreementForm() {
           // template-specific branding (like logos) if a template is active.
         })
         .catch(() => {
-          setTemplateTheme(null);
+          setTemplateTheme(globalDefaultTheme);
         });
     } else if (!pdfSelection) {
       // Reset back to global default when deselected
       setTemplateHtml(globalDefaultHtml);
-      setTemplateTheme(null);
-      setTemplateCustomizations(null);
+      setTemplateTheme(globalDefaultTheme);
+      setTemplateCustomizations(globalDefaultCustomizations);
     }
-  }, [pdfSelection, globalDefaultHtml]);
+  }, [pdfSelection, globalDefaultHtml, globalDefaultTheme, globalDefaultCustomizations]);
 
   // ── Build the accept-offer payload (single source of truth) ────────────────
   const buildAcceptPayload = () => ({
