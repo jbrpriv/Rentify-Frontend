@@ -1610,7 +1610,7 @@ function AgreementForm() {
           // Pre-populate templateHtml for live preview if no custom selection
           setTemplateHtml(defaultAgreement.bodyHtml);
           // Apply the global template's base theme so the preview renders with correct colours
-          if (defaultAgreement.baseTheme && typeof defaultAgreement.baseTheme === 'object') {
+          if (defaultAgreement.baseTheme) {
             setTemplateTheme(defaultAgreement.baseTheme);
           }
           const logo = defaultAgreement?.customizations?.logoUrl || 

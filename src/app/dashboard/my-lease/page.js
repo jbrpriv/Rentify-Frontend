@@ -23,6 +23,7 @@ export default function MyLeasePage() {
   const [agreements, setAgreements] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showLandlord, setShowLandlord] = useState({});
+  const [downloadingId, setDownloadingId] = useState(null);
 
   // Signature modal state
   const [signModalOpen, setSignModalOpen] = useState(false);
@@ -104,6 +105,7 @@ export default function MyLeasePage() {
   };
 
   const handleDownload = async (id, title) => {
+    setDownloadingId(id);
     try {
       const response = await api.get(`/agreements/${id}/pdf`, { responseType: 'blob', params: { currency } });
       const url = window.URL.createObjectURL(new Blob([response.data]));
@@ -113,8 +115,11 @@ export default function MyLeasePage() {
       document.body.appendChild(link);
       link.click();
       link.remove();
+      window.URL.revokeObjectURL(url);
     } catch {
       toast('Error downloading PDF', 'error');
+    } finally {
+      setDownloadingId(null);
     }
   };
 
@@ -380,9 +385,15 @@ export default function MyLeasePage() {
 
                       <button
                         onClick={() => handleDownload(ag._id, ag.property?.title)}
-                        className="flex-1 sm:flex-none inline-flex justify-center items-center px-4 py-2.5 bg-[#E6EAF2] text-[#0B2D72] border border-[#CBD5E1] text-sm font-medium rounded-lg hover:bg-[#DBE2ED] transition-colors shadow-sm"
+                        disabled={!!downloadingId}
+                        className="flex-1 sm:flex-none inline-flex justify-center items-center px-4 py-2.5 bg-[#E6EAF2] text-[#0B2D72] border border-[#CBD5E1] text-sm font-medium rounded-lg hover:bg-[#DBE2ED] disabled:opacity-60 transition-all shadow-sm"
                       >
-                        <Download className="h-4 w-4 mr-2" /> Download PDF
+                        {downloadingId === ag._id ? (
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        ) : (
+                          <Download className="h-4 w-4 mr-2" />
+                        )}
+                        Download PDF
                       </button>
                     </div>
 

@@ -24,6 +24,7 @@ export default function AgreementsPage() {
   const [renewForm, setRenewForm] = useState({ newEndDate: '', newRentAmount: '', notes: '' });
   const [renewLoading, setRenewLoading] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
+  const [downloadingId, setDownloadingId] = useState(null);
 
   // Signature modal state
   const [signModalOpen, setSignModalOpen] = useState(false);
@@ -73,6 +74,7 @@ export default function AgreementsPage() {
 
 
   const handleDownload = async (id, title) => {
+    setDownloadingId(id);
     try {
       const response = await api.get(`/agreements/${id}/pdf`, { responseType: 'blob', params: { currency } });
       const url = window.URL.createObjectURL(new Blob([response.data]));
@@ -82,8 +84,11 @@ export default function AgreementsPage() {
       document.body.appendChild(link);
       link.click();
       link.remove();
+      window.URL.revokeObjectURL(url);
     } catch (error) {
       toast('Error downloading PDF', 'error');
+    } finally {
+      setDownloadingId(null);
     }
   };
 
@@ -278,9 +283,15 @@ export default function AgreementsPage() {
 
                       <button
                         onClick={() => handleDownload(ag._id, ag.property?.title)}
-                        className="inline-flex items-center px-4 py-2 border border-[#E2E8F0] text-sm font-medium rounded-md text-[#0B2D72] bg-[#F1F5F9] hover:bg-[#E2E8F0]"
+                        disabled={!!downloadingId}
+                        className="inline-flex items-center px-4 py-2 border border-[#E2E8F0] text-sm font-medium rounded-md text-[#0B2D72] bg-[#F1F5F9] hover:bg-[#E2E8F0] disabled:opacity-50 transition-all"
                       >
-                        <Download className="h-4 w-4 mr-2" /> PDF
+                        {downloadingId === ag._id ? (
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        ) : (
+                          <Download className="h-4 w-4 mr-2" />
+                        )}
+                        PDF
                       </button>
 
                       {/* View detail */}

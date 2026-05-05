@@ -51,6 +51,11 @@ export default function AdminPdfEditorPage() {
         templateType,
         bodyHtml: content.html,
         bodyJson: content.json,
+        baseTheme: content.themeId,
+        customizations: {
+          logoUrl: content.logoUrl,
+          customWatermark: content.customWatermark,
+        },
       });
       if (templateType === 'agreement') setAgreementTemplate(data);
       else setReceiptTemplate(data);
@@ -176,6 +181,9 @@ export default function AdminPdfEditorPage() {
               key={templateType}
               templateType={templateType}
               initialContent={currentTemplate?.bodyHtml || ''}
+              initialTheme={currentTemplate?.baseTheme?.themeSlug || currentTemplate?.baseTheme || 'modern-minimalist'}
+              initialLogoUrl={currentTemplate?.customizations?.logoUrl || ''}
+              initialWatermark={currentTemplate?.customizations?.customWatermark || ''}
               onSave={handleSave}
               isSaving={saving}
             />

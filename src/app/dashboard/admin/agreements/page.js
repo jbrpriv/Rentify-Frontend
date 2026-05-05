@@ -46,6 +46,7 @@ export default function AdminAgreementsPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
+  const [downloadingId, setDownloadingId] = useState(null);
   const debounceRef = useRef(null);
 
   const fetchAgreements = useCallback(async (searchVal, statusVal) => {
@@ -202,6 +203,7 @@ export default function AdminAgreementsPage() {
 
                 <button
                   onClick={async () => {
+                    setDownloadingId(a._id);
                     try {
                       const response = await api.get(
                         `/agreements/${a._id}/pdf`,
@@ -215,11 +217,19 @@ export default function AdminAgreementsPage() {
                       URL.revokeObjectURL(bUrl);
                     } catch {
                       toast('Failed to download PDF. Please try again.', 'error');
+                    } finally {
+                      setDownloadingId(null);
                     }
                   }}
-                  className="inline-flex w-full items-center justify-center gap-1 text-xs text-[#0B2D72] border border-[#CBD5E1] rounded-lg py-2 hover:bg-[#E6EAF2] font-semibold"
+                  disabled={!!downloadingId}
+                  className="inline-flex w-full items-center justify-center gap-1 text-xs text-[#0B2D72] border border-[#CBD5E1] rounded-lg py-2 hover:bg-[#E6EAF2] font-semibold disabled:opacity-50 transition-all"
                 >
-                  <Eye className="h-3.5 w-3.5" /> Download PDF
+                  {downloadingId === a._id ? (
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  ) : (
+                    <Eye className="h-3.5 w-3.5" />
+                  )}
+                  Download PDF
                 </button>
               </div>
             ))}
@@ -264,8 +274,8 @@ export default function AdminAgreementsPage() {
                     <td className="px-4 py-3">
                       <button
                         onClick={async () => {
+                          setDownloadingId(a._id);
                           try {
-                            // Use api instance with blob responseType — token handled by interceptor
                             const response = await api.get(
                               `/agreements/${a._id}/pdf`,
                               { responseType: 'blob', params: { currency } }
@@ -278,11 +288,19 @@ export default function AdminAgreementsPage() {
                             URL.revokeObjectURL(bUrl);
                           } catch {
                             toast('Failed to download PDF. Please try again.', 'error');
+                          } finally {
+                            setDownloadingId(null);
                           }
                         }}
-                        className="inline-flex items-center gap-1 text-xs text-[#0B2D72] hover:opacity-80 font-semibold"
+                        disabled={!!downloadingId}
+                        className="inline-flex items-center gap-1 text-xs text-[#0B2D72] hover:opacity-80 font-semibold disabled:opacity-50 transition-all"
                       >
-                        <Eye className="h-3.5 w-3.5" /> Download PDF
+                        {downloadingId === a._id ? (
+                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                        ) : (
+                          <Eye className="h-3.5 w-3.5" />
+                        )}
+                        Download PDF
                       </button>
                     </td>
                   </tr>
